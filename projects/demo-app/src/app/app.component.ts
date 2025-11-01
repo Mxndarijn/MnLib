@@ -92,7 +92,6 @@ export class AppComponent implements OnInit {
 
   usePreset(name: 'default' | 'mint' | 'sunset') {
     if (name === 'default') {
-      this.primary = '#0d6efd';
       this.radius = '0.5rem';
       this.padding = '0.5rem 0.75rem';
     } else if (name === 'mint') {

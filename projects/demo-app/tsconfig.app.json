@@ -4,11 +4,6 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
     "types": [],
-    "paths": {
-      "mn-angular-lib": [
-        "projects/mn-angular-lib/src/public-api"
-      ]
-    }
   },
   "files": [
     "src/main.ts"
