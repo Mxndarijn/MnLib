@@ -1,0 +1,4 @@
+/* Aggregate CSS entry for consumers. This file is included in the package assets. */
+@import './styles.css';
+/* Feature styles */
+@import '../features/mn-alert/mn-alert-outlet/mn-alert-outlet.css';
