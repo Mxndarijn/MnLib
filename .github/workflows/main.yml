@@ -1,0 +1,75 @@
+name: Auto release mn-angular-lib on main
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-build-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # om release-commit + tag te pushen
+      id-token: write      # (optioneel) npm provenance (Node 20+)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # nodig om tags te kunnen pushen
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      # ---- Install & Test (root) ----
+      - name: Install deps (root)
+        run: npm ci
+
+      - name: Run tests (lib only, CI mode)
+        run: npx ng test mn-angular-lib --watch=false --browsers=ChromeHeadless --progress=false
+        env:
+          CI: "true"
+
+      # ---- Git identiteit voor versie-commit/tag ----
+      - name: Configure git user
+        run: |
+          git config user.name "ci-release-bot"
+          git config user.email "ci@example.com"
+
+      # ---- Versie bump EERST in de lib (patch) ----
+      # Past projects/mn-angular-lib/package.json aan en maakt een git tag.
+      # Door [skip ci] triggert deze commit geen nieuwe workflow-run.
+      - name: Bump version (patch) in projects/mn-angular-lib
+        working-directory: projects/mn-angular-lib
+        run: |
+          npm version patch -m "chore(release): %s [skip ci]"
+
+      # ---- Push de versie-commit + tag ----
+      - name: Push commit and tags
+        run: |
+          git push
+          git push --tags
+
+      # ---- Build NA de bump, zodat dist de NIEUWE versie heeft ----
+      - name: Build mn-angular-lib
+        run: |
+          npx ng build mn-angular-lib --configuration production || \
+          npm run build --workspace=mn-angular-lib || \
+          npm run build:lib
+      # Resultaat in: dist/mn-angular-lib (incl. geüpdatete package.json)
+
+      # ---- NPM auth (vermijdt 'always-auth' warning) ----
+      - name: Configure npm auth
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ---- Publish vanuit de build output ----
+      - name: Publish dist/mn-angular-lib to npm
+        working-directory: dist/mn-angular-lib
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
