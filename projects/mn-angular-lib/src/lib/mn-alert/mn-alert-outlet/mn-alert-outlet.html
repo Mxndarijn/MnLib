@@ -1,0 +1,8 @@
+@if (alerts$ | async; as alerts) {
+  @for (a of alerts; track trackById) {
+    <ng-container
+      [ngTemplateOutlet]="template"
+      [ngTemplateOutletContext]="contextFor(a)">
+    </ng-container>
+  }
+}
