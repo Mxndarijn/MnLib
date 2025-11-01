@@ -1,0 +1,70 @@
+name: Auto release mn-angular-lib on main
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-build-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # om release-commit + tag te pushen
+      id-token: write     # (optioneel) npm provenance (Node 20+)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # nodig om tags te kunnen pushen
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      # ---- Install & Test (op repo root) ----
+      - name: Install deps (root)
+        run: npm ci
+
+      - name: Run tests (root)
+        run: npm test --if-present
+
+      # ---- Build van de Angular library ----
+      # Pas eventueel het build-commando aan naar wat jij gebruikt.
+      - name: Build mn-angular-lib
+        run: |
+          npx ng build mn-angular-lib --configuration production || \
+          npm run build --workspace=mn-angular-lib || \
+          npm run build:lib
+      # Resultaat verwacht in: dist/mn-angular-lib
+
+      # ---- Git identiteit voor versie-commit/tag ----
+      - name: Configure git user
+        run: |
+          git config user.name "ci-release-bot"
+          git config user.email "ci@example.com"
+
+      # ---- Versie bump in de lib (patch) ----
+      # Dit past projects/mn-angular-lib/package.json (en lockfile daar, als aanwezig) aan
+      # en maakt een tag zoals v1.2.3
+      - name: Bump version (patch) in projects/mn-angular-lib
+        working-directory: projects/mn-angular-lib
+        run: |
+          npm version patch -m "chore(release): %s [skip ci]"
+
+      # ---- Push de versie-commit + git tag ----
+      - name: Push commit and tags
+        run: |
+          git push
+          git push --tags
+
+      # ---- Publish naar npm vanuit de build output ----
+      - name: Publish dist/mn-angular-lib to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: dist/mn-angular-lib
+        run: |
+          # Zorg dat package.json in dist compleet is (Angular CLI kopieert 'm meestal mee)
+          # Publiceer als public package:
+          npm publish --access public
