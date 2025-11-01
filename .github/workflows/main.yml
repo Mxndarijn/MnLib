@@ -27,8 +27,11 @@ jobs:
       - name: Install deps (root)
         run: npm ci
 
-      - name: Run tests (root)
-        run: npm test --if-present
+      - name: Run tests (lib only, CI mode)
+        run: npx ng test mn-angular-lib --watch=false --browsers=ChromeHeadless --progress=false
+        env:
+          CI: "true"
+
 
       # ---- Build van de Angular library ----
       # Pas eventueel het build-commando aan naar wat jij gebruikt.
