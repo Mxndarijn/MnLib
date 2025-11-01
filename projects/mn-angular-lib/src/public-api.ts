@@ -3,3 +3,4 @@
  */
 
 export * from './lib/mn-angular-lib';
+export * from './lib/styles/themes';
