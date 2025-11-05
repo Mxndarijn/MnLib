@@ -40,18 +40,23 @@ jobs:
           # optioneel: voor monorepos/containers
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      # Versie bump in submap: maakt commit + tag
+            # ---- Versie bump (zonder auto-commit/tag) ----
       - name: Bump version (patch) in projects/mn-angular-lib
         working-directory: projects/mn-angular-lib
-        run: "npm version patch -m 'chore(release): %s [skip ci]'"
-
-      # Push commit + tag (duidelijk targetten)
-      - name: Push commit and tags
         run: |
-          # Zorg dat we op main zitten (voor het geval van detached HEAD of rename)
-          git checkout -B main
+          npm version patch --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      # ---- Commit + tag aanmaken en pushen ----
+      - name: Commit version bump and create tag
+        run: |
+          git add projects/mn-angular-lib/package.json projects/mn-angular-lib/package-lock.json
+          git commit -m "chore(release): v${NEW_VERSION} [skip ci]"
+          git tag "v${NEW_VERSION}"
           git push origin HEAD:main
           git push origin --tags
+
 
       # Build ná de bump
       - name: Build mn-angular-lib
