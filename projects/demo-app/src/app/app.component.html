@@ -7,21 +7,6 @@
       <button class="mn-btn" (click)="usePreset('sunset')">Sunset</button>
     </div>
   </div>
-
-  <section class="controls">
-    <label>
-      Primary:
-      <input type="color" [(ngModel)]="primary" (input)="applyThemeToCssVars()" />
-    </label>
-    <label>
-      Radius:
-      <input type="text" [(ngModel)]="radius" (input)="applyThemeToCssVars()" placeholder="e.g. 0.5rem or 8px" />
-    </label>
-    <label>
-      Padding:
-      <input type="text" [(ngModel)]="padding" (input)="applyThemeToCssVars()" placeholder="e.g. 0.5rem 0.75rem" />
-    </label>
-  </section>
   <lib-test></lib-test>
 
   <section class="preview">
@@ -38,18 +23,6 @@
 
     <div class="alert">
       <strong>Alert:</strong> this is a themed alert using <code>--mn-primary</code>.
-    </div>
-  </section>
-
-  <section class="tokens">
-    <div>
-      <strong>--mn-primary:</strong> <span class="swatch" [style.background]="primary"></span> {{ primary }}
-    </div>
-    <div>
-      <strong>--mn-radius:</strong> {{ radius }}
-    </div>
-    <div>
-      <strong>--mn-padding:</strong> {{ padding }}
     </div>
   </section>
 </div>
