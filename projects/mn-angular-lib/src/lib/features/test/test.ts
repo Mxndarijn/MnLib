@@ -1,7 +1,6 @@
 import {Component, inject} from '@angular/core';
-import {MN_THEME, MnTheme} from "../../styles/themes";
+import {MN_THEME, MnTheme} from "mn-angular-lib";
 import {NgStyle} from '@angular/common';
-// import {} from 'mn-angular-lib';
 
 @Component({
   selector: 'lib-test',
