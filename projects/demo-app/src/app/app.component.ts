@@ -18,22 +18,11 @@ export class AppComponent implements OnInit {
 
 
   ngOnInit(): void {
-    // effect(() => {
-    //   const t = this.theme();
-    //   const root = document.documentElement;
-    //   root.style.setProperty('--mn-primary', t.primary);
-    //   root.style.setProperty('--mn-radius', t.radius);
-    //   root.style.setProperty('--mn-padding', t.padding);
-    // });
   }
 
   usePreset(name: 'default' | 'mint' | 'sunset') {
     if (name === 'default') {
-      this.themeService.setTheme({
-        primary: '#0d6efd',
-        radius: '0.5rem',
-        padding: '0.5rem 0.75rem'
-      });
+      this.themeService.reset();
     } else if (name === 'mint') {
       this.themeService.setTheme({
         primary: '#10b981',
