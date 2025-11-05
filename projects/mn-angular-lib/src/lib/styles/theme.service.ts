@@ -1,4 +1,4 @@
-import { Injectable, signal, WritableSignal, inject } from '@angular/core';
+import {Injectable, signal, WritableSignal, inject, Signal, effect} from '@angular/core';
 import { MnTheme, MN_THEME_DEFAULTS } from './themes';
 
 /**
@@ -12,6 +12,13 @@ export class MnThemeService {
   private readonly _theme: WritableSignal<MnTheme> = signal<MnTheme>(MN_THEME_DEFAULTS);
 
   theme = this._theme.asReadonly();
+
+  constructor() {
+    effect(() => {
+      const t = this.theme();
+      document.documentElement.style.setProperty('--mn-primary', t.primary);
+    });
+  }
 
   /**
    * Updates the current theme by merging the provided partial theme properties with the existing theme.
