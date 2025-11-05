@@ -23,3 +23,8 @@
       useValue: { ...MN_THEME_DEFAULTS, ...partial },
     };
   }
+
+  export function injectTheme(): MnTheme {
+    const t = inject<MnTheme>(MN_THEME, { optional: true });
+    return t ?? MN_THEME_DEFAULTS;
+  }

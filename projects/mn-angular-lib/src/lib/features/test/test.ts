@@ -1,5 +1,5 @@
 import {Component, inject} from '@angular/core';
-import {MN_THEME, MnTheme} from "mn-angular-lib";
+import {injectTheme, MnTheme} from '../../styles';
 import {NgStyle} from '@angular/common';
 
 @Component({
@@ -11,5 +11,5 @@ import {NgStyle} from '@angular/common';
   styleUrl: './test.css',
 })
 export class Test {
-  theme: MnTheme = inject(MN_THEME);
+  theme: MnTheme = injectTheme();
 }
