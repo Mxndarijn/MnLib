@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MN_THEME, MnTheme } from 'mn-angular-lib';
+import { MN_THEME, MnTheme,  } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +32,7 @@ import { MN_THEME, MnTheme } from 'mn-angular-lib';
       <input type="text" [(ngModel)]="padding" (input)="applyThemeToCssVars()" placeholder="e.g. 0.5rem 0.75rem" />
     </label>
   </section>
+  <lib-test></lib-test>
 
   <section class="preview">
     <div class="card">

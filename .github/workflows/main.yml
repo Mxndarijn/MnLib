@@ -8,13 +8,15 @@ jobs:
   test-build-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write      # om release-commit + tag te pushen
-      id-token: write      # (optioneel) npm provenance (Node 20+)
+      contents: write
+      id-token: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # nodig om tags te kunnen pushen
+          fetch-depth: 0
+          persist-credentials: true   # zorg dat GITHUB_TOKEN in git remote zit
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -23,7 +25,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
-      # ---- Install & Test (root) ----
       - name: Install deps (root)
         run: npm ci
 
@@ -32,42 +33,38 @@ jobs:
         env:
           CI: "true"
 
-      # ---- Git identiteit voor versie-commit/tag ----
       - name: Configure git user
         run: |
           git config user.name "ci-release-bot"
           git config user.email "ci@example.com"
+          # optioneel: voor monorepos/containers
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      # ---- Versie bump EERST in de lib (patch) ----
-      # Past projects/mn-angular-lib/package.json aan en maakt een git tag.
-      # Door [skip ci] triggert deze commit geen nieuwe workflow-run.
+      # Versie bump in submap: maakt commit + tag
       - name: Bump version (patch) in projects/mn-angular-lib
         working-directory: projects/mn-angular-lib
-        run: |
-          npm version patch -m "chore(release): %s [skip ci]"
+        run: "npm version patch -m 'chore(release): %s [skip ci]'"
 
-      # ---- Push de versie-commit + tag ----
+      # Push commit + tag (duidelijk targetten)
       - name: Push commit and tags
         run: |
-          git push
-          git push --tags
+          # Zorg dat we op main zitten (voor het geval van detached HEAD of rename)
+          git checkout -B main
+          git push origin HEAD:main
+          git push origin --tags
 
-      # ---- Build NA de bump, zodat dist de NIEUWE versie heeft ----
+      # Build ná de bump
       - name: Build mn-angular-lib
         run: |
           npx ng build mn-angular-lib --configuration production || \
           npm run build --workspace=mn-angular-lib || \
           npm run build:lib
-      # Resultaat in: dist/mn-angular-lib (incl. geüpdatete package.json)
 
-      # ---- NPM auth (vermijdt 'always-auth' warning) ----
       - name: Configure npm auth
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # ---- Publish vanuit de build output ----
       - name: Publish dist/mn-angular-lib to npm
         working-directory: dist/mn-angular-lib
         env:
