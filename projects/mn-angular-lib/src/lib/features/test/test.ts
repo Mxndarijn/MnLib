@@ -1,6 +1,6 @@
-import {Component, inject} from '@angular/core';
-import {injectTheme, MnTheme} from '../../styles';
-import {NgStyle} from '@angular/common';
+import { Component } from '@angular/core';
+import { injectThemeSignal } from '../../styles';
+import { NgStyle } from '@angular/common';
 
 @Component({
   selector: 'lib-test',
@@ -11,5 +11,6 @@ import {NgStyle} from '@angular/common';
   styleUrl: './test.css',
 })
 export class Test {
-  theme: MnTheme = injectTheme();
+  // Reactive theme signal; templates read via theme().primary
+  theme = injectThemeSignal();
 }
