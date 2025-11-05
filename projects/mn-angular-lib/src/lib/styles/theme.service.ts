@@ -13,6 +13,8 @@ export class MnThemeService {
 
   theme = this._theme.asReadonly();
 
+  private initialTheme: Partial<MnTheme> = {};
+
   constructor() {
     effect(() => {
       const t = this.theme();
@@ -47,8 +49,14 @@ export class MnThemeService {
    *
    * @return {void} Does not return any value.
    */
-  reset() {
-    this._theme.set(MN_THEME_DEFAULTS);
+  reset(): void {
+    this.setTheme(this.initialTheme);
+  }
+
+  setInitialTheme(initialTheme: Partial<MnTheme>) {
+    const merged = { ...this._theme(), ...initialTheme } as MnTheme;
+    this._theme.set(merged);
+    this.initialTheme = initialTheme;
   }
 }
 
@@ -68,7 +76,7 @@ export function provideMnThemeDynamic(initial?: Partial<MnTheme>) {
     useFactory: () => {
       const svc = new MnThemeService();
       if (initial) {
-        svc.setTheme({ ...initial });
+        svc.setInitialTheme({ ...initial });
       }
       return svc;
     }
