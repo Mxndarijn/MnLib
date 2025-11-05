@@ -1,12 +1,9 @@
 import {Component, effect} from '@angular/core';
 import { injectThemeSignal } from '../../styles';
-import { NgStyle } from '@angular/common';
 
 @Component({
   selector: 'lib-test',
-  imports: [
-    NgStyle
-  ],
+  imports: [  ],
   templateUrl: './test.html',
   styleUrl: './test.css',
 })

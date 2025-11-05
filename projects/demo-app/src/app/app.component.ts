@@ -18,13 +18,13 @@ export class AppComponent implements OnInit {
 
 
   ngOnInit(): void {
-    effect(() => {
-      const t = this.theme();
-      const root = document.documentElement;
-      root.style.setProperty('--mn-primary', t.primary);
-      root.style.setProperty('--mn-radius', t.radius);
-      root.style.setProperty('--mn-padding', t.padding);
-    });
+    // effect(() => {
+    //   const t = this.theme();
+    //   const root = document.documentElement;
+    //   root.style.setProperty('--mn-primary', t.primary);
+    //   root.style.setProperty('--mn-radius', t.radius);
+    //   root.style.setProperty('--mn-padding', t.padding);
+    // });
   }
 
   usePreset(name: 'default' | 'mint' | 'sunset') {
