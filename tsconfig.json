@@ -8,7 +8,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "paths": {
       "mn-angular-lib": [
-        "./projects/mn-angular-lib/src/public-api",
+        "./projects/mn-angular-lib/src/public-api.ts",
         "./dist/mn-angular-lib"
       ]
     },
