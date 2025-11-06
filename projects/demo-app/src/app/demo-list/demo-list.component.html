@@ -1,0 +1,19 @@
+<div class="container">
+  <div class="header">
+    <h1>All Demos</h1>
+  </div>
+
+  <ul class="demo-list">
+    @for (d of demos; track d.path) {
+      <li class="demo-item">
+        <div class="info">
+          <div class="title">{{ d.title }}</div>
+          @if (d.description) {
+            <div class="desc">{{ d.description }}</div>
+          }
+        </div>
+        <a class="mn-btn" [routerLink]="d.path">View</a>
+      </li>
+    }
+  </ul>
+</div>

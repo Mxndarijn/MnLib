@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should set the correct title`, () => {
+  it('should set the correct title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('mn-angular-lib — Theme Demo');
+    expect(app.title).toEqual('MnLib Demos');
   });
 
   it('should render title in header', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.header h1')?.textContent).toContain('Theme Demo');
+    expect(compiled.querySelector('.header h1')?.textContent).toContain('MnLib Demos');
   });
 });

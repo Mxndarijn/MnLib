@@ -1,0 +1,51 @@
+<demo-page [title]="'Theme Demo'">
+  <div demo-actions class="controls">
+    <button class="mn-btn" (click)="usePreset('default')">Default</button>
+    <button class="mn-btn" (click)="usePreset('mint')">Mint</button>
+    <button class="mn-btn" (click)="usePreset('sunset')">Sunset</button>
+  </div>
+
+  <section class="controls">
+    <label>
+      Primary:
+      <input type="color" [(ngModel)]="primary" (input)="applyThemeToCssVars()" />
+    </label>
+    <label>
+      Radius:
+      <input type="text" [(ngModel)]="radius" (input)="applyThemeToCssVars()" placeholder="e.g. 0.5rem or 8px" />
+    </label>
+    <label>
+      Padding:
+      <input type="text" [(ngModel)]="padding" (input)="applyThemeToCssVars()" placeholder="e.g. 0.5rem 0.75rem" />
+    </label>
+  </section>
+
+  <section class="preview">
+    <div class="card">
+      <h3>Card header</h3>
+      <p>Uses <code>--mn-radius</code> and <code>--mn-padding</code>.</p>
+      <div class="actions">
+        <button class="mn-btn">Primary Button</button>
+        <button class="mn-btn outline">Outline Button</button>
+      </div>
+    </div>
+
+    <div class="chip">Chip</div>
+
+    <div class="alert">
+      <strong>Alert:</strong> this is a themed alert using <code>--mn-primary</code>.
+    </div>
+  </section>
+
+  <section class="tokens">
+    <div>
+      <strong>--mn-primary:</strong> <span class="swatch" [style.background]="primary"></span> {{ primary }}
+    </div>
+    <div>
+      <strong>--mn-radius:</strong> {{ radius }}
+    </div>
+    <div>
+      <strong>--mn-padding:</strong> {{ padding }}
+    </div>
+  </section>
+</demo-page>
