@@ -1,6 +1,6 @@
 /* Global styles for the demo app */
 /* Import the library CSS variables so we can use --mn-primary etc. */
-@import '../../mn-angular-lib/src/lib/styles/styles.css';
+@import '../../mn-angular-lib/src/lib/styles/index.css';
 
 :root {
   --mn-radius: 0.375rem;
