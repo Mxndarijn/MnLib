@@ -8,7 +8,7 @@ export interface MnAlertConfig {
   durations?: Partial<Record<MnAlertKind, number | null>>;
   cssClasses?: Partial<Record<MnAlertKind, string>>;
   icons?: Partial<Record<MnAlertKind, unknown>>;
-  defaultDuration?: number | null;
+  fallbackDuration?: number | null;
   finalize?: (a: MnAlert) => MnAlert;
 }
 
@@ -24,6 +24,6 @@ export const DEFAULT_MN_ALERT_CONFIG: Required<MnAlertConfig> = {
     default: 'alert'
   },
   icons: {},
-  defaultDuration: 4000,
+  fallbackDuration: 4000,
   finalize: (a) => a
 };

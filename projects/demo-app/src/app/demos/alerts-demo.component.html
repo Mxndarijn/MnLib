@@ -1,0 +1,48 @@
+<demo-page [title]="'Alerts Demo'">
+  <div class="controls" demo-actions>
+    <button class="mn-btn" (click)="show('success')">Success</button>
+    <button class="mn-btn" (click)="show('info')">Info</button>
+    <button class="mn-btn" (click)="show('warning')">Warning</button>
+    <button class="mn-btn" (click)="show('error')">Error</button>
+    <button class="mn-btn outline" (click)="showCustomDuration()">Custom Duration</button>
+    <button class="mn-btn outline" (click)="showCustomClass()">Custom CSS Class</button>
+    <button class="mn-btn" style="margin-left:auto" (click)="clearAll()">Clear All</button>
+  </div>
+
+  <section class="inputs">
+    <div class="field">
+      <label>Title</label>
+      <input type="text" [(ngModel)]="titleInput" placeholder="Title (optional)" />
+    </div>
+    <div class="field">
+      <label>Subtitle</label>
+      <input type="text" [(ngModel)]="subTitleInput" placeholder="Subtitle (optional)" />
+    </div>
+    <div class="field">
+      <label>Custom duration (ms)</label>
+      <input type="number" min="0" [(ngModel)]="durationInputMs" placeholder="e.g. 2000" />
+    </div>
+  </section>
+
+  <!--
+    The outlet renders alerts emitted by the store/service using your custom template.
+    Template context provides: $implicit (alert), alert, dismiss().
+  -->
+  <ng-template #alertTpl let-a let-dismiss="dismiss">
+    <div class="demo-alert" [ngClass]="{
+      'kind-success': a.kind === 'success',
+      'kind-info': a.kind === 'info',
+      'kind-warning': a.kind === 'warning',
+      'kind-error': a.kind === 'error'
+    }">
+      <div class="title">{{ a.title }}</div>
+      @if (a.subTitle) {
+        <div class="subtitle">{{ a.subTitle }}</div>
+      }
+      <span class="spacer"></span>
+      <button class="close" (click)="dismiss()">✕</button>
+    </div>
+  </ng-template>
+
+  <mn-alert-outlet [template]="alertTpl" />
+</demo-page>

@@ -41,7 +41,7 @@ export class MnAlertService {
     let duration = input.duration;
     if (duration == null) {
       // Prefer user defaultDuration if provided and not null, otherwise use library per-kind default
-      const userDefault = this.cfg.defaultDuration;
+      const userDefault = this.cfg.fallbackDuration;
       if (typeof userDefault === 'number') {
         duration = userDefault;
       } else {
@@ -87,8 +87,8 @@ export class MnAlertService {
           duration = userDur;
         } else {
           // userDur is undefined or null -> fallback to user defaultDuration if numeric
-          if (typeof this.cfg.defaultDuration === 'number') {
-            duration = this.cfg.defaultDuration;
+          if (typeof this.cfg.fallbackDuration === 'number') {
+            duration = this.cfg.fallbackDuration;
           } else {
             duration = this.cfg.durations[kind as keyof typeof this.cfg.durations];
           }

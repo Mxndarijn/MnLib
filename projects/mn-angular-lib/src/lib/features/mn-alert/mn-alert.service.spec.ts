@@ -48,7 +48,7 @@ describe('MnAlertService', () => {
       durations: { info: 123, default: 999 },
       cssClasses: { info: 'custom-info' },
       icons: { info: { name: 'i' } },
-      defaultDuration: 111,
+      fallbackDuration: 111,
       finalize: (a) => ({ ...a, meta: { ...(a.meta ?? {}), finalized: true } })
     };
     setup(cfg);
@@ -71,7 +71,7 @@ describe('MnAlertService', () => {
   it('kind() duration falls back to defaultDuration when per-kind is null or missing', () => {
     const cfg: MnAlertConfig = {
       durations: { success: null },
-      defaultDuration: 321
+      fallbackDuration: 321
     };
     setup(cfg);
 
