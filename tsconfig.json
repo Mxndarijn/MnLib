@@ -6,12 +6,14 @@
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
+    "baseUrl": ".",
     "paths": {
       "mn-angular-lib": [
         "./projects/mn-angular-lib/src/public-api.ts",
         "./dist/mn-angular-lib"
       ]
     },
+    "moduleResolution": "node",
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,

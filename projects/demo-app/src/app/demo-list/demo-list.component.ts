@@ -23,6 +23,7 @@ interface DemoItem {
 })
 export class DemoListComponent {
   demos: DemoItem[] = [
-    { title: 'Theme Demo', path: '/demos/theme', description: 'Play with theme tokens: primary, radius, padding.' }
+    { title: 'Theme Demo', path: '/demos/theme', description: 'Play with theme tokens: primary, radius, padding.' },
+    { title: 'Alerts Demo', path: '/demos/alerts', description: 'Showcase mn-alert service, providers, and outlet template.' }
   ];
 }
