@@ -1,0 +1,87 @@
+<div class="container">
+  <div class="header">
+    <h1>Button Demo</h1>
+    <p>Showcase van alle button varianten</p>
+  </div>
+
+  <!-- Colors - Filled -->
+  <section class="demo-section">
+    <h2>Filled Buttons</h2>
+    <div class="button-grid">
+      <lib-button color="primary">Primary</lib-button>
+      <lib-button color="secondary">Secondary</lib-button>
+      <lib-button color="success">Success</lib-button>
+      <lib-button color="danger">Danger</lib-button>
+    </div>
+  </section>
+
+  <!-- Colors - Outlined -->
+  <section class="demo-section">
+    <h2>Outlined Buttons</h2>
+    <div class="button-grid">
+      <lib-button variant="outlined" color="primary">Primary</lib-button>
+      <lib-button variant="outlined" color="secondary">Secondary</lib-button>
+      <lib-button variant="outlined" color="success">Success</lib-button>
+      <lib-button variant="outlined" color="danger">Danger</lib-button>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Sizes</h2>
+    <div class="button-grid">
+      <lib-button size="small" color="primary">Small</lib-button>
+      <lib-button color="primary">Medium (default)</lib-button>
+      <lib-button size="large" color="primary">Large</lib-button>
+    </div>
+  </section>
+
+  <!-- With Icons -->
+  <section class="demo-section">
+    <h2>With Icons</h2>
+    <div class="button-grid">
+      <lib-button color="success">
+        <span>✓</span>
+        Opslaan
+      </lib-button>
+      <lib-button variant="outlined" color="danger">
+        <span>🗑️</span>
+        Verwijderen
+      </lib-button>
+      <lib-button color="primary">
+        <span>→</span>
+        Volgende
+      </lib-button>
+      <lib-button size="small" color="secondary">
+        <span>⚙️</span>
+        Instellingen
+      </lib-button>
+    </div>
+  </section>
+
+  <!-- Full Width -->
+  <section class="demo-section">
+    <h2>Full Width</h2>
+    <div class="full-width-demo">
+      <lib-button color="primary" [fullWidth]="true">
+        Login
+      </lib-button>
+      <lib-button variant="outlined" color="secondary" [fullWidth]="true">
+        Registreren
+      </lib-button>
+    </div>
+  </section>
+
+  <!-- Disabled -->
+  <section class="demo-section">
+    <h2>Disabled State</h2>
+    <div class="button-grid">
+      <lib-button color="primary" [disabled]="true">Disabled Primary</lib-button>
+      <lib-button variant="outlined" color="secondary" [disabled]="true">Disabled Outlined</lib-button>
+      <lib-button color="success" [disabled]="true">
+        <span>✓</span>
+        Disabled with Icon
+      </lib-button>
+    </div>
+  </section>
+</div>
