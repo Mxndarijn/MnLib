@@ -1,3 +1,10 @@
-<button [class]="buttonClasses" [disabled]="disabled" type="button">
-<ng-content></ng-content>
+<button
+  [class]="cssClass"
+  [disabled]="disabled || loading"
+  [attr.aria-disabled]="(disabled || loading) ? 'true' : null"
+  [attr.aria-busy]="loading ? 'true' : null"
+  [attr.type]="type">
+  <ng-content select="[start]"></ng-content>
+  <ng-content></ng-content>
+  <ng-content select="[end]"></ng-content>
 </button>

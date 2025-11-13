@@ -8,10 +8,10 @@
   <section class="demo-section">
     <h2>Filled Buttons</h2>
     <div class="button-grid">
-      <lib-button color="primary">Primary</lib-button>
-      <lib-button color="secondary">Secondary</lib-button>
-      <lib-button color="success">Success</lib-button>
-      <lib-button color="danger">Danger</lib-button>
+      <mn-button color="primary">Primary</mn-button>
+      <mn-button color="secondary">Secondary</mn-button>
+      <mn-button color="success">Success</mn-button>
+      <mn-button color="danger">Danger</mn-button>
     </div>
   </section>
 
@@ -19,10 +19,23 @@
   <section class="demo-section">
     <h2>Outlined Buttons</h2>
     <div class="button-grid">
-      <lib-button variant="outlined" color="primary">Primary</lib-button>
-      <lib-button variant="outlined" color="secondary">Secondary</lib-button>
-      <lib-button variant="outlined" color="success">Success</lib-button>
-      <lib-button variant="outlined" color="danger">Danger</lib-button>
+      <mn-button variant="outlined" color="primary">Primary</mn-button>
+      <mn-button variant="outlined" color="secondary">Secondary</mn-button>
+      <mn-button variant="outlined" color="success">Success</mn-button>
+      <mn-button variant="outlined" color="danger">Danger</mn-button>
+    </div>
+  </section>
+
+  <!-- Colors - Text -->
+  <section class="demo-section">
+    <h2>Text Buttons</h2>
+    <div class="button-grid">
+      <mn-button variant="text" color="primary">Primary</mn-button>
+      <mn-button variant="text" color="secondary">Secondary</mn-button>
+      <mn-button variant="text" color="success">Success</mn-button>
+      <mn-button variant="text" color="danger">Danger</mn-button>
+      <mn-button variant="text" color="warning">Warning</mn-button>
+      <mn-button variant="text" color="info">Info</mn-button>
     </div>
   </section>
 
@@ -30,9 +43,9 @@
   <section class="demo-section">
     <h2>Sizes</h2>
     <div class="button-grid">
-      <lib-button size="small" color="primary">Small</lib-button>
-      <lib-button color="primary">Medium (default)</lib-button>
-      <lib-button size="large" color="primary">Large</lib-button>
+      <mn-button size="small" color="primary">Small</mn-button>
+      <mn-button color="primary">Medium (default)</mn-button>
+      <mn-button size="large" color="primary">Large</mn-button>
     </div>
   </section>
 
@@ -40,22 +53,22 @@
   <section class="demo-section">
     <h2>With Icons</h2>
     <div class="button-grid">
-      <lib-button color="success">
-        <span>✓</span>
+      <mn-button color="success">
+        <span start>✓</span>
         Opslaan
-      </lib-button>
-      <lib-button variant="outlined" color="danger">
-        <span>🗑️</span>
+      </mn-button>
+      <mn-button variant="outlined" color="danger">
+        <span start>🗑️</span>
         Verwijderen
-      </lib-button>
-      <lib-button color="primary">
-        <span>→</span>
+      </mn-button>
+      <mn-button color="primary">
+        <span end>→</span>
         Volgende
-      </lib-button>
-      <lib-button size="small" color="secondary">
-        <span>⚙️</span>
+      </mn-button>
+      <mn-button size="small" color="secondary">
+        <span start>⚙️</span>
         Instellingen
-      </lib-button>
+      </mn-button>
     </div>
   </section>
 
@@ -63,12 +76,12 @@
   <section class="demo-section">
     <h2>Full Width</h2>
     <div class="full-width-demo">
-      <lib-button color="primary" [fullWidth]="true">
+      <mn-button color="primary" [fullWidth]="true">
         Login
-      </lib-button>
-      <lib-button variant="outlined" color="secondary" [fullWidth]="true">
+      </mn-button>
+      <mn-button variant="outlined" color="secondary" [fullWidth]="true">
         Registreren
-      </lib-button>
+      </mn-button>
     </div>
   </section>
 
@@ -76,12 +89,12 @@
   <section class="demo-section">
     <h2>Disabled State</h2>
     <div class="button-grid">
-      <lib-button color="primary" [disabled]="true">Disabled Primary</lib-button>
-      <lib-button variant="outlined" color="secondary" [disabled]="true">Disabled Outlined</lib-button>
-      <lib-button color="success" [disabled]="true">
-        <span>✓</span>
+      <mn-button color="primary" [disabled]="true">Disabled Primary</mn-button>
+      <mn-button variant="outlined" color="secondary" [disabled]="true">Disabled Outlined</mn-button>
+      <mn-button color="success" [disabled]="true">
+        <span start>✓</span>
         Disabled with Icon
-      </lib-button>
+      </mn-button>
     </div>
   </section>
 </div>

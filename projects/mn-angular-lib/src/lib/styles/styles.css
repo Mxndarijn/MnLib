@@ -1,10 +1,14 @@
-/*Default theme styles*/
+/* Default theme styles */
 :root {
-  /* Colors */
-  --mn-primary: #0d6efd;
-  --mn-primary-hover: #0b5ed7;
-  --mn-success: #198754;
-  --mn-danger: #dc3545;
-  --mn-warning: #ffc107;
-  --mn-info: #0dcaf0;
+  /* Brand palette */
+  --mn-color-primary: #0d6efd;
+  --mn-color-secondary: #6c757d;
+  --mn-color-success: #198754;
+  --mn-color-danger: #dc3545;
+  --mn-color-warning: #ffc107;
+  --mn-color-info: #0dcaf0;
+
+  /* Text tokens */
+  --mn-text: #212529; /* default foreground text */
+  --mn-text-on-colored: #ffffff; /* text on solid/colored backgrounds */
 }

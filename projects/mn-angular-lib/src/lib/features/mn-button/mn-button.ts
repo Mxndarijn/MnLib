@@ -1,30 +1,32 @@
-import {Component, Input} from '@angular/core';
-import {MnButtonColor, MnButtonSize, MnButtonVariant} from "./mn-button.types";
+import {ChangeDetectionStrategy, Component, Input, OnChanges} from '@angular/core';
+import {MnButtonColor, MnButtonSize, MnButtonVariant, MnButtonType} from './mn-button.types';
 
 @Component({
-  selector: 'lib-button',
-  imports: [],
+  selector: 'mn-button',
+  standalone: true,
   templateUrl: './mn-button.html',
-  styleUrl: './mn-button.css',
+  styleUrls: ['./mn-button.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MnButton {
+export class MnButton implements OnChanges {
   @Input() size?: MnButtonSize;
   @Input() color: MnButtonColor = 'primary';
   @Input() variant: MnButtonVariant = 'filled';
+  @Input() type: MnButtonType = 'button';
   @Input() disabled = false;
+  @Input() loading = false;
   @Input() fullWidth = false;
 
-  get buttonClasses(): string {
+  cssClass = '';
+
+  ngOnChanges(): void {
     const classes = [
-      `btn-${this.variant}`,
-      `btn-${this.color}`
-    ];
-    if (this.size) {
-      classes.push(`btn-${this.size}`);
-    }
-    if (this.fullWidth) {
-      classes.push('btn-full-width');
-    }
-    return classes.join(' ');
+      'mn-button',
+      `mn-button--${this.variant}`,
+      `mn-button--${this.color}`,
+      this.size ? `mn-button--${this.size}` : '',
+      this.fullWidth ? 'mn-button--full-width' : ''
+    ].filter(Boolean);
+    this.cssClass = classes.join(' ');
   }
 }
