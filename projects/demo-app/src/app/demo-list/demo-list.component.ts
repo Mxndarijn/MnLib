@@ -25,6 +25,7 @@ export class DemoListComponent {
   demos: DemoItem[] = [
     { title: 'Theme Demo', path: '/demos/theme', description: 'Play with theme tokens: primary, radius, padding.' },
     { title: 'Alerts Demo', path: '/demos/alerts', description: 'Showcase mn-alert service, providers, and outlet template.' },
-    { title: 'Button Demo', path: '/demos/button-demo', description: 'Button watermelon' }
+    { title: 'Button Demo', path: '/demos/button-demo', description: 'Buttons with sizes, variants, and colors.' },
+    { title: 'Input Demo', path: '/demos/input-demo', description: 'Text, email, password, number, date, and a larger description field.' }
   ];
 }
