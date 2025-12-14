@@ -1,26 +1,26 @@
 <demo-page [title]="'Alerts Demo'">
   <div class="controls" demo-actions>
-    <button class="mn-btn" (click)="show('success')">Success</button>
-    <button class="mn-btn" (click)="show('info')">Info</button>
-    <button class="mn-btn" (click)="show('warning')">Warning</button>
-    <button class="mn-btn" (click)="show('error')">Error</button>
-    <button class="mn-btn outline" (click)="showCustomDuration()">Custom Duration</button>
-    <button class="mn-btn outline" (click)="showCustomClass()">Custom CSS Class</button>
-    <button class="mn-btn" style="margin-left:auto" (click)="clearAll()">Clear All</button>
+    <mn-button variant="outlined" color="primary" (click)="show('success')">Success</mn-button>
+    <mn-button variant="outlined" color="primary" (click)="show('info')">Info</mn-button>
+    <mn-button variant="outlined" color="primary" (click)="show('warning')">Warning</mn-button>
+    <mn-button variant="outlined" color="primary" (click)="show('error')">Error</mn-button>
+    <mn-button variant="outlined" color="primary" (click)="showCustomDuration()">Custom Duration</mn-button>
+    <mn-button variant="outlined" color="primary" (click)="showCustomClass()">Custom CSS Class</mn-button>
+    <mn-button variant="outlined" color="primary" style="margin-left:auto" (click)="clearAll()">Clear All</mn-button>
   </div>
 
   <section class="inputs">
     <div class="field">
       <label>Title</label>
-      <input type="text" [(ngModel)]="titleInput" placeholder="Title (optional)" />
+      <input type="text" [(ngModel)]="titleInput" placeholder="Title (optional)"/>
     </div>
     <div class="field">
       <label>Subtitle</label>
-      <input type="text" [(ngModel)]="subTitleInput" placeholder="Subtitle (optional)" />
+      <input type="text" [(ngModel)]="subTitleInput" placeholder="Subtitle (optional)"/>
     </div>
     <div class="field">
       <label>Custom duration (ms)</label>
-      <input type="number" min="0" [(ngModel)]="durationInputMs" placeholder="e.g. 2000" />
+      <input type="number" min="0" [(ngModel)]="durationInputMs" placeholder="e.g. 2000"/>
     </div>
   </section>
 
@@ -40,9 +40,9 @@
         <div class="subtitle">{{ a.subTitle }}</div>
       }
       <span class="spacer"></span>
-      <button class="close" (click)="dismiss()">✕</button>
+      <mn-button variant="outlined" color="primary" class="close" (click)="dismiss()">✕</mn-button>
     </div>
   </ng-template>
 
-  <mn-alert-outlet [template]="alertTpl" />
+  <mn-alert-outlet [template]="alertTpl"/>
 </demo-page>
