@@ -1,20 +1,24 @@
-import { Component, inject } from '@angular/core';
+import { Component, InjectionToken, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MN_INSTANCE_ID, MN_SECTION_PATH } from '../../context/mn-context.tokens';
-import { MnConfigService } from '../../config/mn-config.service';
+import { provideMnComponentConfig } from '../../config/mn-component-config.providers';
 
 interface TestConfig {
   text?: string;
   color?: string;
 }
 
+export const MN_TEST_COMPONENT_CONFIG = new InjectionToken<TestConfig>('MN_TEST_COMPONENT_CONFIG');
+
 @Component({
   selector: 'mn-test-component',
   standalone: true,
   imports: [CommonModule],
+  providers: [
+    provideMnComponentConfig<TestConfig>(MN_TEST_COMPONENT_CONFIG, 'test-component'),
+  ],
   template: `
-    <div class="mn-test" [style.color]="color">
-      {{ text }}
+    <div class="mn-test" [style.color]="(cfg.color ?? 'inherit')">
+      {{ cfg.text ?? 'Hello from component' }}
     </div>
   `,
   styles: [`
@@ -22,18 +26,5 @@ interface TestConfig {
   `]
 })
 export class MnTestComponent {
-  private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
-  private readonly instanceId = inject(MN_INSTANCE_ID, { optional: true }) ?? undefined as string | undefined;
-  private readonly cfg = inject(MnConfigService);
-
-  private readonly componentName = 'test-component';
-
-  text = 'default';
-  color = 'inherit';
-
-  ngOnInit(): void {
-    const resolved = this.cfg.resolve<TestConfig>(this.componentName, this.sectionPath, this.instanceId ?? undefined);
-    this.text = resolved.text ?? this.text;
-    this.color = resolved.color ?? this.color;
-  }
+  readonly cfg = inject(MN_TEST_COMPONENT_CONFIG);
 }
