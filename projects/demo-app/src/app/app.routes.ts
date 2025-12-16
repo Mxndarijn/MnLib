@@ -4,6 +4,7 @@ import { ThemeDemoComponent } from './demos/theme-demo.component';
 import {ButtonDemo} from './button-demo/button-demo';
 import { AlertsDemoComponent } from './demos/alerts-demo.component';
 import { InputDemoComponent } from './input-demo/input-demo';
+import { ConfigDemoComponent } from './demos/config-demo.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -12,5 +13,6 @@ export const routes: Routes = [
   { path: 'demos/alerts', component: AlertsDemoComponent, title: 'Alerts Demo' },
   { path: 'demos/button-demo', component: ButtonDemo, title: 'Button Demo' },
   { path: 'demos/input-demo', component: InputDemoComponent, title: 'Input Demo' },
+  { path: 'demos/config', component: ConfigDemoComponent, title: 'Config Demo' },
   // Future demos can be added here following the same pattern
 ];

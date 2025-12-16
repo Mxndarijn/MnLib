@@ -1,0 +1,23 @@
+{
+  "defaults": {
+    "test-component": {
+      "text": "Hello from config!",
+      "color": "red"
+    }
+  },
+  "overrides": {
+    "root": {
+      "section-a": {
+        "#header-text": {
+          "text": "Overridden config text!"
+        }
+      },
+      "section-b": {
+        "test-component": {
+          "color": "blue",
+          "text": "Overridden config 1!"
+        }
+      }
+    }
+  }
+}
