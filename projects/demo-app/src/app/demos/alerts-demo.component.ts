@@ -2,12 +2,12 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DemoPageComponent } from '../shared/demo-page.component';
-import {MnAlertService, MnAlertOutletComponent, provideMnAlerts, MnAlertKind, MnButton} from 'mn-angular-lib';
+import { MnAlertService, MnAlertOutletComponent, provideMnAlerts, MnAlertKind } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-alerts-demo',
   standalone: true,
-  imports: [CommonModule, FormsModule, DemoPageComponent, MnAlertOutletComponent, MnButton],
+  imports: [CommonModule, FormsModule, DemoPageComponent, MnAlertOutletComponent],
   providers: [
     provideMnAlerts({
       durations: { success: 2500, info: 3500, warning: 6000, error: 8000, default: 4000 },
