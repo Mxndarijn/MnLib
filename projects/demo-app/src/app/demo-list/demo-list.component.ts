@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import {MnButton} from 'mn-angular-lib';
 
 interface DemoItem {
   title: string;
@@ -11,7 +12,7 @@ interface DemoItem {
 @Component({
   selector: 'app-demo-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, MnButton],
   templateUrl: './demo-list.component.html',
   styles: [`
     .demo-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
