@@ -7,94 +7,12 @@
   <!-- Colors - Filled -->
   <section class="demo-section">
     <h2>Filled Buttons</h2>
-    <div class="button-grid">
-      <mn-button color="primary">Primary</mn-button>
-      <mn-button color="secondary">Secondary</mn-button>
-      <mn-button color="success">Success</mn-button>
-      <mn-button color="danger">Danger</mn-button>
+    <div class="flex flex-row gap-x-2">
+      <mn-button class="bg-red-500 rounded-lg ">Red</mn-button>
+      <mn-button class="bg-blue-500 rounded-lg ">Blue</mn-button>
+      <mn-button class="bg-green-500 rounded-lg ">Green</mn-button>
+      <mn-button class="bg-yellow-500 rounded-lg">Yellow</mn-button>
     </div>
   </section>
 
-  <!-- Colors - Outlined -->
-  <section class="demo-section">
-    <h2>Outlined Buttons</h2>
-    <div class="button-grid">
-      <mn-button variant="outlined" color="primary">Primary</mn-button>
-      <mn-button variant="outlined" color="secondary">Secondary</mn-button>
-      <mn-button variant="outlined" color="success">Success</mn-button>
-      <mn-button variant="outlined" color="danger">Danger</mn-button>
-    </div>
-  </section>
-
-  <!-- Colors - Text -->
-  <section class="demo-section">
-    <h2>Text Buttons</h2>
-    <div class="button-grid">
-      <mn-button variant="text" color="primary">Primary</mn-button>
-      <mn-button variant="text" color="secondary">Secondary</mn-button>
-      <mn-button variant="text" color="success">Success</mn-button>
-      <mn-button variant="text" color="danger">Danger</mn-button>
-      <mn-button variant="text" color="warning">Warning</mn-button>
-      <mn-button variant="text" color="info">Info</mn-button>
-    </div>
-  </section>
-
-  <!-- Sizes -->
-  <section class="demo-section">
-    <h2>Sizes</h2>
-    <div class="button-grid">
-      <mn-button size="small" color="primary">Small</mn-button>
-      <mn-button color="primary">Medium (default)</mn-button>
-      <mn-button size="large" color="primary">Large</mn-button>
-    </div>
-  </section>
-
-  <!-- With Icons -->
-  <section class="demo-section">
-    <h2>With Icons</h2>
-    <div class="button-grid">
-      <mn-button color="success">
-        <span start>✓</span>
-        Opslaan
-      </mn-button>
-      <mn-button variant="outlined" color="danger">
-        <span start>🗑️</span>
-        Verwijderen
-      </mn-button>
-      <mn-button color="primary">
-        <span end>→</span>
-        Volgende
-      </mn-button>
-      <mn-button size="small" color="secondary">
-        <span start>⚙️</span>
-        Instellingen
-      </mn-button>
-    </div>
-  </section>
-
-  <!-- Full Width -->
-  <section class="demo-section">
-    <h2>Full Width</h2>
-    <div class="full-width-demo">
-      <mn-button color="primary" [fullWidth]="true">
-        Login
-      </mn-button>
-      <mn-button variant="outlined" color="secondary" [fullWidth]="true">
-        Registreren
-      </mn-button>
-    </div>
-  </section>
-
-  <!-- Disabled -->
-  <section class="demo-section">
-    <h2>Disabled State</h2>
-    <div class="button-grid">
-      <mn-button color="primary" [disabled]="true">Disabled Primary</mn-button>
-      <mn-button variant="outlined" color="secondary" [disabled]="true">Disabled Outlined</mn-button>
-      <mn-button color="success" [disabled]="true">
-        <span start>✓</span>
-        Disabled with Icon
-      </mn-button>
-    </div>
-  </section>
 </div>

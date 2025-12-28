@@ -1,10 +1,5 @@
-<button
-  [class]="cssClass"
-  [disabled]="disabled || loading"
-  [attr.aria-disabled]="(disabled || loading) ? 'true' : null"
-  [attr.aria-busy]="loading ? 'true' : null"
-  [attr.type]="type">
-  <ng-content select="[start]"></ng-content>
+<button class="p-2 ">
+  <ng-content select="[iconLeft]"></ng-content>
   <ng-content></ng-content>
-  <ng-content select="[end]"></ng-content>
+  <ng-content select="[iconRight]"></ng-content>
 </button>
