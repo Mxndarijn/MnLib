@@ -1,6 +1,7 @@
 import {Component, HostBinding, Input} from '@angular/core';
 import {MnButtonTypeDirective} from './mn-button-type.directive';
 import {MnButtonColorDirective} from './mn-button-color.directive';
+import {MnButtonSizeDirective} from './mn-button-size.directive';
 
 @Component({
   selector: 'button[mnButton], a[mnButton]',
@@ -9,9 +10,11 @@ import {MnButtonColorDirective} from './mn-button-color.directive';
   hostDirectives: [
     { directive: MnButtonTypeDirective,  inputs: ['mnButtonType: type'] },
     { directive: MnButtonColorDirective, inputs: ['mnButtonColor: color'] },
+    { directive: MnButtonSizeDirective, inputs: ['mnButtonSize: size'] },
   ]
 })
 export class MnButton{
+  // DIve into HostBinding
   @HostBinding('class')
   readonly hostClass =
     'inline-flex items-center justify-center ' +
