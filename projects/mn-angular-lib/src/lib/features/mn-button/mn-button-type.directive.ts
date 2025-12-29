@@ -1,21 +1,17 @@
 import { Directive, HostBinding, Input } from '@angular/core';
 
-type ButtonType ='filled' | 'outline'  | 'text'
+type ButtonType = 'filled' | 'outline' | 'text';
 
-@Directive({
-  selector: '[mnButtonType]',
-  standalone: true,
-})
+@Directive({ selector: '[mnButtonType]', standalone: true })
 export class MnButtonTypeDirective {
-  @Input() mnButtonType: ButtonType ='filled'
+  @Input() mnButtonType: ButtonType = 'filled';
 
-  @HostBinding('class')
-  get typeClass(): string {
-    const typeClasses = {
-      filled: 'border border-transparent',
-      outline: 'bg-transparent border border-2',
-      text: 'bg-transparent border-transparent',
+  @HostBinding('class') get classes(): string {
+    const map: Record<ButtonType, string> = {
+      filled:  'border border-transparent',
+      outline: 'bg-transparent border',
+      text:    'bg-transparent border-0',
     };
-    return typeClasses[this.mnButtonType];
+    return map[this.mnButtonType];
   }
 }

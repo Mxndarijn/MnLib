@@ -1,10 +1,10 @@
 import { Component} from '@angular/core';
-import {MnButton, MnButtonColorDirective, MnButtonSizeDirective, MnButtonTypeDirective} from 'mn-angular-lib';
+import {MnButton, MnButtonSizeDirective, } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-button-demo',
   imports: [
-    MnButton, MnButtonSizeDirective, MnButtonTypeDirective, MnButtonColorDirective
+    MnButton, MnButtonSizeDirective
   ],
   templateUrl: './button-demo.html',
 })
