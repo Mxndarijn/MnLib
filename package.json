@@ -31,6 +31,7 @@
     "@angular/router": "^20.3.0",
     "json5": "^2.2.3",
     "rxjs": "~7.8.0",
+    "tailwind-variants": "^3.2.2",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

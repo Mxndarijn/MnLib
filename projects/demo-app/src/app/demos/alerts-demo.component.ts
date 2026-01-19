@@ -7,7 +7,7 @@ import {MnAlertService, MnAlertOutletComponent, provideMnAlerts, MnAlertKind, Mn
 @Component({
   selector: 'app-alerts-demo',
   standalone: true,
-  imports: [CommonModule, FormsModule, DemoPageComponent, MnAlertOutletComponent, MnButton],
+  imports: [CommonModule, FormsModule],
   providers: [
     provideMnAlerts({
       durations: { success: 2500, info: 3500, warning: 6000, error: 8000, default: 4000 },

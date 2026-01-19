@@ -1,25 +1,19 @@
 import {Component, HostBinding, Input} from '@angular/core';
-import {MnButtonTypeDirective} from './mn-button-type.directive';
-import {MnButtonColorDirective} from './mn-button-color.directive';
-import {MnButtonSizeDirective} from './mn-button-size.directive';
+import {MnButtonTypes} from './mn-buttonTypes';
+import {mnButtonVariants} from './mn-buttonVariants';
 
 @Component({
   selector: 'button[mnButton], a[mnButton]',
   standalone: true,
   templateUrl: './mn-button.html',
-  hostDirectives: [
-    { directive: MnButtonTypeDirective,  inputs: ['mnButtonType: type'] },
-    { directive: MnButtonColorDirective, inputs: ['mnButtonColor: color'] },
-    { directive: MnButtonSizeDirective, inputs: ['mnButtonSize: size'] },
-  ]
 })
-export class MnButton{
-  // DIve into HostBinding
+export class MnButton {
+  @Input() size: MnButtonTypes['size'] = 'md';
+  @Input() variant: MnButtonTypes['variant'] = 'fill';
+
   @HostBinding('class')
-  readonly hostClass =
-    'inline-flex items-center justify-center ' +
-    'transition focus:outline-none focus:ring-2 focus:ring-offset-2 ' +
-    'focus:ring-red-500';
+  get hostClasses(): string {
+    return mnButtonVariants({ size: this.size, variant: this.variant });
+  }
 
 }
-
