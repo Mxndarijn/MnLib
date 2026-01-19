@@ -10,5 +10,4 @@ import {MnButton } from 'mn-angular-lib';
 })
 export class ButtonDemo {
 
-  protected readonly alert = alert;
 }
