@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from 'tailwind-variants';
 
 export const mnButtonVariants = tv({
-  base: '',
+  base: 'hover:cursor-pointer',
   variants: {
     size: {
       sm: 'px-2 py-1 text-sm',
@@ -35,6 +35,9 @@ export const mnButtonVariants = tv({
       three_xl: 'rounded-3xl',
       four_xl: 'rounded-4xl',
     },
+    disabled: {
+      true: 'opacity-50 pointer-events-none',
+    }
   },
 
   compoundVariants: [
@@ -46,18 +49,18 @@ export const mnButtonVariants = tv({
     { variant: 'fill', color: 'success',   class: 'bg-green-600 text-white hover:bg-green-700' },
 
     // Outline
-    { variant: 'outline', color: 'primary',   class: 'border-blue-600 text-blue-600 hover:bg-blue-50' },
-    { variant: 'outline', color: 'secondary', class: 'border-gray-600 text-gray-700 hover:bg-gray-50' },
-    { variant: 'outline', color: 'danger',    class: 'border-red-600 text-red-600 hover:bg-red-50' },
-    { variant: 'outline', color: 'warning',   class: 'border-amber-500 text-amber-600 hover:bg-amber-50' },
-    { variant: 'outline', color: 'success',   class: 'border-green-600 text-green-600 hover:bg-green-50' },
+    { variant: 'outline', color: 'primary',   class: 'border-blue-600 text-blue-600 hover:bg-blue-100' },
+    { variant: 'outline', color: 'secondary', class: 'border-gray-600 text-gray-700 hover:bg-gray-100' },
+    { variant: 'outline', color: 'danger',    class: 'border-red-600 text-red-600 hover:bg-red-100' },
+    { variant: 'outline', color: 'warning',   class: 'border-amber-500 text-amber-600 hover:bg-amber-100' },
+    { variant: 'outline', color: 'success',   class: 'border-green-600 text-green-600 hover:bg-green-100' },
 
     // Text
-    { variant: 'text', color: 'primary',   class: 'text-blue-600 hover:bg-blue-50' },
-    { variant: 'text', color: 'secondary', class: 'text-gray-700 hover:bg-gray-50' },
-    { variant: 'text', color: 'danger',    class: 'text-red-600 hover:bg-red-50' },
-    { variant: 'text', color: 'warning',   class: 'text-amber-600 hover:bg-amber-50' },
-    { variant: 'text', color: 'success',   class: 'text-green-600 hover:bg-green-50' },
+    { variant: 'text', color: 'primary',   class: 'text-blue-600 hover:bg-blue-100' },
+    { variant: 'text', color: 'secondary', class: 'text-gray-700 hover:bg-gray-100' },
+    { variant: 'text', color: 'danger',    class: 'text-red-600 hover:bg-red-100' },
+    { variant: 'text', color: 'warning',   class: 'text-amber-600 hover:bg-amber-100' },
+    { variant: 'text', color: 'success',   class: 'text-green-600 hover:bg-green-100' },
   ],
 
   defaultVariants: {
@@ -65,6 +68,7 @@ export const mnButtonVariants = tv({
     variant: 'fill',
     color: 'primary',
     borderRadius: 'xl',
+    disabled: false,
   },
 });
 
