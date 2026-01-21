@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import {MnButton} from 'mn-angular-lib';
+import { Component} from '@angular/core';
+import {MnButton } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-button-demo',
@@ -7,7 +7,6 @@ import {MnButton} from 'mn-angular-lib';
     MnButton
   ],
   templateUrl: './button-demo.html',
-  styleUrl: './button-demo.css',
 })
 export class ButtonDemo {
 

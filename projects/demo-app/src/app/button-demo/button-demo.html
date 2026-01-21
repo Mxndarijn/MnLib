@@ -1,18 +1,69 @@
 <div class="container">
   <div class="header">
     <h1>Button Demo</h1>
-    <p>Showcase van alle button varianten</p>
+    <p>Showcase of all button variants</p>
   </div>
 
-  <!-- Colors - Filled -->
-  <section class="demo-section">
-    <h2>Filled Buttons</h2>
-    <div class="flex flex-row gap-x-2">
-      <mn-button class="bg-red-500 rounded-lg ">Red</mn-button>
-      <mn-button class="bg-blue-500 rounded-lg ">Blue</mn-button>
-      <mn-button class="bg-green-500 rounded-lg ">Green</mn-button>
-      <mn-button class="bg-yellow-500 rounded-lg">Yellow</mn-button>
+  <!-- Colors Showcase: primary, secondary, danger, warning, success -->
+  <section class="flex flex-col gap-y-16">
+    <!-- Primary -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Primary buttons</h1>
+      <div class="flex flex-row gap-x-2">
+        <button mnButton color="primary" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
+        <button mnButton color="primary" size="md" variant="outline">Outline button</button>
+        <button mnButton color="primary" size="lg" variant="text">Text button</button>
+      </div>
+    </div>
+
+    <!-- Secondary -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Secondary buttons</h1>
+      <div class="flex flex-row gap-x-2">
+        <button mnButton color="secondary" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
+        <button mnButton color="secondary" size="md" variant="outline">Outline button</button>
+        <button mnButton color="secondary" size="lg" variant="text">Text button</button>
+      </div>
+    </div>
+
+    <!-- Danger -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Danger buttons</h1>
+      <div class="flex flex-row gap-x-2">
+        <button mnButton color="danger" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
+        <button mnButton color="danger" size="md" variant="outline">Outline button</button>
+        <button mnButton color="danger" size="lg" variant="text">Text button</button>
+      </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Warning buttons</h1>
+      <div class="flex flex-row gap-x-2">
+        <button mnButton color="warning" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
+        <button mnButton color="warning" size="md" variant="outline">Outline button</button>
+        <button mnButton color="warning" size="lg" variant="text">Text button</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Success buttons</h1>
+      <div class="flex flex-row gap-x-2">
+        <button mnButton color="success" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
+        <button mnButton color="success" size="md" variant="outline">Outline button</button>
+        <button mnButton color="success" size="lg" variant="text">Text button</button>
+      </div>
+    </div>
+    <!-- Disabled -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Success buttons</h1>
+      <div class="flex flex-row gap-x-2">
+        <button mnButton color="success" [disabled]="true" size="sm" variant="fill" borderRadius="three_xl">Small fill
+        </button>
+        <button mnButton color="success" [disabled]="true" size="md" variant="outline">Outline button</button>
+        <button mnButton color="success" [disabled]="true" size="lg" variant="text">Text button</button>
+      </div>
     </div>
   </section>
-
 </div>
