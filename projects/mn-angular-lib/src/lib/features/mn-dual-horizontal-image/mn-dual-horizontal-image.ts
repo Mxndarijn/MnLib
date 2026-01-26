@@ -11,5 +11,14 @@ import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
   templateUrl: './mn-dual-horizontal-image.html',
 })
 export class MnDualHorizontalImage {
-  @Input() images: MnDualHorizontalImageTypes[] = [];
+  private _images: MnDualHorizontalImageTypes[] = [];
+
+  @Input()
+  set images(value: MnDualHorizontalImageTypes[] | null | undefined) {
+    this._images = (value ?? []).slice(0, 2);
+  }
+
+  get images(): MnDualHorizontalImageTypes[] {
+    return this._images;
+  }
 }
