@@ -8,35 +8,35 @@ import { mnButtonVariants } from './mn-buttonVariants';
   templateUrl: './mn-button.html',
 })
 export class MnButton {
-  @Input() button: Partial<MnButtonTypes> = {};
+  @Input() data: Partial<MnButtonTypes> = {};
 
   // Bind the computed classes to the host element
   @HostBinding('class')
   get hostClasses(): string {
     return mnButtonVariants({
-      size: this.button.size,
-      variant: this.button.variant,
-      color: this.button.color,
-      borderRadius: this.button.borderRadius,
-      disabled: this.button.disabled,
+      size: this.data.size,
+      variant: this.data.variant,
+      color: this.data.color,
+      borderRadius: this.data.borderRadius,
+      disabled: this.data.disabled,
     });
   }
   // For accessibility (works for both <button> and <a>)
   @HostBinding('attr.aria-disabled')
   get ariaDisabled() {
-    return this.button.disabled ? 'true' : null;
+    return this.data.disabled ? 'true' : null;
   }
 
   // Only meaningful for <button>. For <a> it does nothing semantically.
   @HostBinding('attr.disabled')
   get disabledAttr() {
-    return this.button.disabled ? '' : null;
+    return this.data.disabled ? '' : null;
   }
 
   // Make disabled anchors unfocusable + prevent activation
   @HostBinding('attr.tabindex')
   get tabIndex() {
-    return this.button.disabled ? '-1' : null;
+    return this.data.disabled ? '-1' : null;
   }
 
 }
