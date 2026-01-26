@@ -14,7 +14,7 @@ export class MnDualHorizontalImage {
   private _images: MnDualHorizontalImageTypes[] = [];
 
   @Input()
-  set images(value: MnDualHorizontalImageTypes[] | null | undefined) {
+  set images(value: MnDualHorizontalImageTypes[]) {
     this._images = (value ?? []).slice(0, 2);
   }
 
