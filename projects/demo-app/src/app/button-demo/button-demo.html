@@ -5,24 +5,35 @@
   </div>
 
   <!-- Colors Showcase: primary, secondary, danger, warning, success -->
-  <section class="flex flex-col gap-y-16">
+  <section class="flex flex-col gap-y-10">
     <!-- Primary -->
     <div class="flex flex-col gap-y-4">
       <h1>Primary buttons</h1>
       <div class="flex flex-row gap-x-2">
-        <button mnButton color="primary" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
-        <button mnButton color="primary" size="md" variant="outline">Outline button</button>
-        <button mnButton color="primary" size="lg" variant="text">Text button</button>
+        <button mnButton [data]="{ color: 'primary', size: 'sm', variant: 'fill', borderRadius: 'three_xl' }">
+          Small fill
+        </button>
+        <button mnButton [data]="{ color: 'primary', size: 'md', variant: 'outline' }">
+          Outline button
+        </button>
+        <button mnButton [data]="{ color: 'primary', size: 'lg', variant: 'text' }">
+          Text button
+        </button>
       </div>
     </div>
-
     <!-- Secondary -->
     <div class="flex flex-col gap-y-4">
       <h1>Secondary buttons</h1>
       <div class="flex flex-row gap-x-2">
-        <button mnButton color="secondary" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
-        <button mnButton color="secondary" size="md" variant="outline">Outline button</button>
-        <button mnButton color="secondary" size="lg" variant="text">Text button</button>
+        <button mnButton [data]="{ color: 'secondary', size: 'sm', variant: 'fill', borderRadius: 'three_xl' }">
+          Small fill
+        </button>
+        <button mnButton [data]="{ color: 'secondary', size: 'md', variant: 'outline' }">
+          Outline button
+        </button>
+        <button mnButton [data]="{ color: 'secondary', size: 'lg', variant: 'text' }">
+          Text button
+        </button>
       </div>
     </div>
 
@@ -30,9 +41,15 @@
     <div class="flex flex-col gap-y-4">
       <h1>Danger buttons</h1>
       <div class="flex flex-row gap-x-2">
-        <button mnButton color="danger" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
-        <button mnButton color="danger" size="md" variant="outline">Outline button</button>
-        <button mnButton color="danger" size="lg" variant="text">Text button</button>
+        <button mnButton [data]="{ color: 'danger', size: 'sm', variant: 'fill', borderRadius: 'three_xl' }">
+          Small fill
+        </button>
+        <button mnButton [data]="{ color: 'danger', size: 'md', variant: 'outline' }">
+          Outline button
+        </button>
+        <button mnButton [data]="{ color: 'danger', size: 'lg', variant: 'text' }">
+          Text button
+        </button>
       </div>
     </div>
 
@@ -40,9 +57,15 @@
     <div class="flex flex-col gap-y-4">
       <h1>Warning buttons</h1>
       <div class="flex flex-row gap-x-2">
-        <button mnButton color="warning" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
-        <button mnButton color="warning" size="md" variant="outline">Outline button</button>
-        <button mnButton color="warning" size="lg" variant="text">Text button</button>
+        <button mnButton [data]="{ color: 'warning', size: 'sm', variant: 'fill', borderRadius: 'three_xl' }">
+          Small fill
+        </button>
+        <button mnButton [data]="{ color: 'warning', size: 'md', variant: 'outline' }">
+          Outline button
+        </button>
+        <button mnButton [data]="{ color: 'warning', size: 'lg', variant: 'text' }">
+          Text button
+        </button>
       </div>
     </div>
 
@@ -50,19 +73,34 @@
     <div class="flex flex-col gap-y-4">
       <h1>Success buttons</h1>
       <div class="flex flex-row gap-x-2">
-        <button mnButton color="success" size="sm" variant="fill" borderRadius="three_xl">Small fill</button>
-        <button mnButton color="success" size="md" variant="outline">Outline button</button>
-        <button mnButton color="success" size="lg" variant="text">Text button</button>
+        <button mnButton [data]="{ color: 'success', size: 'sm', variant: 'fill', borderRadius: 'three_xl' }">
+          Small fill
+        </button>
+        <button mnButton [data]="{ color: 'success', size: 'md', variant: 'outline' }">
+          Outline button
+        </button>
+        <button mnButton [data]="{ color: 'success', size: 'lg', variant: 'text' }">
+          Text button
+        </button>
       </div>
     </div>
+
     <!-- Disabled -->
     <div class="flex flex-col gap-y-4">
-      <h1>Success buttons</h1>
+      <h1>Disabled buttons</h1>
       <div class="flex flex-row gap-x-2">
-        <button mnButton color="success" [disabled]="true" size="sm" variant="fill" borderRadius="three_xl">Small fill
+        <button
+          mnButton
+          [data]="{ color: 'success', size: 'sm', variant: 'fill', borderRadius: 'three_xl', disabled: true }"
+        >
+          Small fill
         </button>
-        <button mnButton color="success" [disabled]="true" size="md" variant="outline">Outline button</button>
-        <button mnButton color="success" [disabled]="true" size="lg" variant="text">Text button</button>
+        <button mnButton [data]="{ color: 'success', size: 'md', variant: 'outline', disabled: true }">
+          Outline button
+        </button>
+        <button mnButton [data]="{ color: 'success', size: 'lg', variant: 'text', disabled: true }">
+          Text button
+        </button>
       </div>
     </div>
   </section>
