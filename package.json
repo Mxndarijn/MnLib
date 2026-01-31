@@ -30,8 +30,8 @@
     "@angular/platform-browser-dynamic": "^20.3.9",
     "@angular/router": "^20.3.0",
     "json5": "^2.2.3",
+    "ngx-splide": "^7.0.1",
     "rxjs": "~7.8.0",
-    "swiper": "^12.1.0",
     "tailwind-merge": "^3.2.2",
     "tailwind-variants": "^3.2.2",
     "tslib": "^2.3.0"

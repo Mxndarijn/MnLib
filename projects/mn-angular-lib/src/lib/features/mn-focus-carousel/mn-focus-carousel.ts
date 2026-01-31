@@ -1,8 +1,7 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA, Input} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {ImageProps, MnFocusCarouselTypes} from './mn-focus-carouselTypes';
-import {SwiperOptions} from 'swiper/types';
-import { SwiperContainer } from 'swiper/element/bundle';
-import { Navigation, Pagination } from 'swiper/modules';
+import {NgxSplideModule} from 'ngx-splide';
+import { Options } from '@splidejs/splide';
 
 
 @Component({
@@ -10,23 +9,31 @@ import { Navigation, Pagination } from 'swiper/modules';
   templateUrl: './mn-focus-carousel.html',
   styleUrls: ['./mn-focus-carousel.css'],
   standalone: true,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [
+    NgxSplideModule
+  ]
 })
 export class MnFocusCarousel {
 
-  images : ImageProps[] = [];
-  showArrows : boolean = true;
+  images: ImageProps[] = [];
+  showArrows: boolean = true;
 
-  config = <SwiperOptions>(() => ({
-    spaceBetween: 0,
-    modules:[Pagination, Navigation],
-    navigation: this.showArrows,
+  options : Options = {
+    type: 'loop',
+    perPage: 3,
+    arrows: true,
     pagination: true,
-    slidesPerView: 'auto',
-    loop: true,
-    centeredSlides: true,
-    initialSlide: 2,
-  }));
+    focus: 'center' as const,
+    gap: '1rem',
+    breakpoints: {
+      640: {
+        perPage: 2,
+      },
+      1024: {
+        perPage: 3,
+      },
+    },
+  };
 
   private _data!: MnFocusCarouselTypes;
 
@@ -34,5 +41,9 @@ export class MnFocusCarousel {
     this._data = value;
     this.images = this._data.images;
     this.showArrows = this._data.showArrows;
+    this.options = {
+      ...this.options,
+      arrows: this.showArrows
+    };
   }
 }
