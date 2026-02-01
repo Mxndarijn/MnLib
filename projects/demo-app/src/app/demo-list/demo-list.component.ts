@@ -30,5 +30,6 @@ export class DemoListComponent {
     { title: 'Input Demo', path: '/demos/input-demo', description: 'Text, email, password, number, date, and a larger description field.' },
     { title: 'Config Demo', path: '/demos/config', description: 'mn-config with section scoping, component defaults, and instance overrides.' },
     { title: 'DualHorizontalImage Demo', path: '/demos/dual-horizontal-image-demo', description: 'Two images shown horizontally.' },
+    { title: 'Information card Demo', path: '/demos/information-card-demo', description: 'Information card with title, description and optional images.' },
   ];
 }

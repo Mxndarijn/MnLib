@@ -1,0 +1,15 @@
+<div class="flex flex-row gap-x-10">
+@for (card of cards; track card.title) {
+  <lib-mn-information-card class="bg-red-50" [cardData]="card">
+    <div header>
+      <h3>{{card.title}}</h3>
+    </div>
+
+    <p>{{card.description}}</p>
+
+    <div footer>
+      <button>Actie</button>
+    </div>
+  </lib-mn-information-card>
+}
+</div>
