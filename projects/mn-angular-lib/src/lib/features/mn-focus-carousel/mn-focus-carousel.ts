@@ -20,7 +20,7 @@ export class MnFocusCarousel {
 
   options : Options = {
     type: 'loop',
-    perPage: 3,
+    perPage: 5,
     arrows: true,
     pagination: true,
     focus: 'center' as const,
@@ -29,10 +29,10 @@ export class MnFocusCarousel {
     cloneStatus: false,
     breakpoints: {
       640: {
-        perPage: 2,
+        perPage: 3,
       },
       1024: {
-        perPage: 3,
+        perPage: 5,
       },
     },
   };
