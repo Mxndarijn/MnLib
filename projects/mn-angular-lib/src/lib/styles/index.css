@@ -3,6 +3,3 @@
 /* Feature styles */
 @import '../features/mn-alert/mn-alert-outlet/mn-alert-outlet.css';
 @import "tailwindcss";
-@import "swiper/css";
-@import "swiper/css/navigation";
-@import "swiper/css/pagination";
