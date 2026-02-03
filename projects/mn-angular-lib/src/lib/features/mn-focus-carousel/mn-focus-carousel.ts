@@ -25,6 +25,8 @@ export class MnFocusCarousel {
     pagination: true,
     focus: 'center' as const,
     gap: '1rem',
+    updateOnMove: true,
+    cloneStatus: false,
     breakpoints: {
       640: {
         perPage: 2,
@@ -34,6 +36,19 @@ export class MnFocusCarousel {
       },
     },
   };
+
+  isMoving = false;
+  onMove(args: any[]) {
+    // args = [newIndex, prevIndex, destIndex] (Splide event args)
+    this.isMoving = true;
+
+    const [newIndex, prevIndex, destIndex] = args;
+    // hier kun je alvast iets doen (bv preload, classes, analytics, etc.)
+  }
+
+  onMoved(_: any[]) {
+    this.isMoving = false;
+  }
 
   private _data!: MnFocusCarouselTypes;
 
