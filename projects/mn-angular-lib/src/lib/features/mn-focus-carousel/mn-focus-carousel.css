@@ -1,7 +1,10 @@
 ::ng-deep .splide__slide {
   transform: scale(0.88);
   transition: transform 450ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  height: 40vh;
+
 }
+
 
 ::ng-deep .splide__slide.is-active {
   transform: scale(1.12);

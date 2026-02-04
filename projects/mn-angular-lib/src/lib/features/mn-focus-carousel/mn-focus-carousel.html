@@ -3,7 +3,7 @@
     <splide [options]="options">
       @for (image of images; track image.id) {
         <splide-slide>
-          <img [src]="image.src" [alt]="image.alt" />
+          <img class="size-full object-cover"  [src]="image.src" [alt]="image.alt" />
         </splide-slide>
       }
     </splide>

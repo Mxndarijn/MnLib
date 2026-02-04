@@ -18,22 +18,20 @@ export class MnFocusCarousel {
   images: ImageProps[] = [];
   showArrows: boolean = true;
 
-  options : Options = {
+  options: Options = {
     type: 'loop',
-    perPage: 5,
     arrows: true,
     pagination: true,
-    focus: 'center' as const,
-    gap: '1rem',
+    focus: 'center',
+    gap: '2rem',
     updateOnMove: true,
     cloneStatus: false,
+
+    perPage: 3,
     breakpoints: {
-      640: {
-        perPage: 3,
-      },
-      1024: {
-        perPage: 5,
-      },
+      1024: { perPage: 3 },
+      768:  { perPage: 3 },
+      480:  { perPage: 1 },
     },
   };
 
