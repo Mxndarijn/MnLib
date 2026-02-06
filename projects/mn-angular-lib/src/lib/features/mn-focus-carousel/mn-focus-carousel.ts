@@ -1,20 +1,16 @@
-import {Component, Input} from '@angular/core';
-import {ImageProps, MnFocusCarouselTypes} from './mn-focus-carouselTypes';
-import {NgxSplideModule} from 'ngx-splide';
+import { Component, Input } from '@angular/core';
+import { ImageProps, MnFocusCarouselTypes } from './mn-focus-carouselTypes';
+import { NgxSplideModule } from 'ngx-splide';
 import { Options } from '@splidejs/splide';
-
 
 @Component({
   selector: 'lib-mn-focus-carousel',
   templateUrl: './mn-focus-carousel.html',
   styleUrls: ['./mn-focus-carousel.css'],
   standalone: true,
-  imports: [
-    NgxSplideModule
-  ]
+  imports: [NgxSplideModule],
 })
 export class MnFocusCarousel {
-
   images: ImageProps[] = [];
   showArrows: boolean = true;
 
@@ -23,30 +19,16 @@ export class MnFocusCarousel {
     arrows: true,
     pagination: true,
     focus: 'center',
-    gap: '2rem',
     updateOnMove: true,
     cloneStatus: false,
-
-    perPage: 3,
+    gap: 10,
+    perPage: 5,
     breakpoints: {
-      1024: { perPage: 3 },
-      768:  { perPage: 3 },
-      480:  { perPage: 1 },
+      1024: { perPage: 5 },
+      768: { perPage: 3 },
+      480: { perPage: 1 },
     },
   };
-
-  isMoving = false;
-  onMove(args: any[]) {
-    // args = [newIndex, prevIndex, destIndex] (Splide event args)
-    this.isMoving = true;
-
-    const [newIndex, prevIndex, destIndex] = args;
-    // hier kun je alvast iets doen (bv preload, classes, analytics, etc.)
-  }
-
-  onMoved(_: any[]) {
-    this.isMoving = false;
-  }
 
   private _data!: MnFocusCarouselTypes;
 
@@ -56,7 +38,7 @@ export class MnFocusCarousel {
     this.showArrows = this._data.showArrows;
     this.options = {
       ...this.options,
-      arrows: this.showArrows
+      arrows: this.showArrows,
     };
   }
 }

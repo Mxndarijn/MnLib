@@ -1,11 +1,14 @@
 <div class="flex flex-col gap-y-4">
   <div class="relative overflow-hidden">
-    <splide [options]="options">
-      @for (image of images; track image.id) {
-        <splide-slide>
-          <img class="size-full object-cover"  [src]="image.src" [alt]="image.alt" />
-        </splide-slide>
-      }
-    </splide>
+<splide [options]="options">
+  @for (image of images; track image.id) {
+    <splide-slide>
+      <div class="slide-inner">
+        <img class="size-full object-cover" [src]="image.src" [alt]="image.alt" />
+      </div>
+    </splide-slide>
+  }
+</splide>
+
   </div>
 </div>
