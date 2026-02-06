@@ -1,14 +1,11 @@
 import { Component } from '@angular/core';
-import {MnInformationCard, MnInformationCardTypes} from 'mn-angular-lib';
+import { MnInformationCard, MnInformationCardTypes } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-information-card-demo',
   standalone: true,
-  imports: [
-    MnInformationCard
-  ],
+  imports: [MnInformationCard],
   templateUrl: './information-card-demo.html',
-  styleUrl: './information-card-demo.css',
 })
 export class InformationCardDemo {
   cards: MnInformationCardTypes[] = [
@@ -17,7 +14,13 @@ export class InformationCardDemo {
       description: 'This is card 1.',
       bottomBorder: true,
       shadow: true,
+      image: {
+        id: 1,
+        url: 'https://logo-icons.com/cdn/shop/files/2081-logo-1713630973.369.svg?v=1713641356',
+        alt: 'test-image',
+      },
       textPosition: 'center',
-    },    { title: 'Card 2', description: 'This is card 2.' },
+    },
+    { title: 'Card 2', description: 'This is card 2.' },
   ];
 }

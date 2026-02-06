@@ -1,14 +1,16 @@
 <div class="flex flex-row gap-x-10">
 @for (card of cards; track card.title) {
-  <lib-mn-information-card class="bg-red-50" [cardData]="card">
+  <lib-mn-information-card class="bg-red-50 " [cardData]="card">
     <div header>
-      <h3>{{card.title}}</h3>
+      @if (card.image) {
+      <img class="size-16"  [src]="card.image.url"/>
+      }
     </div>
-
-    <p>{{card.description}}</p>
+ 
+    <p>{{card.title}}</p>
 
     <div footer>
-      <button>Actie</button>
+      <button>{{card.description}}</button>
     </div>
   </lib-mn-information-card>
 }

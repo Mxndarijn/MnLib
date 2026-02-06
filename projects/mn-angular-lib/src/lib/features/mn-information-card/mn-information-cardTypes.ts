@@ -1,8 +1,8 @@
-import {MnInformationCardVariants} from './mn-information-cardVariants';
+import { MnInformationCardVariants } from './mn-information-cardVariants';
 
 // TODO make global image type
 interface imageType {
-  id: string;
+  id: number;
   url: string;
   alt?: string;
 }

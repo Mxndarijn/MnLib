@@ -4,7 +4,7 @@ export const mnInformationCardVariants = tv({
   base: '',
   variants: {
     bottomBorder: {
-      true: 'border-b border-b-2 border-yellow-500',
+      true: 'border-b border-b-2 border-brand-500',
     },
     shadow: {
       true: 'shadow-lg',
@@ -26,7 +26,6 @@ export const mnInformationCardVariants = tv({
       four_xl: 'rounded-4xl',
     },
   },
-
 });
 
 export type MnInformationCardVariants = VariantProps<typeof mnInformationCardVariants>;
