@@ -1,6 +1,6 @@
 <div class="flex flex-row gap-x-10">
 @for (card of cards; track card.title) {
-  <lib-mn-information-card class="bg-red-50 " [cardData]="card">
+  <lib-mn-information-card class="bg-red-50 w-48 h-84" [cardData]="card">
     <div header>
       @if (card.image) {
       <img class="size-16"  [src]="card.image.url"/>
