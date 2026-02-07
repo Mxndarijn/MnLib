@@ -1,9 +1,10 @@
 import {Component, Input, Optional, Self} from '@angular/core';
 import {NgClass} from '@angular/common';
-import {MnInputProps, MnErrorMessage} from './mn-input-fieldTypes';
+import {MnInputProps, MnErrorMessageData} from './mn-input-fieldTypes';
 import {AbstractControl, NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {pickAdapter} from './mn-input-field-adapters';
 import {mnInputFieldVariants} from './mn-input-fieldVariants';
+import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 
 /**
  * MnInputField Component
@@ -39,7 +40,7 @@ import {mnInputFieldVariants} from './mn-input-fieldVariants';
 @Component({
   selector: 'mn-input-field',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-input-field.html',
 })
 export class MnInputField {
@@ -63,7 +64,7 @@ export class MnInputField {
    * These are used when useBuiltInErrorMessages is true (default).
    * Can be overridden per-field using props.errorMessages.
    */
-  private readonly builtInErrorMessages: Record<string, MnErrorMessage> = {
+  private readonly builtInErrorMessages: Record<string, MnErrorMessageData> = {
     required: 'This field is required',
     email: 'Please enter a valid email address',
     minlength: (args: any) => `Minimum ${args.requiredLength} characters required`,

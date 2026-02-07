@@ -26,14 +26,14 @@ export type MnInputType =
  * @param errors - All validation errors present on the control
  * @returns The error message string to display
  */
-export type MnErrorMessage = string | ((args: any, errors: ValidationErrors) => string);
+export type MnErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
 
 /**
  * Map of error keys to error message definitions.
  * Keys correspond to Angular validator error keys (e.g., 'required', 'email', 'minlength')
  * or custom validator keys.
  */
-export type MnErrorMessages = Partial<Record<string, MnErrorMessage>>;
+export type MnErrorMessagesData = Partial<Record<string, MnErrorMessageData>>;
 
 /**
  * Base properties for all MnInputField variants.
@@ -80,7 +80,7 @@ export interface MnInputBaseProps {
    * Custom error messages mapped by validator error key.
    * Example: { required: 'This field is mandatory', email: 'Invalid email format' }
    */
-  errorMessages?: MnErrorMessages;
+  errorMessages?: MnErrorMessagesData;
 
   /**
    * Fallback error message when no specific message is found for an error.

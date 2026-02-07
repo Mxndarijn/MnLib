@@ -31,18 +31,16 @@
   @if (showError) {
     <!-- Show all errors mode -->
     @if (props.showAllErrors) {
-      <div [id]="resolvedId + '-error'" class="">
+      <div class="flex flex-col gap-y-1">
         @for (error of errorMessages; track $index) {
-          <div  class="text-red-500 mt-2 text-sm">
-            {{ error }}
-          </div>
+          <lib-mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></lib-mn-error-message>
         }
       </div>
     } @else {
-      <!-- Show single error mode (default) -->
-      <div [id]="resolvedId + '-error'" class="text-red-500 mt-2 text-sm">
-        {{ errorMessage }}
-      </div>
+      @if (errorMessage != null) {
+        <lib-mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></lib-mn-error-message>
+
+      }
     }
   }
 </div>
