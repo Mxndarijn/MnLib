@@ -64,14 +64,6 @@ jobs:
           npx ng build mn-angular-lib --configuration production || \
           npm run build --workspace=mn-angular-lib || \
           npm run build:lib
-
-      - name: Configure npm auth
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish dist/mn-angular-lib to npm
         working-directory: dist/mn-angular-lib
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
