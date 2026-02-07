@@ -11,6 +11,7 @@ export class InformationCardDemo {
   cards: MnInformationCardTypes[] = [
     {
       title: 'Card 1',
+      id: 1,
       description: 'This is card 1.',
       bottomBorder: true,
       shadow: true,
@@ -21,6 +22,6 @@ export class InformationCardDemo {
       },
       textPosition: 'center',
     },
-    { title: 'Card 2', description: 'This is card 2.' },
+    { id: 2, title: 'Card 2', description: 'This is card 2.' },
   ];
 }

@@ -7,11 +7,18 @@ interface imageType {
   alt?: string;
 }
 
-export interface MnInformationCardTypes {
+export interface MnInformationCardData {
   bottomBorder?: MnInformationCardVariants['bottomBorder'];
   shadow?: MnInformationCardVariants['shadow'];
   textPosition?: MnInformationCardVariants['textPosition'];
+
   title: string;
   description: string;
-  image?: imageType;
 }
+
+export interface MnDefaultInformationCardData extends MnInformationCardData {
+  image: imageType;
+}
+
+
+

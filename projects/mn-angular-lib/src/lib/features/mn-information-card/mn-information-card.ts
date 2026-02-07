@@ -1,5 +1,5 @@
 import {Component, HostBinding, Input} from '@angular/core';
-import {MnInformationCardTypes} from './mn-information-cardTypes';
+import {MnInformationCardData } from './mn-information-cardTypes';
 import {mnInformationCardVariants} from './mn-information-cardVariants';
 import {NgClass} from '@angular/common';
 
@@ -12,16 +12,13 @@ import {NgClass} from '@angular/common';
   templateUrl: './mn-information-card.html',
 })
 export class MnInformationCard {
-  private _cardData: MnInformationCardTypes = {
-    title: 'Example',
-    description: 'This is an example card.'
-  };
+  private _cardData!: MnInformationCardData
 
-  @Input() set cardData(value: MnInformationCardTypes) {
+  @Input() set cardData(value: MnInformationCardData) {
     this._cardData = value;
   }
 
-  get cardData(): MnInformationCardTypes {
+  get cardData(): MnInformationCardData {
     return this._cardData;
   }
   get hostClasses(): string {
