@@ -13,7 +13,7 @@
         "./dist/mn-angular-lib"
       ]
     },
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
