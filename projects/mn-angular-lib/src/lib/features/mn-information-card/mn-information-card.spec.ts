@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MnInformationCard } from './mn-information-card';
+import {MnInformationCardData} from 'mn-angular-lib';
 
 describe('MnInformationCard', () => {
   let component: MnInformationCard;
@@ -14,6 +15,11 @@ describe('MnInformationCard', () => {
 
     fixture = TestBed.createComponent(MnInformationCard);
     component = fixture.componentInstance;
+    component.data = {
+      id: 1,
+      title: 'Test Title',
+      description: 'Test Description'
+    } as MnInformationCardData;
     fixture.detectChanges();
   });
 

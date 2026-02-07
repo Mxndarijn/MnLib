@@ -1,5 +1,5 @@
-import {Component, HostBinding, Input} from '@angular/core';
-import {MnInformationCardBaseData} from './mn-information-cardTypes';
+import {Component, Input} from '@angular/core';
+import {MnInformationCardData} from './mn-information-cardTypes';
 import {mnInformationCardVariants} from './mn-information-cardVariants';
 import {NgClass} from '@angular/common';
 
@@ -23,5 +23,3 @@ export class MnInformationCard<TExtra = unknown> {
   }
 }
 
-export type MnInformationCardData<TExtra = unknown> =
-  MnInformationCardBaseData  & TExtra;

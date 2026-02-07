@@ -27,9 +27,9 @@ export class DemoListComponent {
     { title: 'Theme Demo', path: '/demos/theme', description: 'Play with theme tokens: primary, radius, padding.' },
     { title: 'Alerts Demo', path: '/demos/alerts', description: 'Showcase mn-alert service, providers, and outlet template.' },
     { title: 'Button Demo', path: '/demos/button-demo', description: 'Buttons with sizes, variants, and colors.' },
-    { title: 'Input Demo', path: '/demos/input-demo', description: 'Text, email, password, number, date, and a larger description field.' },
     { title: 'Config Demo', path: '/demos/config', description: 'mn-config with section scoping, component defaults, and instance overrides.' },
     { title: 'DualHorizontalImage Demo', path: '/demos/dual-horizontal-image-demo', description: 'Two images shown horizontally.' },
     { title: 'Information card Demo', path: '/demos/information-card-demo', description: 'Information card with title, description and optional images.' },
+    {title: 'Input field demo', path: '/demos/input-field-demo', description: 'Input field demo'}
   ];
 }

@@ -3,10 +3,10 @@ import { DemoListComponent } from './demo-list/demo-list.component';
 import { ThemeDemoComponent } from './demos/theme-demo.component';
 import {ButtonDemo} from './button-demo/button-demo';
 import { AlertsDemoComponent } from './demos/alerts-demo.component';
-import { InputDemoComponent } from './input-demo/input-demo';
 import { ConfigDemoComponent } from './demos/config-demo.component';
 import {DualHorizontalImageDemo} from './dual-horizontal-image-demo/dual-horizontal-image-demo';
 import {InformationCardDemo} from './information-card-demo/information-card-demo';
+import {InputFieldDemo} from './input-field-demo/input-field-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -14,9 +14,9 @@ export const routes: Routes = [
   { path: 'demos/theme', component: ThemeDemoComponent, title: 'Theme Demo' },
   { path: 'demos/alerts', component: AlertsDemoComponent, title: 'Alerts Demo' },
   { path: 'demos/button-demo', component: ButtonDemo, title: 'Button Demo' },
-  { path: 'demos/input-demo', component: InputDemoComponent, title: 'Input Demo' },
   { path: 'demos/config', component: ConfigDemoComponent, title: 'Config Demo' },
   { path: 'demos/dual-horizontal-image-demo', component: DualHorizontalImageDemo, title: 'DualImageHorizontal Demo' },
   { path: 'demos/information-card-demo', component: InformationCardDemo, title: 'Information card Demo' },
+  {path: 'demos/input-field-demo', component: InputFieldDemo, title: 'Input Field Demo' }
   // Future demos can be added here following the same pattern
 ];
