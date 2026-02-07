@@ -1,0 +1,24 @@
+<div class="flex flex-row gap-x-10">
+  @for (card of cards; track card.id) {
+    <lib-mn-information-card class="bg-red-50 w-48 h-84" [data]="card">
+      <div header>
+        @switch (card.kind) {
+          @case ('one-image') {
+            <img class="size-16" [src]="card.image.url" [alt]="card.image.alt" />
+          }
+          @case ('two-images') {
+            @for (img of card.images; track img.id) {
+              <img class="size-16" [src]="img.url" [alt]="img.alt" />
+            }
+          }
+        }
+      </div>
+
+      <p>{{ card.title }}</p>
+
+      <div footer>
+        <button>{{ card.description }}</button>
+      </div>
+    </lib-mn-information-card>
+  }
+</div>
