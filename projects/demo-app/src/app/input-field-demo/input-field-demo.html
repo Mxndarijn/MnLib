@@ -1,0 +1,72 @@
+<h2>MnInputField Demo - Error Handling & Display Modes</h2>
+
+<p>
+  This demo showcases the refactored MnInputField component with English documentation,
+  flexible error handling, and the new <strong>showAllErrors</strong> feature.
+</p>
+
+<form [formGroup]="form">
+  <!-- Example 1: Default Behavior -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 1: Default Built-in Error Messages</h3>
+    <p>
+      Uses built-in English error messages (translated from Dutch).
+      Shows only one error at a time (default behavior).
+    </p>
+    <mn-input-field class="block w-[200px]"
+      formControlName="name"
+      [props]="nameProps"
+    ></mn-input-field>
+  </div>
+
+  <!-- Example 2: Custom Messages, No Built-ins -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 2: Custom Error Messages Only</h3>
+    <p>
+      <code>useBuiltInErrorMessages: false</code> - Only uses custom error messages.
+      Demonstrates complete control over error text.
+    </p>
+    <mn-input-field
+      formControlName="email"
+      [props]="emailProps"
+    ></mn-input-field>
+  </div>
+
+  <!-- Example 3: Priority-Based Error Display -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 3: Priority-Based Error Display (Single Error)</h3>
+    <p>
+      Uses <code>errorPriority</code> to control which error shows first.
+      Custom validator (noXAllowed) + function-based error messages.
+      Try entering 'x' or less than 3 characters.
+    </p>
+    <mn-input-field
+      formControlName="username"
+      [props]="usernameProps"
+    ></mn-input-field>
+  </div>
+
+  <!-- Example 4: Show All Errors -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 4: Show All Errors Mode NEW</h3>
+    <p>
+      <code>showAllErrors: true</code> - Displays ALL validation errors simultaneously.
+      Perfect for complex validation rules where users need to see all requirements at once.
+      Try entering a weak password to see multiple errors appear.
+    </p>
+    <mn-input-field
+      formControlName="password"
+      [props]="passwordProps"
+    ></mn-input-field>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <button type="button" (click)="form.markAllAsTouched()">
+      Show All Validation Errors
+    </button>
+    <button type="button" (click)="form.reset()" style="margin-left: 10px;">
+      Reset Form
+    </button>
+  </div>
+</form>
+

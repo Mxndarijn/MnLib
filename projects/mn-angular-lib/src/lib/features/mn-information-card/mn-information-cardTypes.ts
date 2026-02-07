@@ -16,5 +16,5 @@ export interface MnInformationCardBaseData  {
   description: string;
 }
 
-
-
+export type MnInformationCardData<TExtra = unknown> =
+  MnInformationCardBaseData  & TExtra;
