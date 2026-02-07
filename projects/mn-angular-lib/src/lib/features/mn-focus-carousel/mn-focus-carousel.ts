@@ -21,7 +21,7 @@ export class MnFocusCarousel {
     focus: 'center',
     updateOnMove: true,
     cloneStatus: false,
-    gap: 10,
+    fixedWidth: 300,
     perPage: 5,
     breakpoints: {
       1024: { perPage: 5 },
