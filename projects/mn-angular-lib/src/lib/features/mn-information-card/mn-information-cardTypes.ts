@@ -1,23 +1,19 @@
 import { MnInformationCardVariants } from './mn-information-cardVariants';
 
 // TODO make global image type
-interface imageType {
+export interface MnImageType {
   id: number;
   url: string;
   alt?: string;
 }
 
-export interface MnInformationCardData {
+export interface MnInformationCardBaseData  {
+  id: number;
   bottomBorder?: MnInformationCardVariants['bottomBorder'];
   shadow?: MnInformationCardVariants['shadow'];
   textPosition?: MnInformationCardVariants['textPosition'];
-
   title: string;
   description: string;
-}
-
-export interface MnDefaultInformationCardData extends MnInformationCardData {
-  image: imageType;
 }
 
 

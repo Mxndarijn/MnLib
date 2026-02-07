@@ -1,5 +1,5 @@
 import {Component, HostBinding, Input} from '@angular/core';
-import {MnInformationCardData } from './mn-information-cardTypes';
+import {MnInformationCardBaseData} from './mn-information-cardTypes';
 import {mnInformationCardVariants} from './mn-information-cardVariants';
 import {NgClass} from '@angular/common';
 
@@ -11,21 +11,17 @@ import {NgClass} from '@angular/common';
   ],
   templateUrl: './mn-information-card.html',
 })
-export class MnInformationCard {
-  private _cardData!: MnInformationCardData
+export class MnInformationCard<TExtra = unknown> {
+  @Input({ required: true }) data!: MnInformationCardData<TExtra>;
 
-  @Input() set cardData(value: MnInformationCardData) {
-    this._cardData = value;
-  }
-
-  get cardData(): MnInformationCardData {
-    return this._cardData;
-  }
   get hostClasses(): string {
     return mnInformationCardVariants({
-      bottomBorder: this.cardData.bottomBorder,
-      shadow: this.cardData.shadow,
-      textPosition: this.cardData.textPosition,
+      bottomBorder: this.data.bottomBorder,
+      shadow: this.data.shadow,
+      textPosition: this.data.textPosition,
     });
   }
 }
+
+export type MnInformationCardData<TExtra = unknown> =
+  MnInformationCardBaseData  & TExtra;
