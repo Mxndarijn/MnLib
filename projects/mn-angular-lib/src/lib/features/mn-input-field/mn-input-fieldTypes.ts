@@ -49,17 +49,6 @@ export interface MnInputBaseProps {
   /** Type of input field (text, email, date, etc.) */
   type: MnInputType;
 
-  // ========== UI Properties ==========
-
-  /** Label text displayed above the input field */
-  label?: string;
-
-  /** Placeholder text shown inside the input when empty */
-  placeholder?: string;
-
-  /** ARIA label for screen readers (falls back to label if not provided) */
-  ariaLabel?: string;
-
   // ========== Styling/Variants ==========
 
   /** Size variant of the input field (default: 'md') */
@@ -110,6 +99,21 @@ export interface MnInputBaseProps {
    * Default: false (backwards compatible - show single error)
    */
   showAllErrors?: boolean;
+}
+
+/**
+ * Configuration for MnInputField resolved from MnConfigService.
+ * Contains UI properties that can ONLY be set via configuration.
+ */
+export interface MnInputFieldUIConfig {
+  /** Label text displayed above the input field */
+  label?: string;
+
+  /** Placeholder text shown inside the input when empty */
+  placeholder?: string;
+
+  /** ARIA label for screen readers (falls back to label if not provided) */
+  ariaLabel?: string;
 }
 
 /**

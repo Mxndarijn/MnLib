@@ -1,8 +1,8 @@
 <div class="flex flex-col" [class.is-fullwidth]="props.fullWidth">
   <!-- Label -->
-  @if (props.label) {
+  @if (uiConfig.label) {
     <label class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!" [attr.for]="resolvedId">
-      <p>{{ props.label }}</p>
+      <p>{{ uiConfig.label }}</p>
       @if (isRequired()) {
         <span class="text-red-500 ">*</span>
       }
@@ -14,8 +14,8 @@
     [id]="resolvedId"
     [attr.name]="resolvedName"
     [type]="props.type"
-    [attr.placeholder]="props.placeholder || null"
-    [attr.aria-label]="props.ariaLabel || props.label || null"
+    [attr.placeholder]="uiConfig.placeholder || null"
+    [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || null"
     [attr.aria-invalid]="showError || null"
     [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
     [disabled]="isDisabled"

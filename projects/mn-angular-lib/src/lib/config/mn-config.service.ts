@@ -66,6 +66,12 @@ export class MnConfigService {
       }
     }
 
+    console.debug(`[MnConfig] Resolving for ${componentName}`, {
+      sectionPath,
+      instanceId,
+      resolved,
+    });
+
     return resolved as T;
   }
 

@@ -5,13 +5,13 @@
   flexible error handling, and the new <strong>showAllErrors</strong> feature.
 </p>
 
-<form [formGroup]="form">
+<form [formGroup]="form" mn-section="root">
   <!-- Example 1: Default Behavior -->
   <div style="margin-bottom: 30px;">
     <h3>Example 1: Default Built-in Error Messages</h3>
     <p>
-      Uses built-in English error messages (translated from Dutch).
-      Shows only one error at a time (default behavior).
+      Uses built-in English error messages.
+      Label and Placeholder come from <code>defaults['mn-input-field']</code> in <code>mn-config.json5</code>.
     </p>
     <mn-input-field class="block w-[200px]"
       formControlName="name"
@@ -20,11 +20,11 @@
   </div>
 
   <!-- Example 2: Custom Messages, No Built-ins -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 2: Custom Error Messages Only</h3>
+  <div style="margin-bottom: 30px;" mn-section="section-a">
+    <h3>Example 2: Custom Error Messages & Section Override</h3>
     <p>
       <code>useBuiltInErrorMessages: false</code> - Only uses custom error messages.
-      Demonstrates complete control over error text.
+      Label and Placeholder come from <code>overrides['root']['section-a']['#mn-input-email']</code> because <code>props.id</code> is 'email'.
     </p>
     <mn-input-field
       formControlName="email"
