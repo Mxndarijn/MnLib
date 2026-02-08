@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { DemoPageComponent } from '../shared/demo-page.component';
 import { injectThemeSignal, MnThemeService, Test } from 'mn-angular-lib';
@@ -7,7 +7,7 @@ import { injectThemeSignal, MnThemeService, Test } from 'mn-angular-lib';
 @Component({
   selector: 'app-theme-demo',
   standalone: true,
-  imports: [CommonModule, FormsModule, DemoPageComponent, Test],
+  imports: [FormsModule, DemoPageComponent, Test],
   templateUrl: './theme-demo.component.html',
   styleUrl: './theme-demo.component.css'
 })

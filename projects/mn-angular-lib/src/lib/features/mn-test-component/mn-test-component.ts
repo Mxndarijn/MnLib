@@ -1,5 +1,5 @@
 import { Component, InjectionToken, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { provideMnComponentConfig } from '../../config/mn-component-config.providers';
 
 interface TestConfig {
@@ -12,7 +12,7 @@ export const MN_TEST_COMPONENT_CONFIG = new InjectionToken<TestConfig>('MN_TEST_
 @Component({
   selector: 'mn-test-component',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   providers: [
     provideMnComponentConfig<TestConfig>(MN_TEST_COMPONENT_CONFIG, 'test-component'),
   ],
