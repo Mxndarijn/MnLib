@@ -42,21 +42,21 @@ export const mnButtonVariants = tv({
 
   compoundVariants: [
     // Fill
-    { variant: 'fill', color: 'primary',   class: 'bg-blue-600 text-white hover:bg-blue-700' },
+    { variant: 'fill', color: 'primary',   class: 'bg-brand-600 text-white hover:bg-brand-700' },
     { variant: 'fill', color: 'secondary', class: 'bg-gray-600 text-white hover:bg-gray-700' },
     { variant: 'fill', color: 'danger',    class: 'bg-red-600 text-white hover:bg-red-700' },
     { variant: 'fill', color: 'warning',   class: 'bg-amber-500 text-black hover:bg-amber-600' },
     { variant: 'fill', color: 'success',   class: 'bg-green-600 text-white hover:bg-green-700' },
 
     // Outline
-    { variant: 'outline', color: 'primary',   class: 'border-blue-600 text-blue-600 hover:bg-blue-100' },
+    { variant: 'outline', color: 'primary',   class: 'border-brand-600 text-blue-600 hover:bg-brand-100' },
     { variant: 'outline', color: 'secondary', class: 'border-gray-600 text-gray-700 hover:bg-gray-100' },
     { variant: 'outline', color: 'danger',    class: 'border-red-600 text-red-600 hover:bg-red-100' },
     { variant: 'outline', color: 'warning',   class: 'border-amber-500 text-amber-600 hover:bg-amber-100' },
     { variant: 'outline', color: 'success',   class: 'border-green-600 text-green-600 hover:bg-green-100' },
 
     // Text
-    { variant: 'text', color: 'primary',   class: 'text-blue-600 hover:bg-blue-100' },
+    { variant: 'text', color: 'primary',   class: 'text-brand-600 hover:bg-brand-100' },
     { variant: 'text', color: 'secondary', class: 'text-gray-700 hover:bg-gray-100' },
     { variant: 'text', color: 'danger',    class: 'text-red-600 hover:bg-red-100' },
     { variant: 'text', color: 'warning',   class: 'text-amber-600 hover:bg-amber-100' },
