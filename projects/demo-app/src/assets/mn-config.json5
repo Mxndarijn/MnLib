@@ -3,6 +3,11 @@
     "test-component": {
       "text": "Hello from config!",
       "color": "red"
+    },
+    "mn-input-field": {
+      "placeholder": "Default placeholder from mn-config1",
+      "label": "Generic Input",
+      "ariaLabel": "Global accessible label"
     }
   },
   "overrides": {
@@ -10,6 +15,11 @@
       "section-a": {
         "#header-text": {
           "text": "Overridden config text!"
+        },
+        "#mn-input-email": {
+          "label": "Email Address",
+          "placeholder": "Enter your email",
+          "ariaLabel": "Your email address"
         }
       },
       "section-b": {

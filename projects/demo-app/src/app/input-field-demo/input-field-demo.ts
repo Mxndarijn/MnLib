@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { MnInputField, MnInputProps } from 'mn-angular-lib';
+import {MnInputField, MnInputProps, MnInstanceDirective, MnSectionDirective} from 'mn-angular-lib';
 
 /**
  * Custom validator: disallows the letter 'x' in the input value
@@ -22,7 +22,7 @@ function noXAllowedValidator(control: AbstractControl): ValidationErrors | null 
 @Component({
   selector: 'app-input-field-demo',
   standalone: true,
-  imports: [MnInputField, ReactiveFormsModule],
+  imports: [MnInputField, ReactiveFormsModule, MnSectionDirective],
   templateUrl: './input-field-demo.html',
 })
 export class InputFieldDemo {
@@ -45,17 +45,13 @@ export class InputFieldDemo {
   nameProps = {
     id: 'name',
     type: 'text',
-    label: 'Name',
-    placeholder: 'Enter your name',
   } satisfies MnInputProps;
 
   // Example 2: Custom error messages with built-ins disabled
   emailProps = {
     id: 'email',
     type: 'email',
-    label: 'Email Address',
     shadow: true,
-    placeholder: 'you@example.com',
     size: 'md',
     borderRadius: 'md',
     useBuiltInErrorMessages: false,
@@ -70,8 +66,6 @@ export class InputFieldDemo {
   usernameProps = {
     id: 'username',
     type: 'text',
-    label: 'Username (Priority Mode)',
-    placeholder: 'Choose a username',
     size: 'md',
     borderRadius: 'md',
     errorMessages: {
@@ -87,8 +81,6 @@ export class InputFieldDemo {
   passwordProps = {
     id: 'password',
     type: 'password',
-    label: 'Password (Show All Errors)',
-    placeholder: 'Create a strong password',
     size: 'md',
     borderRadius: 'md',
     showAllErrors: true, // NEW: Display all validation errors simultaneously

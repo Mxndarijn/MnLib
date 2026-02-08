@@ -1,10 +1,14 @@
-import {Component, Input, Optional, Self} from '@angular/core';
+import {Component, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
 import {NgClass} from '@angular/common';
-import {MnInputProps, MnErrorMessageData} from './mn-input-fieldTypes';
+import {MnInputProps, MnErrorMessageData, MnInputFieldUIConfig} from './mn-input-fieldTypes';
 import {AbstractControl, NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {pickAdapter} from './mn-input-field-adapters';
 import {mnInputFieldVariants} from './mn-input-fieldVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
+import {MnConfigService} from "../../config/mn-config.service";
+import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
+
+export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('MN_INPUT_FIELD_CONFIG');
 
 /**
  * MnInputField Component
@@ -43,9 +47,16 @@ import {MnErrorMessage} from '../mn-error-message/mn-error-message';
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-input-field.html',
 })
-export class MnInputField {
+export class MnInputField implements OnInit {
+  /** Resolved UI configuration for the input field */
+  protected uiConfig: MnInputFieldUIConfig = {};
+
   /** Configuration properties for the input field */
   @Input({ required: true }) props!: MnInputProps;
+
+  private readonly configService = inject(MnConfigService);
+  private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
+  private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
 
   /** Current raw string value of the input element */
   value: string | null = null;
@@ -81,6 +92,19 @@ export class MnInputField {
    */
   constructor(@Optional() @Self() public ngControl: NgControl) {
     if (this.ngControl) this.ngControl.valueAccessor = this;
+  }
+
+  ngOnInit() {
+    this.resolveConfig();
+  }
+
+  private resolveConfig() {
+    const instanceId = this.explicitInstanceId || `mn-input-${this.props.id}`;
+    this.uiConfig = this.configService.resolve<MnInputFieldUIConfig>(
+      'mn-input-field',
+      this.sectionPath,
+      instanceId
+    );
   }
 
   /**
