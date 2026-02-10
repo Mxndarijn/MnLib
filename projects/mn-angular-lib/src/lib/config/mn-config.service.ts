@@ -23,20 +23,34 @@ export class MnConfigService {
    * Consumers should typically call this via the APP_INITIALIZER helper.
    */
   async load(url: string): Promise<void> {
-    let json = await firstValueFrom(this.http.get<unknown>(url, { responseType: 'json' as const }));
-    if (typeof json === 'string') {
-      try {
-        json = JSON5.parse(json);
-      } catch {
-        console.warn(`[MnConfig] Failed to parse JSON from ${url}`, json);
-        json = {};
-      }
+    let text: string;
+
+    try {
+      text = await firstValueFrom(
+        this.http.get(url, { responseType: 'text' })
+      );
+    } catch (err) {
+      console.warn(`[MnConfig] Failed to load config from ${url}`, err);
+      this._config = { defaults: {}, overrides: {} };
+      return;
     }
+
+    let json: unknown;
+
+    try {
+      json = JSON5.parse(text);
+    } catch (err) {
+      console.warn(`[MnConfig] Failed to parse JSON5 from ${url}`, err, text);
+      json = {};
+    }
+
     const cfg = (isPlainObject(json) ? json : {}) as any;
-    const defaults = (isPlainObject(cfg.defaults) ? cfg.defaults : {}) as Record<string, unknown>;
+    const defaults = isPlainObject(cfg.defaults) ? cfg.defaults : {};
     const overrides = isPlainObject(cfg.overrides) ? cfg.overrides : cfg.overrides ?? {};
+
     this._config = { defaults, overrides };
   }
+
 
   /**
    * Resolve a configuration object for a component, optionally scoped to a section path
