@@ -12,6 +12,7 @@ export interface MnInformationCardBaseData  {
   bottomBorder?: MnInformationCardVariants['bottomBorder'];
   shadow?: MnInformationCardVariants['shadow'];
   textPosition?: MnInformationCardVariants['textPosition'];
+  borderRadius: MnInformationCardVariants['borderRadius'];
   title: string;
   description: string;
 }
