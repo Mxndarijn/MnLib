@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { MnConfigFile } from './mn-config.types';
+import JSON5 from 'json5';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return (
@@ -25,8 +26,9 @@ export class MnConfigService {
     let json = await firstValueFrom(this.http.get<unknown>(url, { responseType: 'json' as const }));
     if (typeof json === 'string') {
       try {
-        json = JSON.parse(json);
+        json = JSON5.parse(json);
       } catch {
+        console.warn(`[MnConfig] Failed to parse JSON from ${url}`, json);
         json = {};
       }
     }
