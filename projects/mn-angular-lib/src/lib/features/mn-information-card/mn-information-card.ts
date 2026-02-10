@@ -4,7 +4,7 @@ import {mnInformationCardVariants} from './mn-information-cardVariants';
 import {NgClass} from '@angular/common';
 
 @Component({
-  selector: 'lib-mn-information-card',
+  selector: 'mn-lib-information-card',
   standalone: true,
   imports: [
     NgClass

@@ -1,0 +1,56 @@
+<h2>MnTextarea Demo</h2>
+
+<p>
+  This demo showcases the MnTextarea component with configurable rows, cols,
+  resize behavior, and the same error handling features as MnInputField.
+</p>
+
+<form [formGroup]="form" mn-section="root">
+  <!-- Example 1: Basic Textarea -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 1: Basic Textarea (vertical resize, full width)</h3>
+    <p>
+      A simple required textarea with <code>rows: 4</code>, <code>resize: 'vertical'</code>,
+      and <code>fullWidth: true</code>.
+    </p>
+    <mn-lib-textarea
+      formControlName="description"
+      [props]="descriptionProps"
+    ></mn-lib-textarea>
+  </div>
+
+  <!-- Example 2: Show All Errors, No Resize -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 2: Show All Errors &amp; No Resize</h3>
+    <p>
+      <code>showAllErrors: true</code>, <code>resize: 'none'</code>, with shadow and larger size.
+      Try typing less than 10 characters to see multiple errors.
+    </p>
+    <mn-lib-textarea
+      formControlName="bio"
+      [props]="bioProps"
+    ></mn-lib-textarea>
+  </div>
+
+  <!-- Example 3: Priority Errors, Both Resize -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 3: Priority-Based Errors &amp; Both Resize</h3>
+    <p>
+      Uses <code>errorPriority</code> to control which error shows first.
+      <code>resize: 'both'</code> allows resizing in both directions.
+    </p>
+    <mn-lib-textarea
+      formControlName="notes"
+      [props]="notesProps"
+    ></mn-lib-textarea>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <button type="button" (click)="form.markAllAsTouched()">
+      Show All Validation Errors
+    </button>
+    <button type="button" (click)="form.reset()" style="margin-left: 10px;">
+      Reset Form
+    </button>
+  </div>
+</form>

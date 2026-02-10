@@ -3,7 +3,7 @@ import {NgOptimizedImage} from '@angular/common';
 import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
 
 @Component({
-  selector: 'lib-mn-dual-horizontal-image',
+  selector: 'mn-lib-dual-horizontal-image',
   standalone: true,
   imports: [
     NgOptimizedImage

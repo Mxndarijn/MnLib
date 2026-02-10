@@ -1,31 +1,29 @@
 <div class="flex flex-col h-full" [class.is-fullwidth]="props.fullWidth">
   <!-- Label -->
-  @if (uiConfig.label) {
+  @if (uiConfig.label || props.label) {
     <label class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!" [attr.for]="resolvedId">
-      <p>{{ uiConfig.label }}</p>
+      <p>{{ uiConfig.label || props.label }}</p>
       @if (isRequired()) {
         <span class="text-red-500 ">*</span>
       }
     </label>
   }
 
-  <!-- Input Element -->
-  <input
+  <!-- Textarea Element -->
+  <textarea
     [id]="resolvedId"
     [attr.name]="resolvedName"
-    [type]="props.type"
     [attr.placeholder]="uiConfig.placeholder || null"
     [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || null"
     [attr.aria-invalid]="showError || null"
     [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
     [disabled]="isDisabled"
-    [attr.min]="minAttr"
-    [attr.max]="maxAttr"
-    [value]="value ?? ''"
-    [ngClass]="inputClasses"
+    [attr.rows]="props.rows ?? null"
+    [attr.cols]="props.cols ?? null"
+    [ngClass]="textareaClasses"
     (input)="handleInput(($any($event.target)).value)"
     (blur)="handleBlur()"
-  />
+  >{{ value ?? '' }}</textarea>
 
   <!-- Error Messages -->
   @if (showError) {
@@ -39,7 +37,6 @@
     } @else {
       @if (errorMessage != null) {
         <lib-mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></lib-mn-error-message>
-
       }
     }
   }
