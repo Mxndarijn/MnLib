@@ -1,73 +1,72 @@
 import {Component, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
 import {NgClass} from '@angular/common';
-import {MnInputProps, MnErrorMessageData, MnInputFieldUIConfig} from './mn-input-fieldTypes';
-import {AbstractControl, NgControl, ValidationErrors, Validators} from '@angular/forms';
-import {pickAdapter} from './mn-input-field-adapters';
-import {mnInputFieldVariants} from './mn-input-fieldVariants';
+import {MnTextareaProps, MnTextareaErrorMessageData, MnTextareaUIConfig} from './mn-textareaTypes';
+import {NgControl, ValidationErrors, Validators} from '@angular/forms';
+import {mnTextareaVariants} from './mn-textareaVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 import {MnConfigService} from "../../config/mn-config.service";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
 
-export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('MN_INPUT_FIELD_CONFIG');
+export const MN_TEXTAREA_CONFIG = new InjectionToken<MnTextareaUIConfig>('MN_TEXTAREA_CONFIG');
 
 /**
- * MnInputField Component
+ * MnTextarea Component
  *
- * A flexible, accessible input field component that implements Angular's ControlValueAccessor
- * and Validator interfaces. Supports multiple input types, custom validation messages,
- * and configurable error display (single or multiple errors).
+ * A flexible, accessible textarea component that implements Angular's ControlValueAccessor
+ * and Validator interfaces. Works similarly to MnInputField but uses a textarea element,
+ * allowing users to set the height (rows), width (cols), and resize behavior.
  *
  * Features:
  * - Works with Angular Reactive Forms (FormControl, FormGroup)
- * - Supports standard and date/time input types
+ * - Configurable rows, cols, and resize behavior
  * - Built-in error messages with internationalization support
  * - Custom error messages per field
  * - Priority-based error display or show all errors
  * - Full accessibility (ARIA attributes)
- * - Type-safe adapter pattern for different input types
  *
  * @example
  * ```typescript
- * <mn-input-field
- *   formControlName="email"
+ * <mn-textarea
+ *   formControlName="description"
  *   [props]="{
- *     id: 'email',
- *     type: 'email',
- *     label: 'Email Address',
+ *     id: 'description',
+ *     rows: 5,
+ *     label: 'Description',
  *     size: 'md',
  *     borderRadius: 'md',
- *     errorMessages: { required: 'Email is required' }
+ *     resize: 'vertical',
+ *     errorMessages: { required: 'Description is required' }
  *   }"
- * ></mn-input-field>
+ * ></mn-textarea>
  * ```
  */
 @Component({
-  selector: 'mn-lib-input-field',
+  selector: 'mn-lib-textarea',
   standalone: true,
   imports: [NgClass, MnErrorMessage],
-  templateUrl: './mn-input-field.html',
+  templateUrl: './mn-textarea.html',
 })
-export class MnInputField implements OnInit {
-  /** Resolved UI configuration for the input field */
-  protected uiConfig: MnInputFieldUIConfig = {};
+export class MnTextarea implements OnInit {
+  /** Resolved UI configuration for the textarea */
+  protected uiConfig: MnTextareaUIConfig = {};
 
-  /** Configuration properties for the input field */
-  @Input({ required: true }) props!: MnInputProps;
+  /** Configuration properties for the textarea */
+  @Input({ required: true }) props!: MnTextareaProps;
 
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
 
-  /** Current raw string value of the input element */
+  /** Current raw string value of the textarea element */
   value: string | null = null;
 
-  /** Whether the input is disabled */
+  /** Whether the textarea is disabled */
   isDisabled = false;
 
   /** Callback function to notify Angular forms of value changes */
   private onChange: (val: any) => void = () => {};
 
-  /** Callback function to notify Angular forms when input is touched/blurred */
+  /** Callback function to notify Angular forms when textarea is touched/blurred */
   private onTouched: () => void = () => {};
 
   /**
@@ -75,13 +74,10 @@ export class MnInputField implements OnInit {
    * These are used when useBuiltInErrorMessages is true (default).
    * Can be overridden per-field using props.errorMessages.
    */
-  private readonly builtInErrorMessages: Record<string, MnErrorMessageData> = {
+  private readonly builtInErrorMessages: Record<string, MnTextareaErrorMessageData> = {
     required: 'This field is required',
-    email: 'Please enter a valid email address',
     minlength: (args: any) => `Minimum ${args.requiredLength} characters required`,
     maxlength: (args: any) => `Maximum ${args.requiredLength} characters allowed`,
-    mnMin: (args: any) => `Date/time must be from ${args.min} onwards`,
-    mnMax: (args: any) => `Date/time must be up to ${args.max}`,
   };
 
   /**
@@ -99,36 +95,27 @@ export class MnInputField implements OnInit {
   }
 
   private resolveConfig() {
-    const instanceId = this.explicitInstanceId || `mn-input-${this.props.id}`;
-    this.uiConfig = this.configService.resolve<MnInputFieldUIConfig>(
-      'mn-input-field',
+    const instanceId = this.explicitInstanceId || `mn-textarea-${this.props.id}`;
+    this.uiConfig = this.configService.resolve<MnTextareaUIConfig>(
+      'mn-textarea',
       this.sectionPath,
       instanceId
     );
   }
 
-  /**
-   * Gets the appropriate adapter based on the input type.
-   * Adapters handle type-specific formatting, parsing, and validation.
-   */
-  private get adapter() {
-    return pickAdapter(this.props.type);
-  }
-
   // ========== ControlValueAccessor Implementation ==========
 
   /**
-   * Writes a new value to the input element (called by Angular Forms).
-   * Formats the value using the type-specific adapter.
+   * Writes a new value to the textarea element (called by Angular Forms).
    *
-   * @param val - The value to write (type depends on input type)
+   * @param val - The value to write
    */
   writeValue(val: unknown): void {
-    this.value = this.adapter.format(val);
+    this.value = val != null ? String(val) : null;
   }
 
   /**
-   * Registers a callback function to be called when the input value changes.
+   * Registers a callback function to be called when the textarea value changes.
    *
    * @param fn - Callback function to notify Angular Forms of changes
    */
@@ -137,7 +124,7 @@ export class MnInputField implements OnInit {
   }
 
   /**
-   * Registers a callback function to be called when the input is touched/blurred.
+   * Registers a callback function to be called when the textarea is touched/blurred.
    *
    * @param fn - Callback function to notify Angular Forms of touch events
    */
@@ -146,9 +133,9 @@ export class MnInputField implements OnInit {
   }
 
   /**
-   * Sets the disabled state of the input element.
+   * Sets the disabled state of the textarea element.
    *
-   * @param isDisabled - Whether the input should be disabled
+   * @param isDisabled - Whether the textarea should be disabled
    */
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
@@ -157,65 +144,22 @@ export class MnInputField implements OnInit {
   // ========== Event Handlers ==========
 
   /**
-   * Handles input events from the input element.
-   * Parses the raw string value and notifies Angular Forms.
+   * Handles input events from the textarea element.
+   * Notifies Angular Forms of the new value.
    *
-   * @param raw - Raw string value from the input element
+   * @param raw - Raw string value from the textarea element
    */
   handleInput(raw: string): void {
     this.value = raw;
-    this.onChange(this.adapter.parse(raw));
+    this.onChange(raw);
   }
 
   /**
-   * Handles blur events from the input element.
-   * Notifies Angular Forms that the input has been touched.
+   * Handles blur events from the textarea element.
+   * Notifies Angular Forms that the textarea has been touched.
    */
   handleBlur(): void {
     this.onTouched();
-  }
-
-  // ========== Validator Implementation ==========
-
-  /**
-   * Validates the control using the type-specific adapter.
-   * Called by Angular Forms during validation.
-   *
-   * @param control - The AbstractControl to validate
-   * @returns ValidationErrors if invalid, null if valid
-   */
-  validate(control: AbstractControl): ValidationErrors | null {
-    return this.adapter.validate(this.props, control, this.value);
-  }
-
-  // ========== Template Attribute Getters ==========
-
-  /**
-   * Gets all DOM attributes from the adapter.
-   * These are input-type-specific attributes (min, max, step, inputmode).
-   */
-  get domAttrs() {
-    return this.adapter.attrs(this.props);
-  }
-
-  /** Min attribute for date/time/number inputs */
-  get minAttr() {
-    return this.domAttrs.min ?? null;
-  }
-
-  /** Max attribute for date/time/number inputs */
-  get maxAttr() {
-    return this.domAttrs.max ?? null;
-  }
-
-  /** Step attribute for number/date/time inputs */
-  get stepAttr() {
-    return this.domAttrs.step ?? null;
-  }
-
-  /** Inputmode attribute for mobile keyboard optimization */
-  get inputmodeAttr() {
-    return this.domAttrs.inputmode ?? null;
   }
 
   // ========== Error Handling ==========
@@ -245,7 +189,6 @@ export class MnInputField implements OnInit {
    * @returns The error key to display
    */
   private pickErrorKey(errors: ValidationErrors): string {
-    // If priority is specified, use the first matching error from the priority list
     if (this.props.errorPriority) {
       for (const key of this.props.errorPriority) {
         if (errors[key] !== undefined) {
@@ -253,7 +196,6 @@ export class MnInputField implements OnInit {
         }
       }
     }
-    // Otherwise, use the first error key
     return Object.keys(errors)[0];
   }
 
@@ -264,16 +206,14 @@ export class MnInputField implements OnInit {
 
   /**
    * Resolves a single error message for a specific error key.
-   * Checks custom messages, built-in messages, and fallback in order.
    *
-   * @param errorKey - The error key (e.g., 'required', 'email')
+   * @param errorKey - The error key (e.g., 'required', 'minlength')
    * @param errors - All validation errors on the control
    * @returns The resolved error message string
    */
   private resolveErrorMessageForKey(errorKey: string, errors: ValidationErrors): string {
     const errorArgs = errors[errorKey];
 
-    // Priority: custom > built-in > fallback > default
     const customMsg = this.props.errorMessages?.[errorKey];
     const useBuiltIn = this.props.useBuiltInErrorMessages !== false;
     const builtInMsg = useBuiltIn ? this.builtInErrorMessages[errorKey] : undefined;
@@ -281,7 +221,6 @@ export class MnInputField implements OnInit {
 
     const msgDef = customMsg ?? builtInMsg ?? fallbackMsg ?? 'Invalid input';
 
-    // If the message is a function, call it with error arguments
     if (typeof msgDef === 'function') {
       return msgDef(errorArgs, errors);
     }
@@ -290,7 +229,6 @@ export class MnInputField implements OnInit {
 
   /**
    * Gets all error messages for the current control state.
-   * Returns an array of error messages (used when showAllErrors is true).
    *
    * @returns Array of error message strings
    */
@@ -304,7 +242,6 @@ export class MnInputField implements OnInit {
 
   /**
    * Gets a single error message for the current control state.
-   * Uses errorPriority to determine which error to show (when showAllErrors is false).
    *
    * @returns Single error message string, or null if no errors
    */
@@ -318,26 +255,27 @@ export class MnInputField implements OnInit {
 
   // ========== Resolved Properties ==========
 
-  /** Resolved ID for the input element */
+  /** Resolved ID for the textarea element */
   get resolvedId(): string {
     return this.props.id;
   }
 
-  /** Resolved name attribute for the input element */
+  /** Resolved name attribute for the textarea element */
   get resolvedName(): string | null {
     return this.props?.name ?? null;
   }
 
   /**
    * Computes the CSS classes from tailwind-variants based on the props.
-   * Returns the variant classes for styling the input element.
+   * Returns the variant classes for styling the textarea element.
    */
-  get inputClasses(): string {
-    return mnInputFieldVariants({
+  get textareaClasses(): string {
+    return mnTextareaVariants({
       size: this.props.size,
       borderRadius: this.props.borderRadius,
       shadow: this.props.shadow,
       fullWidth: this.props.fullWidth,
+      resize: this.props.resize,
     });
   }
 }

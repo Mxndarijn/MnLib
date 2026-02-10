@@ -13,10 +13,10 @@
       Uses built-in English error messages.
       Label and Placeholder come from <code>defaults['mn-input-field']</code> in <code>mn-config.json5</code>.
     </p>
-    <mn-input-field class="block w-[200px]"
+    <mn-lib-input-field class="block w-[200px]"
       formControlName="name"
       [props]="nameProps"
-    ></mn-input-field>
+    ></mn-lib-input-field>
   </div>
 
   <!-- Example 2: Custom Messages, No Built-ins -->
@@ -26,10 +26,10 @@
       <code>useBuiltInErrorMessages: false</code> - Only uses custom error messages.
       Label and Placeholder come from <code>overrides['root']['section-a']['#mn-input-email']</code> because <code>props.id</code> is 'email'.
     </p>
-    <mn-input-field
+    <mn-lib-input-field
       formControlName="email"
       [props]="emailProps"
-    ></mn-input-field>
+    ></mn-lib-input-field>
   </div>
 
   <!-- Example 3: Priority-Based Error Display -->
@@ -40,10 +40,10 @@
       Custom validator (noXAllowed) + function-based error messages.
       Try entering 'x' or less than 3 characters.
     </p>
-    <mn-input-field
+    <mn-lib-input-field
       formControlName="username"
       [props]="usernameProps"
-    ></mn-input-field>
+    ></mn-lib-input-field>
   </div>
 
   <!-- Example 4: Show All Errors -->
@@ -54,10 +54,10 @@
       Perfect for complex validation rules where users need to see all requirements at once.
       Try entering a weak password to see multiple errors appear.
     </p>
-    <mn-input-field
+    <mn-lib-input-field
       formControlName="password"
       [props]="passwordProps"
-    ></mn-input-field>
+    ></mn-lib-input-field>
   </div>
 
   <div style="margin-top: 30px;">

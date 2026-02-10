@@ -1,6 +1,6 @@
 <div class="flex flex-row gap-x-10">
   @for (card of cards; track card.id) {
-    <lib-mn-information-card class="bg-red-50 w-48 h-84" [data]="card">
+    <mn-lib-information-card class="bg-red-50 w-48 h-84" [data]="card">
       <div header>
         @switch (card.kind) {
           @case ('one-image') {
@@ -19,6 +19,6 @@
       <div footer>
         <button>{{ card.description }}</button>
       </div>
-    </lib-mn-information-card>
+    </mn-lib-information-card>
   }
 </div>

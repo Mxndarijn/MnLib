@@ -11,7 +11,7 @@ export const MN_LIB_DUAL_HORIZONTAL_IMAGE = new InjectionToken<MnDualHorizontalI
 
 
 @Component({
-  selector: 'lib-mn-dual-horizontal-image',
+  selector: 'mn-lib-dual-horizontal-image',
   standalone: true,
   imports: [
     NgOptimizedImage

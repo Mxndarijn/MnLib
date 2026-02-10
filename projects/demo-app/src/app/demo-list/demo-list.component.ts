@@ -30,6 +30,7 @@ export class DemoListComponent {
     { title: 'Config Demo', path: '/demos/config', description: 'mn-config with section scoping, component defaults, and instance overrides.' },
     { title: 'DualHorizontalImage Demo', path: '/demos/dual-horizontal-image-demo', description: 'Two images shown horizontally.' },
     { title: 'Information card Demo', path: '/demos/information-card-demo', description: 'Information card with title, description and optional images.' },
-    {title: 'Input field demo', path: '/demos/input-field-demo', description: 'Input field demo'}
+    {title: 'Input field demo', path: '/demos/input-field-demo', description: 'Input field demo'},
+    {title: 'Textarea demo', path: '/demos/textarea-demo', description: 'Textarea with configurable rows, cols, resize, and error handling.'}
   ];
 }
