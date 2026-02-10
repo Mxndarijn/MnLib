@@ -1,6 +1,14 @@
-import {Component, Input} from '@angular/core';
+import {Component, inject, InjectionToken, Input} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
+import {provideMnComponentConfig} from '../../config';
+
+export interface MnDualHorizontalImageConfig {
+  images?: MnDualHorizontalImageTypes[]
+}
+
+export const MN_LIB_DUAL_HORIZONTAL_IMAGE = new InjectionToken<MnDualHorizontalImageConfig>('MN_LIB_DUAL_HORIZONTAL_IMAGE');
+
 
 @Component({
   selector: 'lib-mn-dual-horizontal-image',
@@ -8,20 +16,14 @@ import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
   imports: [
     NgOptimizedImage
   ],
+  providers: [
+    provideMnComponentConfig<MnDualHorizontalImageConfig>(MN_LIB_DUAL_HORIZONTAL_IMAGE, 'mn-dual-horizontal-image'),
+  ],
   templateUrl: './mn-dual-horizontal-image.html',
   host: {
     class: 'block'
   }
 })
 export class MnDualHorizontalImage {
-  private _images: MnDualHorizontalImageTypes[] = [];
-
-  @Input()
-  set images(value: MnDualHorizontalImageTypes[]) {
-    this._images = (value ?? []).slice(0, 2);
-  }
-
-  get images(): MnDualHorizontalImageTypes[] {
-    return this._images;
-  }
+  protected readonly componentConfig = inject(MN_LIB_DUAL_HORIZONTAL_IMAGE);
 }
