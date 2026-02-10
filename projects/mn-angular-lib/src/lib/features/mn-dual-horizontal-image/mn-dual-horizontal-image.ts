@@ -9,6 +9,9 @@ import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
     NgOptimizedImage
   ],
   templateUrl: './mn-dual-horizontal-image.html',
+  host: {
+    class: 'block'
+  }
 })
 export class MnDualHorizontalImage {
   private _images: MnDualHorizontalImageTypes[] = [];

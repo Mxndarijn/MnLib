@@ -19,6 +19,7 @@ export class MnInformationCard<TExtra = unknown> {
       bottomBorder: this.data.bottomBorder,
       shadow: this.data.shadow,
       textPosition: this.data.textPosition,
+      borderRadius: this.data.borderRadius
     });
   }
 }

@@ -22,6 +22,7 @@ export class InformationCardDemo {
       id: 1,
       description: 'This is card 1.',
       bottomBorder: true,
+      borderRadius: 'none',
       shadow: true,
       kind: 'one-image',
       image: {
@@ -36,6 +37,7 @@ export class InformationCardDemo {
       title: 'Card 2',
       description: 'This is card 2.',
       kind: 'two-images',
+      borderRadius: 'none',
       images: [
         {
           id: 1,

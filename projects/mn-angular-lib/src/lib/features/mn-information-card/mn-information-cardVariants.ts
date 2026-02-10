@@ -7,7 +7,7 @@ export const mnInformationCardVariants = tv({
       true: 'border-b border-b-2 border-brand-500',
     },
     shadow: {
-      true: 'shadow-lg',
+      true: 'shadow-xl',
     },
     textPosition: {
       left: 'text-left',
