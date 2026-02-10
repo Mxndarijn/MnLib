@@ -1,31 +1,37 @@
 {
   "defaults": {
     "test-component": {
-      "text": "Hello from config!",
-      "color": "red"
+      text: "Hello from config!",
+      color: "red"
     },
     "mn-input-field": {
-      "placeholder": "Default placeholder from mn-config1",
-      "label": "Generic Input",
-      "ariaLabel": "Global accessible label"
+      placeholder: "Default placeholder from mn-config1",
+      label: "Generic Input",
+      ariaLabel: "Global accessible label"
+    },
+    "mn-dual-horizontal-image": {
+      images: [
+        { id: '1', url: 'https://www.wildkogel-arena.at/site/assets/files/17949/wildkogelarena_2024-7237.1920x0-sp.jpg', alt: 'Image 1' },
+        { id: '2', url: 'https://6hsport15.wordpress.com/wp-content/uploads/2016/01/skic3abn.jpg?w=617&h=411', alt: 'Image 2' }
+      ]
     }
   },
   "overrides": {
-    "root": {
+    root: {
       "section-a": {
         "#header-text": {
           "text": "Overridden config text!"
         },
         "#mn-input-email": {
-          "label": "Email Address",
-          "placeholder": "Enter your email",
-          "ariaLabel": "Your email address"
+          label: "Email Address",
+          placeholder: "Enter your email",
+          ariaLabel: "Your email address"
         }
       },
       "section-b": {
         "test-component": {
-          "color": "blue",
-          "text": "Overridden config 1!"
+          color: "blue",
+          text: "Overridden config 1!"
         }
       }
     }
