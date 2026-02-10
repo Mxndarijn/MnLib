@@ -42,7 +42,7 @@ export const mnButtonVariants = tv({
 
   compoundVariants: [
     // Fill
-    { variant: 'fill', color: 'primary',   class: 'bg-brand-600 text-white hover:bg-brand-700' },
+    { variant: 'fill', color: 'primary',   class: 'bg-brand-600 text-black hover:bg-brand-700' },
     { variant: 'fill', color: 'secondary', class: 'bg-gray-600 text-white hover:bg-gray-700' },
     { variant: 'fill', color: 'danger',    class: 'bg-red-600 text-white hover:bg-red-700' },
     { variant: 'fill', color: 'warning',   class: 'bg-amber-500 text-black hover:bg-amber-600' },
