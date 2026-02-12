@@ -6,12 +6,12 @@ import { MnConfigService } from './mn-config.service';
  * during application bootstrap. The consuming application is responsible for providing
  * HttpClient (e.g., via HttpClientModule or provideHttpClient()).
  */
-export function provideMnConfig(url: string): Provider[] {
+export function provideMnConfig(url: string, debugMode = false): Provider[] {
   return [
     {
       provide: APP_INITIALIZER,
       multi: true,
-      useFactory: (svc: MnConfigService) => () => svc.load(url),
+      useFactory: (svc: MnConfigService) => () => svc.load(url, debugMode),
       deps: [MnConfigService],
     },
   ];

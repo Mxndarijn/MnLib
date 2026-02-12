@@ -15,6 +15,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 @Injectable({ providedIn: 'root' })
 export class MnConfigService {
   private _config: MnConfigFile | null = null;
+  private _debugMode = false;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -22,7 +23,8 @@ export class MnConfigService {
    * Load the configuration JSON from the provided URL and cache it in memory.
    * Consumers should typically call this via the APP_INITIALIZER helper.
    */
-  async load(url: string): Promise<void> {
+  async load(url: string, debugMode = false): Promise<void> {
+    this._debugMode = debugMode;
     let text: string;
 
     try {
@@ -82,11 +84,13 @@ export class MnConfigService {
       }
     }
 
-    console.debug(`[MnConfig] Resolving for ${componentName}`, {
-      sectionPath,
-      instanceId,
-      resolved,
-    });
+    if (this._debugMode) {
+      console.debug(`[MnConfig] Resolving for ${componentName}`, {
+        sectionPath,
+        instanceId,
+        resolved,
+      });
+    }
 
     return resolved as T;
   }
