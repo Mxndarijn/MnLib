@@ -1,7 +1,16 @@
-<div class="flex flex-col h-full w-full -space-y-5 md:-space-y-10 lg:-space-y-5">
-  @for (image of componentConfig.images; track image.id) {
-    <div class="w-[75%] h-1/2 overflow-hidden rounded-3xl shadow-md md:w-[65%] lg:w-[80%] first:self-start last:self-end last:mb-4">
-      <img [ngSrc]="image.url" width="150" height="100" class="size-full object-cover" [alt]="image.alt" />
+<div class="flex flex-col w-full -space-y-5 md:-space-y-10 lg:-space-y-5">
+@for (image of componentConfig.images; track image.id) {
+  <div
+    class="relative aspect-[16/6]  w-[75%] md:w-[65%] lg:w-[80%]
+             overflow-hidden rounded-3xl shadow-md
+             first:self-start last:self-end last:mb-4"
+  >
+    <img
+    [ngSrc]="image.url"
+    fill
+    class="object-cover"
+    [alt]="image.alt"
+  />
     </div>
   } @empty {
     <p>No images found</p>
