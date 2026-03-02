@@ -1,4 +1,5 @@
 import {MnAlertKind} from './mn-alert.tokens';
+import {MnAlertVariants} from './mn-alertVariants';
 
 export type MnAlertId = string;
 
@@ -11,4 +12,5 @@ export interface MnAlert {
   duration?: number;
   meta?: Record<string, unknown>;
   kind: MnAlertKind;
+  variant?: MnAlertVariants['variant'];
 }

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import {MnAlertStore} from '../mn-alert.store';
 import {MnAlert} from '../mn-alert.types';
+import {mnAlertVariants} from '../mn-alertVariants';
 
 export interface MnAlertTemplateContext {
   $implicit: MnAlert;
@@ -20,7 +21,7 @@ export interface MnAlertTemplateContext {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MnAlertOutletComponent {
-  @Input({ required: true }) template!: TemplateRef<MnAlertTemplateContext>;
+  @Input() template?: TemplateRef<MnAlertTemplateContext>;
 
   private store = inject(MnAlertStore);
   alerts$: Observable<MnAlert[]> = this.store.alerts$;
@@ -32,6 +33,10 @@ export class MnAlertOutletComponent {
   }
 
   trackById = (_: number, a: MnAlert) => a.id;
+
+  getAlertClasses(a: MnAlert) {
+    return mnAlertVariants({ kind: a.kind, variant: a.variant });
+  }
 
   contextFor(a: MnAlert) {
     return {

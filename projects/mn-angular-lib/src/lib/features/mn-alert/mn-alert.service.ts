@@ -3,6 +3,7 @@ import { Injectable, Inject, Optional } from '@angular/core';
 import { MnAlertStore } from './mn-alert.store';
 import { MnAlert, MnAlertId } from './mn-alert.types';
 import { MN_ALERT_CONFIG, DEFAULT_MN_ALERT_CONFIG, MnAlertConfig, MnAlertKind } from './mn-alert.tokens';
+import { MnAlertVariants } from './mn-alertVariants';
 
 export interface MnShowInput {
   title: string;
@@ -12,6 +13,7 @@ export interface MnShowInput {
   cssClass?: string;
   meta?: Record<string, unknown>;
   kind: MnAlertKind;
+  variant?: MnAlertVariants['variant'];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -56,7 +58,8 @@ export class MnAlertService {
       icon: input.icon,
       cssClass: input.cssClass,
       meta: input.meta,
-      kind: input.kind
+      kind: input.kind,
+      variant: input.variant
     };
     return this.store.show(this.cfg.finalize(a as MnAlert));
   }
@@ -101,7 +104,8 @@ export class MnAlertService {
 
     const cssClass = extra?.cssClass ?? this.cfg.cssClasses[kind];
     const icon = (extra?.icon ?? this.cfg.icons[kind]) as unknown;
+    const variant = extra?.variant;
 
-    return this.show({ title, subTitle, duration: duration as number, cssClass, icon, meta: extra?.meta , kind: kind});
+    return this.show({ title, subTitle, duration: duration as number, cssClass, icon, meta: extra?.meta , kind: kind, variant});
   }
 }

@@ -5,7 +5,6 @@
     <button mnButton variant="outline" color="primary" (click)="show('success')">Success</button>
     <button mnButton variant="outline" color="primary" (click)="show('error')">Error</button>
     <button mnButton variant="outline" color="primary" (click)="show('warning')">Warning</button>
-    <button mnButton variant="outline" color="primary" (click)="show('error')">Error</button>
     <button mnButton variant="outline" color="primary" (click)="showCustomDuration()">Custom Duration</button>
     <button mnButton variant="outline" color="primary" (click)="showCustomClass()">Custom CSS Class</button>
     <button mnButton variant="outline" color="primary" style="margin-left:auto" (click)="clearAll()">Clear All</button>
@@ -13,38 +12,27 @@
 
   <section class="inputs">
     <div class="field">
-      <label>Title</label>
-      <input type="text" [(ngModel)]="titleInput" placeholder="Title (optional)" />
+      <label class="text-sm font-medium text-gray-700">Title</label>
+      <input type="text" [(ngModel)]="titleInput" placeholder="Title (optional)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
     </div>
     <div class="field">
-      <label>Subtitle</label>
-      <input type="text" [(ngModel)]="subTitleInput" placeholder="Subtitle (optional)" />
+      <label class="text-sm font-medium text-gray-700">Subtitle</label>
+      <input type="text" [(ngModel)]="subTitleInput" placeholder="Subtitle (optional)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
     </div>
     <div class="field">
-      <label>Custom duration (ms)</label>
-      <input type="number" min="0" [(ngModel)]="durationInputMs" placeholder="e.g. 2000" />
+      <label class="text-sm font-medium text-gray-700">Custom duration (ms)</label>
+      <input type="number" min="0" [(ngModel)]="durationInputMs" placeholder="e.g. 2000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
     </div>
   </section>
 
-  <!--
-    The outlet renders alerts emitted by the store/service using your custom template.
-    Template context provides: $implicit (alert), alert, dismiss().
-  -->
-  <ng-template #alertTpl let-a let-dismiss="dismiss">
-    <div class="demo-alert" [ngClass]="{
-      'kind-success': a.kind === 'success',
-      'kind-info': a.kind === 'info',
-      'kind-warning': a.kind === 'warning',
-      'kind-error': a.kind === 'error'
-    }">
-      <div class="title">{{ a.title }}</div>
-      @if (a.subTitle) {
-        <div class="subtitle">{{ a.subTitle }}</div>
-      }
-      <span class="spacer"></span>
-      <button class="close" (click)="dismiss()">✕</button>
+  <div class="mt-8">
+    <h3 class="text-lg font-medium mb-4">Variants Demo</h3>
+    <div class="flex gap-2">
+      <button mnButton (click)="alerts.info('Soft Variant', 'This is the default soft variant', { variant: 'soft' })">Soft (Default)</button>
+      <button mnButton (click)="alerts.success('Fill Variant', 'This is the fill variant', { variant: 'fill' })">Fill</button>
+      <button mnButton (click)="alerts.warning('Outline Variant', 'This is the outline variant', { variant: 'outline' })">Outline</button>
     </div>
-  </ng-template>
+  </div>
 
-  <mn-alert-outlet [template]="alertTpl" />
+  <mn-alert-outlet />
 </demo-page>
