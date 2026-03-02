@@ -1,13 +1,15 @@
 <demo-page [title]="'Alerts Demo'">
-<!--  TODO fix buttons-->
-  <div class="controls" demo-actions>
-    <button mnButton variant="outline" color="primary" (click)="show('info')">Info</button>
-    <button mnButton variant="outline" color="primary" (click)="show('success')">Success</button>
-    <button mnButton variant="outline" color="primary" (click)="show('error')">Error</button>
-    <button mnButton variant="outline" color="primary" (click)="show('warning')">Warning</button>
-    <button mnButton variant="outline" color="primary" (click)="showCustomDuration()">Custom Duration</button>
-    <button mnButton variant="outline" color="primary" (click)="showCustomClass()">Custom CSS Class</button>
-    <button mnButton variant="outline" color="primary" style="margin-left:auto" (click)="clearAll()">Clear All</button>
+  <div class="controls mb-6" demo-actions>
+    <div class="flex flex-wrap gap-2 items-center">
+      <button mnButton [data]="{ variant: 'outline', color: 'primary' }" (click)="show('info')">Info</button>
+      <button mnButton [data]="{ variant: 'outline', color: 'success' }" (click)="show('success')">Success</button>
+      <button mnButton [data]="{ variant: 'outline', color: 'danger' }" (click)="show('error')">Error</button>
+      <button mnButton [data]="{ variant: 'outline', color: 'warning' }" (click)="show('warning')">Warning</button>
+      <div class="h-6 w-px bg-gray-200 mx-1"></div>
+      <button mnButton [data]="{ variant: 'text', color: 'secondary' }" (click)="showCustomDuration()">Custom Duration</button>
+      <button mnButton [data]="{ variant: 'text', color: 'secondary' }" (click)="showCustomClass()">Custom CSS Class</button>
+      <button mnButton [data]="{ variant: 'fill', color: 'danger' }" class="ml-auto" (click)="clearAll()">Clear All</button>
+    </div>
   </div>
 
   <section class="inputs">
@@ -25,12 +27,21 @@
     </div>
   </section>
 
-  <div class="mt-8">
-    <h3 class="text-lg font-medium mb-4">Variants Demo</h3>
-    <div class="flex gap-2">
-      <button mnButton (click)="alerts.info('Soft Variant', 'This is the default soft variant', { variant: 'soft' })">Soft (Default)</button>
-      <button mnButton (click)="alerts.success('Fill Variant', 'This is the fill variant', { variant: 'fill' })">Fill</button>
-      <button mnButton (click)="alerts.warning('Outline Variant', 'This is the outline variant', { variant: 'outline' })">Outline</button>
+  <div class="mt-8 border-t pt-6">
+    <h3 class="text-lg font-medium mb-4">Alert Style Variants</h3>
+    <div class="flex flex-wrap gap-3">
+      <div class="flex flex-col gap-2">
+        <span class="text-xs text-gray-500 font-medium px-1 uppercase tracking-wider">Soft (Default)</span>
+        <button mnButton [data]="{ variant: 'fill', color: 'primary' }" (click)="alerts.info('Soft Variant', 'This is the default soft variant', { variant: 'soft' })">Show Info (Soft)</button>
+      </div>
+      <div class="flex flex-col gap-2">
+        <span class="text-xs text-gray-500 font-medium px-1 uppercase tracking-wider">Fill</span>
+        <button mnButton [data]="{ variant: 'outline', color: 'success' }" (click)="alerts.success('Fill Variant', 'This is the fill variant', { variant: 'fill' })">Show Success (Fill)</button>
+      </div>
+      <div class="flex flex-col gap-2">
+        <span class="text-xs text-gray-500 font-medium px-1 uppercase tracking-wider">Outline</span>
+        <button mnButton [data]="{ variant: 'outline', color: 'warning' }" (click)="alerts.warning('Outline Variant', 'This is the outline variant', { variant: 'outline' })">Show Warning (Outline)</button>
+      </div>
     </div>
   </div>
 

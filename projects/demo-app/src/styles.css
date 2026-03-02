@@ -1,6 +1,21 @@
 /* Global styles for the demo app */
 /* Import the library CSS variables so we can use --mn-primary etc. */
 @import '../../mn-angular-lib/src/lib/styles/index.css';
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50:  #ECFEFF;
+  --color-brand-100: #CFFAFE;
+  --color-brand-200: #A5F3FC;
+  --color-brand-300: #67E8F9;
+  --color-brand-400: #22D3EE;
+  --color-brand-500: #14B8A6;
+  --color-brand-600: #0D9488;
+  --color-brand-700: #0F766E;
+  --color-brand-800: #115E59;
+  --color-brand-900: #134E4A;
+}
+
 
 :root {
   --mn-radius: 0.375rem;

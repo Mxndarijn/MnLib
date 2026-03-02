@@ -1,14 +1,15 @@
 /* Default theme styles */
-:root {
-  /* Brand palette */
-  --mn-color-primary: #0d6efd;
-  --mn-color-secondary: #6c757d;
-  --mn-color-success: #198754;
-  --mn-color-danger: #dc3545;
-  --mn-color-warning: #ffc107;
-  --mn-color-info: #0dcaf0;
+@import "tailwindcss";
 
-  /* Text tokens */
-  --mn-text: #212529; /* default foreground text */
-  --mn-text-on-colored: #ffffff; /* text on solid/colored backgrounds */
+@theme {
+  --color-brand-50:  #F5F3FF;
+  --color-brand-100: #EDE9FE;
+  --color-brand-200: #DDD6FE;
+  --color-brand-300: #C4B5FD;
+  --color-brand-400: #A78BFA;
+  --color-brand-500: #8B5CF6; /* hoofd paars */
+  --color-brand-600: #7C3AED;
+  --color-brand-700: #6D28D9;
+  --color-brand-800: #5B21B6;
+  --color-brand-900: #4C1D95;
 }
