@@ -1,57 +1,62 @@
 import {HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 
-/** Represents a network error where no response was received from the server. */
+/**
+ * Represents a network error where no response was received from the server.
+ *
+ * Used as a sentinel value for `ApiStatus` when the request failed
+ * before reaching the server (e.g. timeout, DNS failure, or offline).
+ */
 export const NETWORK_ERROR_STATUS = 0 as const;
 
 /**
  * Represents the numeric status of an API call.
- * - A positive number — the HTTP status code (e.g. 400, 404, 500).
+ *
+ * Possible values:
+ * - A positive number — the HTTP status code (e.g. 200, 400, 404, 500).
  * - `0` — a network error (no response received, e.g. timeout or offline).
  * - `null` — status is unknown or not yet determined.
  */
 export type ApiStatus = number | null;
 
 /**
- * A structured representation of an API error, capturing all relevant
- * details for logging, display, and retry logic.
+ * A structured representation of an API error.
+ *
+ * Captures all relevant details — status, message, validation errors,
+ * and retry information — so consumers can log, display, or act on
+ * failures without inspecting the raw HTTP response.
  */
 export interface ApiError {
-  /** The HTTP error status or network error indicator. */
   status: ApiStatus;
-  /** A readable error message suitable for display. */
   message: string;
-  /** Additional error details, if available. */
   details?: unknown;
-  /** The raw error message returned by the backend, if any. */
   backendMessage?: string;
-  /** Field-level validation errors keyed by field name. */
   validationErrors?: Record<string, string[]>;
-  /** The request URL that produced the error. */
   url?: string | null;
-  /** The response headers associated with the error. */
   headers?: HttpHeaders;
-  /** The original error object before transformation. */
   original: HttpErrorResponse | Error;
-  /** Whether the failed request can be retried. */
   retryable: boolean;
-  /** ISO timestamp of when the error occurred. */
   timestamp: string;
 }
 
 /**
- * Metadata associated with a successful API response.
+ * Metadata associated with an API result.
+ *
+ * Attached to both `SuccessResult` and `FailureResult` to provide
+ * transport-level details such as the HTTP status code, response
+ * headers, and the final URL after any redirects.
  */
 export interface ResultMeta {
-  /** The numeric HTTP status code (e.g. 200, 201). */
   statusCode?: number;
-  /** The response headers. */
   headers?: HttpHeaders;
-  /** The final response URL (may differ from the request URL after redirects). */
   url?: string;
 }
 
 /**
  * Represents a successful API result containing the response data.
+ *
+ * Discriminated by `ok: true`. Use `result.ok` to narrow the union
+ * before accessing `data`.
+ *
  * @template T The type of the response data.
  */
 export interface SuccessResult<T> {
@@ -62,6 +67,9 @@ export interface SuccessResult<T> {
 
 /**
  * Represents a failed API result containing the structured error.
+ *
+ * Discriminated by `ok: false`. Use `result.ok` to narrow the union
+ * before accessing `error`.
  */
 export interface FailureResult {
   ok: false;
@@ -71,6 +79,7 @@ export interface FailureResult {
 
 /**
  * A discriminated union representing either a successful or failed API result.
+ *
  * Use `result.ok` to narrow the type:
  * ```ts
  * if (result.ok) {
@@ -79,15 +88,31 @@ export interface FailureResult {
  *   console.error(result.error.message);
  * }
  * ```
+ *
  * @template T The type of the response data on success.
  */
 export type Result<T> = SuccessResult<T> | FailureResult;
 
-/** A JavaScript primitive value. */
+/**
+ * A JavaScript primitive value.
+ *
+ * Used as the building block for query parameter values.
+ */
 export type Primitive = string | number | boolean | null | undefined;
 
-/** A value that can be used as a query parameter — a single primitive or an array of primitives. */
+/**
+ * A value that can be used as a query parameter.
+ *
+ * Either a single primitive or an array of primitives.
+ * Array values are appended as multiple entries for the same key.
+ */
 export type QueryValue = Primitive | Primitive[];
 
-/** A record of query parameter key-value pairs. */
+/**
+ * A record of query parameter key-value pairs.
+ *
+ * Passed to CRUD service methods and converted to `HttpParams`
+ * before the request is sent. `null` and `undefined` values
+ * are silently skipped during conversion.
+ */
 export type QueryParams = Record<string, QueryValue>;
