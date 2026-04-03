@@ -1,0 +1,223 @@
+<div class="p-8 max-w-7xl mx-auto">
+  <div class="mb-12">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">Modal Demo</h1>
+    <p class="text-lg text-gray-500">Showcase of all modal variants</p>
+  </div>
+
+  <section class="flex flex-col gap-y-10">
+    <!-- Confirmation Modals -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Confirmation Modals</h2>
+      <div class="flex flex-row gap-x-2 flex-wrap">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openConfirmationModal()"
+        >
+          Open Confirmation
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'danger', size: 'md', variant: 'fill' }"
+          (click)="openDangerConfirmation()"
+        >
+          Open Danger Confirmation
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Modal -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Form Modal</h2>
+      <div class="flex flex-row gap-x-2">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openFormModal()"
+        >
+          Open Form Modal
+        </button>
+      </div>
+    </div>
+
+    <!-- Wizard Modal -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Wizard Modal</h2>
+      <div class="flex flex-row gap-x-2">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openWizardModal()"
+        >
+          Open Wizard
+        </button>
+      </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Custom Template Modal</h2>
+      <div class="flex flex-row gap-x-2">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openCustomModal()"
+        >
+          Open Custom Modal
+        </button>
+      </div>
+    </div>
+
+    <!-- Multiple Footer Actions -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Multiple Footer Actions</h2>
+      <div class="flex flex-row gap-x-2">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openMultiActionModal()"
+        >
+          Open Multi-Action Modal
+        </button>
+      </div>
+    </div>
+
+    <!-- Polling Modal -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Polling / Async Modal</h2>
+      <div class="flex flex-row gap-x-2">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openPollingModal()"
+        >
+          Open Polling Modal
+        </button>
+      </div>
+    </div>
+
+    <!-- Read-Only / Field Groups -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Read-Only & Field Groups</h2>
+      <div class="flex flex-row gap-x-2">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openReadOnlyGroupedModal()"
+        >
+          Open Weapon Info (Read-Only)
+        </button>
+      </div>
+    </div>
+
+    <!-- Multi-Select Table -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Multi-Select Table Modal</h2>
+      <div class="flex flex-row gap-x-2">
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openMultiSelectTableModal()"
+        >
+          Open Table Select Modal
+        </button>
+      </div>
+    </div>
+
+    <!-- Size Variations -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Modal Sizes</h2>
+      <div class="flex flex-row gap-x-2 flex-wrap">
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+          (click)="openConfirmationModal()"
+        >
+          Small (SM)
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+          (click)="openFormModal()"
+        >
+          Medium (MD)
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+          (click)="openLargeModal()"
+        >
+          Large (LG)
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+          (click)="openLargeModal()"
+        >
+          Extra Large (XL)
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+          (click)="openFullScreenModal()"
+        >
+          Full Screen
+        </button>
+      </div>
+    </div>
+
+    <!-- Result Display -->
+    <div class="flex flex-col gap-y-4" *ngIf="lastResult">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Last Modal Result</h2>
+      <div class="p-4 bg-gray-100 rounded-lg border border-gray-300 font-mono text-sm text-gray-700">
+        {{ lastResult }}
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Custom Template for Custom Modal -->
+<ng-template #customTemplate let-modalRef="modalRef">
+  <div class="py-4">
+    <p class="mb-4 text-gray-600">Below is a table of users loaded in a custom modal template.</p>
+
+    <table class="w-full border-collapse text-sm">
+      <thead>
+        <tr>
+          <th class="px-4 py-3 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-700 text-xs uppercase tracking-wider">#</th>
+          <th class="px-4 py-3 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-700 text-xs uppercase tracking-wider">Name</th>
+          <th class="px-4 py-3 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-700 text-xs uppercase tracking-wider">Email</th>
+          <th class="px-4 py-3 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-700 text-xs uppercase tracking-wider">Role</th>
+          <th class="px-4 py-3 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-700 text-xs uppercase tracking-wider">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of sampleUsers; let i = index" class="hover:bg-gray-50">
+          <td class="px-4 py-3 border-b border-gray-200">{{ i + 1 }}</td>
+          <td class="px-4 py-3 border-b border-gray-200">{{ user.name }}</td>
+          <td class="px-4 py-3 border-b border-gray-200">{{ user.email }}</td>
+          <td class="px-4 py-3 border-b border-gray-200">{{ user.role }}</td>
+          <td class="px-4 py-3 border-b border-gray-200">
+            <span
+              class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800': user.status === 'Active',
+                'bg-red-100 text-red-800': user.status === 'Inactive'
+              }"
+            >{{ user.status }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-4 flex justify-end">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="modalRef.close('Selected users')"
+      >
+        Done
+      </button>
+    </div>
+  </div>
+</ng-template>

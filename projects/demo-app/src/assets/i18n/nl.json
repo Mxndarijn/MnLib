@@ -1,0 +1,15 @@
+{
+  "demo.title": "Taal Demo",
+  "demo.subtitle": "Deze pagina demonstreert de MnLanguageService functies.",
+  "demo.greeting": "Hallo, {{name}}!",
+  "demo.welcome": "Welkom bij het MnLib taalsysteem.",
+  "demo.items_count": "Je hebt {{count}} items in je winkelwagen.",
+  "demo.standalone.title": "Standalone Gebruik",
+  "demo.standalone.description": "De taalservice werkt zonder de config service.",
+  "demo.pipe.title": "Pipe Gebruik",
+  "demo.pipe.description": "Gebruik de mnTranslate pipe direct in templates.",
+  "demo.config.title": "Config Integratie",
+  "demo.config.description": "Config waarden met $translate markers worden automatisch vertaald.",
+  "demo.switch_locale": "Taal Wisselen",
+  "demo.current_locale": "Huidige taal: {{locale}}"
+}

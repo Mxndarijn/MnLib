@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { MnConfigFile } from './mn-config.types';
+import { MnLanguageService } from '../language/mn-language.service';
+import { isTranslatable, MnLanguageConfig } from '../language/mn-language.types';
 import JSON5 from 'json5';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -16,6 +18,8 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 export class MnConfigService {
   private _config: MnConfigFile | null = null;
   private _debugMode = false;
+
+  private readonly lang = inject(MnLanguageService);
 
   constructor(private readonly http: HttpClient) {}
 
@@ -51,6 +55,18 @@ export class MnConfigService {
     const overrides = isPlainObject(cfg.overrides) ? cfg.overrides : cfg.overrides ?? {};
 
     this._config = { defaults, overrides };
+
+    // Bootstrap language service from config if a "language" section is present.
+    // This avoids circular dependency: config reads raw language settings and
+    // pushes them into the language service (language service never imports config).
+    const langCfg = cfg.language;
+    if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
+      const lc = langCfg as unknown as MnLanguageConfig;
+      this.lang.configure(lc.urlPattern);
+      const localesToLoad = lc.preload ?? [lc.defaultLocale];
+      await Promise.all(localesToLoad.map(l => this.lang.loadLocale(l)));
+      await this.lang.setLocale(lc.defaultLocale);
+    }
   }
 
 
@@ -92,7 +108,7 @@ export class MnConfigService {
       });
     }
 
-    return resolved as T;
+    return this.resolveTranslatables(resolved) as T;
   }
 
   /**
@@ -107,6 +123,24 @@ export class MnConfigService {
       if (node === undefined) return undefined;
     }
     return node;
+  }
+
+  /**
+   * Recursively walk a resolved config object and replace any `{ $translate: "key" }` markers
+   * with their translated values from MnLanguageService.
+   */
+  private resolveTranslatables(obj: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (isTranslatable(value)) {
+        out[key] = this.lang.translate(value.$translate, value.params);
+      } else if (isPlainObject(value)) {
+        out[key] = this.resolveTranslatables(value as Record<string, unknown>);
+      } else {
+        out[key] = value;
+      }
+    }
+    return out;
   }
 
   /**

@@ -49,6 +49,12 @@ export interface MnInputBaseProps {
   /** Type of input field (text, email, date, etc.) */
   type: MnInputType;
 
+  /** Label text (overrides uiConfig.label when provided) */
+  label?: string;
+
+  /** Placeholder text (overrides uiConfig.placeholder when provided) */
+  placeholder?: string;
+
   // ========== Styling/Variants ==========
 
   /** Size variant of the input field (default: 'md') */

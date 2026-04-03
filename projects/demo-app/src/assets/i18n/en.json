@@ -1,0 +1,15 @@
+{
+  "demo.title": "Language Demo",
+  "demo.subtitle": "This page demonstrates the MnLanguageService features.",
+  "demo.greeting": "Hello, {{name}}!",
+  "demo.welcome": "Welcome to the MnLib language system.",
+  "demo.items_count": "You have {{count}} items in your cart.",
+  "demo.standalone.title": "Standalone Usage",
+  "demo.standalone.description": "The language service works without the config service.",
+  "demo.pipe.title": "Pipe Usage",
+  "demo.pipe.description": "Use the mnTranslate pipe directly in templates.",
+  "demo.config.title": "Config Integration",
+  "demo.config.description": "Config values with $translate markers are auto-resolved.",
+  "demo.switch_locale": "Switch Language",
+  "demo.current_locale": "Current locale: {{locale}}"
+}

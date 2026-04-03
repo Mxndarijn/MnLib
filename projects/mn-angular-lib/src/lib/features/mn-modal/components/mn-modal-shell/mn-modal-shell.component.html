@@ -1,0 +1,89 @@
+<div class="modal-backdrop absolute inset-0 bg-black/50 animate-[fadeIn_0.2s_ease-in-out]" *ngIf="showBackdrop" (click)="onBackdropClick()"></div>
+
+<div
+  class="modal-container relative bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col animate-[slideIn_0.2s_ease-in-out]"
+  [ngClass]="containerSizeClass"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="config.title ? 'mn-modal-title' : null"
+  [attr.aria-describedby]="config.description ? 'mn-modal-description' : null"
+  tabindex="-1"
+  (click)="$event.stopPropagation()"
+>
+  <div class="flex items-center justify-between p-6 border-b border-gray-200">
+    <div class="flex flex-col gap-0.5">
+      <h2 class="m-0 text-xl font-semibold text-gray-900" *ngIf="config.title" id="mn-modal-title">{{ config.title }}</h2>
+      <p class="m-0 text-sm text-gray-500 font-normal" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+    </div>
+    <button
+      *ngIf="showCloseButton"
+      class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 p-0 w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-gray-100 hover:text-gray-900"
+      (click)="onCloseButtonClick()"
+      aria-label="Close modal"
+    >
+      ×
+    </button>
+  </div>
+  <p class="m-0 px-6 text-sm text-gray-500 leading-relaxed" *ngIf="config.description" id="mn-modal-description">{{ config.description }}</p>
+
+  <div class="flex-1 overflow-y-auto p-6">
+    <mn-wizard-body
+      *ngIf="config.kind === ModalKind.WIZARD"
+      [config]="asWizard(config)"
+      [modalRef]="asAny(modalRef)"
+    ></mn-wizard-body>
+
+    <mn-form-body
+      *ngIf="config.kind === ModalKind.FORM"
+      [config]="asForm(config)"
+      [modalRef]="asAny(modalRef)"
+    ></mn-form-body>
+
+    <mn-confirmation-body
+      *ngIf="config.kind === ModalKind.CONFIRMATION"
+      [config]="asConfirmation(config)"
+      [modalRef]="asAny(modalRef)"
+    ></mn-confirmation-body>
+
+    <mn-custom-body-host
+      *ngIf="config.kind === ModalKind.CUSTOM"
+      [config]="asCustom(config)"
+      [modalRef]="asAny(modalRef)"
+    ></mn-custom-body-host>
+  </div>
+
+  <!-- Custom Footer Actions -->
+  <div *ngIf="hasCustomFooterActions" class="flex gap-3 p-6 border-t border-gray-200">
+    <ng-container *ngFor="let action of leftFooterActions">
+      <button
+        mnButton
+        [data]="{
+          variant: getActionButtonVariant(action.style),
+          color: getActionButtonColor(action.style),
+          disabled: action.disabled
+        }"
+        [disabled]="action.disabled"
+        (click)="onFooterAction(action)"
+      >
+        {{ action.label }}
+      </button>
+    </ng-container>
+
+    <div class="flex-1"></div>
+
+    <ng-container *ngFor="let action of rightFooterActions">
+      <button
+        mnButton
+        [data]="{
+          variant: getActionButtonVariant(action.style),
+          color: getActionButtonColor(action.style),
+          disabled: action.disabled
+        }"
+        [disabled]="action.disabled"
+        (click)="onFooterAction(action)"
+      >
+        {{ action.label }}
+      </button>
+    </ng-container>
+  </div>
+</div>

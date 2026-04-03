@@ -7,6 +7,9 @@ import {DualHorizontalImageDemo} from './dual-horizontal-image-demo/dual-horizon
 import {InformationCardDemo} from './information-card-demo/information-card-demo';
 import {InputFieldDemo} from './input-field-demo/input-field-demo';
 import {TextareaDemo} from './textarea-demo/textarea-demo';
+import {ModalDemo} from './modal-demo/modal-demo';
+import {TableDemo} from './table-demo/table-demo';
+import {LanguageDemo} from './language-demo/language-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -17,6 +20,9 @@ export const routes: Routes = [
   { path: 'demos/dual-horizontal-image-demo', component: DualHorizontalImageDemo, title: 'DualImageHorizontal Demo' },
   { path: 'demos/information-card-demo', component: InformationCardDemo, title: 'Information card Demo' },
   {path: 'demos/input-field-demo', component: InputFieldDemo, title: 'Input Field Demo' },
-  {path: 'demos/textarea-demo', component: TextareaDemo, title: 'Textarea Demo' }
+  {path: 'demos/textarea-demo', component: TextareaDemo, title: 'Textarea Demo' },
+  {path: 'demos/modal-demo', component: ModalDemo, title: 'Modal Demo' },
+  {path: 'demos/table-demo', component: TableDemo, title: 'Table Demo' },
+  {path: 'demos/language-demo', component: LanguageDemo, title: 'Language Demo' }
   // Future demos can be added here following the same pattern
 ];

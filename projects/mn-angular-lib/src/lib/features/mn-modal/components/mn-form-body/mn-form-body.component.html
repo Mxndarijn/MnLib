@@ -1,0 +1,393 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
+  <!-- Shared field rendering template (must be inside form for formControlName) -->
+  <ng-template #fieldTemplate let-rowField>
+    <ng-container [ngSwitch]="rowField.field.kind">
+      <div *ngSwitchCase="FieldKind.TEXT">
+        <mn-lib-input-field
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            type: 'text',
+            label: asField(rowField.field).label,
+            placeholder: asField(rowField.field).placeholder
+          })"
+        ></mn-lib-input-field>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.NUMBER">
+        <mn-lib-input-field
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            type: 'number',
+            label: asField(rowField.field).label,
+            placeholder: asField(rowField.field).placeholder
+          })"
+        ></mn-lib-input-field>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.PASSWORD">
+        <mn-lib-input-field
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            type: 'password',
+            label: asField(rowField.field).label,
+            placeholder: asField(rowField.field).placeholder
+          })"
+        ></mn-lib-input-field>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.SELECT" class="flex flex-col">
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-gray-700" [for]="asKey(rowField.field.key)">
+          {{ asField(rowField.field).label }}
+          <span *ngIf="hasRequiredValidator(rowField.field)" class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <select
+            [id]="asKey(rowField.field.key)"
+            [formControlName]="asKey(rowField.field.key)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-base text-gray-900 bg-white transition-all appearance-none pr-8 focus:outline-none focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10 select-arrow"
+            [class.opacity-50]="isFieldLoading(asKey(rowField.field.key))"
+          >
+            <option value="" disabled selected hidden>
+              {{ isFieldLoading(asKey(rowField.field.key)) ? labels.loading : labels.selectPlaceholder }}
+            </option>
+            <option
+              *ngFor="let option of getFieldOptions(rowField.field)"
+              [value]="option.value"
+              [disabled]="option.state === 'disabled'"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+          <div *ngIf="isFieldLoading(asKey(rowField.field.key))" class="absolute right-8 top-1/2 -translate-y-1/2">
+            <div class="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
+        </div>
+        <div
+          *ngIf="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          class="text-red-500 text-xs pl-2 pt-1"
+        >
+          This field is required
+        </div>
+        <div *ngIf="getFieldError(asKey(rowField.field.key))" class="text-red-500 text-xs pl-2 pt-1">
+          {{ getFieldError(asKey(rowField.field.key)) }}
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.CHECKBOX">
+        <mn-lib-checkbox
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            label: asField(rowField.field).label
+          })"
+        ></mn-lib-checkbox>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.DATE">
+        <mn-lib-input-field
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            type: 'date',
+            label: asField(rowField.field).label,
+            placeholder: asField(rowField.field).placeholder,
+            startDate: asField(rowField.field).minDate,
+            endDate: asField(rowField.field).maxDate
+          })"
+        ></mn-lib-input-field>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.DATETIME">
+        <mn-lib-datetime
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            label: asField(rowField.field).label,
+            placeholder: asField(rowField.field).placeholder,
+            mode: asField(rowField.field).mode || 'datetime-local',
+            min: asField(rowField.field).min,
+            max: asField(rowField.field).max,
+            step: asField(rowField.field).step
+          })"
+        ></mn-lib-datetime>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.TEXTAREA">
+        <mn-lib-textarea
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            label: asField(rowField.field).label,
+            rows: asField(rowField.field).rows || 4,
+            resize: 'vertical'
+          })"
+        ></mn-lib-textarea>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.MULTI_SELECT">
+        <div *ngIf="isFieldLoading(asKey(rowField.field.key))" class="flex items-center gap-2 py-2 text-sm text-gray-500">
+          <div class="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+          Loading options...
+        </div>
+        <mn-lib-multi-select
+          *ngIf="!isFieldLoading(asKey(rowField.field.key))"
+          [formControlName]="asKey(rowField.field.key)"
+          [props]="asAny({
+            id: asKey(rowField.field.key),
+            label: asField(rowField.field).label,
+            options: getFieldOptions(rowField.field),
+            searchable: asField(rowField.field).searchable,
+            searchPlaceholder: asField(rowField.field).searchPlaceholder,
+            maxSelections: asField(rowField.field).maxSelections
+          })"
+        ></mn-lib-multi-select>
+        <div *ngIf="getFieldError(asKey(rowField.field.key))" class="text-red-500 text-xs pl-2 pt-1">
+          {{ getFieldError(asKey(rowField.field.key)) }}
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.MULTI_SELECT_TABLE" class="flex flex-col gap-1">
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-gray-700">
+          {{ asField(rowField.field).label }}
+          <span *ngIf="hasRequiredValidator(rowField.field)" class="text-red-500">*</span>
+        </label>
+        <mn-table
+          [dataSource]="tableDataSources[asKey(rowField.field.key)]"
+          (selectionChange)="onTableSelectionChange(rowField.field, $event)"
+        ></mn-table>
+        <div
+          *ngIf="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          class="text-red-500 text-xs pl-2 pt-1"
+        >
+          This field is required
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.SINGLE_SELECT_TABLE" class="flex flex-col gap-1">
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-gray-700">
+          {{ asField(rowField.field).label }}
+          <span *ngIf="hasRequiredValidator(rowField.field)" class="text-red-500">*</span>
+        </label>
+        <mn-table
+          [dataSource]="tableDataSources[asKey(rowField.field.key)]"
+          (selectionChange)="onTableSelectionChange(rowField.field, $event)"
+        ></mn-table>
+        <div
+          *ngIf="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          class="text-red-500 text-xs pl-2 pt-1"
+        >
+          This field is required
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.COLOR" class="flex flex-col gap-1">
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-gray-700">
+          {{ asField(rowField.field).label }}
+          <span *ngIf="hasRequiredValidator(rowField.field)" class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center gap-3">
+          <input
+            type="color"
+            class="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer p-0.5"
+            [value]="getColorValue(rowField.field)"
+            [disabled]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
+            (input)="onColorChange(rowField.field, $event)"
+          />
+          <span class="text-sm text-gray-600 font-mono">{{ getColorValue(rowField.field) }}</span>
+        </div>
+        <div *ngIf="asField(rowField.field).swatches" class="flex gap-1.5 mt-1">
+          <button
+            *ngFor="let swatch of asField(rowField.field).swatches"
+            type="button"
+            class="w-6 h-6 rounded-md border border-gray-300 cursor-pointer transition-transform hover:scale-110"
+            [style.background-color]="swatch"
+            [class.ring-2]="getColorValue(rowField.field) === swatch"
+            [class.ring-blue-500]="getColorValue(rowField.field) === swatch"
+            (click)="setColorFromSwatch(rowField.field, swatch)"
+          ></button>
+        </div>
+        <div
+          *ngIf="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          class="text-red-500 text-xs pl-2 pt-1"
+        >
+          This field is required
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.RATING" class="flex flex-col gap-1">
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-gray-700">
+          {{ asField(rowField.field).label }}
+          <span *ngIf="hasRequiredValidator(rowField.field)" class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center gap-1">
+          <button
+            *ngFor="let star of getRatingRange(rowField.field)"
+            type="button"
+            class="text-2xl cursor-pointer transition-colors focus:outline-none"
+            [class.text-yellow-400]="star <= getRatingValue(rowField.field)"
+            [class.text-gray-300]="star > getRatingValue(rowField.field)"
+            [disabled]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
+            (click)="setRating(rowField.field, star)"
+          >
+            &#9733;
+          </button>
+          <span class="text-sm text-gray-500 ml-2">{{ getRatingValue(rowField.field) }} / {{ asField(rowField.field).max || 5 }}</span>
+        </div>
+        <div
+          *ngIf="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          class="text-red-500 text-xs pl-2 pt-1"
+        >
+          This field is required
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.SLIDER" class="flex flex-col gap-1">
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-gray-700">
+          {{ asField(rowField.field).label }}
+          <span *ngIf="hasRequiredValidator(rowField.field)" class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center gap-3">
+          <input
+            type="range"
+            class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            [attr.min]="asField(rowField.field).min ?? 0"
+            [attr.max]="asField(rowField.field).max ?? 100"
+            [attr.step]="asField(rowField.field).step ?? 1"
+            [value]="getSliderValue(rowField.field)"
+            [disabled]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
+            (input)="onSliderChange(rowField.field, $event)"
+          />
+          <span *ngIf="asField(rowField.field).showValue !== false" class="text-sm text-gray-600 min-w-[3rem] text-right">
+            {{ getSliderValue(rowField.field) }}{{ asField(rowField.field).unit || '' }}
+          </span>
+        </div>
+        <div class="flex justify-between text-xs text-gray-400 px-1">
+          <span>{{ asField(rowField.field).min ?? 0 }}</span>
+          <span>{{ asField(rowField.field).max ?? 100 }}</span>
+        </div>
+        <div
+          *ngIf="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          class="text-red-500 text-xs pl-2 pt-1"
+        >
+          This field is required
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.FILE" class="flex flex-col gap-1">
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-gray-700">
+          {{ asField(rowField.field).label }}
+          <span *ngIf="hasRequiredValidator(rowField.field)" class="text-red-500">*</span>
+        </label>
+        <div
+          class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center transition-colors hover:border-blue-400 hover:bg-blue-50/30"
+          [class.border-red-300]="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          [class.opacity-50]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
+        >
+          <input
+            type="file"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            [attr.accept]="asField(rowField.field).accept || null"
+            [attr.multiple]="asField(rowField.field).multiple || null"
+            [disabled]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
+            (change)="onFileChange(rowField.field, $event)"
+          />
+          <div class="flex flex-col items-center gap-2">
+            <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            <p class="text-sm text-gray-500">{{ labels.fileUploadPrompt }}</p>
+            <p *ngIf="asField(rowField.field).accept" class="text-xs text-gray-400">Accepted: {{ asField(rowField.field).accept }}</p>
+            <p *ngIf="asField(rowField.field).maxSize" class="text-xs text-gray-400">Max size: {{ formatFileSize(asField(rowField.field).maxSize) }}</p>
+          </div>
+        </div>
+        <!-- Selected files list -->
+        <div *ngIf="getSelectedFiles(asKey(rowField.field.key)).length > 0" class="flex flex-col gap-1 mt-2">
+          <div *ngFor="let file of getSelectedFiles(asKey(rowField.field.key)); let i = index" class="flex items-center justify-between px-3 py-1.5 bg-gray-50 rounded-lg text-sm">
+            <span class="text-gray-700 truncate">{{ file.name }} ({{ formatFileSize(file.size) }})</span>
+            <button type="button" class="text-gray-400 hover:text-red-500 ml-2 cursor-pointer" (click)="removeFile(asKey(rowField.field.key), i)">&times;</button>
+          </div>
+        </div>
+        <div
+          *ngIf="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
+          class="text-red-500 text-xs pl-2 pt-1"
+        >
+          {{ getFileError(rowField.field) }}
+        </div>
+      </div>
+
+      <div *ngSwitchCase="FieldKind.CUSTOM">
+        <ng-container
+          mnCustomFieldHost
+          [component]="asField(rowField.field).component"
+          [inputs]="asField(rowField.field).inputs"
+          [formControlName]="asKey(rowField.field.key)"
+        ></ng-container>
+      </div>
+
+      <div *ngSwitchDefault>
+      </div>
+    </ng-container>
+
+    <!-- Show cross-field error below any field that has one -->
+    <div
+      *ngIf="getFieldError(asKey(rowField.field.key)) && rowField.field.kind !== FieldKind.SELECT && rowField.field.kind !== FieldKind.MULTI_SELECT"
+      class="text-red-500 text-xs pl-2 pt-1"
+    >
+      {{ getFieldError(asKey(rowField.field.key)) }}
+    </div>
+  </ng-template>
+
+  <!-- Field Groups (sections with headers) -->
+  <div *ngIf="fieldGroups.length > 0" class="flex flex-col gap-6">
+    <div *ngFor="let group of fieldGroups" class="flex flex-col gap-4" [style.display]="isGroupVisible(group) ? '' : 'none'">
+      <div class="border-b border-gray-200 pb-2">
+        <h3 class="text-base font-semibold text-gray-900">{{ group.title }}</h3>
+        <p *ngIf="group.description" class="text-sm text-gray-500 mt-0.5">{{ group.description }}</p>
+      </div>
+      <div *ngFor="let row of group.rows" class="grid gap-4" [style.grid-template-columns]="getGridColumns(row)">
+        <div *ngFor="let rowField of row.fields" class="flex flex-col gap-2" [style.grid-column]="getGridSpan(rowField)" [style.display]="isFieldVisible(rowField.field) ? '' : 'none'">
+          <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: rowField }"></ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standard rows (no groups) -->
+  <div class="flex flex-col gap-4" *ngIf="fieldGroups.length === 0">
+    <div *ngFor="let row of rows" class="grid gap-4" [style.grid-template-columns]="getGridColumns(row)">
+      <div *ngFor="let rowField of row.fields" class="flex flex-col gap-2" [style.grid-column]="getGridSpan(rowField)" [style.display]="isFieldVisible(rowField.field) ? '' : 'none'">
+        <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: rowField }"></ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form-level errors (not tied to a specific field) -->
+  <div *ngIf="formErrors['_form']" class="text-red-500 text-sm px-2 py-1 bg-red-50 rounded-md">
+    {{ formErrors['_form'] }}
+  </div>
+
+  <div class="flex gap-3 pt-4 border-t border-gray-200" *ngIf="!hideFooter">
+    <button
+      mnButton
+      type="button"
+      [data]="{ variant: 'outline', color: 'secondary' }"
+      (click)="modalRef.dismiss(ModalCloseReason.CANCELLED)"
+    >
+      {{ labels.cancel }}
+    </button>
+
+    <div class="flex-1"></div>
+
+    <button
+      mnButton
+      type="submit"
+      [data]="{ variant: 'fill', color: 'primary', disabled: form.invalid || isSubmitting }"
+      [disabled]="form.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? labels.submitting : labels.submit }}
+    </button>
+  </div>
+</form>

@@ -1,0 +1,91 @@
+<div class="flex flex-col gap-6">
+  <div class="flex gap-2 pb-4 border-b border-gray-200">
+    <div
+      *ngFor="let step of visibleSteps; let i = index"
+      class="flex items-center gap-2 flex-1"
+      [class.active]="step.id === currentStepId"
+      [class.complete]="visitedStepIds.includes(step.id) && step.id !== currentStepId"
+      [class.cursor-pointer]="isFreeFlow && canNavigateToStep(step)"
+      (click)="isFreeFlow ? goToStep(step) : null"
+    >
+      <div
+        class="w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-all text-sm"
+        [ngClass]="{
+          'bg-blue-500 text-white': step.id === currentStepId,
+          'bg-green-500 text-white': visitedStepIds.includes(step.id) && step.id !== currentStepId,
+          'bg-gray-200 text-gray-500': !visitedStepIds.includes(step.id) && step.id !== currentStepId
+        }"
+      >{{ i + 1 }}</div>
+      <div
+        class="text-sm"
+        [ngClass]="{
+          'text-gray-900 font-semibold': step.id === currentStepId,
+          'text-gray-500': step.id !== currentStepId
+        }"
+      >{{ step.title }}</div>
+    </div>
+  </div>
+
+  <div class="min-h-48">
+    <ng-container *ngFor="let step of config.steps">
+      <div [style.display]="step.id === currentStepId ? 'block' : 'none'">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ step.title }}</h3>
+        <div class="text-gray-700">
+          <!-- Form step -->
+          <mn-form-body
+            *ngIf="stepFormConfigs[step.id]"
+            [config]="stepFormConfigs[step.id]"
+            [modalRef]="asAny(modalRef)"
+            [hideFooter]="true"
+          ></mn-form-body>
+
+          <!-- Text body -->
+          <div *ngIf="!stepFormConfigs[step.id] && isTextBody(step)">
+            {{ step.body }}
+          </div>
+
+          <!-- Dynamic content container for component/template bodies -->
+          <ng-container #dynamicContainer></ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Wizard-level errors (from onBeforeComplete) -->
+  <div *ngIf="wizardErrors && (wizardErrors | keyvalue).length > 0" class="flex flex-col gap-1 px-2 py-2 bg-red-50 rounded-md">
+    <div *ngFor="let err of wizardErrors | keyvalue" class="text-red-500 text-sm">
+      {{ err.value }}
+    </div>
+  </div>
+
+  <div class="flex gap-3 pt-4 border-t border-gray-200">
+    <button
+      mnButton
+      [data]="{ variant: 'outline', color: 'secondary' }"
+      (click)="back()"
+    >
+      {{ canGoBack ? labels.back : labels.close }}
+    </button>
+
+    <div class="flex-1"></div>
+
+    <button
+      *ngIf="!isLastStep"
+      mnButton
+      [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid }"
+      (click)="next()"
+    >
+      {{ labels.next }}
+    </button>
+
+    <button
+      *ngIf="isLastStep"
+      mnButton
+      [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid || isCompleting }"
+      [disabled]="!isCurrentStepValid || isCompleting"
+      (click)="complete()"
+    >
+      {{ isCompleting ? labels.completing : labels.complete }}
+    </button>
+  </div>
+</div>

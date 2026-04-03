@@ -1,0 +1,101 @@
+import {TemplateRef} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
+
+// ── Pagination Strategy ──
+export interface PaginationStrategy {
+  hasMoreRows: boolean;
+  loadMore: () => Promise<void>;
+  reset?: () => void;
+}
+
+export interface CursorPaginationStrategy extends PaginationStrategy {
+  endCursor?: string;
+}
+
+export interface OffsetPaginationStrategy extends PaginationStrategy {
+  currentPage: number;
+  pageSize: number;
+  totalItems?: number;
+}
+
+// ── Row Action ──
+export interface TableRowAction<T> {
+  icon?: string;
+  label?: string;
+  cssClass?: string;
+  onClick: (row: T) => void;
+  isVisible?: (row: T) => boolean;
+  isDisabled?: (row: T) => boolean;
+}
+
+// ── Column Sort Type ──
+export enum ColumnSortType {
+  ALPHABETICAL = 'ALPHABETICAL',
+  NUMERICAL = 'NUMERICAL',
+  DATE = 'DATE',
+  NONE = 'NONE',
+}
+
+// ── Sort State ──
+export interface SortState {
+  columnKey: string;
+  direction: 'asc' | 'desc';
+}
+
+// ── Appearance ──
+export interface TableAppearance {
+  striped?: boolean;
+  hover?: boolean;
+  compact?: boolean;
+  bordered?: boolean;
+}
+
+// ── Column Definition ──
+export interface ColumnDefinition<T> {
+  key: string;
+  header: string | TemplateRef<any>;
+  cell: ((row: T) => string) | TemplateRef<any>;
+  sortType?: ColumnSortType;
+  getRawValueToSort?: (row: T) => any;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+  hiddenBelow?: 'sm' | 'md' | 'lg';
+}
+
+// ── Table Data Source ──
+export interface TableDataSource<T> {
+  dataRows: BehaviorSubject<T[]>;
+  columns: ColumnDefinition<T>[];
+  getID: (row: T) => string;
+  emptyMessage: string;
+  emptyTemplate?: TemplateRef<any>;
+  isDataLoading: boolean;
+
+  // Search
+  canSearch: boolean;
+  searchPlaceholder?: string;
+  isInSearch?: (row: T, searchValue: string) => boolean;
+  searchForAdditionalItems?: (searchValue: string) => Promise<T[]>;
+
+  // Pagination
+  paginationMode?: 'none' | 'load-more' | 'paginated' | 'infinite-scroll';
+  paginationStrategy?: PaginationStrategy;
+  loadAdditionalRows?: () => Promise<T[]>;
+
+  // Sorting
+  defaultSort?: SortState;
+
+  // Selection
+  selectionMode?: 'none' | 'single' | 'multi';
+  selectedRows?: BehaviorSubject<T[]>;
+
+  // Row interaction
+  rowActions?: TableRowAction<T>[];
+  onRowClick?: (row: T) => void;
+
+  // Appearance
+  appearance?: TableAppearance;
+
+  // Toolbar
+  toolbarTemplate?: TemplateRef<any>;
+}

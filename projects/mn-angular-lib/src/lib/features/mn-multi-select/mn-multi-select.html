@@ -1,0 +1,104 @@
+<div class="flex flex-col h-full" [class.is-fullwidth]="props.fullWidth">
+  @if (uiConfig.label || props.label) {
+    <label class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!" [attr.for]="resolvedId">
+      <p>{{ uiConfig.label || props.label }}</p>
+      @if (isRequired()) {
+        <span class="text-red-500">*</span>
+      }
+    </label>
+  }
+
+  <!-- Trigger -->
+  <div
+    [id]="resolvedId"
+    [ngClass]="triggerClasses"
+    class="relative"
+    [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || props.label || null"
+    [attr.aria-invalid]="showError || null"
+    [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
+    [attr.aria-expanded]="isOpen"
+    role="combobox"
+    tabindex="0"
+    (click)="toggle()"
+    (keydown.enter)="toggle()"
+    (keydown.space)="toggle(); $event.preventDefault()"
+    (blur)="handleBlur()"
+  >
+    <div class="flex flex-row items-center gap-x-1 flex-wrap min-h-[1.5rem]">
+      @if (selectedOptions.length === 0) {
+        <span class="text-gray-500">{{ uiConfig.placeholder || props.placeholder || 'Select...' }}</span>
+      } @else {
+        @for (opt of selectedOptions; track opt.value) {
+          <span class="inline-flex items-center gap-x-1 bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-md">
+            {{ opt.label }}
+            <button
+              type="button"
+              class="text-gray-400 hover:text-gray-600 cursor-pointer"
+              (click)="removeOption(opt, $event)"
+              [attr.aria-label]="'Remove ' + opt.label"
+            >×</button>
+          </span>
+        }
+      }
+    </div>
+    <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+      <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
+        <path fill="currentColor" d="M6 8L1 3h10z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Dropdown -->
+  @if (isOpen) {
+    <div class="relative z-50">
+      <div class="absolute top-0 left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+        @if (props.searchable) {
+          <div class="p-2 border-b border-gray-200">
+            <input
+              type="text"
+              class="w-full p-1.5 text-sm border border-gray-300 rounded-md outline-none focus:border-blue-500"
+              [placeholder]="props.searchPlaceholder || 'Search...'"
+              [value]="searchTerm"
+              (input)="onSearch(($any($event.target)).value)"
+              (click)="$event.stopPropagation()"
+            />
+          </div>
+        }
+        @for (opt of filteredOptions; track opt.value) {
+          <div
+            class="flex items-center gap-x-2 px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
+            [class.opacity-50]="opt.disabled || isMaxReached(opt)"
+            [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
+            (click)="toggleOption(opt); $event.stopPropagation()"
+          >
+            <input
+              type="checkbox"
+              class="w-4 h-4 accent-brand-500 pointer-events-none"
+              [checked]="isSelected(opt)"
+              [disabled]="opt.disabled || isMaxReached(opt)"
+              tabindex="-1"
+            />
+            <span>{{ opt.label }}</span>
+          </div>
+        }
+        @if (filteredOptions.length === 0) {
+          <div class="px-3 py-2 text-sm text-gray-400">No options found</div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (showError) {
+    @if (props.showAllErrors) {
+      <div class="flex flex-col gap-y-1 mt-1">
+        @for (error of errorMessages; track $index) {
+          <lib-mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></lib-mn-error-message>
+        }
+      </div>
+    } @else {
+      @if (errorMessage != null) {
+        <lib-mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></lib-mn-error-message>
+      }
+    }
+  }
+</div>
