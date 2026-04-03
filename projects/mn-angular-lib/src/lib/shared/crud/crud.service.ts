@@ -1,5 +1,5 @@
 import {inject} from '@angular/core';
-import {ApiError, ApiStatus, FailureResult, NETWORK_ERROR_STATUS, QueryParams, Result, ResultMeta, SuccessResult} from './crud.model';
+import {ApiError, FailureResult, QueryParams, Result, ResultMeta, SuccessResult} from './crud.model';
 import {catchError, map, Observable, of} from 'rxjs';
 import {HttpClient, HttpErrorResponse, HttpParams, HttpResponse, HttpStatusCode} from '@angular/common/http';
 import {API_BASE_URL} from './crud.tokens';
@@ -50,13 +50,11 @@ export abstract class CrudService<
   /**
    * Retrieves all entities from the configured endpoint.
    *
-   * Query values are converted to `HttpParams` before the request is sent.
-   * On success, the response body is wrapped in a `SuccessResult`.
-   * On failure, the error is mapped to a structured `FailureResult`
-   * instead of terminating the observable with an error.
+   * Sends a GET request to the base endpoint. Query values are
+   * converted to `HttpParams` before the request is sent.
    *
    * @param query Optional query parameters appended to the request URL.
-   * @returns An observable emitting either a successful list response or a structured failure.
+   * @returns An observable emitting a `Result` with the list response or a structured failure.
    */
   getAll(query?: QueryParams): Observable<Result<TListResponse>> {
     return this.http
@@ -73,12 +71,9 @@ export abstract class CrudService<
    * Retrieves a single entity by its identifier.
    *
    * Sends a GET request to `{endpoint}/{id}`.
-   * On success, the response body is wrapped in a `SuccessResult`.
-   * On failure, the error is mapped to a structured `FailureResult`
-   * instead of terminating the observable with an error.
    *
    * @param id The unique identifier of the entity to retrieve.
-   * @returns An observable emitting either the entity response or a structured failure.
+   * @returns An observable emitting a `Result` with the entity or a structured failure.
    */
   getById(id: TId): Observable<Result<TGetByIdResponse>> {
     return this.http
@@ -93,12 +88,9 @@ export abstract class CrudService<
    * Creates a new entity at the configured endpoint.
    *
    * Sends a POST request with the provided payload as the request body.
-   * On success, the response body is wrapped in a `SuccessResult`.
-   * On failure, the error is mapped to a structured `FailureResult`
-   * instead of terminating the observable with an error.
    *
    * @param payload The data used to create the entity.
-   * @returns An observable emitting either the created entity response or a structured failure.
+   * @returns An observable emitting a `Result` with the created entity or a structured failure.
    */
   create(payload: TCreatePayload): Observable<Result<TCreateResponse>> {
     return this.http
@@ -110,17 +102,14 @@ export abstract class CrudService<
   }
 
   /**
-   * Fully updates an existing entity.
+   * Fully replaces an existing entity.
    *
-   * Sends a PUT request to `{endpoint}/{id}` with the provided payload
-   * as the request body, replacing the entire entity.
-   * On success, the response body is wrapped in a `SuccessResult`.
-   * On failure, the error is mapped to a structured `FailureResult`
-   * instead of terminating the observable with an error.
+   * Sends a PUT request to `{endpoint}/{id}` with the provided payload,
+   * replacing the entire entity.
    *
    * @param id The unique identifier of the entity to update.
    * @param payload The complete data to replace the existing entity with.
-   * @returns An observable emitting either the updated entity response or a structured failure.
+   * @returns An observable emitting a `Result` with the updated entity or a structured failure.
    */
   update(id: TId, payload: TUpdatePayload): Observable<Result<TUpdateResponse>> {
     return this.http
@@ -134,15 +123,12 @@ export abstract class CrudService<
   /**
    * Partially updates an existing entity.
    *
-   * Sends a PATCH request to `{endpoint}/{id}` with the provided payload
-   * as the request body, merging changes into the existing entity.
-   * On success, the response body is wrapped in a `SuccessResult`.
-   * On failure, the error is mapped to a structured `FailureResult`
-   * instead of terminating the observable with an error.
+   * Sends a PATCH request to `{endpoint}/{id}` with the provided payload,
+   * merging changes into the existing entity.
    *
    * @param id The unique identifier of the entity to patch.
    * @param payload A partial set of fields to update on the existing entity.
-   * @returns An observable emitting either the updated entity response or a structured failure.
+   * @returns An observable emitting a `Result` with the updated entity or a structured failure.
    */
   patch(id: TId, payload: Partial<TUpdatePayload>): Observable<Result<TUpdateResponse>> {
     return this.http
@@ -157,15 +143,9 @@ export abstract class CrudService<
    * Deletes an entity by its identifier.
    *
    * Sends a DELETE request to `{endpoint}/{id}`.
-   * On success, the response body is wrapped in a `SuccessResult`.
-   * On failure, the error is mapped to a structured `FailureResult`
-   * instead of terminating the observable with an error.
-   *
-   * The default response type is `void`, but subclasses can override
-   * `TDeleteResponse` to capture data returned by the server.
    *
    * @param id The unique identifier of the entity to delete.
-   * @returns An observable emitting either the delete response or a structured failure.
+   * @returns An observable emitting a `Result` with the delete response or a structured failure.
    */
   delete(id: TId): Observable<Result<TDeleteResponse>> {
     return this.http
@@ -181,13 +161,9 @@ export abstract class CrudService<
    *
    * Behaves like {@link getAll} but observes the complete HTTP response,
    * giving access to headers, status code, and URL alongside the body.
-   * On success, the full `HttpResponse` is wrapped in a `SuccessResult`
-   * with additional metadata extracted from the response.
-   * On failure, the error is mapped to a structured `FailureResult`
-   * instead of terminating the observable with an error.
    *
    * @param query Optional query parameters appended to the request URL.
-   * @returns An observable emitting either the full HTTP response or a structured failure.
+   * @returns An observable emitting a `Result` with the full HTTP response or a structured failure.
    */
   getAllResponse(query?: QueryParams): Observable<Result<HttpResponse<TListResponse>>> {
     return this.http
@@ -220,6 +196,7 @@ export abstract class CrudService<
   /**
    * Wraps a value in a `SuccessResult`.
    *
+   * @template T The type of the response data.
    * @param data The response data to wrap.
    * @param meta Optional metadata (status code, headers, URL) to attach.
    * @returns A `SuccessResult` containing the provided data.
@@ -355,18 +332,16 @@ export abstract class CrudService<
   }
 
   /**
-   * Returns a default user-facing message for the given API status.
+   * Returns a default user-facing message for the given HTTP status code.
    *
-   * Provides human-readable messages for common HTTP status codes
-   * and network errors. Override this method to customise messages.
+   * Provides human-readable messages for common HTTP status codes.
+   * Override this method to customise messages.
    *
-   * @param status The normalised API status.
+   * @param status The HTTP status code, or `null` when unknown.
    * @returns A descriptive error message.
    */
-  protected defaultMessage(status: ApiStatus): string {
+  protected defaultMessage(status: HttpStatusCode | null): string {
     switch (status) {
-      case NETWORK_ERROR_STATUS:
-        return 'Network error';
       case HttpStatusCode.BadRequest:
         return 'Bad request';
       case HttpStatusCode.Unauthorized:
@@ -391,14 +366,13 @@ export abstract class CrudService<
   /**
    * Determines whether a request with the given status can be retried.
    *
-   * Network errors, timeouts, rate-limiting responses, and server errors
+   * Timeouts, rate-limiting responses, and server errors
    * (5xx) are considered retryable by default.
    *
-   * @param status The normalised API status.
+   * @param status The HTTP status code, or `null` when unknown.
    * @returns `true` if the request is safe to retry.
    */
-  protected isRetryable(status: ApiStatus): boolean {
-    if (status === NETWORK_ERROR_STATUS) return true;
+  protected isRetryable(status: HttpStatusCode | null): boolean {
     if (status === HttpStatusCode.RequestTimeout) return true;
     if (status === HttpStatusCode.TooManyRequests) return true;
     if (typeof status === 'number' && status >= 500) return true;
@@ -406,18 +380,17 @@ export abstract class CrudService<
   }
 
   /**
-   * Normalises a raw HTTP status into a consistent `number | null` value.
+   * Normalises a raw HTTP status into an `HttpStatusCode | null` value.
    *
-   * Converts `undefined` and `NaN` to `null` so downstream code only
-   * needs to handle `number | null`.
+   * Converts `undefined`, `NaN`, and `0` (network error) to `null`
+   * so downstream code only needs to handle `HttpStatusCode | null`.
    *
    * @param status The raw status value from the HTTP response.
-   * @returns The normalised status, or `null` when indeterminate.
+   * @returns The normalised status code, or `null` when indeterminate.
    */
-  protected normalizeStatus(status: number | null | undefined): number | null {
-    if (status === NETWORK_ERROR_STATUS) return NETWORK_ERROR_STATUS;
-    if (status === null || status === undefined || Number.isNaN(status)) return null;
-    return status;
+  protected normalizeStatus(status: number | null | undefined): HttpStatusCode | null {
+    if (status === null || status === undefined || status === 0 || Number.isNaN(status)) return null;
+    return status as HttpStatusCode;
   }
 
   /**

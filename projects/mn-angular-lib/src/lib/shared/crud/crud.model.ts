@@ -1,22 +1,4 @@
-import {HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-
-/**
- * Represents a network error where no response was received from the server.
- *
- * Used as a sentinel value for `ApiStatus` when the request failed
- * before reaching the server (e.g. timeout, DNS failure, or offline).
- */
-export const NETWORK_ERROR_STATUS = 0 as const;
-
-/**
- * Represents the numeric status of an API call.
- *
- * Possible values:
- * - A positive number — the HTTP status code (e.g. 200, 400, 404, 500).
- * - `0` — a network error (no response received, e.g. timeout or offline).
- * - `null` — status is unknown or not yet determined.
- */
-export type ApiStatus = number | null;
+import {HttpErrorResponse, HttpHeaders, HttpStatusCode} from '@angular/common/http';
 
 /**
  * A structured representation of an API error.
@@ -26,7 +8,7 @@ export type ApiStatus = number | null;
  * failures without inspecting the raw HTTP response.
  */
 export interface ApiError {
-  status: ApiStatus;
+  status: HttpStatusCode | null;
   message: string;
   details?: unknown;
   backendMessage?: string;
@@ -80,14 +62,8 @@ export interface FailureResult {
 /**
  * A discriminated union representing either a successful or failed API result.
  *
- * Use `result.ok` to narrow the type:
- * ```ts
- * if (result.ok) {
- *   console.log(result.data);
- * } else {
- *   console.error(result.error.message);
- * }
- * ```
+ * Discriminated by `ok`. Use `result.ok` to narrow the type
+ * before accessing `data` or `error`.
  *
  * @template T The type of the response data on success.
  */
