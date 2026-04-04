@@ -134,6 +134,15 @@ export class MnConfigService {
     for (const [key, value] of Object.entries(obj)) {
       if (isTranslatable(value)) {
         out[key] = this.lang.translate(value.$translate, value.params);
+      } else if (Array.isArray(value)) {
+        out[key] = value.map(item => {
+          if (isTranslatable(item)) {
+            return this.lang.translate(item.$translate, item.params);
+          } else if (isPlainObject(item)) {
+            return this.resolveTranslatables(item as Record<string, unknown>);
+          }
+          return item;
+        });
       } else if (isPlainObject(value)) {
         out[key] = this.resolveTranslatables(value as Record<string, unknown>);
       } else {
