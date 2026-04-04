@@ -17,6 +17,11 @@
     "language-demo-component": {
       label: { $translate: "demo.greeting", params: { name: "Config" } }
     },
+    "language-demo-reactive": {
+      title: { $translate: "demo.reactive_config.title" },
+      description: { $translate: "demo.reactive_config.description" },
+      label: { $translate: "demo.reactive_config.label", params: { name: "World" } }
+    },
     "mn-dual-horizontal-image": {
       images: [
         { id: '1', url: 'https://www.wildkogel-arena.at/site/assets/files/17949/wildkogelarena_2024-7237.1920x0-sp.jpg', alt: 'Image 1' },

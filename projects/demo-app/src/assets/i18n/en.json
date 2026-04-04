@@ -11,5 +11,8 @@
   "demo.config.title": "Config Integration",
   "demo.config.description": "Config values with $translate markers are auto-resolved.",
   "demo.switch_locale": "Switch Language",
-  "demo.current_locale": "Current locale: {{locale}}"
+  "demo.current_locale": "Current locale: {{locale}}",
+  "demo.reactive_config.title": "Reactive Config",
+  "demo.reactive_config.description": "This value comes from mn-config.json5 via provideMnComponentConfig and updates automatically when you switch locale.",
+  "demo.reactive_config.label": "Hello from config, {{name}}!"
 }

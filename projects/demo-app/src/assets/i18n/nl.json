@@ -11,5 +11,8 @@
   "demo.config.title": "Config Integratie",
   "demo.config.description": "Config waarden met $translate markers worden automatisch vertaald.",
   "demo.switch_locale": "Taal Wisselen",
-  "demo.current_locale": "Huidige taal: {{locale}}"
+  "demo.current_locale": "Huidige taal: {{locale}}",
+  "demo.reactive_config.title": "Reactieve Config",
+  "demo.reactive_config.description": "Deze waarde komt uit mn-config.json5 via provideMnComponentConfig en wordt automatisch bijgewerkt wanneer je van taal wisselt.",
+  "demo.reactive_config.label": "Hallo vanuit config, {{name}}!"
 }

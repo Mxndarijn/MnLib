@@ -1,11 +1,22 @@
-import { Component, inject } from '@angular/core';
-import { MnLanguageService, MnTranslatePipe, MnConfigService } from 'mn-angular-lib';
+import { Component, inject, InjectionToken } from '@angular/core';
+import { MnLanguageService, MnTranslatePipe, MnConfigService, provideMnComponentConfig } from 'mn-angular-lib';
 import { AsyncPipe } from '@angular/common';
+
+export interface ReactiveConfigDemo {
+  title: string;
+  description: string;
+  label: string;
+}
+
+const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
 
 @Component({
   selector: 'app-language-demo',
   standalone: true,
   imports: [MnTranslatePipe, AsyncPipe],
+  providers: [
+    provideMnComponentConfig<ReactiveConfigDemo>(REACTIVE_CFG, 'language-demo-reactive'),
+  ],
   template: `
     <div class="container">
       <h1>{{ 'demo.title' | mnTranslate }}</h1>
@@ -69,7 +80,23 @@ import { AsyncPipe } from '@angular/common';
         </div>
       </section>
 
-      <!-- 4. Locale observable -->
+      <!-- 4. Reactive config (provideMnComponentConfig) -->
+      <section>
+        <h2>{{ 'demo.reactive_config.title' | mnTranslate }}</h2>
+        <p>{{ 'demo.reactive_config.description' | mnTranslate }}</p>
+        <div class="example">
+          <h3>mn-config.json5</h3>
+          <code>title: {{ '{' }} $translate: "demo.reactive_config.title" {{ '}' }}</code><br/>
+          <code>description: {{ '{' }} $translate: "demo.reactive_config.description" {{ '}' }}</code><br/>
+          <code>label: {{ '{' }} $translate: "demo.reactive_config.label", params: {{ '{' }} name: "World" {{ '}' }} {{ '}' }}</code>
+          <h3>Resolved via provideMnComponentConfig (reactive)</h3>
+          <p class="result">Title: {{ reactiveCfg.title }}</p>
+          <p class="result">Description: {{ reactiveCfg.description }}</p>
+          <p class="result">Label: {{ reactiveCfg.label }}</p>
+        </div>
+      </section>
+
+      <!-- 5. Locale observable -->
       <section>
         <h2>Locale Observable</h2>
         <p>Subscribe to <code>locale$</code> for reactive locale changes.</p>
@@ -97,6 +124,7 @@ import { AsyncPipe } from '@angular/common';
 export class LanguageDemo {
   readonly lang = inject(MnLanguageService);
   private readonly config = inject(MnConfigService);
+  readonly reactiveCfg = inject(REACTIVE_CFG);
 
   standaloneResult = '';
   standaloneParamResult = '';
