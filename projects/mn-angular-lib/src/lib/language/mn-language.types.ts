@@ -36,6 +36,12 @@ export interface MnLanguageConfig {
   defaultLocale: string;
   /** Locales to preload at bootstrap. */
   preload?: string[];
+  /**
+   * Optional mapping of domain hostnames to locale codes.
+   * When set, the service will use the current domain to determine the initial locale.
+   * Example: { "example.nl": "nl", "example.de": "de", "example.com": "en" }
+   */
+  domainLocaleMap?: Record<string, string>;
 }
 
 /**

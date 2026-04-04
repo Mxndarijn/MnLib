@@ -21,9 +21,10 @@ export function provideMnLanguage(config: MnLanguageConfig): Provider[] {
       useFactory: (svc: MnLanguageService) => async () => {
         svc.configure(config.urlPattern);
 
-        const localesToLoad = config.preload ?? [config.defaultLocale];
+        const effectiveLocale = svc.resolveLocaleForDomain(config.domainLocaleMap, config.defaultLocale);
+        const localesToLoad = config.preload ?? [effectiveLocale];
         await Promise.all(localesToLoad.map(l => svc.loadLocale(l)));
-        await svc.setLocale(config.defaultLocale);
+        await svc.setLocale(effectiveLocale);
       },
       deps: [MnLanguageService],
     },

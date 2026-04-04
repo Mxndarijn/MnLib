@@ -63,9 +63,10 @@ export class MnConfigService {
     if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
       const lc = langCfg as unknown as MnLanguageConfig;
       this.lang.configure(lc.urlPattern);
-      const localesToLoad = lc.preload ?? [lc.defaultLocale];
+      const effectiveLocale = this.lang.resolveLocaleForDomain(lc.domainLocaleMap, lc.defaultLocale);
+      const localesToLoad = lc.preload ?? [effectiveLocale];
       await Promise.all(localesToLoad.map(l => this.lang.loadLocale(l)));
-      await this.lang.setLocale(lc.defaultLocale);
+      await this.lang.setLocale(effectiveLocale);
     }
   }
 

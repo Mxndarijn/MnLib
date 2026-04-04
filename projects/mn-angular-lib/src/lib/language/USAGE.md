@@ -33,7 +33,13 @@ Add a `language` section to your `mn-config.json5`:
   language: {
     urlPattern: "assets/i18n/{locale}.json",
     defaultLocale: "en",
-    preload: ["en", "nl"]
+    preload: ["en", "nl"],
+    // Optional: map domain hostnames to a default locale
+    domainLocaleMap: {
+      "example.nl": "nl",
+      "example.de": "de",
+      "example.com": "en"
+    }
   },
   defaults: { /* ... */ },
   overrides: { /* ... */ }

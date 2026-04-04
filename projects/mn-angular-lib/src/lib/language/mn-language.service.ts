@@ -99,4 +99,15 @@ export class MnLanguageService {
   t(key: string, params?: Record<string, string | number>): string {
     return this.translate(key, params);
   }
+
+  /**
+   * Resolve the effective default locale from a domain-to-locale map.
+   * Matches `window.location.hostname` against the map keys.
+   * Returns the mapped locale, or the provided fallback if no match is found.
+   */
+  resolveLocaleForDomain(domainLocaleMap: Record<string, string> | undefined, fallback: string): string {
+    if (!domainLocaleMap || typeof window === 'undefined') return fallback;
+    const hostname = window.location.hostname;
+    return domainLocaleMap[hostname] ?? fallback;
+  }
 }
