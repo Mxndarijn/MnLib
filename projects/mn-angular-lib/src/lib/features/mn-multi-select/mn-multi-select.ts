@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, ElementRef, HostListener, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnMultiSelectProps, MnMultiSelectOption, MnMultiSelectErrorMessageData, MnMultiSelectUIConfig} from './mn-multi-selectTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -6,6 +6,8 @@ import {mnMultiSelectVariants} from './mn-multi-selectVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 import {MnConfigService} from "../../config/mn-config.service";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
+import {MnLanguageService} from "../../language/mn-language.service";
+import {skip} from "rxjs";
 
 export const MN_MULTI_SELECT_CONFIG = new InjectionToken<MnMultiSelectUIConfig>('MN_MULTI_SELECT_CONFIG');
 
@@ -24,6 +26,8 @@ export class MnMultiSelect implements OnInit {
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
   private readonly elRef = inject(ElementRef);
+  private readonly lang = inject(MnLanguageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Currently selected values */
   selectedValues: unknown[] = [];
@@ -44,6 +48,11 @@ export class MnMultiSelect implements OnInit {
 
   ngOnInit() {
     this.resolveConfig();
+
+    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveConfig();
+    });
+    this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
 
   private resolveConfig() {

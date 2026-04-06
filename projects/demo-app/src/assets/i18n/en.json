@@ -14,5 +14,11 @@
   "demo.current_locale": "Current locale: {{locale}}",
   "demo.reactive_config.title": "Reactive Config",
   "demo.reactive_config.description": "This value comes from mn-config.json5 via provideMnComponentConfig and updates automatically when you switch locale.",
-  "demo.reactive_config.label": "Hello from config, {{name}}!"
+  "demo.reactive_config.label": "Hello from config, {{name}}!",
+  "demo.form.section_title": "Reactive Form Fields",
+  "demo.form.section_description": "Internal form components (mn-input-field, mn-textarea, etc.) now re-resolve their config when the locale changes.",
+  "demo.form.name.placeholder": "Enter your name",
+  "demo.form.name.label": "Your Name",
+  "demo.form.message.placeholder": "Type your message here",
+  "demo.form.message.label": "Message"
 }

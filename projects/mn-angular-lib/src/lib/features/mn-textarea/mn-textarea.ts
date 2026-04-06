@@ -1,4 +1,4 @@
-import {Component, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnTextareaProps, MnTextareaErrorMessageData, MnTextareaUIConfig} from './mn-textareaTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -6,6 +6,8 @@ import {mnTextareaVariants} from './mn-textareaVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 import {MnConfigService} from "../../config/mn-config.service";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
+import {MnLanguageService} from "../../language/mn-language.service";
+import {skip} from "rxjs";
 
 export const MN_TEXTAREA_CONFIG = new InjectionToken<MnTextareaUIConfig>('MN_TEXTAREA_CONFIG');
 
@@ -56,6 +58,8 @@ export class MnTextarea implements OnInit {
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
+  private readonly lang = inject(MnLanguageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Current raw string value of the textarea element */
   value: string | null = null;
@@ -92,6 +96,11 @@ export class MnTextarea implements OnInit {
 
   ngOnInit() {
     this.resolveConfig();
+
+    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveConfig();
+    });
+    this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
 
   private resolveConfig() {

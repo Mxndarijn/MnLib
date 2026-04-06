@@ -14,5 +14,11 @@
   "demo.current_locale": "Huidige taal: {{locale}}",
   "demo.reactive_config.title": "Reactieve Config",
   "demo.reactive_config.description": "Deze waarde komt uit mn-config.json5 via provideMnComponentConfig en wordt automatisch bijgewerkt wanneer je van taal wisselt.",
-  "demo.reactive_config.label": "Hallo vanuit config, {{name}}!"
+  "demo.reactive_config.label": "Hallo vanuit config, {{name}}!",
+  "demo.form.section_title": "Reactieve Formuliervelden",
+  "demo.form.section_description": "Interne formuliercomponenten (mn-input-field, mn-textarea, etc.) herladen hun config wanneer de taal wijzigt.",
+  "demo.form.name.placeholder": "Voer je naam in",
+  "demo.form.name.label": "Je Naam",
+  "demo.form.message.placeholder": "Typ hier je bericht",
+  "demo.form.message.label": "Bericht"
 }

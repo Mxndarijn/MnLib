@@ -1,4 +1,4 @@
-import {Component, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnInputProps, MnErrorMessageData, MnInputFieldUIConfig} from './mn-input-fieldTypes';
 import {AbstractControl, NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -7,6 +7,8 @@ import {mnInputFieldVariants} from './mn-input-fieldVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 import {MnConfigService} from "../../config/mn-config.service";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
+import {MnLanguageService} from "../../language/mn-language.service";
+import {skip} from "rxjs";
 
 export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('MN_INPUT_FIELD_CONFIG');
 
@@ -57,6 +59,8 @@ export class MnInputField implements OnInit {
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
+  private readonly lang = inject(MnLanguageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Current raw string value of the input element */
   value: string | null = null;
@@ -96,6 +100,11 @@ export class MnInputField implements OnInit {
 
   ngOnInit() {
     this.resolveConfig();
+
+    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveConfig();
+    });
+    this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
 
   private resolveConfig() {

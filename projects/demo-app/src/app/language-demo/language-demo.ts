@@ -1,6 +1,7 @@
 import { Component, inject, InjectionToken } from '@angular/core';
-import { MnLanguageService, MnTranslatePipe, MnConfigService, provideMnComponentConfig } from 'mn-angular-lib';
+import { MnLanguageService, MnTranslatePipe, MnConfigService, provideMnComponentConfig, MnInputField, MnTextarea, MN_SECTION_PATH } from 'mn-angular-lib';
 import { AsyncPipe } from '@angular/common';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
 export interface ReactiveConfigDemo {
   title: string;
@@ -13,9 +14,10 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
 @Component({
   selector: 'app-language-demo',
   standalone: true,
-  imports: [MnTranslatePipe, AsyncPipe],
+  imports: [MnTranslatePipe, AsyncPipe, MnInputField, MnTextarea, ReactiveFormsModule],
   providers: [
     provideMnComponentConfig<ReactiveConfigDemo>(REACTIVE_CFG, 'language-demo-reactive'),
+    { provide: MN_SECTION_PATH, useValue: ['root', 'language-demo'] },
   ],
   template: `
     <div class="container">
@@ -96,7 +98,24 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
         </div>
       </section>
 
-      <!-- 5. Locale observable -->
+      <!-- 5. Reactive form fields (internal components) -->
+      <section>
+        <h2>{{ 'demo.form.section_title' | mnTranslate }}</h2>
+        <p>{{ 'demo.form.section_description' | mnTranslate }}</p>
+        <div class="example">
+          <h3>mn-config.json5</h3>
+          <code>placeholder: {{ '{' }} $translate: "demo.form.name.placeholder" {{ '}' }}</code><br/>
+          <code>label: {{ '{' }} $translate: "demo.form.name.label" {{ '}' }}</code>
+          <h3>mn-input-field (switch locale to see placeholder/label update)</h3>
+          <mn-lib-input-field [formControl]="nameCtrl" [props]="{ id: 'demo-name', type: 'text', size: 'md', borderRadius: 'md' }"></mn-lib-input-field>
+        </div>
+        <div class="example">
+          <h3>mn-textarea (switch locale to see placeholder/label update)</h3>
+          <mn-lib-textarea [formControl]="messageCtrl" [props]="{ id: 'demo-message', size: 'md', borderRadius: 'md', rows: 3 }"></mn-lib-textarea>
+        </div>
+      </section>
+
+      <!-- 6. Locale observable -->
       <section>
         <h2>Locale Observable</h2>
         <p>Subscribe to <code>locale$</code> for reactive locale changes.</p>
@@ -129,6 +148,8 @@ export class LanguageDemo {
   standaloneResult = '';
   standaloneParamResult = '';
   configResolved = '';
+  nameCtrl = new FormControl('');
+  messageCtrl = new FormControl('');
 
   constructor() {
     this.refresh();

@@ -19,6 +19,10 @@
       label: "Generic Input",
       ariaLabel: "Global accessible label"
     },
+    "mn-textarea": {
+      placeholder: "Default textarea placeholder",
+      label: "Generic Textarea"
+    },
     "language-demo-component": {
       label: { $translate: "demo.greeting", params: { name: "Config" } }
     },
@@ -50,6 +54,16 @@
         "test-component": {
           color: "blue",
           text: "Overridden config 1!"
+        }
+      },
+      "language-demo": {
+        "#mn-input-demo-name": {
+          placeholder: { $translate: "demo.form.name.placeholder" },
+          label: { $translate: "demo.form.name.label" }
+        },
+        "#mn-textarea-demo-message": {
+          placeholder: { $translate: "demo.form.message.placeholder" },
+          label: { $translate: "demo.form.message.label" }
         }
       }
     }

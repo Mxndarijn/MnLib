@@ -1,4 +1,4 @@
-import {Component, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnCheckboxProps, MnCheckboxErrorMessageData, MnCheckboxUIConfig} from './mn-checkboxTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -6,6 +6,8 @@ import {mnCheckboxVariants} from './mn-checkboxVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 import {MnConfigService} from "../../config/mn-config.service";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
+import {MnLanguageService} from "../../language/mn-language.service";
+import {skip} from "rxjs";
 
 export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHECKBOX_CONFIG');
 
@@ -23,6 +25,8 @@ export class MnCheckbox implements OnInit {
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
+  private readonly lang = inject(MnLanguageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   value = false;
   isDisabled = false;
@@ -40,6 +44,11 @@ export class MnCheckbox implements OnInit {
 
   ngOnInit() {
     this.resolveConfig();
+
+    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveConfig();
+    });
+    this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
 
   private resolveConfig() {
