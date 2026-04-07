@@ -196,6 +196,10 @@ export class MnMultiSelect implements OnInit {
     if (typeof msgDef === 'function') {
       return msgDef(errorArgs, errors);
     }
+    // Interpolate {{placeholder}} tokens with validation error args
+    if (typeof msgDef === 'string' && errorArgs && typeof errorArgs === 'object') {
+      return msgDef.replace(/\{\{(\w+)\}\}/g, (_, key) => errorArgs[key] ?? _);
+    }
     return msgDef;
   }
 
