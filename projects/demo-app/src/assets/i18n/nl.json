@@ -20,5 +20,16 @@
   "demo.form.name.placeholder": "Voer je naam in",
   "demo.form.name.label": "Je Naam",
   "demo.form.message.placeholder": "Typ hier je bericht",
-  "demo.form.message.label": "Bericht"
+  "demo.form.message.label": "Bericht",
+  "validation.required": "Dit veld is verplicht",
+  "validation.email": "Voer een geldig e-mailadres in",
+  "validation.minlength": "Minimaal {{requiredLength}} tekens vereist",
+  "demo.validation.section_title": "Validatie met Vertalingen",
+  "demo.validation.section_description": "Formuliervelden met verplichte validators en vertaalde foutmeldingen via mn-config.json5.",
+  "demo.validation.name.label": "Naam (verplicht)",
+  "demo.validation.name.placeholder": "Voer je naam in",
+  "demo.validation.email.label": "E-mail (verplicht)",
+  "demo.validation.email.placeholder": "Voer je e-mailadres in",
+  "demo.validation.message.label": "Bericht (verplicht)",
+  "demo.validation.message.placeholder": "Typ een bericht"
 }

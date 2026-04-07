@@ -79,4 +79,10 @@ export interface MnDatetimeUIConfig {
 
   /** ARIA label for screen readers (falls back to label if not provided) */
   ariaLabel?: string;
+
+  /**
+   * Error messages resolved from config (supports $translate markers).
+   * These override built-in error messages but are overridden by props.errorMessages.
+   */
+  errorMessages?: Record<string, string>;
 }

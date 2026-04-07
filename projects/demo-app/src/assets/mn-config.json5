@@ -17,11 +17,18 @@
     "mn-input-field": {
       placeholder: "Default placeholder from mn-config1",
       label: "Generic Input",
-      ariaLabel: "Global accessible label"
+      ariaLabel: "Global accessible label",
+      errorMessages: {
+        required: { $translate: "validation.required" },
+        email: { $translate: "validation.email" }
+      }
     },
     "mn-textarea": {
       placeholder: "Default textarea placeholder",
-      label: "Generic Textarea"
+      label: "Generic Textarea",
+      errorMessages: {
+        required: { $translate: "validation.required" }
+      }
     },
     "language-demo-component": {
       label: { $translate: "demo.greeting", params: { name: "Config" } }
@@ -64,6 +71,18 @@
         "#mn-textarea-demo-message": {
           placeholder: { $translate: "demo.form.message.placeholder" },
           label: { $translate: "demo.form.message.label" }
+        },
+        "#mn-input-validation-name": {
+          label: { $translate: "demo.validation.name.label" },
+          placeholder: { $translate: "demo.validation.name.placeholder" }
+        },
+        "#mn-input-validation-email": {
+          label: { $translate: "demo.validation.email.label" },
+          placeholder: { $translate: "demo.validation.email.placeholder" }
+        },
+        "#mn-textarea-validation-message": {
+          label: { $translate: "demo.validation.message.label" },
+          placeholder: { $translate: "demo.validation.message.placeholder" }
         }
       }
     }

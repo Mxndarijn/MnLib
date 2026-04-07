@@ -187,10 +187,11 @@ export class MnMultiSelect implements OnInit {
   private resolveErrorMessageForKey(errorKey: string, errors: ValidationErrors): string {
     const errorArgs = errors[errorKey];
     const customMsg = this.props.errorMessages?.[errorKey];
+    const configMsg = this.uiConfig.errorMessages?.[errorKey];
     const useBuiltIn = this.props.useBuiltInErrorMessages !== false;
     const builtInMsg = useBuiltIn ? this.builtInErrorMessages[errorKey] : undefined;
     const fallbackMsg = this.props.defaultErrorMessage;
-    const msgDef = customMsg ?? builtInMsg ?? fallbackMsg ?? 'Invalid input';
+    const msgDef = customMsg ?? configMsg ?? builtInMsg ?? fallbackMsg ?? 'Invalid input';
 
     if (typeof msgDef === 'function') {
       return msgDef(errorArgs, errors);

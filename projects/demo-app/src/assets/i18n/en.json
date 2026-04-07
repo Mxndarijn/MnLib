@@ -20,5 +20,16 @@
   "demo.form.name.placeholder": "Enter your name",
   "demo.form.name.label": "Your Name",
   "demo.form.message.placeholder": "Type your message here",
-  "demo.form.message.label": "Message"
+  "demo.form.message.label": "Message",
+  "validation.required": "This field is required",
+  "validation.email": "Please enter a valid email address",
+  "validation.minlength": "Minimum {{requiredLength}} characters required",
+  "demo.validation.section_title": "Validation with Translations",
+  "demo.validation.section_description": "Form fields with required validators and translated error messages via mn-config.json5.",
+  "demo.validation.name.label": "Name (required)",
+  "demo.validation.name.placeholder": "Enter your name",
+  "demo.validation.email.label": "Email (required)",
+  "demo.validation.email.placeholder": "Enter your email",
+  "demo.validation.message.label": "Message (required)",
+  "demo.validation.message.placeholder": "Type a message"
 }

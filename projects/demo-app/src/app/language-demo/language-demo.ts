@@ -1,7 +1,7 @@
 import { Component, inject, InjectionToken } from '@angular/core';
 import { MnLanguageService, MnTranslatePipe, MnConfigService, provideMnComponentConfig, MnInputField, MnTextarea, MN_SECTION_PATH } from 'mn-angular-lib';
 import { AsyncPipe } from '@angular/common';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 
 export interface ReactiveConfigDemo {
   title: string;
@@ -115,7 +115,27 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
         </div>
       </section>
 
-      <!-- 6. Locale observable -->
+      <!-- 6. Validation with translated error messages -->
+      <section>
+        <h2>{{ 'demo.validation.section_title' | mnTranslate }}</h2>
+        <p>{{ 'demo.validation.section_description' | mnTranslate }}</p>
+        <div class="example">
+          <h3>mn-config.json5</h3>
+          <code>errorMessages: {{ '{' }} required: {{ '{' }} $translate: "validation.required" {{ '}' }} {{ '}' }}</code>
+          <h3>mn-input-field (required) — touch and clear to see translated error</h3>
+          <mn-lib-input-field [formControl]="valNameCtrl" [props]="{ id: 'validation-name', type: 'text', size: 'md', borderRadius: 'md' }"></mn-lib-input-field>
+        </div>
+        <div class="example">
+          <h3>mn-input-field (required + email) — enter invalid email to see translated error</h3>
+          <mn-lib-input-field [formControl]="valEmailCtrl" [props]="{ id: 'validation-email', type: 'email', size: 'md', borderRadius: 'md' }"></mn-lib-input-field>
+        </div>
+        <div class="example">
+          <h3>mn-textarea (required) — touch and clear to see translated error</h3>
+          <mn-lib-textarea [formControl]="valMessageCtrl" [props]="{ id: 'validation-message', size: 'md', borderRadius: 'md', rows: 3 }"></mn-lib-textarea>
+        </div>
+      </section>
+
+      <!-- 7. Locale observable -->
       <section>
         <h2>Locale Observable</h2>
         <p>Subscribe to <code>locale$</code> for reactive locale changes.</p>
@@ -150,6 +170,9 @@ export class LanguageDemo {
   configResolved = '';
   nameCtrl = new FormControl('');
   messageCtrl = new FormControl('');
+  valNameCtrl = new FormControl('', [Validators.required]);
+  valEmailCtrl = new FormControl('', [Validators.required, Validators.email]);
+  valMessageCtrl = new FormControl('', [Validators.required]);
 
   constructor() {
     this.refresh();
