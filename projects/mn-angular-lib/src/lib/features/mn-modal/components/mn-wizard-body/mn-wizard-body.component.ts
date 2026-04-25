@@ -9,6 +9,7 @@ import {
   AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MnModalRef } from '../../mn-modal-ref';
 import {
@@ -24,11 +25,12 @@ import {
 } from '../../mn-modal.types';
 import { MnButton } from '../../../mn-button/mn-button';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
+import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
 
 @Component({
   selector: 'mn-wizard-body',
   standalone: true,
-  imports: [CommonModule, MnButton, MnFormBodyComponent],
+  imports: [CommonModule, ReactiveFormsModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent],
   templateUrl: './mn-wizard-body.component.html',
   styleUrls: ['./mn-wizard-body.component.css'],
 })
@@ -68,6 +70,12 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     // Pre-build form configs for all form-driven steps
     for (const step of this.config.steps) {
       if (step.fields && step.fields.length > 0) {
+        // Merge top-level initialValue with step-level initialValue
+        const mergedInitialValue = {
+          ...(this.config.initialValue || {}),
+          ...(step.initialValue || {})
+        };
+
         this.stepFormConfigs[step.id] = {
           kind: ModalKind.FORM,
           fields: step.fields,
@@ -75,7 +83,9 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
           fieldGroups: step.fieldGroups,
           formValidators: step.formValidators,
           groupValidators: step.groupValidators,
-          initialValue: step.initialValue,
+          initialValue: mergedInitialValue,
+          readOnly: this.config.readOnly,
+          disabled: this.config.disabled
         } as FormModalConfig<any, any>;
       }
     }
@@ -90,6 +100,10 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     // Subscribe to form bodies list changes to track validity
     this.formBodiesSubscription = this.formBodies.changes.subscribe(() => {
       this.trackCurrentStepValidity();
+      // Apply autofocus when form bodies change (e.g. step navigation)
+      setTimeout(() => {
+        this.getCurrentFormBody()?.applyAutoFocus();
+      }, 100);
     });
     // Initial validity check
     this.trackCurrentStepValidity();

@@ -1,9 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MnConfirmationBodyComponent } from './mn-confirmation-body.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { Validators } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import {
   ActionStyle,
   ConfirmationModalConfig,
   ConfirmationTone,
+  FieldKind,
   ModalCloseReason,
   ModalKind,
 } from '../../mn-modal.types';
@@ -23,7 +27,7 @@ describe('MnConfirmationBodyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MnConfirmationBodyComponent],
+      imports: [MnConfirmationBodyComponent, HttpClientTestingModule],
     }).compileComponents();
   });
 
@@ -126,5 +130,41 @@ describe('MnConfirmationBodyComponent', () => {
     expect(component.getButtonVariant(ActionStyle.DANGER)).toBe('fill');
     expect(component.getButtonVariant(ActionStyle.GHOST)).toBe('text');
     expect(component.getButtonVariant(ActionStyle.SECONDARY)).toBe('outline');
+  });
+
+  it('should disable confirm button if hybrid form is invalid', fakeAsync(() => {
+    setup({
+      fields: [
+        {
+          kind: FieldKind.TEXT,
+          key: 'reason',
+          label: 'Reason',
+          validators: [Validators.required]
+        }
+      ]
+    });
+    tick(); // for initial status emit
+    fixture.detectChanges();
+
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const confirmBtn = buttons[1];
+    expect(confirmBtn.nativeElement.disabled).toBeTrue();
+
+    // Fill the form
+    component.formBody!.form.get('reason')!.setValue('Some reason');
+    fixture.detectChanges();
+
+    expect(component.confirmButtonStatus).toBe('VALID');
+    fixture.detectChanges();
+
+    expect(confirmBtn.nativeElement.disabled).toBeFalse();
+  }));
+
+  it('should enable confirm button immediately if no fields', () => {
+    setup({ message: 'Just a message' });
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const confirmBtn = buttons[1];
+    expect(confirmBtn.nativeElement.disabled).toBeFalse();
+    expect(component.confirmButtonStatus).toBe('VALID');
   });
 });

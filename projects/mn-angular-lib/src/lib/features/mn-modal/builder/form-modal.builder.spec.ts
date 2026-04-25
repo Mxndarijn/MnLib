@@ -133,4 +133,44 @@ describe('FormModalBuilder', () => {
       .build();
     expect(config.fields.length).toBe(2);
   });
+
+  it('should support declarative addRow', () => {
+    const config = ModalBuilder.form<TestModel>()
+      .addRow(2, (row) => {
+        row.add({ kind: FieldKind.TEXT, key: 'first', label: 'First' });
+        row.add({ kind: FieldKind.TEXT, key: 'last', label: 'Last' }, 2);
+      })
+      .build();
+
+    expect(config.rows!.length).toBe(1);
+    expect(config.rows![0].columns).toBe(2);
+    expect(config.rows![0].fields.length).toBe(2);
+    expect(config.rows![0].fields[0].field.key).toBe('first');
+    expect(config.rows![0].fields[1].span).toBe(2);
+    expect(config.fields.length).toBe(2);
+  });
+
+  it('should support declarative fieldGroup', () => {
+    const config = ModalBuilder.form<TestModel>()
+      .fieldGroup('Identity', (g) => {
+        g.row(2)
+          .addToRow({ kind: FieldKind.TEXT, key: 'first', label: 'First' })
+          .addToRow({ kind: FieldKind.TEXT, key: 'last', label: 'Last' });
+      })
+      .build();
+
+    expect(config.fieldGroups!.length).toBe(1);
+    expect(config.fieldGroups![0].title).toBe('Identity');
+    expect(config.fieldGroups![0].fields.length).toBe(2);
+    expect(config.fieldGroups![0].rows!.length).toBe(1);
+    expect(config.fieldGroups![0].rows![0].columns).toBe(2);
+    expect(config.fields.length).toBe(2);
+  });
+
+  it('should support body() in form', () => {
+    const config = ModalBuilder.form()
+      .body('Hello World')
+      .build();
+    expect(config.body).toBe('Hello World');
+  });
 });

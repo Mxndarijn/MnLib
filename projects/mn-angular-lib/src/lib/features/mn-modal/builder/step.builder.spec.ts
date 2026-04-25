@@ -301,4 +301,15 @@ describe('StepBuilder', () => {
       .build();
     expect(config.steps[0].initialValue).toEqual({ name: 'Default' });
   });
+
+  it('should set nextLabel, backLabel, and hideBack', () => {
+    const step = new StepBuilder('s1', 'S')
+      .nextLabel('Forward')
+      .backLabel('Go Back')
+      .hideBack(true)
+      .build();
+    expect(step.nextLabel).toBe('Forward');
+    expect(step.backLabel).toBe('Go Back');
+    expect(step.hideBack).toBeTrue();
+  });
 });

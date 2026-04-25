@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Validators } from '@angular/forms';
 import { MnFormBodyComponent } from './mn-form-body.component';
 import { MnModalRef } from '../../mn-modal-ref';
@@ -147,5 +147,106 @@ describe('MnFormBodyComponent', () => {
       { kind: FieldKind.TEXT, key: 'b', label: 'B' },
     ]));
     expect(component.rows.length).toBe(2);
+  });
+
+  it('should include top-level fields even when fieldGroups are present', () => {
+    const config: FormModalConfig<any, any> = {
+      kind: ModalKind.FORM,
+      fields: [
+        { kind: FieldKind.TEXT, key: 'topField', label: 'Top' },
+        { kind: FieldKind.TEXT, key: 'groupField', label: 'In Group' },
+      ],
+      fieldGroups: [
+        {
+          title: 'Group 1',
+          rows: [
+            { columns: 1, fields: [{ field: { kind: FieldKind.TEXT, key: 'groupField', label: 'In Group' }, span: 1 }] }
+          ],
+          fields: []
+        } as any
+      ]
+    };
+    setup(config);
+    expect(component.fieldGroups.length).toBe(1);
+    expect(component.rows.length).toBe(1);
+    expect(component.rows[0].fields[0].field.key).toBe('topField');
+
+    // Verify DOM rendering
+    const debugElement = fixture.debugElement;
+    const groupElement = debugElement.nativeElement.querySelector('h3');
+    expect(groupElement.textContent).toContain('Group 1');
+
+    const inputFields = debugElement.nativeElement.querySelectorAll('mn-lib-input-field');
+    // One in group, one standalone
+    expect(inputFields.length).toBe(2);
+  });
+
+  it('should initialize form controls with updateOn option', () => {
+    setup({
+      kind: ModalKind.FORM,
+      fields: [
+        {
+          kind: FieldKind.TEXT,
+          key: 'name',
+          label: 'Name',
+          updateOn: 'blur',
+          validators: [Validators.required]
+        }
+      ]
+    } as any);
+
+    const control = component.form.get('name');
+    expect(control?.updateOn).toBe('blur');
+  });
+
+  it('should apply autoFocus to the correct field', fakeAsync(() => {
+    setup({
+      kind: ModalKind.FORM,
+      fields: [
+        { kind: FieldKind.TEXT, key: 'field1', label: 'Field 1' },
+        { kind: FieldKind.TEXT, key: 'field2', label: 'Field 2', autoFocus: true }
+      ]
+    } as any);
+
+    tick(150); // increased tick to ensure AfterViewInit setTimeout and internal applyAutoFocus setTimeout finish
+    fixture.detectChanges();
+
+    const inputFields = component.inputFields?.toArray();
+    expect(inputFields?.length).toBe(2);
+
+    const spy = spyOn(inputFields![1], 'focus');
+
+    // Re-trigger autoFocus logic
+    (component as any).applyAutoFocus();
+    tick(100);
+
+    expect(spy).toHaveBeenCalled();
+  }));
+
+  it('should disable all controls when config.disabled is true', () => {
+    setup({
+      kind: ModalKind.FORM,
+      disabled: true,
+      fields: [
+        { kind: FieldKind.TEXT, key: 'name', label: 'Name' }
+      ]
+    } as any);
+
+    expect(component.form.disabled).toBeTrue();
+    expect(component.form.get('name')?.disabled).toBeTrue();
+  });
+
+  it('should treat all fields as readOnly when config.readOnly is true', () => {
+    setup({
+      kind: ModalKind.FORM,
+      readOnly: true,
+      fields: [
+        { kind: FieldKind.TEXT, key: 'name', label: 'Name' }
+      ]
+    } as any);
+
+    expect(component.isFieldReadOnly(component.config.fields[0])).toBeTrue();
+    // form should also be disabled by default if readOnly is true in ngOnInit
+    expect(component.form.disabled).toBeTrue();
   });
 });

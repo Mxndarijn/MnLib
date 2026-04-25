@@ -1,8 +1,8 @@
 <div class="modal-backdrop absolute inset-0 bg-black/50 animate-[fadeIn_0.2s_ease-in-out]" *ngIf="showBackdrop" (click)="onBackdropClick()"></div>
 
 <div
-  class="modal-container relative bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col animate-[slideIn_0.2s_ease-in-out]"
-  [ngClass]="containerSizeClass"
+  class="modal-container relative bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
+  [ngClass]="[containerSizeClass, animationClass]"
   role="dialog"
   aria-modal="true"
   [attr.aria-labelledby]="config.title ? 'mn-modal-title' : null"

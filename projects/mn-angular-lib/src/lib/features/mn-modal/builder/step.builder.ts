@@ -2,23 +2,17 @@ import {
   WizardStepConfig,
   FormFieldConfig,
   FormFieldGroup,
-  FormRow,
-  FormRowField,
   FormValidator,
-  FieldKind,
-  SelectOption,
   StepState,
   StepGuard,
   StepValidator,
   ModalStepId,
-  Type,
-  ModalInputMap,
 } from '../mn-modal.types';
+import { FormLayoutBuilder } from './form-layout.builder';
 
 export class StepBuilder<TModel = any> {
   private config: WizardStepConfig<TModel>;
-  private currentRow: FormRowField<TModel>[] = [];
-  private currentRowColumns = 1;
+  private layoutBuilder: FormLayoutBuilder<TModel, this>;
 
   constructor(id: string, title: string) {
     this.config = {
@@ -27,6 +21,7 @@ export class StepBuilder<TModel = any> {
       fields: [],
       state: StepState.PENDING,
     };
+    this.layoutBuilder = new FormLayoutBuilder(this.config, this);
   }
 
   body(body: any): this {
@@ -57,17 +52,7 @@ export class StepBuilder<TModel = any> {
    * s.field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [...] })
    */
   field(field: FormFieldConfig<TModel>): this {
-    this.flushCurrentRow();
-    this.config.fields = this.config.fields || [];
-    this.config.fields.push(field);
-    if (!this.config.rows) {
-      this.config.rows = [];
-    }
-    this.config.rows.push({
-      columns: 1,
-      fields: [{ field, span: 1 }],
-    });
-    return this;
+    return this.layoutBuilder.field(field);
   }
 
   /**
@@ -75,89 +60,110 @@ export class StepBuilder<TModel = any> {
    * All subsequent `addToRow()` calls will add fields to this row.
    */
   row(columns: number = 2): this {
-    this.flushCurrentRow();
-    this.currentRowColumns = columns;
-    return this;
+    return this.layoutBuilder.row(columns);
   }
 
   /**
    * Add a field to the current row started by `row()`.
    */
   addToRow(field: FormFieldConfig<TModel>, span: number = 1): this {
-    this.config.fields = this.config.fields || [];
-    this.config.fields.push(field);
-    this.currentRow.push({ field, span });
-    return this;
+    return this.layoutBuilder.addToRow(field, span);
   }
 
-  private flushCurrentRow(): void {
-    if (this.currentRow.length > 0) {
-      if (!this.config.rows) {
-        this.config.rows = [];
-      }
-      this.config.rows.push({
-        columns: this.currentRowColumns,
-        fields: [...this.currentRow],
-      });
-      this.currentRow = [];
-      this.currentRowColumns = 1;
-    }
+  /**
+   * Declarative way to add a row.
+   */
+  addRow(
+    columns: number,
+    buildFn: (row: { add: (field: FormFieldConfig<TModel>, span?: number) => void }) => void
+  ): this {
+    return this.layoutBuilder.addRow(columns, buildFn);
   }
 
   /**
    * Add a field group with a section header.
    */
-  fieldGroup(group: FormFieldGroup<TModel>): this {
-    this.flushCurrentRow();
-    if (!this.config.fieldGroups) {
-      this.config.fieldGroups = [];
-    }
-    this.config.fields = this.config.fields || [];
-    group.fields.forEach(f => this.config.fields!.push(f));
-    if (!group.rows) {
-      group.rows = group.fields.map(f => ({
-        columns: 1,
-        fields: [{ field: f, span: 1 }],
-      }));
-    }
-    this.config.fieldGroups.push(group);
-    return this;
+  fieldGroup(group: FormFieldGroup<TModel>): this;
+  /**
+   * Add a field group using a functional builder.
+   */
+  fieldGroup(
+    title: string,
+    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
+  ): this;
+  /**
+   * Add a field group with title, description, and a functional builder.
+   */
+  fieldGroup(
+    title: string,
+    description: string,
+    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
+  ): this;
+  fieldGroup(
+    arg1: string | FormFieldGroup<TModel>,
+    arg2?: string | ((group: FormLayoutBuilder<TModel, any>) => void),
+    arg3?: (group: FormLayoutBuilder<TModel, any>) => void
+  ): this {
+    return this.layoutBuilder.fieldGroup(arg1 as any, arg2 as any, arg3 as any);
   }
 
   /**
    * Add form-level validators for cross-field validation within this step.
    */
   formValidators(validators: FormValidator<TModel>[]): this {
-    this.config.formValidators = validators;
-    return this;
+    return this.layoutBuilder.formValidators(validators);
   }
 
   /**
    * Add Angular FormGroup-level validators for this step.
    */
   groupValidators(validators: any[]): this {
-    this.config.groupValidators = validators;
-    return this;
+    return this.layoutBuilder.groupValidators(validators);
   }
 
   /**
    * Set initial values for fields in this step.
    */
   initialValue(value: Partial<TModel>): this {
-    this.config.initialValue = value;
-    return this;
+    return this.layoutBuilder.initialValue(value);
   }
 
   /**
    * Set a visibility condition for this step based on aggregated wizard data.
    */
-  visible(condition: (aggregatedData: Record<ModalStepId, Record<string, any>>) => boolean): this {
+  visible(
+    condition: (aggregatedData: Record<ModalStepId, Record<string, any>>) => boolean
+  ): this {
     this.config.visible = condition;
     return this;
   }
 
+  /**
+   * Set a custom label for the 'Next' button on this step.
+   */
+  nextLabel(label: string): this {
+    this.config.nextLabel = label;
+    return this;
+  }
+
+  /**
+   * Set a custom label for the 'Back' button on this step.
+   */
+  backLabel(label: string): this {
+    this.config.backLabel = label;
+    return this;
+  }
+
+  /**
+   * Hide the 'Back' button on this step.
+   */
+  hideBack(hide: boolean = true): this {
+    this.config.hideBack = hide;
+    return this;
+  }
+
   build(): WizardStepConfig<TModel> {
-    this.flushCurrentRow();
+    this.layoutBuilder.flushCurrentRow();
     return this.config;
   }
 }

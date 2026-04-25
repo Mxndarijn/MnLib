@@ -1,3 +1,10 @@
+<mn-custom-body-host
+  *ngIf="(config.component || config.template) && !hideCustomBody"
+  [config]="asAny(config)"
+  [modalRef]="asAny(modalRef)"
+  class="mb-6 block"
+></mn-custom-body-host>
+
 <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
   <!-- Shared field rendering template (must be inside form for formControlName) -->
   <ng-template #fieldTemplate let-rowField>
@@ -9,7 +16,10 @@
             id: asKey(rowField.field.key),
             type: 'text',
             label: asField(rowField.field).label,
-            placeholder: asField(rowField.field).placeholder
+            placeholder: asField(rowField.field).placeholder,
+            mask: asField(rowField.field).mask,
+            autocomplete: asField(rowField.field).autocomplete,
+            readonly: isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-input-field>
       </div>
@@ -21,7 +31,8 @@
             id: asKey(rowField.field.key),
             type: 'number',
             label: asField(rowField.field).label,
-            placeholder: asField(rowField.field).placeholder
+            placeholder: asField(rowField.field).placeholder,
+            readonly: isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-input-field>
       </div>
@@ -33,7 +44,8 @@
             id: asKey(rowField.field.key),
             type: 'password',
             label: asField(rowField.field).label,
-            placeholder: asField(rowField.field).placeholder
+            placeholder: asField(rowField.field).placeholder,
+            readonly: isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-input-field>
       </div>
@@ -48,7 +60,8 @@
             [id]="asKey(rowField.field.key)"
             [formControlName]="asKey(rowField.field.key)"
             class="w-full px-3 py-2 border border-gray-300 rounded-xl text-base text-gray-900 bg-white transition-all appearance-none pr-8 focus:outline-none focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10 select-arrow"
-            [class.opacity-50]="isFieldLoading(asKey(rowField.field.key))"
+            [class.opacity-50]="isFieldLoading(asKey(rowField.field.key)) || isFieldDisabled(rowField.field)"
+            [attr.disabled]="isFieldDisabled(rowField.field) || isFieldReadOnly(rowField.field) ? '' : null"
           >
             <option value="" disabled selected hidden>
               {{ isFieldLoading(asKey(rowField.field.key)) ? labels.loading : labels.selectPlaceholder }}
@@ -81,7 +94,8 @@
           [formControlName]="asKey(rowField.field.key)"
           [props]="asAny({
             id: asKey(rowField.field.key),
-            label: asField(rowField.field).label
+            label: asField(rowField.field).label,
+            disabled: isFieldDisabled(rowField.field) || isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-checkbox>
       </div>
@@ -95,7 +109,8 @@
             label: asField(rowField.field).label,
             placeholder: asField(rowField.field).placeholder,
             startDate: asField(rowField.field).minDate,
-            endDate: asField(rowField.field).maxDate
+            endDate: asField(rowField.field).maxDate,
+            readonly: isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-input-field>
       </div>
@@ -110,7 +125,8 @@
             mode: asField(rowField.field).mode || 'datetime-local',
             min: asField(rowField.field).min,
             max: asField(rowField.field).max,
-            step: asField(rowField.field).step
+            step: asField(rowField.field).step,
+            readonly: isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-datetime>
       </div>
@@ -122,7 +138,9 @@
             id: asKey(rowField.field.key),
             label: asField(rowField.field).label,
             rows: asField(rowField.field).rows || 4,
-            resize: 'vertical'
+            resize: 'vertical',
+            autocomplete: asField(rowField.field).autocomplete,
+            readonly: isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-textarea>
       </div>
@@ -141,7 +159,8 @@
             options: getFieldOptions(rowField.field),
             searchable: asField(rowField.field).searchable,
             searchPlaceholder: asField(rowField.field).searchPlaceholder,
-            maxSelections: asField(rowField.field).maxSelections
+            maxSelections: asField(rowField.field).maxSelections,
+            disabled: isFieldDisabled(rowField.field) || isFieldReadOnly(rowField.field)
           })"
         ></mn-lib-multi-select>
         <div *ngIf="getFieldError(asKey(rowField.field.key))" class="text-red-500 text-xs pl-2 pt-1">
@@ -356,7 +375,7 @@
   </div>
 
   <!-- Standard rows (no groups) -->
-  <div class="flex flex-col gap-4" *ngIf="fieldGroups.length === 0">
+  <div class="flex flex-col gap-4" *ngIf="rows.length > 0">
     <div *ngFor="let row of rows" class="grid gap-4" [style.grid-template-columns]="getGridColumns(row)">
       <div *ngFor="let rowField of row.fields" class="flex flex-col gap-2" [style.grid-column]="getGridSpan(rowField)" [style.display]="isFieldVisible(rowField.field) ? '' : 'none'">
         <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: rowField }"></ng-container>

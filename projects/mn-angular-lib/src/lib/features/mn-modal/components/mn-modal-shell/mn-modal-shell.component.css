@@ -5,6 +5,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+:host(.is-stacked) {
+  transform: scale(0.96) translateY(-1rem);
+  filter: brightness(0.9) blur(1px);
+  pointer-events: none;
+  opacity: 0.8;
 }
 
 @keyframes fadeIn {
@@ -17,6 +25,11 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
@@ -27,10 +40,23 @@
   to { opacity: 0; transform: translateY(1rem); }
 }
 
+@keyframes zoomOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
 :host(.closing) .modal-backdrop {
   animation: fadeOut 0.15s ease-in-out forwards;
 }
 
-:host(.closing) .modal-container {
+:host(.closing).anim-slide .modal-container {
   animation: slideOut 0.15s ease-in-out forwards;
+}
+
+:host(.closing).anim-fade .modal-container {
+  animation: fadeOut 0.15s ease-in-out forwards;
+}
+
+:host(.closing).anim-zoom .modal-container {
+  animation: zoomOut 0.15s ease-in-out forwards;
 }

@@ -2,6 +2,7 @@ import { ModalBuilder } from './modal.builder';
 import {
   ActionStyle,
   ConfirmationTone,
+  FieldKind,
   ModalCloseReason,
   ModalKind,
   ModalSize,
@@ -88,5 +89,39 @@ describe('ConfirmationModalBuilder', () => {
   it('should default message to empty string', () => {
     const config = ModalBuilder.confirmation().build();
     expect(config.message).toBe('');
+  });
+
+  it('should support fields and rows (Hybrid Confirmation)', () => {
+    const config = ModalBuilder.confirmation()
+      .message('Hybrid')
+      .field({ kind: FieldKind.TEXT, key: 'reason', label: 'Reason' })
+      .addRow(2, (row) => {
+        row.add({ kind: FieldKind.CHECKBOX, key: 'ok', label: 'OK' });
+      })
+      .build();
+
+    expect(config.fields!.length).toBe(2);
+    expect(config.rows!.length).toBe(2);
+    expect(config.fields![0].key).toBe('reason');
+    expect(config.fields![1].key).toBe('ok');
+  });
+
+  it('should support body()', () => {
+    const config = ModalBuilder.confirmation()
+      .body('Custom Body')
+      .build();
+    expect(config.body).toBe('Custom Body');
+  });
+
+  it('should support fieldGroup()', () => {
+    const config = ModalBuilder.confirmation()
+      .fieldGroup('Options', (g) => {
+        g.field({ kind: FieldKind.TEXT, key: 'opt1', label: 'Option 1' });
+      })
+      .build();
+
+    expect(config.fieldGroups!.length).toBe(1);
+    expect(config.fieldGroups![0].title).toBe('Options');
+    expect(config.fieldGroups![0].fields.length).toBe(1);
   });
 });

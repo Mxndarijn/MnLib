@@ -1,46 +1,65 @@
-<div class="flex flex-col items-center gap-6 text-center" [ngClass]="toneClass">
-  <div *ngIf="config.tone === 'warning' || config.tone === 'danger'"
-       class="w-12 h-12 rounded-full flex items-center justify-center"
-       [ngClass]="{
-         'bg-blue-100 text-blue-500': config.tone !== 'warning' && config.tone !== 'danger',
-         'bg-amber-100 text-amber-500': config.tone === 'warning',
-         'bg-red-100 text-red-500': config.tone === 'danger'
-       }">
-    <svg
-      *ngIf="config.tone === 'warning'"
-      class="w-6 h-6"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-      />
-    </svg>
-    <svg
-      *ngIf="config.tone === 'danger'"
-      class="w-6 h-6"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-      />
-    </svg>
+<div class="flex flex-col gap-6" [ngClass]="toneClass">
+  <!-- Custom Content (Component or Template) -->
+  <mn-custom-body-host
+    *ngIf="config.component || config.template"
+    [config]="asAny(config)"
+    [modalRef]="asAny(modalRef)"
+  ></mn-custom-body-host>
+
+  <div class="flex flex-col items-center text-center gap-6">
+    <div *ngIf="config.tone === 'warning' || config.tone === 'danger'"
+         class="w-12 h-12 rounded-full flex items-center justify-center"
+         [ngClass]="{
+           'bg-blue-100 text-blue-500': config.tone !== 'warning' && config.tone !== 'danger',
+           'bg-amber-100 text-amber-500': config.tone === 'warning',
+           'bg-red-100 text-red-500': config.tone === 'danger'
+         }">
+      <svg
+        *ngIf="config.tone === 'warning'"
+        class="w-6 h-6"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+        />
+      </svg>
+      <svg
+        *ngIf="config.tone === 'danger'"
+        class="w-6 h-6"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+        />
+      </svg>
+    </div>
+
+    <div class="text-base text-gray-700 leading-relaxed max-w-[28rem]" *ngIf="config.message">
+      {{ config.message }}
+    </div>
   </div>
 
-  <div class="text-base text-gray-700 leading-relaxed max-w-[28rem]">
-    {{ config.message }}
-  </div>
+  <!-- Form Fields / Rows -->
+  <mn-form-body
+    *ngIf="hasFormFields"
+    [config]="asAny(config)"
+    [modalRef]="asAny(modalRef)"
+    [hideFooter]="true"
+    [hideCustomBody]="true"
+    (formStatusChange)="onFormStatusChange($event)"
+  ></mn-form-body>
 
   <div class="flex gap-3 w-full">
     <button
@@ -60,8 +79,10 @@
       mnButton
       [data]="{
         variant: getButtonVariant(confirmStyle),
-        color: getButtonColor(confirmStyle)
+        color: getButtonColor(confirmStyle),
+        disabled: isConfirmDisabled
       }"
+      [disabled]="isConfirmDisabled"
       (click)="confirm()"
     >
       {{ confirmLabel }}

@@ -121,22 +121,22 @@ export class ModalDemo {
     const config = ModalBuilder.form<UserFormModel, UserFormModel>()
       .title('User Information')
       .size(ModalSize.LG)
-      // First Name and Last Name side by side
-      .row(2)
-        .addToRow({
+      .addRow(2, (row) => {
+        row.add({
           kind: FieldKind.TEXT,
           key: 'firstName',
           label: 'First Name',
           placeholder: 'Enter first name',
           validators: [Validators.required],
-        })
-        .addToRow({
+        });
+        row.add({
           kind: FieldKind.TEXT,
           key: 'lastName',
           label: 'Last Name',
           placeholder: 'Enter last name',
           validators: [Validators.required],
-        })
+        });
+      })
       // Email full width
       .field({
         kind: FieldKind.TEXT,
@@ -444,43 +444,23 @@ export class ModalDemo {
       .title('Weapon Information')
       .subtitle('View weapon details')
       .size(ModalSize.LG)
-      .fieldGroup({
-        title: 'General Information',
-        description: 'Basic weapon identification details',
-        fields: [
-          { kind: FieldKind.TEXT, key: 'name', label: 'Weapon Name', readOnly: true },
-          { kind: FieldKind.TEXT, key: 'serialNumber', label: 'Serial Number', readOnly: true },
-        ],
-        rows: [
-          { columns: 2, fields: [
-            { field: { kind: FieldKind.TEXT, key: 'name', label: 'Weapon Name', readOnly: true }, span: 1 },
-            { field: { kind: FieldKind.TEXT, key: 'serialNumber', label: 'Serial Number', readOnly: true }, span: 1 },
-          ]},
-        ],
+      .fieldGroup('General Information', 'Basic weapon identification details', (g) => {
+        g.addRow(2, (row) => {
+          row.add({ kind: FieldKind.TEXT, key: 'name', label: 'Weapon Name', readOnly: true });
+          row.add({ kind: FieldKind.TEXT, key: 'serialNumber', label: 'Serial Number', readOnly: true });
+        });
       })
-      .fieldGroup({
-        title: 'Specifications',
-        fields: [
-          { kind: FieldKind.TEXT, key: 'brand', label: 'Brand', readOnly: true },
-          { kind: FieldKind.TEXT, key: 'model', label: 'Model', readOnly: true },
-          { kind: FieldKind.TEXT, key: 'caliber', label: 'Caliber', readOnly: true },
-        ],
-        rows: [
-          { columns: 3, fields: [
-            { field: { kind: FieldKind.TEXT, key: 'brand', label: 'Brand', readOnly: true }, span: 1 },
-            { field: { kind: FieldKind.TEXT, key: 'model', label: 'Model', readOnly: true }, span: 1 },
-            { field: { kind: FieldKind.TEXT, key: 'caliber', label: 'Caliber', readOnly: true }, span: 1 },
-          ]},
-        ],
+      .fieldGroup('Specifications', (g) => {
+        g.addRow(3, (row) => {
+          row.add({ kind: FieldKind.TEXT, key: 'brand', label: 'Brand', readOnly: true });
+          row.add({ kind: FieldKind.TEXT, key: 'model', label: 'Model', readOnly: true });
+          row.add({ kind: FieldKind.TEXT, key: 'caliber', label: 'Caliber', readOnly: true });
+        });
       })
-      .fieldGroup({
-        title: 'Status & Maintenance',
-        description: 'Current status and maintenance notes',
-        fields: [
-          { kind: FieldKind.TEXT, key: 'status', label: 'Status', disabled: true },
-          { kind: FieldKind.TEXT, key: 'lastMaintenance', label: 'Last Maintenance', readOnly: true },
-          { kind: FieldKind.TEXTAREA, key: 'notes', label: 'Notes', readOnly: true, rows: 3 },
-        ],
+      .fieldGroup('Status & Maintenance', 'Current status and maintenance notes', (g) => {
+        g.field({ kind: FieldKind.TEXT, key: 'status', label: 'Status', disabled: true })
+         .field({ kind: FieldKind.TEXT, key: 'lastMaintenance', label: 'Last Maintenance', readOnly: true })
+         .field({ kind: FieldKind.TEXTAREA, key: 'notes', label: 'Notes', readOnly: true, rows: 3 });
       })
       .initialValue({
         name: 'Glock 17 Gen5',
@@ -583,6 +563,238 @@ export class ModalDemo {
         label: 'Close',
         style: ActionStyle.PRIMARY,
       })
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  @ViewChild('customHeader', { static: true }) customHeader!: TemplateRef<any>;
+  @ViewChild('confirmationDetail', { static: true }) confirmationDetail!: TemplateRef<any>;
+  @ViewChild('wizardHeader', { static: true }) wizardHeader!: TemplateRef<any>;
+
+  openHybridModal() {
+    interface HybridModel {
+      email: string;
+    }
+    const config = ModalBuilder.form<HybridModel>()
+      .title('Hybrid Modal')
+      .size(ModalSize.MD)
+      .template(this.customHeader)
+      .field({
+        kind: FieldKind.TEXT,
+        key: 'email',
+        label: 'Email Address',
+        placeholder: 'Enter your email',
+        validators: [Validators.required, Validators.email]
+      })
+      .onComplete({
+        handle: async (result) => {
+          this.lastResult = `Hybrid Form Result: ${JSON.stringify(result)}`;
+        }
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  openHybridConfirmationModal() {
+    const config = ModalBuilder.confirmation()
+      .title('Confirm with details')
+      .size(ModalSize.MD)
+      .template(this.confirmationDetail)
+      .fieldGroup('Verification Details', 'Please provide additional context for this action', (g) => {
+        g.addRow(2, (row) => {
+          row.add({
+            kind: FieldKind.TEXT,
+            key: 'reason',
+            label: 'Reason',
+            placeholder: 'Why are you doing this?',
+            validators: [Validators.required]
+          });
+          row.add({
+            kind: FieldKind.SELECT,
+            key: 'priority',
+            label: 'Priority',
+            options: [
+              { label: 'Low', value: 'low' },
+              { label: 'Medium', value: 'medium' },
+              { label: 'High', value: 'high' }
+            ],
+            validators: [Validators.required]
+          });
+        });
+      })
+      .field({
+        kind: FieldKind.CHECKBOX,
+        key: 'acknowledged',
+        label: 'I acknowledge that I have read and understood the implications of this action',
+        validators: [Validators.requiredTrue]
+      })
+      .confirmAction({
+        label: 'Confirm All',
+        style: ActionStyle.PRIMARY,
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  openWizardWithCustomHeader() {
+    interface WizardHeaderModel {
+      data1: string;
+      data2: string;
+    }
+    const config = ModalBuilder.wizard<WizardHeaderModel>()
+      .title('Wizard with Custom Visualization')
+      .template(this.wizardHeader)
+      .addStep<WizardHeaderModel>('Step 1', (s) => {
+        s.body('This wizard has a custom header visualization across all steps.')
+         .field({ kind: FieldKind.TEXT, key: 'data1', label: 'Field 1' })
+         .nextLabel('Go to Step 2');
+      })
+      .addStep<WizardHeaderModel>('Step 2', (s) => {
+        s.body('Still here!')
+         .field({ kind: FieldKind.TEXT, key: 'data2', label: 'Field 2' })
+         .backLabel('Go back to 1')
+         .nextLabel('Finish');
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  openAdvancedFormFeatures() {
+    interface AdvancedModel {
+      phone: string;
+      taxId: string;
+      deferred: string;
+      autoFocused: string;
+    }
+
+    const config = ModalBuilder.form<AdvancedModel>()
+      .title('Advanced Form Features')
+      .subtitle('Showcase of masking, updateOn, and auto-focus')
+      .size(ModalSize.MD)
+      .field({
+        kind: FieldKind.TEXT,
+        key: 'autoFocused',
+        label: 'Auto-Focused Field',
+        placeholder: 'I should be focused on open',
+        autoFocus: true
+      })
+      .field({
+        kind: FieldKind.TEXT,
+        key: 'phone',
+        label: 'Phone Number (Masked)',
+        placeholder: '(000) 000-0000',
+        mask: '(000) 000-0000',
+        validators: [Validators.required, Validators.pattern(/^\(\d{3}\) \d{3}-\d{4}$/)]
+      })
+      .field({
+        kind: FieldKind.TEXT,
+        key: 'taxId',
+        label: 'Tax ID (Mixed Mask)',
+        placeholder: 'AA-000-**',
+        mask: 'AA-000-**',
+        validators: [Validators.required, Validators.pattern(/^[a-zA-Z]{2}-\d{3}-.{2}$/)]
+      })
+      .field({
+        kind: FieldKind.TEXT,
+        key: 'deferred',
+        label: 'Deferred Validation (updateOn: blur)',
+        placeholder: 'Validation runs only on blur',
+        updateOn: 'blur',
+        validators: [Validators.required, Validators.minLength(5)]
+      })
+      .onComplete({
+        handle: async (result) => {
+          this.lastResult = `Advanced Form Result: ${JSON.stringify(result)}`;
+        }
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  openStackedModalDemo() {
+    const openSecond = () => {
+      interface SecondModel {
+        note: string;
+      }
+      const config2 = ModalBuilder.form<SecondModel>()
+        .title('Second Modal')
+        .subtitle('This modal is stacked on top of the first one.')
+        .size(ModalSize.SM)
+        .animation('zoom')
+        .field({
+          kind: FieldKind.TEXT,
+          key: 'note',
+          label: 'A note in the second modal',
+          placeholder: 'Type something...'
+        })
+        .onComplete({
+          handle: async (res) => console.log('Second modal complete', res)
+        })
+        .build();
+      this.modalService.open(config2);
+    };
+
+    interface FirstModel {
+      input1: string;
+    }
+    const config = ModalBuilder.form<FirstModel>()
+      .title('First Modal')
+      .subtitle('Click the button below to open another modal on top.')
+      .size(ModalSize.MD)
+      .animation('fade')
+      .field({
+        kind: FieldKind.TEXT,
+        key: 'input1',
+        label: 'Input in first modal',
+        placeholder: 'First modal input'
+      })
+      .footerActions([
+        {
+          label: 'Cancel',
+          style: ActionStyle.SECONDARY,
+          closesModal: true,
+          closeReason: ModalCloseReason.CANCELLED
+        },
+        {
+          label: 'Open Second Modal',
+          style: ActionStyle.PRIMARY,
+          handler: () => openSecond()
+        }
+      ])
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  openFluentValidationDemo() {
+    interface FluentModel {
+      email: string;
+      password: string;
+    }
+    const config = ModalBuilder.form<FluentModel>()
+      .title('Fluent Validation Demo')
+      .size(ModalSize.MD)
+      .fieldWithValidators({
+        kind: FieldKind.TEXT,
+        key: 'email',
+        label: 'Email Address'
+      })
+        .required()
+        .email()
+        .done()
+      .fieldWithValidators({
+        kind: FieldKind.PASSWORD,
+        key: 'password',
+        label: 'Password'
+      })
+        .required()
+        .minLength(8)
+        .done()
       .build();
 
     this.modalService.open(config);

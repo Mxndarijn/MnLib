@@ -54,6 +54,10 @@ export class MnModalRef<TResult = any> implements ModalRef<TResult> {
     this.componentRef.changeDetectorRef.detectChanges();
   }
 
+  get component(): any {
+    return this.componentRef.instance;
+  }
+
   private destroy(): void {
     this.componentRef.destroy();
   }

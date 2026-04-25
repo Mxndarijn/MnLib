@@ -1,11 +1,10 @@
 import { BaseModalBuilder } from './base-modal.builder';
+import { FormLayoutBuilder, FieldValidatorBuilder } from './form-layout.builder';
 import {
   FormModalConfig,
   ModalKind,
   FormFieldConfig,
   FormFieldGroup,
-  FormRow,
-  FormRowField,
   FormLayoutMode,
   SubmitMode,
   ModalResultHandler,
@@ -16,9 +15,6 @@ export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseMo
   FormModalConfig<TModel, TResult>,
   TResult
 > {
-  private currentRow: FormRowField<TModel>[] = [];
-  private currentRowColumns = 1;
-
   constructor() {
     super({
       kind: ModalKind.FORM,
@@ -27,59 +23,27 @@ export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseMo
     });
   }
 
-  /**
-   * Add a field as a full-width row (single column).
-   * This is the simple API — each field gets its own row.
-   */
-  field(field: FormFieldConfig<TModel>): this {
-    this.flushCurrentRow();
-    this.config.fields.push(field);
-    this.config.rows!.push({
-      columns: 1,
-      fields: [{ field, span: 1 }],
-    });
-    return this;
+  override body(body: any): this {
+    return super.body(body);
   }
 
-  /**
-   * Start a new row with the specified number of columns.
-   * All subsequent `addToRow()` calls will add fields to this row
-   * until the next `row()` or `field()` call.
-   *
-   * @example
-   * .row(2)
-   *   .addToRow({ kind: FieldKind.TEXT, key: 'firstName', label: 'First Name' })
-   *   .addToRow({ kind: FieldKind.TEXT, key: 'lastName', label: 'Last Name' })
-   * .row(3)
-   *   .addToRow({ kind: FieldKind.TEXT, key: 'city', label: 'City' }, 2)
-   *   .addToRow({ kind: FieldKind.TEXT, key: 'zip', label: 'ZIP' })
-   */
-  row(columns: number = 2): this {
-    this.flushCurrentRow();
-    this.currentRowColumns = columns;
-    return this;
+  override field(field: FormFieldConfig<TModel>): this {
+    return super.field(field);
   }
 
-  /**
-   * Add a field to the current row started by `row()`.
-   * @param field - The field configuration
-   * @param span - How many columns this field should span (default: 1)
-   */
-  addToRow(field: FormFieldConfig<TModel>, span: number = 1): this {
-    this.config.fields.push(field);
-    this.currentRow.push({ field, span });
-    return this;
+  override row(columns: number = 2): this {
+    return super.row(columns);
   }
 
-  private flushCurrentRow(): void {
-    if (this.currentRow.length > 0) {
-      this.config.rows!.push({
-        columns: this.currentRowColumns,
-        fields: [...this.currentRow],
-      });
-      this.currentRow = [];
-      this.currentRowColumns = 1;
-    }
+  override addToRow(field: FormFieldConfig<TModel>, span: number = 1): this {
+    return super.addToRow(field, span);
+  }
+
+  override addRow(
+    columns: number,
+    buildFn: (row: { add: (field: FormFieldConfig<TModel>, span?: number) => void }) => void
+  ): this {
+    return super.addRow(columns, buildFn as any);
   }
 
   layout(mode: FormLayoutMode): this {
@@ -88,8 +52,7 @@ export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseMo
   }
 
   initialValue(value: Partial<TModel>): this {
-    this.config.initialValue = value;
-    return this;
+    return this.layoutBuilder.initialValue(value);
   }
 
   submitMode(mode: SubmitMode): this {
@@ -102,48 +65,43 @@ export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseMo
     return this;
   }
 
-  /**
-   * Add form-level validators for cross-field validation.
-   * These receive the entire form value and return an error map or null.
-   */
   formValidators(validators: FormValidator<TModel>[]): this {
-    this.config.formValidators = validators;
-    return this;
+    return this.layoutBuilder.formValidators(validators);
   }
 
-  /**
-   * Add Angular FormGroup-level validators.
-   * These are standard Angular ValidatorFn applied to the FormGroup itself.
-   */
   groupValidators(validators: any[]): this {
-    this.config.groupValidators = validators;
-    return this;
+    return this.layoutBuilder.groupValidators(validators);
   }
 
   /**
    * Add a field group with a section header.
    * Groups visually separate fields with a title and optional description.
    */
-  fieldGroup(group: FormFieldGroup<TModel>): this {
-    this.flushCurrentRow();
-    if (!this.config.fieldGroups) {
-      this.config.fieldGroups = [];
-    }
-    // Also add group fields to the flat fields array for form control creation
-    group.fields.forEach(f => this.config.fields.push(f));
-    // Build rows for the group if not provided
-    if (!group.rows) {
-      group.rows = group.fields.map(f => ({
-        columns: 1,
-        fields: [{ field: f, span: 1 }],
-      }));
-    }
-    this.config.fieldGroups.push(group);
-    return this;
+  override fieldGroup(group: FormFieldGroup<TModel>): this;
+  /**
+   * Add a field group using a functional builder.
+   */
+  override fieldGroup(
+    title: string,
+    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
+  ): this;
+  /**
+   * Add a field group with title, description, and a functional builder.
+   */
+  override fieldGroup(
+    title: string,
+    description: string,
+    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
+  ): this;
+  override fieldGroup(
+    arg1: string | FormFieldGroup<TModel>,
+    arg2?: string | ((group: FormLayoutBuilder<TModel, any>) => void),
+    arg3?: (group: FormLayoutBuilder<TModel, any>) => void
+  ): this {
+    return super.fieldGroup(arg1 as any, arg2 as any, arg3 as any);
   }
 
   override build(): Readonly<FormModalConfig<TModel, TResult>> {
-    this.flushCurrentRow();
-    return super.build();
+    return super.build() as any;
   }
 }

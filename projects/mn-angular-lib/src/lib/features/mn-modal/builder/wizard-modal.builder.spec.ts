@@ -140,4 +140,66 @@ describe('WizardModalBuilder', () => {
       .build();
     expect(config.steps[0].state).toBe(StepState.ACTIVE);
   });
+
+  it('should support declarative addRow in steps', () => {
+    const config = ModalBuilder.wizard()
+      .addStep('Step 1', (s) => {
+        s.addRow(2, (row) => {
+          row.add({ kind: FieldKind.TEXT, key: 'first', label: 'First' });
+          row.add({ kind: FieldKind.TEXT, key: 'last', label: 'Last' });
+        });
+      })
+      .build();
+
+    expect(config.steps[0].rows!.length).toBe(1);
+    expect(config.steps[0].rows![0].columns).toBe(2);
+    expect(config.steps[0].fields!.length).toBe(2);
+  });
+
+  it('should support generic TResult', () => {
+    interface MyResult {
+      id: string;
+      value: number;
+    }
+    const config = ModalBuilder.wizard<MyResult>()
+      .onBeforeComplete([(payload) => {
+        // payload: Record<ModalStepId, Record<string, any>>
+        return null; // Should compile
+      }])
+      .addStep('Step 1', (s) => s.body(''))
+      .build();
+
+    expect(config.kind).toBe(ModalKind.WIZARD);
+  });
+
+  it('should allow structured payload mapping (concept)', () => {
+    interface WizardData {
+      account: { email: string };
+      profile: { age: number };
+    }
+
+    // This is mostly a compile-time test for the generic TResult propagation
+    const config = ModalBuilder.wizard<WizardData>()
+      .addStep<{ email: string }>('Account', (s) => {
+        s.field({ kind: FieldKind.TEXT, key: 'email', label: 'Email' });
+      }, 'account')
+      .addStep<{ age: number }>('Profile', (s) => {
+        s.field({ kind: FieldKind.NUMBER, key: 'age', label: 'Age' });
+      }, 'profile')
+      .build();
+
+    expect(config.steps.length).toBe(2);
+    expect(config.steps[0].id).toBe('account');
+    expect(config.steps[1].id).toBe('profile');
+  });
+
+  it('should support top-level initialValue', () => {
+    interface MyModel { name: string; age: number; }
+    const config = ModalBuilder.wizard<MyModel>()
+      .initialValue({ name: 'Global' })
+      .addStep('S1', (s) => s.body(''))
+      .build();
+
+    expect(config.initialValue).toEqual({ name: 'Global' });
+  });
 });

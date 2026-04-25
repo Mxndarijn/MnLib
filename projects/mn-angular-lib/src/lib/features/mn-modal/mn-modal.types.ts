@@ -267,6 +267,12 @@ export interface WizardStepConfig<TModel = any> {
   initialValue?: Partial<TModel>;
   guard?: StepGuard;
   validators?: StepValidator[];
+  /** Custom label for the 'Next' button on this step */
+  nextLabel?: string;
+  /** Custom label for the 'Back' button on this step */
+  backLabel?: string;
+  /** Whether to hide the 'Back' button on this step */
+  hideBack?: boolean;
   /** Condition to show/hide this entire step based on aggregated wizard data */
   visible?: (aggregatedData: Record<ModalStepId, Record<string, any>>) => boolean;
 }
@@ -301,6 +307,14 @@ export interface TextFieldConfig<TModel = unknown> {
   disabled?: boolean;
   /** Condition to show/hide this field based on other field values */
   visible?: FieldVisibilityCondition<TModel>;
+  /** Input mask (e.g., '(000) 000-0000') */
+  mask?: string;
+  /** Autocomplete attribute */
+  autocomplete?: string;
+  /** Whether to focus this field when the modal opens */
+  autoFocus?: boolean;
+  /** When to update the form control value and run validation */
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface NumberFieldConfig<TModel = unknown> {
@@ -316,6 +330,8 @@ export interface NumberFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface SelectFieldConfig<TModel = unknown, TValue = unknown> {
@@ -329,6 +345,8 @@ export interface SelectFieldConfig<TModel = unknown, TValue = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
   /** Async data source for loading options dynamically */
   dataSource?: FieldDataSource<TValue, TModel>;
 }
@@ -338,9 +356,13 @@ export interface CheckboxFieldConfig<TModel = unknown> {
   key: keyof TModel;
   label: string;
   defaultValue?: boolean;
+  validators?: any[];
+  asyncValidators?: any[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface DateFieldConfig<TModel = unknown> {
@@ -355,6 +377,8 @@ export interface DateFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface TextareaFieldConfig<TModel = unknown> {
@@ -368,6 +392,8 @@ export interface TextareaFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface DatetimeFieldConfig<TModel = unknown> {
@@ -384,6 +410,8 @@ export interface DatetimeFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface MultiSelectFieldConfig<TModel = unknown, TValue = unknown> {
@@ -399,6 +427,8 @@ export interface MultiSelectFieldConfig<TModel = unknown, TValue = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
   /** Async data source for loading options dynamically */
   dataSource?: FieldDataSource<TValue, TModel>;
 }
@@ -413,6 +443,8 @@ export interface PasswordFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface MultiSelectTableFieldConfig<TModel = unknown, TRow = any> {
@@ -428,6 +460,8 @@ export interface MultiSelectTableFieldConfig<TModel = unknown, TRow = any> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface SingleSelectTableFieldConfig<TModel = unknown, TRow = any> {
@@ -443,6 +477,8 @@ export interface SingleSelectTableFieldConfig<TModel = unknown, TRow = any> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface ColorFieldConfig<TModel = unknown> {
@@ -458,6 +494,8 @@ export interface ColorFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface RatingFieldConfig<TModel = unknown> {
@@ -475,6 +513,8 @@ export interface RatingFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface SliderFieldConfig<TModel = unknown> {
@@ -496,6 +536,8 @@ export interface SliderFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface FileFieldConfig<TModel = unknown> {
@@ -515,6 +557,8 @@ export interface FileFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export interface CustomFieldConfig<TModel = unknown> {
@@ -523,7 +567,11 @@ export interface CustomFieldConfig<TModel = unknown> {
   component: Type<unknown>;
   inputs?: ModalInputMap;
   label?: string;
+  validators?: any[];
+  asyncValidators?: any[];
   visible?: FieldVisibilityCondition<TModel>;
+  autoFocus?: boolean;
+  updateOn?: 'change' | 'blur' | 'submit';
 }
 
 export type FormFieldConfig<TModel = unknown> =
@@ -543,6 +591,11 @@ export type FormFieldConfig<TModel = unknown> =
   | RatingFieldConfig<TModel>
   | SliderFieldConfig<TModel>
   | CustomFieldConfig<TModel>;
+
+export interface AnimationOptions {
+  type: 'slide' | 'fade' | 'zoom';
+  duration?: number; // ms
+}
 
 // =========================
 // Form Layout Types
@@ -683,17 +736,29 @@ export interface BaseModalConfig<TResult = unknown> {
   /** Polling configuration for periodic async operations */
   polling?: ModalPollingConfig<TResult>;
   /** Handler called when the modal is cancelled or dismissed */
+  readOnly?: boolean;
+  disabled?: boolean;
   onCancel?: ModalCancelHandler<TResult>;
   /** i18n labels for buttons and UI text */
   i18n?: ModalI18nLabels;
+  /** Animation configuration */
+  animation?: AnimationOptions | AnimationOptions['type'];
+
+  /** Custom component to render in the modal body */
+  component?: Type<unknown>;
+  /** Custom template to render in the modal body */
+  template?: TemplateRef<unknown>;
+  /** Inputs for the custom component */
+  inputs?: ModalInputMap;
 }
 
 // =========================
 // Specialized Configs
 // =========================
 
-/** Validator that receives aggregated data from all wizard steps before completion */
-export type WizardBeforeCompleteValidator = (payload: Record<ModalStepId, Record<string, any>>) => Promise<Record<string, string> | null> | Record<string, string> | null;
+export type WizardBeforeCompleteValidator<TResult = any> = (
+  payload: Record<ModalStepId, Record<string, any>>
+) => Promise<Partial<Record<keyof TResult, string>> | null> | Partial<Record<keyof TResult, string>> | null;
 
 export interface WizardModalConfig<TResult = WizardResult> extends BaseModalConfig<TResult> {
   kind: ModalKind.WIZARD;
@@ -703,11 +768,14 @@ export interface WizardModalConfig<TResult = WizardResult> extends BaseModalConf
   onStepChange?: WizardStepChangeHandler;
   onComplete?: ModalResultHandler<TResult>;
   /** Cross-step validators run before wizard completion */
-  onBeforeComplete?: WizardBeforeCompleteValidator[];
+  onBeforeComplete?: WizardBeforeCompleteValidator<TResult>[];
+  /** Global initial values for all steps */
+  initialValue?: Partial<TResult>;
 }
 
 export interface FormModalConfig<TModel = unknown, TResult = TModel> extends BaseModalConfig<TResult> {
   kind: ModalKind.FORM;
+  body?: any;
   fields: FormFieldConfig<TModel>[];
   rows?: FormRow<TModel>[];
   layout?: FormLayoutMode;
@@ -728,13 +796,19 @@ export interface ConfirmationModalConfig<TResult = boolean> extends BaseModalCon
   tone?: ConfirmationTone;
   confirm?: ConfirmationActionConfig<TResult>;
   cancel?: CancellationActionConfig;
+
+  // Form-like capabilities for hybrid confirmation modals
+  body?: any;
+  fields?: FormFieldConfig<any>[];
+  rows?: FormRow<any>[];
+  fieldGroups?: FormFieldGroup<any>[];
+  formValidators?: FormValidator<any>[];
+  groupValidators?: any[];
+  initialValue?: Partial<any>;
 }
 
 export interface CustomModalConfig<TResult = unknown> extends BaseModalConfig<TResult> {
   kind: ModalKind.CUSTOM;
-  component?: Type<unknown>;
-  template?: TemplateRef<unknown>;
-  inputs?: ModalInputMap;
   onComplete?: ModalResultHandler<TResult>;
 }
 

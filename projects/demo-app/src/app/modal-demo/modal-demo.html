@@ -56,7 +56,7 @@
 
     <!-- Custom Modal -->
     <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Custom Template Modal</h2>
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Custom & Hybrid Modals</h2>
       <div class="flex flex-row gap-x-2">
         <button
           mnButton
@@ -64,6 +64,48 @@
           (click)="openCustomModal()"
         >
           Open Custom Modal
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
+          (click)="openHybridModal()"
+        >
+          Open Hybrid (Form + Template)
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
+          (click)="openHybridConfirmationModal()"
+        >
+          Open Hybrid Confirmation
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+          (click)="openWizardWithCustomHeader()"
+        >
+          Open Wizard + Custom Header
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          (click)="openAdvancedFormFeatures()"
+        >
+          Open Advanced Form (Mask/Focus/Blur)
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+          (click)="openStackedModalDemo()"
+        >
+          Open Stacked Modal Demo
+        </button>
+        <button
+          mnButton
+          [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
+          (click)="openFluentValidationDemo()"
+        >
+          Open Fluent Validation Demo
         </button>
       </div>
     </div>
@@ -219,5 +261,48 @@
         Done
       </button>
     </div>
+  </div>
+</ng-template>
+
+<ng-template #customHeader>
+  <div class="bg-blue-50 p-4 mb-4 rounded-lg border border-blue-200">
+    <h3 class="text-blue-800 font-semibold mb-1">Information Notice</h3>
+    <p class="text-blue-700 text-sm">
+      This is a custom template injected into a <strong>Form Modal</strong>.
+      You can still use all form builder features below.
+    </p>
+  </div>
+</ng-template>
+
+<ng-template #confirmationDetail>
+  <div class="mb-6">
+    <div class="flex items-start gap-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+      <div class="p-2 bg-amber-100 rounded-full text-amber-600 shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
+      <div>
+        <h4 class="text-amber-800 font-semibold">Caution: Sensitive Action</h4>
+        <p class="text-amber-700 text-sm mt-1">
+          You are about to perform an action that may have significant impact. Please review the details below carefully before proceeding.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-4 flex justify-center">
+      <img src="https://placehold.co/600x200/f59e0b/ffffff?text=Important+Confirmation" alt="Confirmation Graphic" class="rounded-lg shadow-sm border border-gray-200 w-full h-32 object-cover">
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #wizardHeader>
+  <div class="flex items-center gap-3 p-3 bg-purple-50 text-purple-700 rounded-lg border border-purple-100 mb-4">
+    <div class="bg-purple-100 p-2 rounded-full">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+      </svg>
+    </div>
+    <span class="font-medium text-sm">Universal Step Header - Persistent across all wizard stages</span>
   </div>
 </ng-template>

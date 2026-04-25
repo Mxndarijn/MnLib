@@ -55,6 +55,15 @@ export interface MnInputBaseProps {
   /** Placeholder text (overrides uiConfig.placeholder when provided) */
   placeholder?: string;
 
+  /** Input mask (e.g., '(000) 000-0000') */
+  mask?: string;
+
+  /** Autocomplete attribute */
+  autocomplete?: string;
+
+  /** Whether to focus this field when the component initializes */
+  autoFocus?: boolean;
+
   // ========== Styling/Variants ==========
 
   /** Size variant of the input field (default: 'md') */

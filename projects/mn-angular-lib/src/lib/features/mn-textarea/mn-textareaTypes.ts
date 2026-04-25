@@ -54,8 +54,14 @@ export interface MnTextareaProps {
   /** Whether the textarea should take full width of its container */
   fullWidth?: MnTextareaVariants['fullWidth'];
 
-  /** Resize behavior of the textarea (default: 'vertical') */
+  /** resize behavior of the textarea (default: 'vertical') */
   resize?: MnTextareaVariants['resize'];
+
+  /** Whether to focus this field when the component initializes */
+  autoFocus?: boolean;
+
+  /** Autocomplete attribute */
+  autocomplete?: string;
 
   // ========== Error Message Configuration ==========
 

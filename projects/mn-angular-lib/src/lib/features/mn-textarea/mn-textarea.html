@@ -18,6 +18,7 @@
     [attr.aria-invalid]="showError || null"
     [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
     [disabled]="isDisabled"
+    [attr.autocomplete]="props.autocomplete || null"
     [attr.rows]="props.rows ?? null"
     [attr.cols]="props.cols ?? null"
     [ngClass]="textareaClasses"

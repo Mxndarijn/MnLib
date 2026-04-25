@@ -1,4 +1,14 @@
-import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  InjectionToken,
+  Input,
+  OnInit,
+  Optional,
+  Self
+} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnTextareaProps, MnTextareaErrorMessageData, MnTextareaUIConfig} from './mn-textareaTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -52,6 +62,8 @@ export class MnTextarea implements OnInit {
   /** Resolved UI configuration for the textarea */
   protected uiConfig: MnTextareaUIConfig = {};
 
+  private readonly el = inject(ElementRef);
+
   /** Configuration properties for the textarea */
   @Input({ required: true }) props!: MnTextareaProps;
 
@@ -101,6 +113,18 @@ export class MnTextarea implements OnInit {
       this.resolveConfig();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
+
+    if (this.props.autoFocus) {
+      setTimeout(() => this.focus(), 0);
+    }
+  }
+
+  /**
+   * Focuses the textarea element.
+   */
+  focus(): void {
+    const textarea = this.el.nativeElement.querySelector('textarea');
+    if (textarea) textarea.focus();
   }
 
   private resolveConfig() {

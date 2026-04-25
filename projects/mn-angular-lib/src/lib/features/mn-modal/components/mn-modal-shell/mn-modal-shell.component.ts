@@ -37,6 +37,7 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
   @Input() modalRef!: MnModalRef<TResult>;
 
   isClosing = false;
+  isStacked = false;
   readonly ModalKind = ModalKind;
   private previouslyFocusedElement: HTMLElement | null = null;
   private focusTrapListener: ((e: KeyboardEvent) => void) | null = null;
@@ -122,7 +123,12 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
   @HostBinding('class') get hostClasses(): string {
     const size = this.config.size || ModalSize.MD;
     const closing = this.isClosing ? ' closing' : '';
-    return `modal-shell modal-${size}${closing}`;
+    const animType = typeof this.config.animation === 'string'
+      ? this.config.animation
+      : this.config.animation?.type || 'slide';
+    const animation = ` anim-${animType}`;
+    const stacked = this.isStacked ? ' is-stacked' : '';
+    return `modal-shell modal-${size}${closing}${animation}${stacked}`;
   }
 
   startClosing(): Promise<void> {
@@ -182,6 +188,19 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
 
   get showCloseButton(): boolean {
     return this.config.closeMode !== CloseMode.DISABLED;
+  }
+
+  get animationClass(): string {
+    const animType = typeof this.config.animation === 'string'
+      ? this.config.animation
+      : this.config.animation?.type || 'slide';
+
+    switch (animType) {
+      case 'fade': return 'animate-[fadeIn_0.2s_ease-in-out]';
+      case 'zoom': return 'animate-[zoomIn_0.2s_ease-in-out]';
+      case 'slide':
+      default: return 'animate-[slideIn_0.2s_ease-in-out]';
+    }
   }
 
   // =========================

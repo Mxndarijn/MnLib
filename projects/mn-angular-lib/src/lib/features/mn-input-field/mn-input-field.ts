@@ -1,7 +1,17 @@
-import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
-import {NgClass} from '@angular/common';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  InjectionToken,
+  Input,
+  OnInit,
+  Optional,
+  Self
+} from '@angular/core';
+import {CommonModule, NgClass} from '@angular/common';
 import {MnInputProps, MnErrorMessageData, MnInputFieldUIConfig} from './mn-input-fieldTypes';
-import {AbstractControl, NgControl, ValidationErrors, Validators} from '@angular/forms';
+import {AbstractControl, FormsModule, NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {pickAdapter} from './mn-input-field-adapters';
 import {mnInputFieldVariants} from './mn-input-fieldVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
@@ -46,12 +56,14 @@ export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('M
 @Component({
   selector: 'mn-lib-input-field',
   standalone: true,
-  imports: [NgClass, MnErrorMessage],
+  imports: [CommonModule, NgClass, MnErrorMessage, FormsModule],
   templateUrl: './mn-input-field.html',
 })
 export class MnInputField implements OnInit {
   /** Resolved UI configuration for the input field */
   protected uiConfig: MnInputFieldUIConfig = {};
+
+  private readonly el = inject(ElementRef);
 
   /** Configuration properties for the input field */
   @Input({ required: true }) props!: MnInputProps;
@@ -105,6 +117,18 @@ export class MnInputField implements OnInit {
       this.resolveConfig();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
+
+    if (this.props.autoFocus) {
+      setTimeout(() => this.focus(), 0);
+    }
+  }
+
+  /**
+   * Focuses the input element.
+   */
+  focus(): void {
+    const input = this.el.nativeElement.querySelector('input');
+    if (input) input.focus();
   }
 
   private resolveConfig() {
@@ -180,8 +204,15 @@ export class MnInputField implements OnInit {
    * @param raw - Raw string value from the input element
    */
   handleInput(raw: string): void {
-    this.value = raw;
-    this.onChange(this.adapter.parse(raw));
+    let finalValue = raw;
+
+    // Apply mask if available
+    if (this.props.mask && typeof this.adapter.applyMask === 'function') {
+      finalValue = this.adapter.applyMask(raw, this.props.mask);
+    }
+
+    this.value = finalValue;
+    this.onChange(this.adapter.parse(finalValue));
   }
 
   /**

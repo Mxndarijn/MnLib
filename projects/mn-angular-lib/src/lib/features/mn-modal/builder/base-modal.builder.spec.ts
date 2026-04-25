@@ -76,4 +76,20 @@ describe('BaseModalBuilder (via FormModalBuilder)', () => {
     expect(config1).not.toBe(config2);
     expect(config1).toEqual(config2);
   });
+
+  it('should set custom component, template, and inputs', () => {
+    const mockComponent = {} as any;
+    const mockTemplate = {} as any;
+    const mockInputs = { key: 'value' };
+
+    const config = ModalBuilder.form()
+      .component(mockComponent)
+      .template(mockTemplate)
+      .inputs(mockInputs)
+      .build();
+
+    expect(config.component).toBe(mockComponent);
+    expect(config.template).toBe(mockTemplate);
+    expect(config.inputs).toEqual(mockInputs);
+  });
 });

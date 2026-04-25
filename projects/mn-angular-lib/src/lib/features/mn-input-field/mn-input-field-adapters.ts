@@ -113,6 +113,11 @@ export interface MnInputAdapter<TOut = string | null> {
    * // if startDate is '2024-07-01'
    */
   validate(props: MnInputProps, control: AbstractControl, currentRaw: string | null): ValidationErrors | null;
+
+  /**
+   * Applies a mask to the raw input value.
+   */
+  applyMask?(value: string, mask: string): string;
 }
 
 /**
@@ -138,12 +143,64 @@ const emptyToNull = (raw: string): string | null => (raw === '' ? null : raw);
  * - Values are stored as strings in the FormControl
  * - No special DOM attributes
  * - No additional validation (relies on Angular's built-in validators)
+ * - Supports simple masking (0 for digit, A for alpha, * for any)
  */
 export const defaultTextAdapter: MnInputAdapter<string | null> = {
   parse: (raw) => emptyToNull(raw),
   format: (val) => (val == null ? '' : String(val)),
   attrs: () => ({}),
   validate: () => null,
+  applyMask: (value: string, mask: string): string => {
+    if (!mask || !value) return value;
+
+    let result = '';
+    let maskIndex = 0;
+    let dataIndex = 0;
+
+    // Remove non-alphanumeric if we want to re-mask from clean data
+    // But usually we just want to restrict input.
+    // A simple implementation:
+    while (maskIndex < mask.length && dataIndex < value.length) {
+      const maskChar = mask[maskIndex];
+      const dataChar = value[dataIndex];
+
+      if (maskChar === '0') {
+        if (/\d/.test(dataChar)) {
+          result += dataChar;
+          dataIndex++;
+          maskIndex++;
+        } else {
+          dataIndex++; // skip invalid
+        }
+      } else if (maskChar === 'A') {
+        if (/[a-zA-Z]/.test(dataChar)) {
+          result += dataChar;
+          dataIndex++;
+          maskIndex++;
+        } else {
+          dataIndex++; // skip invalid
+        }
+      } else if (maskChar === '*') {
+        result += dataChar;
+        dataIndex++;
+        maskIndex++;
+      } else {
+        result += maskChar;
+        if (dataChar === maskChar) {
+          dataIndex++;
+        }
+        maskIndex++;
+      }
+    }
+
+    // Auto-append static characters if next in mask
+    while (maskIndex < mask.length && !/[0A*]/.test(mask[maskIndex])) {
+      result += mask[maskIndex];
+      maskIndex++;
+    }
+
+    return result;
+  }
 };
 
 /**

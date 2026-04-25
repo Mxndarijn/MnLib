@@ -4,8 +4,8 @@ import { ConfirmationModalBuilder } from './confirmation-modal.builder';
 import { CustomModalBuilder } from './custom-modal.builder';
 
 export class ModalBuilder {
-  static wizard(): WizardModalBuilder {
-    return new WizardModalBuilder();
+  static wizard<TResult = any>(): WizardModalBuilder<TResult> {
+    return new WizardModalBuilder<TResult>();
   }
 
   static form<TModel = unknown, TResult = TModel>(): FormModalBuilder<TModel, TResult> {

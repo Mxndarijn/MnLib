@@ -1,4 +1,14 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+  ViewChildren,
+  QueryList,
+  AfterViewInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -26,18 +36,24 @@ import { MnTextarea } from '../../../mn-textarea/mn-textarea';
 import { MnCustomFieldHostDirective } from './mn-custom-field-host.directive';
 import { MnTable } from '../../../mn-table/mn-table.component';
 import { MultiSelectTableFieldConfig, SingleSelectTableFieldConfig, RatingFieldConfig, SliderFieldConfig, ColorFieldConfig } from '../../mn-modal.types';
+import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
 
 @Component({
   selector: 'mn-form-body',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnCustomFieldHostDirective, MnTable],
+  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent],
   templateUrl: './mn-form-body.component.html',
   styleUrls: ['./mn-form-body.component.css'],
 })
-export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnInit, OnDestroy {
+export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnInit, OnDestroy, AfterViewInit {
   @Input() config!: FormModalConfig<TModel, TResult>;
   @Input() modalRef!: MnModalRef<TResult>;
   @Input() hideFooter = false;
+  @Input() hideCustomBody = false;
+  @Output() formStatusChange = new EventEmitter<string>();
+
+  @ViewChildren(MnInputField) inputFields?: QueryList<MnInputField>;
+  @ViewChildren(MnTextarea) textareas?: QueryList<MnTextarea>;
 
   form!: FormGroup;
   rows: FormRow<TModel>[] = [];
@@ -107,6 +123,50 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     this.initializeDataSources();
     this.initializeTableFields();
     this.subscribeToValueChanges();
+
+    if (this.config.disabled || this.config.readOnly) {
+      this.form.disable();
+    }
+
+    // Emit initial status
+    setTimeout(() => {
+      this.formStatusChange.emit(this.form.status);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Small delay to ensure children are fully rendered and MnModalShell hasn't just stolen focus
+    setTimeout(() => {
+      this.applyAutoFocus();
+    }, 100);
+  }
+
+  public applyAutoFocus(): void {
+    const autoFocusField = this.config.fields.find(f => (f as any).autoFocus);
+    if (!autoFocusField) return;
+
+    const key = autoFocusField.key as string;
+
+    // Small delay to ensure browser is ready to focus
+    setTimeout(() => {
+      // Try finding in MnInputField components
+      const inputField = this.inputFields?.find(f => f.props.id === key);
+      if (inputField) {
+        inputField.focus();
+        return;
+      }
+
+      // Try finding in MnTextarea components
+      const textarea = this.textareas?.find(f => (f as any).props?.id === key);
+      if (textarea && typeof (textarea as any).focus === 'function') {
+        (textarea as any).focus();
+        return;
+      }
+
+      // Fallback to native element if possible
+      const el = document.getElementById(key);
+      if (el) el.focus();
+    }, 50);
   }
 
   ngOnDestroy(): void {
@@ -125,10 +185,19 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
         initialValue = (fieldConfig.defaultValue ?? false) as any;
       }
 
-      const validators = fieldConfig.validators || [];
-      const asyncValidators = fieldConfig.asyncValidators || [];
-      formControls[field.key as string] = [initialValue, validators, asyncValidators];
-    });
+    const validators = fieldConfig.validators || [];
+    const asyncValidators = fieldConfig.asyncValidators || [];
+    const updateOn = fieldConfig.updateOn || 'change';
+
+    formControls[field.key as string] = [
+      initialValue,
+      {
+        validators,
+        asyncValidators,
+        updateOn
+      }
+    ];
+  });
 
     this.form = this.fb.group(formControls);
 
@@ -149,11 +218,11 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   }
 
   isFieldReadOnly(field: FormFieldConfig<TModel>): boolean {
-    return (field as any).readOnly === true;
+    return this.config.readOnly === true || (field as any).readOnly === true;
   }
 
   isFieldDisabled(field: FormFieldConfig<TModel>): boolean {
-    return (field as any).disabled === true;
+    return this.config.disabled === true || (field as any).disabled === true;
   }
 
   /** Track which field groups are currently visible */
@@ -162,12 +231,28 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   private buildRows(): void {
     if (this.config.rows && this.config.rows.length > 0) {
       this.rows = this.config.rows;
-    } else if (!this.config.fieldGroups || this.config.fieldGroups.length === 0) {
-      // Fallback: each field gets its own full-width row
-      this.rows = this.config.fields.map(field => ({
-        columns: 1,
-        fields: [{ field, span: 1 }],
-      }));
+    } else {
+      // Create rows for fields that are not in any row or group
+      const fieldsInGroups = new Set<string>();
+      (this.config.fieldGroups || []).forEach(g => {
+        (g.rows || []).forEach(r => r.fields.forEach(f => fieldsInGroups.add(f.field.key as string)));
+        // Also check if group has flat fields list (compatibility)
+        if ((g as any).fields) {
+          (g as any).fields.forEach((f: any) => fieldsInGroups.add(f.key as string));
+        }
+      });
+
+      const fieldsInRows = new Set<string>();
+      (this.config.rows || []).forEach(r => r.fields.forEach(f => fieldsInRows.add(f.field.key as string)));
+
+      const standaloneFields = this.config.fields.filter(f => !fieldsInGroups.has(f.key as string) && !fieldsInRows.has(f.key as string));
+
+      if (standaloneFields.length > 0) {
+        this.rows = standaloneFields.map(field => ({
+          columns: 1,
+          fields: [{ field, span: 1 }],
+        }));
+      }
     }
     // Build field groups
     this.fieldGroups = this.config.fieldGroups || [];
@@ -480,6 +565,9 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
       // Reload data sources that depend on changed fields
       this.reloadDependentDataSources(formValue);
+
+      // Emit status change
+      this.formStatusChange.emit(this.form.status);
     });
   }
 
