@@ -121,11 +121,6 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
 
   get isConfirmDisabled(): boolean {
     if (this.hasFormFields) {
-      if (this.formBody?.form) {
-        return this.formBody.form.invalid;
-      }
-      // If we have form fields but formBody is not yet ready,
-      // use the last known status if available
       return this.confirmButtonStatus !== 'VALID';
     }
     return false;

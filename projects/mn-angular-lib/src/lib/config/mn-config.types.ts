@@ -2,7 +2,18 @@
  * Types for mn-lib configuration.
  */
 
+export interface MnConfigSettings {
+  /** Application or library version. */
+  version?: string;
+  /** Application or library name. */
+  name?: string;
+}
+
 export interface MnConfigFile {
+  /**
+   * General settings such as version and name.
+   */
+  settings?: MnConfigSettings;
   /**
    * Base defaults by component name. Each value is a plain object with inputs/options for that component.
    */

@@ -1,7 +1,7 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { MnConfigFile } from './mn-config.types';
+import { MnConfigFile, MnConfigSettings } from './mn-config.types';
 import { MnLanguageService } from '../language/mn-language.service';
 import { isTranslatable, MnLanguageConfig } from '../language/mn-language.types';
 import JSON5 from 'json5';
@@ -17,11 +17,21 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 @Injectable({ providedIn: 'root' })
 export class MnConfigService {
   private _config: MnConfigFile | null = null;
+  private _settings: MnConfigSettings = {};
   private _debugMode = false;
+
+  /** Reactive version counter — incremented on every config load. */
+  private _configVersion = signal(0);
+  readonly configVersion = this._configVersion.asReadonly();
 
   private readonly lang = inject(MnLanguageService);
 
   constructor(private readonly http: HttpClient) {}
+
+  /** General settings from the config file (version, name, etc.). */
+  get settings(): Readonly<MnConfigSettings> {
+    return this._settings;
+  }
 
   /**
    * Load the configuration JSON from the provided URL and cache it in memory.
@@ -54,7 +64,10 @@ export class MnConfigService {
     const defaults = isPlainObject(cfg.defaults) ? cfg.defaults : {};
     const overrides = isPlainObject(cfg.overrides) ? cfg.overrides : cfg.overrides ?? {};
 
-    this._config = { defaults, overrides };
+    const settings: MnConfigSettings = isPlainObject(cfg.settings) ? cfg.settings as MnConfigSettings : {};
+
+    this._config = { settings, defaults, overrides };
+    this._settings = settings;
 
     // Bootstrap language service from config if a "language" section is present.
     // This avoids circular dependency: config reads raw language settings and
@@ -68,6 +81,36 @@ export class MnConfigService {
       await Promise.all(localesToLoad.map(l => this.lang.loadLocale(l)));
       await this.lang.setLocale(effectiveLocale);
     }
+
+    this._configVersion.update(v => v + 1);
+  }
+
+  /**
+   * Load configuration from a pre-parsed object (no HTTP fetch).
+   * Used for live preview scenarios where config is pushed via postMessage.
+   * Optionally re-bootstraps the language service if a `language` section is present.
+   */
+  async loadFromObject(config: Record<string, any>, bootstrapLanguage = false): Promise<void> {
+    const defaults = isPlainObject(config['defaults']) ? config['defaults'] : {};
+    const overrides = isPlainObject(config['overrides']) ? config['overrides'] : {};
+    const settings: MnConfigSettings = isPlainObject(config['settings']) ? config['settings'] as MnConfigSettings : {};
+
+    this._config = { settings, defaults, overrides };
+    this._settings = settings;
+
+    if (bootstrapLanguage) {
+      const langCfg = config['language'];
+      if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
+        const lc = langCfg as unknown as MnLanguageConfig;
+        this.lang.configure(lc.urlPattern);
+        const effectiveLocale = this.lang.resolveLocaleForDomain(lc.domainLocaleMap, lc.defaultLocale);
+        const localesToLoad = lc.preload ?? [effectiveLocale];
+        await Promise.all(localesToLoad.map(l => this.lang.loadLocale(l)));
+        await this.lang.setLocale(effectiveLocale);
+      }
+    }
+
+    this._configVersion.update(v => v + 1);
   }
 
 
