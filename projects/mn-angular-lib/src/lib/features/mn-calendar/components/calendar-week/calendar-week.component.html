@@ -1,0 +1,44 @@
+<div class="calendar-week" role="grid" aria-label="Week view">
+  <div class="week-header" [style.grid-template-columns]="'60px ' + gridTemplateColumns">
+    <div class="time-gutter-header"></div>
+    <div class="day-column-header"
+      *ngFor="let col of columns; let i = index; trackBy: trackByColumn"
+      [class.today]="col.isToday"
+      [style.grid-column]="getHeaderColumn(i)"
+      role="columnheader">
+      <span class="day-name">{{ col.dayName }}</span>
+      <span class="day-number">{{ col.dayNumber }}</span>
+    </div>
+  </div>
+  <div class="week-body">
+    <div class="time-gutter" [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'">
+      <div class="hour-label"
+        *ngFor="let row of hourRows; trackBy: trackByHour"
+        [style.grid-row]="row.topRow + '/' + row.bottomRow">
+        {{ row.hourLabel }}
+      </div>
+    </div>
+    <div class="week-grid"
+      [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'"
+      [style.grid-template-columns]="gridTemplateColumns">
+      <div class="hour-line"
+        *ngFor="let row of hourRows; trackBy: trackByHour"
+        [style.grid-row]="row.topRow + '/' + row.bottomRow"
+        [style.grid-column]="'1 / -1'">
+      </div>
+      <div class="current-time-line" *ngIf="currentTimeRow > 0 && currentTimeCol"
+        [style.grid-row]="currentTimeRow"
+        [style.grid-column]="currentTimeCol">
+        <div class="current-time-dot"></div>
+        <div class="current-time-rule"></div>
+      </div>
+      <div class="week-event"
+        *ngFor="let event of displayEvents; trackBy: trackByEvent"
+        [style.grid-row]="getEventRow(event)"
+        [style.grid-column]="getEventColumn(event)"
+        (click)="onEventClick(event)">
+        <app-calendar-event [event]="event" [customComponent]="calendarEventComponent"></app-calendar-event>
+      </div>
+    </div>
+  </div>
+</div>

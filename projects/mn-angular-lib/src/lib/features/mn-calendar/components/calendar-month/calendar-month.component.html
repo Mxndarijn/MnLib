@@ -1,0 +1,26 @@
+<div class="calendar-month" role="grid" aria-label="Month view">
+  <div class="month-header">
+    <div class="day-header" *ngFor="let day of longDayNames; trackBy: trackByDayName" role="columnheader">{{ day }}</div>
+  </div>
+  <div class="month-grid">
+    <div
+      class="month-cell"
+      *ngFor="let item of monthItems; trackBy: trackByMonthItem"
+      [class.other-month]="!item.isCurrentMonth"
+      [class.today]="item.isToday"
+      (click)="onDayClick(item.date)"
+      role="gridcell"
+      [attr.aria-label]="item.date.toDateString()">
+      <span class="day-number">{{ item.dayNumber }}</span>
+      <div class="month-events">
+        <div
+          class="month-event-dot"
+          *ngFor="let event of item.events.slice(0, 3); trackBy: trackByEventDot"
+          [style.background-color]="event.color.primaryColor"
+          [title]="event.title">
+        </div>
+        <span class="more-events" *ngIf="item.events.length > 3">+{{ item.events.length - 3 }}</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -35,5 +35,10 @@
   "demo.validation.email.label": "Email (required)",
   "demo.validation.email.placeholder": "Enter your email",
   "demo.validation.message.label": "Message (required)",
-  "demo.validation.message.placeholder": "Type a message"
+  "demo.validation.message.placeholder": "Type a message",
+  "calendar.today": "Today",
+  "calendar.upcoming_events": "Upcoming events",
+  "calendar.view.month": "Month",
+  "calendar.view.week": "Week",
+  "calendar.view.day": "Day"
 }

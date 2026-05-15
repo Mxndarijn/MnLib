@@ -1,0 +1,69 @@
+<div class="calendar-view" role="application" aria-label="Calendar">
+  <div class="calendar-toolbar">
+    <div class="toolbar-left">
+      <div class="view-switcher" role="tablist" aria-label="Calendar view">
+        <button
+          *ngFor="let view of viewOptions; trackBy: trackByView"
+          class="view-btn"
+          role="tab"
+          [attr.aria-selected]="currentView === view.value"
+          [class.active]="currentView === view.value"
+          (click)="switchView(view.value)">
+          {{ view.label }}
+        </button>
+      </div>
+      <div class="date-nav">
+        <button class="nav-btn" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
+        <input type="date" [value]="dateInputValue" (change)="onDateInputChange($event)" class="date-input" aria-label="Select date" />
+        <button class="nav-btn" (click)="navigateNext()" aria-label="Next">&#8250;</button>
+        <button class="today-btn" (click)="goToToday()">{{ config.todayLabel }}</button>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button *ngIf="showButton" class="action-btn" (click)="ButtonClickedEvent.emit()">
+        {{ buttonTitle }}
+      </button>
+    </div>
+  </div>
+
+  <div class="calendar-content">
+    <div class="calendar-main">
+      <app-calendar-month
+        *ngIf="currentView === CalendarView.MONTH"
+        [focusDay]="focusDay"
+        [eventsChanged]="internalEventsChanged"
+        [focusDayChanged]="internalFocusDayChanged"
+        [config]="config"
+        (dayClicked)="onMonthDayClick($event)">
+      </app-calendar-month>
+
+      <app-calendar-week
+        *ngIf="currentView === CalendarView.WEEK"
+        [focusDay]="focusDay"
+        [eventsChanged]="internalEventsChanged"
+        [focusDayChanged]="internalFocusDayChanged"
+        [config]="config"
+        [calendarEventComponent]="CalendarEventComponent"
+        (eventClicked)="onEventClick($event)">
+      </app-calendar-week>
+
+      <app-calendar-day
+        *ngIf="currentView === CalendarView.DAY"
+        [focusDay]="focusDay"
+        [eventsChanged]="internalEventsChanged"
+        [focusDayChanged]="internalFocusDayChanged"
+        [config]="config"
+        [calendarEventComponent]="CalendarEventComponent"
+        (eventClicked)="onEventClick($event)">
+      </app-calendar-day>
+    </div>
+
+    <div class="calendar-sidebar">
+      <app-upcoming-events
+        [eventsChanged]="internalEventsChanged"
+        [config]="config"
+        (eventClicked)="onEventClick($event)">
+      </app-upcoming-events>
+    </div>
+  </div>
+</div>

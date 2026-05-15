@@ -1,0 +1,21 @@
+<div class="calendar-demo-wrapper">
+  <div class="calendar-demo-header">
+    <h2>Calendar Demo</h2>
+    <span class="calendar-demo-subtitle">Week, day, and month views with custom event renderers and configurable hours.</span>
+  </div>
+
+  <div class="calendar-demo-body">
+    <app-calendar-view
+      [showButton]="true"
+      [buttonTitle]="'New Event'"
+      [NewCalendarItemsEvent]="eventsEmitter"
+      (RequestNewCalendarItemsEvent)="loadEvents($event)"
+      (CalendarItemClickedEvent)="onEventClick($event)"
+      (ButtonClickedEvent)="onNewEvent()">
+    </app-calendar-view>
+  </div>
+
+  <div *ngIf="clickedEvent" class="calendar-demo-clicked">
+    <strong>Last clicked:</strong> {{ clickedEvent.title }} ({{ clickedEvent.startTime | date:'short' }} - {{ clickedEvent.endTime | date:'short' }})
+  </div>
+</div>

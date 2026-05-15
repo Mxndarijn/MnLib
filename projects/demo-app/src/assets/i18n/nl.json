@@ -35,5 +35,10 @@
   "demo.validation.email.label": "E-mail (verplicht)",
   "demo.validation.email.placeholder": "Voer je e-mailadres in",
   "demo.validation.message.label": "Bericht (verplicht)",
-  "demo.validation.message.placeholder": "Typ een bericht"
+  "demo.validation.message.placeholder": "Typ een bericht",
+  "calendar.today": "Vandaag",
+  "calendar.upcoming_events": "Aankomende gebeurtenissen",
+  "calendar.view.month": "Maand",
+  "calendar.view.week": "Week",
+  "calendar.view.day": "Dag"
 }

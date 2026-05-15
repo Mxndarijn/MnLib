@@ -1,0 +1,40 @@
+<div class="calendar-day" role="grid" aria-label="Day view">
+  <div class="day-header">
+    <div class="time-gutter-header"></div>
+    <div class="day-column-header" [class.today]="isToday" role="columnheader">
+      <span class="day-name">{{ dayName }}</span>
+      <span class="day-number">{{ focusDay.getDate() }}</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="time-gutter" [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'">
+      <div class="hour-label"
+        *ngFor="let row of hourRows; trackBy: trackByHour"
+        [style.grid-row]="row.topRow + '/' + row.bottomRow">
+        {{ row.hourLabel }}
+      </div>
+    </div>
+    <div class="day-grid"
+      [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'"
+      [style.grid-template-columns]="'repeat(' + totalColumns + ', 1fr)'">
+      <div class="hour-line"
+        *ngFor="let row of hourRows; trackBy: trackByHour"
+        [style.grid-row]="row.topRow + '/' + row.bottomRow"
+        [style.grid-column]="'1 / -1'">
+      </div>
+      <div class="current-time-line" *ngIf="currentTimeRow > 0 && isToday"
+        [style.grid-row]="currentTimeRow"
+        [style.grid-column]="'1 / -1'">
+        <div class="current-time-dot"></div>
+        <div class="current-time-rule"></div>
+      </div>
+      <div class="day-event"
+        *ngFor="let event of displayEvents; trackBy: trackByEvent"
+        [style.grid-row]="getEventRow(event)"
+        [style.grid-column]="getEventColumn(event)"
+        (click)="onEventClick(event)">
+        <app-calendar-event [event]="event" [customComponent]="calendarEventComponent"></app-calendar-event>
+      </div>
+    </div>
+  </div>
+</div>
