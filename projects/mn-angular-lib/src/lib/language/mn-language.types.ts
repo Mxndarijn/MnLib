@@ -42,6 +42,8 @@ export interface MnLanguageConfig {
    * Example: { "example.nl": "nl", "example.de": "de", "example.com": "en" }
    */
   domainLocaleMap?: Record<string, string>;
+  /** Whether to enable debug logging. */
+  debug?: boolean;
 }
 
 /**

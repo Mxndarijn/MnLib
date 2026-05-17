@@ -19,6 +19,9 @@ export function provideMnLanguage(config: MnLanguageConfig): Provider[] {
       provide: APP_INITIALIZER,
       multi: true,
       useFactory: (svc: MnLanguageService) => async () => {
+        if (config.debug) {
+          svc.setDebug(true);
+        }
         svc.configure(config.urlPattern);
 
         const effectiveLocale = svc.resolveLocaleForDomain(config.domainLocaleMap, config.defaultLocale);

@@ -39,6 +39,7 @@ export class MnConfigService {
    */
   async load(url: string, debugMode = false): Promise<void> {
     this._debugMode = debugMode;
+    this.lang.setDebug(debugMode);
     let text: string;
 
     try {
@@ -75,9 +76,12 @@ export class MnConfigService {
     const langCfg = cfg.language;
     if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
       const lc = langCfg as unknown as MnLanguageConfig;
+      if (this._debugMode) {
+        console.log(`[MnConfig] Applying language config from file`, lc);
+      }
       this.lang.configure(lc.urlPattern);
       const effectiveLocale = this.lang.resolveLocaleForDomain(lc.domainLocaleMap, lc.defaultLocale);
-      const localesToLoad = lc.preload ?? [effectiveLocale];
+      const localesToLoad = Array.from(new Set([...(lc.preload ?? []), effectiveLocale]));
       await Promise.all(localesToLoad.map(l => this.lang.loadLocale(l)));
       await this.lang.setLocale(effectiveLocale);
     }
@@ -102,9 +106,12 @@ export class MnConfigService {
       const langCfg = config['language'];
       if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
         const lc = langCfg as unknown as MnLanguageConfig;
+        if (this._debugMode) {
+          console.log(`[MnConfig] Applying language config from object`, lc);
+        }
         this.lang.configure(lc.urlPattern);
         const effectiveLocale = this.lang.resolveLocaleForDomain(lc.domainLocaleMap, lc.defaultLocale);
-        const localesToLoad = lc.preload ?? [effectiveLocale];
+        const localesToLoad = Array.from(new Set([...(lc.preload ?? []), effectiveLocale]));
         await Promise.all(localesToLoad.map(l => this.lang.loadLocale(l)));
         await this.lang.setLocale(effectiveLocale);
       }

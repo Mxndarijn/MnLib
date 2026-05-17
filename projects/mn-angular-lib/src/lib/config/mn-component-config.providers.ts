@@ -48,7 +48,7 @@ export function provideMnComponentConfig<T extends object>(
 
       // Re-resolve translatable values whenever the locale changes.
       // skip(1) because the current locale was already used for the initial resolve.
-      const sub = lang.locale$.pipe(skip(1)).subscribe(() => {
+      const sub = lang.locale$.subscribe(() => {
         const updated = resolveConfig();
         // Mutate the existing object in place so all template bindings pick up the new values.
         for (const key of Object.keys(updated) as Array<keyof T>) {

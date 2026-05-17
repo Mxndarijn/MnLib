@@ -8,6 +8,7 @@ export class MnLanguageService {
   private _translations: MnTranslations = {};
   private _locale$ = new BehaviorSubject<string>('en');
   private _urlPattern: string | null = null;
+  private _debug = false;
 
   /** Observable of the current active locale. */
   readonly locale$: Observable<string> = this._locale$.asObservable();
@@ -20,10 +21,23 @@ export class MnLanguageService {
   }
 
   /**
+   * Enable or disable debug logging.
+   */
+  setDebug(enabled: boolean): void {
+    this._debug = enabled;
+    if (enabled) {
+      console.log(`[MnLanguage] Debug mode enabled`);
+    }
+  }
+
+  /**
    * Configure the URL pattern used to fetch translation files.
    * Use `{locale}` as placeholder, e.g. `"assets/i18n/{locale}.json"`.
    */
   configure(urlPattern: string): void {
+    if (this._debug) {
+      console.log(`[MnLanguage] Configured urlPattern: ${urlPattern}`);
+    }
     this._urlPattern = urlPattern;
   }
 
@@ -40,12 +54,18 @@ export class MnLanguageService {
     }
 
     const url = this._urlPattern.replace('{locale}', locale);
+    if (this._debug) {
+      console.log(`[MnLanguage] Loading locale "${locale}" from ${url}`);
+    }
 
     try {
       const map = await firstValueFrom(
         this.http.get<MnTranslationMap>(url)
       );
       this._translations[locale] = map ?? {};
+      if (this._debug) {
+        console.log(`[MnLanguage] Loaded locale "${locale}"`, this._translations[locale]);
+      }
     } catch (err) {
       console.warn(`[MnLanguage] Failed to load translations from ${url}`, err);
       this._translations[locale] = {};
@@ -56,6 +76,9 @@ export class MnLanguageService {
    * Switch the active locale. Loads translations if not yet loaded.
    */
   async setLocale(locale: string): Promise<void> {
+    if (this._debug) {
+      console.log(`[MnLanguage] Setting locale to "${locale}"`);
+    }
     await this.loadLocale(locale);
     this._locale$.next(locale);
   }
@@ -78,9 +101,12 @@ export class MnLanguageService {
    */
   translate(key: string, params?: Record<string, string | number>): string {
     const map = this._translations[this.locale] ?? {};
-    let value = map[key];
+    let value = this.getValueFromMap(map, key);
 
     if (value === undefined) {
+      if (this._debug) {
+        console.warn(`[MnLanguage] Missing translation for key: "${key}" in locale: "${this.locale}"`);
+      }
       return key;
     }
 
@@ -91,6 +117,23 @@ export class MnLanguageService {
     }
 
     return value;
+  }
+
+  /**
+   * Helper to retrieve a value from a potentially nested translation map using a dot-notated key.
+   */
+  private getValueFromMap(map: any, key: string): string | undefined {
+    if (map[key] !== undefined) return map[key];
+
+    const parts = key.split('.');
+    let current = map;
+
+    for (const part of parts) {
+      if (current === null || typeof current !== 'object') return undefined;
+      current = current[part];
+    }
+
+    return typeof current === 'string' ? current : undefined;
   }
 
   /**
