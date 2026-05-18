@@ -4,11 +4,11 @@ export const mnAlertVariants = tv({
   base: 'flex items-start gap-3 p-4 border rounded-xl shadow-sm transition-all duration-300',
   variants: {
     kind: {
-      success: 'bg-green-50 border-green-200 text-green-800',
-      info: 'bg-blue-50 border-blue-200 text-blue-800',
-      warning: 'bg-amber-50 border-amber-200 text-amber-800',
-      error: 'bg-red-50 border-red-200 text-red-800',
-      default: 'bg-white border-gray-200 text-gray-800',
+      success: 'bg-success/10 border-success/30 text-success',
+      info: 'bg-info/10 border-info/30 text-info',
+      warning: 'bg-warning/10 border-warning/30 text-warning',
+      error: 'bg-error/10 border-error/30 text-error',
+      default: 'bg-base-100 border-base-300 text-base-content',
     },
     variant: {
       fill: '',
@@ -20,22 +20,22 @@ export const mnAlertVariants = tv({
     {
       kind: 'success',
       variant: 'fill',
-      class: 'bg-green-600 border-green-700 text-white'
+      class: 'bg-success border-success text-success-content'
     },
     {
       kind: 'info',
       variant: 'fill',
-      class: 'bg-blue-600 border-blue-700 text-white'
+      class: 'bg-info border-info text-info-content'
     },
     {
       kind: 'warning',
       variant: 'fill',
-      class: 'bg-amber-500 border-amber-600 text-white'
+      class: 'bg-warning border-warning text-warning-content'
     },
     {
       kind: 'error',
       variant: 'fill',
-      class: 'bg-red-600 border-red-700 text-white'
+      class: 'bg-error border-error text-error-content'
     }
   ],
   defaultVariants: {

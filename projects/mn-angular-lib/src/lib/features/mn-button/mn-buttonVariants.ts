@@ -42,25 +42,25 @@ export const mnButtonVariants = tv({
 
   compoundVariants: [
     // Fill
-    { variant: 'fill', color: 'primary',   class: 'bg-brand-500 text-black hover:bg-brand-700' },
-    { variant: 'fill', color: 'secondary', class: 'bg-gray-600 text-white hover:bg-gray-700' },
-    { variant: 'fill', color: 'danger',    class: 'bg-red-600 text-white hover:bg-red-700' },
-    { variant: 'fill', color: 'warning',   class: 'bg-amber-500 text-black hover:bg-amber-600' },
-    { variant: 'fill', color: 'success',   class: 'bg-green-600 text-white hover:bg-green-700' },
+    { variant: 'fill', color: 'primary',   class: 'bg-primary text-primary-content hover:bg-primary/80' },
+    { variant: 'fill', color: 'secondary', class: 'bg-neutral text-neutral-content hover:bg-neutral/80' },
+    { variant: 'fill', color: 'danger',    class: 'bg-error text-error-content hover:bg-error/80' },
+    { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content hover:bg-warning/80' },
+    { variant: 'fill', color: 'success',   class: 'bg-success text-success-content hover:bg-success/80' },
 
     // Outline
-    { variant: 'outline', color: 'primary',   class: 'border-brand-500 text-brand-500 hover:bg-brand-100' },
-    { variant: 'outline', color: 'secondary', class: 'border-gray-600 text-gray-700 hover:bg-gray-100' },
-    { variant: 'outline', color: 'danger',    class: 'border-red-600 text-red-600 hover:bg-red-100' },
-    { variant: 'outline', color: 'warning',   class: 'border-amber-500 text-amber-600 hover:bg-amber-100' },
-    { variant: 'outline', color: 'success',   class: 'border-green-600 text-green-600 hover:bg-green-100' },
+    { variant: 'outline', color: 'primary',   class: 'border-primary text-primary hover:bg-primary/10' },
+    { variant: 'outline', color: 'secondary', class: 'border-neutral text-neutral hover:bg-neutral/10' },
+    { variant: 'outline', color: 'danger',    class: 'border-error text-error hover:bg-error/10' },
+    { variant: 'outline', color: 'warning',   class: 'border-warning text-warning hover:bg-warning/10' },
+    { variant: 'outline', color: 'success',   class: 'border-success text-success hover:bg-success/10' },
 
     // Text
-    { variant: 'text', color: 'primary',   class: 'text-brand-500 hover:bg-brand-100' },
-    { variant: 'text', color: 'secondary', class: 'text-gray-700 hover:bg-gray-100' },
-    { variant: 'text', color: 'danger',    class: 'text-red-600 hover:bg-red-100' },
-    { variant: 'text', color: 'warning',   class: 'text-amber-600 hover:bg-amber-100' },
-    { variant: 'text', color: 'success',   class: 'text-green-600 hover:bg-green-100' },
+    { variant: 'text', color: 'primary',   class: 'text-primary hover:bg-primary/10' },
+    { variant: 'text', color: 'secondary', class: 'text-neutral hover:bg-neutral/10' },
+    { variant: 'text', color: 'danger',    class: 'text-error hover:bg-error/10' },
+    { variant: 'text', color: 'warning',   class: 'text-warning hover:bg-warning/10' },
+    { variant: 'text', color: 'success',   class: 'text-success hover:bg-success/10' },
   ],
 
   defaultVariants: {
