@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {Subject, Subscription, debounceTime} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
@@ -9,6 +9,7 @@ import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn
   imports: [NgClass, NgTemplateOutlet],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MnTable<T = any> implements OnInit, OnDestroy {
   @Input() dataSource!: TableDataSource<T>;
@@ -23,6 +24,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy {
   currentSort: SortState | null = null;
   selectedIds = new Set<string>();
 
+  private cdr = inject(ChangeDetectorRef);
   private dataSubscription?: Subscription;
   private searchSubject = new Subject<string>();
   private searchSubscription?: Subscription;
@@ -33,6 +35,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy {
 
     this.dataSubscription = this.dataSource.dataRows.subscribe(() => {
       this.applyFilterAndSort(false);
+      this.cdr.markForCheck();
     });
 
     this.searchSubscription = this.searchSubject
@@ -40,6 +43,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy {
       .subscribe(value => {
         this.searchValue = value;
         this.applyFilterAndSort(true);
+        this.cdr.markForCheck();
       });
   }
 
