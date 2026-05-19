@@ -22,6 +22,7 @@ export const mnButtonVariants = tv({
       danger: '',
       warning: '',
       success: '',
+      accent: '',
     },
 
     borderRadius: {
@@ -47,20 +48,21 @@ export const mnButtonVariants = tv({
     { variant: 'fill', color: 'danger',    class: 'bg-error text-error-content hover:bg-error/80' },
     { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content hover:bg-warning/80' },
     { variant: 'fill', color: 'success',   class: 'bg-success text-success-content hover:bg-success/80' },
-
+    { variant: 'fill', color: 'accent',    class: 'bg-accent text-accent-content hover:bg-accent/80' },
     // Outline
     { variant: 'outline', color: 'primary',   class: 'border-primary text-primary hover:bg-primary/10' },
     { variant: 'outline', color: 'secondary', class: 'border-neutral text-neutral hover:bg-neutral/10' },
     { variant: 'outline', color: 'danger',    class: 'border-error text-error hover:bg-error/10' },
     { variant: 'outline', color: 'warning',   class: 'border-warning text-warning hover:bg-warning/10' },
     { variant: 'outline', color: 'success',   class: 'border-success text-success hover:bg-success/10' },
-
+    { variant: 'outline', color: 'accent',    class: 'border-accent text-accent hover:bg-accent/10' },
     // Text
     { variant: 'text', color: 'primary',   class: 'text-primary hover:bg-primary/10' },
     { variant: 'text', color: 'secondary', class: 'text-neutral hover:bg-neutral/10' },
     { variant: 'text', color: 'danger',    class: 'text-error hover:bg-error/10' },
     { variant: 'text', color: 'warning',   class: 'text-warning hover:bg-warning/10' },
     { variant: 'text', color: 'success',   class: 'text-success hover:bg-success/10' },
+    { variant: 'text', color: 'accent',    class: 'text-accent hover:bg-accent/10' },
   ],
 
   defaultVariants: {
