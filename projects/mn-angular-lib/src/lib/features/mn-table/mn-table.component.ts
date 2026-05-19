@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DoCheck, EventEmitter, inject, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
-import {Subject, Subscription, debounceTime} from 'rxjs';
+import {Subject, Subscription, debounceTime, skip} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 
 @Component({
@@ -11,7 +11,7 @@ import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn
   styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MnTable<T = any> implements OnInit, OnDestroy {
+export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   @Input() dataSource!: TableDataSource<T>;
 
   @Output() sortChange = new EventEmitter<SortState | null>();
@@ -29,11 +29,28 @@ export class MnTable<T = any> implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private searchSubscription?: Subscription;
 
+  /** Tracks the previous toolbar template reference for change detection. */
+  private previousToolbarTemplate?: TemplateRef<any>;
+
+  /**
+   * Checks for changes to dataSource properties that are not covered
+   * by Angular's default change detection (e.g. toolbarTemplate).
+   */
+  ngDoCheck(): void {
+    const currentTemplate = this.dataSource?.toolbarTemplate;
+    if (currentTemplate !== this.previousToolbarTemplate) {
+      this.previousToolbarTemplate = currentTemplate;
+      this.cdr.markForCheck();
+    }
+  }
+
   ngOnInit(): void {
     this.currentSort = this.dataSource.defaultSort ?? null;
-    this.filteredItems = this.dataSource.dataRows.value;
+    this.applyFilterAndSort(false);
 
-    this.dataSubscription = this.dataSource.dataRows.subscribe(() => {
+    // Skip the initial BehaviorSubject emission (already handled above)
+    // to avoid triggering markForCheck during the first change detection cycle.
+    this.dataSubscription = this.dataSource.dataRows.pipe(skip(1)).subscribe(() => {
       this.applyFilterAndSort(false);
       this.cdr.markForCheck();
     });
