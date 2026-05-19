@@ -3,7 +3,7 @@
   <div *ngIf="dataSource.canSearch">
     <input
       type="text"
-      class="input input-sm rounded border border-gray-300 bg-gray-100 px-3 py-1.5 text-sm focus:outline-none focus:border-brand-500 w-full max-w-xs dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+      class="input input-sm rounded border border-base-300 bg-base-200 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-brand-500 w-full max-w-xs"
       [placeholder]="dataSource.searchPlaceholder ?? 'Search...'"
       (input)="onSearch($any($event.target).value)"
       aria-label="Search table"
@@ -16,9 +16,9 @@
 <div class="overflow-x-auto" role="region" aria-label="Data table">
   <table [class]="tableClasses">
     <thead>
-      <tr>
+      <tr class="bg-base-100">
         <!-- Selection checkbox column header -->
-        <th *ngIf="hasSelection" class="w-10 text-center text-sm bg-gray-50 px-2 py-2 dark:bg-gray-800">
+        <th *ngIf="hasSelection" class="w-10 text-center text-sm bg-base-200 px-2 py-2">
           <label *ngIf="isMultiSelect">
             <input
               type="checkbox"
@@ -36,8 +36,7 @@
           class="text-sm px-4 py-2"
           [class.cursor-pointer]="isSortable(column)"
           [class.select-none]="isSortable(column)"
-          [class.hover:bg-gray-100]="isSortable(column)"
-          [class.dark:hover:bg-gray-700]="isSortable(column)"
+          [class.hover:bg-base-200]="isSortable(column)"
           [class.text-left]="(column.align ?? 'left') === 'left'"
           [class.text-center]="column.align === 'center'"
           [class.text-right]="column.align === 'right'"
@@ -69,29 +68,29 @@
       <!-- Loading state -->
       <ng-container *ngIf="dataSource.isDataLoading; else content">
         <tr *ngFor="let _ of skeletonRows" class="animate-pulse">
-          <td *ngIf="hasSelection" class="px-2 py-3"><div class="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700"></div></td>
+          <td *ngIf="hasSelection" class="px-2 py-3"><div class="h-4 w-4 rounded bg-base-300"></div></td>
           <td *ngFor="let column of dataSource.columns; trackBy: trackByKey" class="px-4 py-3"
             [class.hidden]="column.hiddenBelow === 'sm' || column.hiddenBelow === 'md' || column.hiddenBelow === 'lg'"
             [class.sm:table-cell]="column.hiddenBelow === 'sm'"
             [class.md:table-cell]="column.hiddenBelow === 'md'"
             [class.lg:table-cell]="column.hiddenBelow === 'lg'"
           >
-            <div class="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-4 w-3/4 rounded bg-base-300"></div>
           </td>
-          <td *ngIf="hasRowActions" class="px-4 py-3"><div class="h-4 w-16 rounded bg-gray-200 dark:bg-gray-700"></div></td>
+          <td *ngIf="hasRowActions" class="px-4 py-3"><div class="h-4 w-16 rounded bg-base-300"></div></td>
         </tr>
       </ng-container>
 
       <!-- Content -->
       <ng-template #content>
         <!-- Empty state -->
-        <tr *ngIf="filteredItems.length === 0">
+        <tr *ngIf="filteredItems.length === 0" class="bg-base-100">
           <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
             <ng-container *ngIf="dataSource.emptyTemplate; else defaultEmpty">
               <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
             </ng-container>
             <ng-template #defaultEmpty>
-              <div class="flex flex-col items-center gap-2 text-gray-400 dark:text-gray-500">
+              <div class="flex flex-col items-center gap-2 text-base-content/50">
                 <p class="text-sm">{{ dataSource.emptyMessage }}</p>
               </div>
             </ng-template>
@@ -101,16 +100,13 @@
         <!-- Data rows -->
         <tr
           *ngFor="let row of filteredItems; trackBy: trackByID; let odd = odd; let last = last"
-          class="bg-white transition-colors duration-150 dark:bg-gray-900"
+          class="bg-base-100 transition-colors duration-150"
           [class.bg-brand-50]="isSelected(row)"
-          [class.bg-gray-50]="!isSelected(row) && odd && dataSource.appearance?.striped"
-          [class.dark:bg-gray-800]="!isSelected(row) && odd && dataSource.appearance?.striped"
-          [class.hover:bg-gray-100]="dataSource.appearance?.hover !== false"
-          [class.dark:hover:bg-gray-800]="dataSource.appearance?.hover !== false"
+          [class.bg-base-200]="!isSelected(row) && odd && dataSource.appearance?.striped"
+          [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
           [class.cursor-pointer]="!!dataSource.onRowClick"
           [class.border-b]="!last"
-          [class.border-gray-200]="!last"
-          [class.dark:border-gray-700]="!last"
+          [class.border-base-300]="!last"
           [class.border-b-1]="last"
           [class.border-black]="last"
           [class.shadow-3xl]="last"
@@ -164,7 +160,7 @@
             <div class="inline-flex items-center justify-end gap-2">
               <button
                 *ngFor="let action of getVisibleActions(row)"
-                class="px-2 py-1 text-xs rounded hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:hover:bg-gray-700"
+                class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 [ngClass]="action.cssClass ?? ''"
                 [disabled]="action.isDisabled ? action.isDisabled(row) : false"
                 (click)="$event.stopPropagation(); action.onClick(row)"

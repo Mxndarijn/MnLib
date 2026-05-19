@@ -26,14 +26,14 @@
   >
     <div class="flex flex-row items-center gap-x-1 flex-wrap min-h-[1.5rem]">
       @if (selectedOptions.length === 0) {
-        <span class="text-gray-500 dark:text-gray-400">{{ uiConfig.placeholder || props.placeholder || 'Select...' }}</span>
+        <span class="text-base-content/50">{{ uiConfig.placeholder || props.placeholder || 'Select...' }}</span>
       } @else {
         @for (opt of selectedOptions; track opt.value) {
-          <span class="inline-flex items-center gap-x-1 bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-md dark:bg-gray-700 dark:text-gray-200">
+          <span class="inline-flex items-center gap-x-1 bg-base-200 text-base-content text-xs px-2 py-0.5 rounded-md">
             {{ opt.label }}
             <button
               type="button"
-              class="text-gray-400 hover:text-gray-600 cursor-pointer dark:text-gray-400 dark:hover:text-gray-200"
+              class="text-base-content/50 hover:text-base-content cursor-pointer"
               (click)="removeOption(opt, $event)"
               [attr.aria-label]="'Remove ' + opt.label"
             >×</button>
@@ -42,7 +42,7 @@
       }
     </div>
     <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-      <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
+      <svg class="w-4 h-4 text-base-content/50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
         <path fill="currentColor" d="M6 8L1 3h10z"/>
       </svg>
     </div>
@@ -51,12 +51,12 @@
   <!-- Dropdown -->
   @if (isOpen) {
     <div class="relative z-50">
-      <div class="absolute top-0 left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-800 dark:border-gray-600">
+      <div class="absolute top-0 left-0 right-0 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto">
         @if (props.searchable) {
-          <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+          <div class="p-2 border-b border-base-300">
             <input
               type="text"
-              class="w-full p-1.5 text-sm border border-gray-300 rounded-md outline-none focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+              class="w-full p-1.5 text-sm border border-base-300 rounded-md outline-none focus:border-brand-500 bg-base-200 text-base-content placeholder-base-content/50"
               [placeholder]="props.searchPlaceholder || 'Search...'"
               [value]="searchTerm"
               (input)="onSearch(($any($event.target)).value)"
@@ -66,7 +66,7 @@
         }
         @for (opt of filteredOptions; track opt.value) {
           <div
-            class="flex items-center gap-x-2 px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+            class="flex items-center gap-x-2 px-3 py-2 text-sm cursor-pointer text-base-content hover:bg-base-200"
             [class.opacity-50]="opt.disabled || isMaxReached(opt)"
             [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
             (click)="toggleOption(opt); $event.stopPropagation()"
@@ -82,7 +82,7 @@
           </div>
         }
         @if (filteredOptions.length === 0) {
-          <div class="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">No options found</div>
+          <div class="px-3 py-2 text-sm text-base-content/50">No options found</div>
         }
       </div>
     </div>

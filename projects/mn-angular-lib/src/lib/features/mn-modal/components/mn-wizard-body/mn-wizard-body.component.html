@@ -6,7 +6,7 @@
     class="block"
   ></mn-custom-body-host>
 
-  <div class="flex gap-2 pb-4 border-b border-gray-200">
+  <div class="flex gap-2 pb-4 border-b border-base-300">
     <div
       *ngFor="let step of visibleSteps; let i = index"
       class="flex items-center gap-2 flex-1"
@@ -20,14 +20,14 @@
         [ngClass]="{
           'bg-blue-500 text-white': step.id === currentStepId,
           'bg-green-500 text-white': visitedStepIds.includes(step.id) && step.id !== currentStepId,
-          'bg-gray-200 text-gray-500': !visitedStepIds.includes(step.id) && step.id !== currentStepId
+          'bg-base-200 text-base-content/50': !visitedStepIds.includes(step.id) && step.id !== currentStepId
         }"
       >{{ i + 1 }}</div>
       <div
         class="text-sm"
         [ngClass]="{
-          'text-gray-900 font-semibold': step.id === currentStepId,
-          'text-gray-500': step.id !== currentStepId
+          'text-base-content font-semibold': step.id === currentStepId,
+          'text-base-content/50': step.id !== currentStepId
         }"
       >{{ step.title }}</div>
     </div>
@@ -36,8 +36,8 @@
   <div class="min-h-48">
     <ng-container *ngFor="let step of config.steps">
       <div [style.display]="step.id === currentStepId ? 'block' : 'none'">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ step.title }}</h3>
-        <div class="text-gray-700">
+        <h3 class="text-lg font-semibold text-base-content mb-4">{{ step.title }}</h3>
+        <div class="text-base-content/80">
           <!-- Form step -->
           <mn-form-body
             *ngIf="stepFormConfigs[step.id]"
@@ -66,7 +66,7 @@
     </div>
   </div>
 
-  <div class="flex gap-3 pt-4 border-t border-gray-200">
+  <div class="flex gap-3 pt-4 border-t border-base-300">
     <button
       *ngIf="!currentStep?.hideBack"
       mnButton
