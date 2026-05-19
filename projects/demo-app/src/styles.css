@@ -14,12 +14,70 @@
   --color-brand-700: #0F766E;
   --color-brand-800: #115E59;
   --color-brand-900: #134E4A;
+
+  --color-primary: #0ea5e9;
+  --color-primary-content: #ffffff;
+  --color-secondary: #0284c7;
+  --color-accent: #0e4e69;
+  --color-neutral: #2f8ea1;
+  --color-neutral-content: #ffffff;
+  --color-base-100: #f9fafb;
+  --color-base-200: #e5e7eb;
+  --color-base-300: #d1d5db;
+  --color-info: #3b57c2;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #ffffff;
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+  --color-base-content: #374151;
 }
 
 
 :root {
   --mn-radius: 0.375rem;
   --mn-padding: 0.5rem 0.75rem;
+}
+
+[data-theme="light"] {
+  --color-primary: #0ea5e9;
+  --color-primary-content: #ffffff;
+  --color-secondary: #0284c7;
+  --color-accent: #0e4e69;
+  --color-neutral: #2f8ea1;
+  --color-neutral-content: #ffffff;
+  --color-base-100: #f9fafb;
+  --color-base-200: #e5e7eb;
+  --color-base-300: #d1d5db;
+  --color-info: #3b57c2;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #1a1a1a;
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+  --color-base-content: #374151;
+}
+
+[data-theme="dark"] {
+  --color-primary: #38bdf8;
+  --color-primary-content: #0c1a2e;
+  --color-secondary: #0369a1;
+  --color-accent: #0e7490;
+  --color-neutral: #11b9d2;
+  --color-neutral-content: #0c1a2e;
+  --color-base-100: #1f2937;
+  --color-base-200: #131a23;
+  --color-base-300: #2D3542;
+  --color-info: #3b57c2;
+  --color-success: #1ba14f;
+  --color-success-content: #ffffff;
+  --color-warning: #f97316;
+  --color-warning-content: #1a1a1a;
+  --color-error: #b71d1d;
+  --color-error-content: #ffffff;
+  --color-base-content: #b4b9b9;
 }
 
 html, body {
@@ -29,8 +87,9 @@ html, body {
 body {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  background: #f6f7fb;
-  color: #222;
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  transition: background 0.2s, color 0.2s;
 }
 
 .container {

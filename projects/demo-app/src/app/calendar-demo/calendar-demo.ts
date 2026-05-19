@@ -85,11 +85,11 @@ export class CalendarDemo {
   private generateSampleEvents() {
     const today = new Date();
     const colors = [
-      { id: '1', colorName: 'Blue', primaryColor: '#3b82f6', secondaryColor: '#dbeafe' },
-      { id: '2', colorName: 'Green', primaryColor: '#22c55e', secondaryColor: '#dcfce7' },
-      { id: '3', colorName: 'Red', primaryColor: '#ef4444', secondaryColor: '#fee2e2' },
-      { id: '4', colorName: 'Purple', primaryColor: '#a855f7', secondaryColor: '#f3e8ff' },
-      { id: '5', colorName: 'Orange', primaryColor: '#f97316', secondaryColor: '#ffedd5' }
+      { id: '1', colorName: 'Blue', primaryColor: '#1e40af', secondaryColor: '#bfdbfe' },
+    { id: '2', colorName: 'Green', primaryColor: '#15803d', secondaryColor: '#bbf7d0' },
+    { id: '3', colorName: 'Red', primaryColor: '#b91c1c', secondaryColor: '#fecaca' },
+    { id: '4', colorName: 'Purple', primaryColor: '#7e22ce', secondaryColor: '#e9d5ff' },
+    { id: '5', colorName: 'Orange', primaryColor: '#c2410c', secondaryColor: '#fed7aa' }
     ];
 
     const makeDate = (dayOffset: number, hour: number, minute = 0): Date => {

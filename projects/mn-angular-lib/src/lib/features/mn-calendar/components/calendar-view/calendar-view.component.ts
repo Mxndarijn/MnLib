@@ -62,41 +62,41 @@ import { UpcomingEventsComponent } from '../upcoming-events/upcoming-events.comp
       flex-wrap: wrap;
     }
     .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .view-switcher { display: flex; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; }
+    .view-switcher { display: flex; border: 1px solid var(--color-base-300); border-radius: 6px; overflow: hidden; }
     .view-btn {
       padding: 6px 14px;
       border: none;
-      background: white;
+      background: var(--color-base-100);
       cursor: pointer;
       font-size: 13px;
       transition: background 0.15s;
     }
-    .view-btn:hover { background: #f3f4f6; }
-    .view-btn.active { background: #3b82f6; color: white; }
+    .view-btn:hover { background: var(--color-base-200); }
+    .view-btn.active { background: var(--color-primary); color: var(--color-primary-content, white); }
     .date-nav { display: flex; align-items: center; gap: 4px; }
     .nav-btn {
-      width: 32px; height: 32px; border: 1px solid #e5e7eb; border-radius: 6px;
-      background: white; cursor: pointer; font-size: 18px; display: flex;
+      width: 32px; height: 32px; border: 1px solid var(--color-base-300); border-radius: 6px;
+      background: var(--color-base-100); cursor: pointer; font-size: 18px; display: flex;
       align-items: center; justify-content: center;
     }
-    .nav-btn:hover { background: #f3f4f6; }
+    .nav-btn:hover { background: var(--color-base-200); }
     .date-input {
-      padding: 4px 8px; border: 1px solid #e5e7eb; border-radius: 6px;
+      padding: 4px 8px; border: 1px solid var(--color-base-300); border-radius: 6px; background: var(--color-base-100); color: var(--color-base-content);
       font-size: 13px;
     }
     .today-btn {
-      padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 6px;
-      background: white; cursor: pointer; font-size: 13px;
+      padding: 6px 12px; border: 1px solid var(--color-base-300); border-radius: 6px;
+      background: var(--color-base-100); cursor: pointer; font-size: 13px; color: var(--color-base-content);
     }
-    .today-btn:hover { background: #f3f4f6; }
+    .today-btn:hover { background: var(--color-base-200); }
     .action-btn {
       padding: 8px 16px; border: none; border-radius: 6px;
-      background: #3b82f6; color: white; cursor: pointer; font-size: 13px;
+      background: var(--color-primary); color: var(--color-primary-content, white); cursor: pointer; font-size: 13px;
     }
-    .action-btn:hover { background: #2563eb; }
+    .action-btn:hover { opacity: 0.85; }
     .calendar-content { display: grid; grid-template-columns: 1fr 220px; gap: 12px; flex: 1; min-height: 0; }
     .calendar-main { min-width: 0; min-height: 0; overflow: hidden; }
-    .calendar-sidebar { border-left: 1px solid #e5e7eb; overflow: auto; }
+    .calendar-sidebar { border-left: 1px solid var(--color-base-300); overflow: auto; }
 
     @media (max-width: 767px) {
       .calendar-toolbar { padding: 8px 0; }

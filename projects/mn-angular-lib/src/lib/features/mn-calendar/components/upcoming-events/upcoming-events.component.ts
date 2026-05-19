@@ -24,7 +24,7 @@ import { UpcomingEventRowComponent } from '../upcoming-event-row/upcoming-event-
       margin-bottom: 12px;
     }
     .no-events {
-      color: #9ca3af;
+      color: var(--color-base-content, #9ca3af); opacity: 0.5;
       font-size: 14px;
     }
   `]

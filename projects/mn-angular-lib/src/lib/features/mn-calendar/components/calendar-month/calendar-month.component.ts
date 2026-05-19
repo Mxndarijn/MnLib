@@ -26,7 +26,7 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
       font-weight: 600;
       font-size: 13px;
       padding: 8px 0;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--color-base-300);
     }
     .month-grid {
       display: grid;
@@ -38,15 +38,15 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
     .month-cell {
       min-height: 0;
       padding: 4px 8px;
-      border: 1px solid #f3f4f6;
+      border: 1px solid var(--color-base-200);
       cursor: pointer;
       transition: background 0.15s;
     }
-    .month-cell:hover { background: #f9fafb; }
+    .month-cell:hover { background: var(--color-base-200); }
     .month-cell.other-month { opacity: 0.4; }
     .month-cell.today .day-number {
-      background: #3b82f6;
-      color: white;
+      background: var(--color-primary);
+      color: var(--color-primary-content, white);
       border-radius: 50%;
       width: 24px;
       height: 24px;
@@ -61,7 +61,7 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
       height: 8px;
       border-radius: 50%;
     }
-    .more-events { font-size: 10px; color: #6b7280; }
+    .more-events { font-size: 10px; color: var(--color-base-content, #6b7280); opacity: 0.6; }
   `]
 })
 export class CalendarMonthComponent implements OnInit, OnDestroy {

@@ -31,7 +31,7 @@ interface DisplayHourRow extends HourRow {
     .calendar-week { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
     .week-header {
       display: grid;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--color-base-300);
     }
     .time-gutter-header { min-width: 60px; }
     .day-column-header {
@@ -39,8 +39,8 @@ interface DisplayHourRow extends HourRow {
       padding: 8px 4px;
       font-size: 13px;
     }
-    .day-column-header.today { color: #3b82f6; font-weight: 700; }
-    .day-name { display: block; font-size: 11px; text-transform: uppercase; color: #6b7280; }
+    .day-column-header.today { color: var(--color-primary); font-weight: 700; }
+    .day-name { display: block; font-size: 11px; text-transform: uppercase; color: var(--color-base-content, #6b7280); opacity: 0.7; }
     .day-number { font-size: 18px; font-weight: 600; }
     .week-body { display: grid; grid-template-columns: 60px 1fr; flex: 1; min-height: 0; overflow: hidden; align-items: stretch; }
     .time-gutter {
@@ -50,7 +50,7 @@ interface DisplayHourRow extends HourRow {
     }
     .hour-label {
       font-size: 11px;
-      color: #6b7280;
+      color: var(--color-base-content, #6b7280); opacity: 0.7;
       text-align: right;
       padding-right: 8px;
       display: flex;
@@ -66,7 +66,7 @@ interface DisplayHourRow extends HourRow {
       min-height: 0;
     }
     .hour-line {
-      border-top: 1px solid #f3f4f6;
+      border-top: 1px solid var(--color-base-200);
       pointer-events: none;
       min-height: 0;
     }
@@ -84,7 +84,7 @@ interface DisplayHourRow extends HourRow {
     .current-time-dot {
       width: 8px;
       height: 8px;
-      background: #ef4444;
+      background: var(--color-error, #ef4444);
       border-radius: 50%;
       position: absolute;
       left: -4px;
@@ -92,7 +92,7 @@ interface DisplayHourRow extends HourRow {
     }
     .current-time-rule {
       height: 2px;
-      background: #ef4444;
+      background: var(--color-error, #ef4444);
       width: 100%;
     }
   `]

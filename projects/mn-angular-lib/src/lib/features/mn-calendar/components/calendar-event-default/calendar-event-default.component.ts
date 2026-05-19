@@ -19,7 +19,7 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
   styles: [`
     .calendar-event-default {
       padding: 4px 8px;
-      border-left: 3px solid #3b82f6;
+      border-left: 3px solid var(--color-primary, #3b82f6);
       border-radius: 4px;
       font-size: 12px;
       height: 100%;
@@ -31,17 +31,20 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: inherit;
     }
     .event-time {
       font-size: 11px;
-      opacity: 0.8;
+      opacity: 0.85;
+      color: inherit;
     }
     .event-description {
       font-size: 11px;
-      opacity: 0.7;
+      opacity: 0.75;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: inherit;
     }
   `]
 })

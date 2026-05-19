@@ -16,9 +16,9 @@ interface DemoItem {
   templateUrl: './demo-list.component.html',
   styles: [`
     .demo-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-    .demo-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: var(--mn-radius); }
-    .title { font-weight: 600; }
-    .desc { color: #555; font-size: 12px; }
+    .demo-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-base-200); border: 1px solid var(--color-base-300); border-radius: var(--mn-radius); transition: background 0.2s, border-color 0.2s; }
+    .title { font-weight: 600; color: var(--color-base-content); }
+    .desc { color: var(--color-base-content); opacity: 0.6; font-size: 12px; }
   `]
 })
 export class DemoListComponent {
