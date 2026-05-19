@@ -1,7 +1,7 @@
 <div class="modal-backdrop absolute inset-0 bg-black/50 animate-[fadeIn_0.2s_ease-in-out]" *ngIf="showBackdrop" (click)="onBackdropClick()"></div>
 
 <div
-  class="modal-container relative bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
+  class="modal-container relative bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col dark:bg-gray-900"
   [ngClass]="[containerSizeClass, animationClass]"
   role="dialog"
   aria-modal="true"
@@ -10,21 +10,21 @@
   tabindex="-1"
   (click)="$event.stopPropagation()"
 >
-  <div class="flex items-center justify-between p-6 border-b border-gray-200">
+  <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
     <div class="flex flex-col gap-0.5">
-      <h2 class="m-0 text-xl font-semibold text-gray-900" *ngIf="config.title" id="mn-modal-title">{{ config.title }}</h2>
-      <p class="m-0 text-sm text-gray-500 font-normal" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+      <h2 class="m-0 text-xl font-semibold text-gray-900 dark:text-gray-100" *ngIf="config.title" id="mn-modal-title">{{ config.title }}</h2>
+      <p class="m-0 text-sm text-gray-500 font-normal dark:text-gray-400" *ngIf="config.subtitle">{{ config.subtitle }}</p>
     </div>
     <button
       *ngIf="showCloseButton"
-      class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 p-0 w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-gray-100 hover:text-gray-900"
+      class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 p-0 w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
       (click)="onCloseButtonClick()"
       aria-label="Close modal"
     >
       ×
     </button>
   </div>
-  <p class="m-0 px-6 text-sm text-gray-500 leading-relaxed" *ngIf="config.description" id="mn-modal-description">{{ config.description }}</p>
+  <p class="m-0 px-6 text-sm text-gray-500 leading-relaxed dark:text-gray-400" *ngIf="config.description" id="mn-modal-description">{{ config.description }}</p>
 
   <div class="flex-1 overflow-y-auto p-6">
     <mn-wizard-body
@@ -53,7 +53,7 @@
   </div>
 
   <!-- Custom Footer Actions -->
-  <div *ngIf="hasCustomFooterActions" class="flex gap-3 p-6 border-t border-gray-200">
+  <div *ngIf="hasCustomFooterActions" class="flex gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
     <ng-container *ngFor="let action of leftFooterActions">
       <button
         mnButton
