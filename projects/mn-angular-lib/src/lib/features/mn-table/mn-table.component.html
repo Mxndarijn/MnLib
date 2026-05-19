@@ -1,15 +1,19 @@
 <!-- Toolbar: search + custom toolbar template -->
 <div class="flex flex-row items-center justify-end gap-2 mb-3">
-  <div *ngIf="dataSource.canSearch">
-    <input
-      type="text"
-      class="input input-sm rounded border border-base-300 bg-base-200 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-brand-500 w-full max-w-xs"
-      [placeholder]="dataSource.searchPlaceholder ?? 'Search...'"
-      (input)="onSearch($any($event.target).value)"
-      aria-label="Search table"
-    />
-  </div>
-  <ng-container *ngIf="dataSource.toolbarTemplate" [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
+  @if (dataSource.canSearch) {
+    <div>
+      <input
+        type="text"
+        class="input input-sm rounded border border-base-300 bg-base-200 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-brand-500 w-full max-w-xs"
+        [placeholder]="dataSource.searchPlaceholder ?? 'Search...'"
+        (input)="onSearch($any($event.target).value)"
+        aria-label="Search table"
+      />
+    </div>
+  }
+  @if (dataSource.toolbarTemplate) {
+    <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
+  }
 </div>
 
 <!-- Table wrapper with horizontal scroll -->
@@ -18,128 +22,29 @@
     <thead>
       <tr class="bg-base-100">
         <!-- Selection checkbox column header -->
-        <th *ngIf="hasSelection" class="w-10 text-center text-sm bg-base-200 px-2 py-2">
-          <label *ngIf="isMultiSelect">
-            <input
-              type="checkbox"
-              class="accent-brand-500"
-              [checked]="allSelected"
-              (change)="toggleAll()"
-              aria-label="Select all rows"
-            />
-          </label>
-        </th>
+        @if (hasSelection) {
+          <th class="w-10 text-center text-sm bg-base-200 px-2 py-2">
+            @if (isMultiSelect) {
+              <label>
+                <input
+                  type="checkbox"
+                  class="accent-brand-500"
+                  [checked]="allSelected"
+                  (change)="toggleAll()"
+                  aria-label="Select all rows"
+                />
+              </label>
+            }
+          </th>
+        }
 
         <!-- Data columns -->
-        <th
-          *ngFor="let column of dataSource.columns; trackBy: trackByKey"
-          class="text-sm px-4 py-2"
-          [class.cursor-pointer]="isSortable(column)"
-          [class.select-none]="isSortable(column)"
-          [class.hover:bg-base-200]="isSortable(column)"
-          [class.text-left]="(column.align ?? 'left') === 'left'"
-          [class.text-center]="column.align === 'center'"
-          [class.text-right]="column.align === 'right'"
-          [class.hidden]="column.hiddenBelow === 'sm' || column.hiddenBelow === 'md' || column.hiddenBelow === 'lg'"
-          [class.sm:table-cell]="column.hiddenBelow === 'sm'"
-          [class.md:table-cell]="column.hiddenBelow === 'md'"
-          [class.lg:table-cell]="column.hiddenBelow === 'lg'"
-          [style.width]="column.width ?? null"
-          [attr.aria-sort]="currentSort?.columnKey === column.key ? (currentSort!.direction === 'asc' ? 'ascending' : 'descending') : null"
-          (click)="sort(column)"
-        >
-          <span class="inline-flex items-center gap-1">
-            <ng-container *ngIf="isTemplateRef(column.header); else stringHeader">
-              <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
-            </ng-container>
-            <ng-template #stringHeader>
-              <span>{{ column.header }}</span>
-            </ng-template>
-            <span *ngIf="isSortable(column)" class="text-[0.65rem] opacity-70 min-w-3 inline-block">{{ getSortIcon(column) }}</span>
-          </span>
-        </th>
-
-        <!-- Actions column header -->
-        <th *ngIf="hasRowActions" class="text-sm px-4 py-2 text-right">Actions</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <!-- Loading state -->
-      <ng-container *ngIf="dataSource.isDataLoading; else content">
-        <tr *ngFor="let _ of skeletonRows" class="animate-pulse">
-          <td *ngIf="hasSelection" class="px-2 py-3"><div class="h-4 w-4 rounded bg-base-300"></div></td>
-          <td *ngFor="let column of dataSource.columns; trackBy: trackByKey" class="px-4 py-3"
-            [class.hidden]="column.hiddenBelow === 'sm' || column.hiddenBelow === 'md' || column.hiddenBelow === 'lg'"
-            [class.sm:table-cell]="column.hiddenBelow === 'sm'"
-            [class.md:table-cell]="column.hiddenBelow === 'md'"
-            [class.lg:table-cell]="column.hiddenBelow === 'lg'"
-          >
-            <div class="h-4 w-3/4 rounded bg-base-300"></div>
-          </td>
-          <td *ngIf="hasRowActions" class="px-4 py-3"><div class="h-4 w-16 rounded bg-base-300"></div></td>
-        </tr>
-      </ng-container>
-
-      <!-- Content -->
-      <ng-template #content>
-        <!-- Empty state -->
-        <tr *ngIf="filteredItems.length === 0" class="bg-base-100">
-          <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
-            <ng-container *ngIf="dataSource.emptyTemplate; else defaultEmpty">
-              <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
-            </ng-container>
-            <ng-template #defaultEmpty>
-              <div class="flex flex-col items-center gap-2 text-base-content/50">
-                <p class="text-sm">{{ dataSource.emptyMessage }}</p>
-              </div>
-            </ng-template>
-          </td>
-        </tr>
-
-        <!-- Data rows -->
-        <tr
-          *ngFor="let row of filteredItems; trackBy: trackByID; let odd = odd; let last = last"
-          class="bg-base-100 transition-colors duration-150"
-          [class.bg-brand-50]="isSelected(row)"
-          [class.bg-base-200]="!isSelected(row) && odd && dataSource.appearance?.striped"
-          [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
-          [class.cursor-pointer]="!!dataSource.onRowClick"
-          [class.border-b]="!last"
-          [class.border-base-300]="!last"
-          [class.border-b-1]="last"
-          [class.border-black]="last"
-          [class.shadow-3xl]="last"
-          (click)="onRowClick(row)"
-        >
-          <!-- Selection checkbox -->
-          <td *ngIf="hasSelection" class="w-10 text-center px-2 py-2">
-            <label>
-              <input
-                *ngIf="isMultiSelect; else radioTpl"
-                type="checkbox"
-                class="accent-brand-500"
-                [checked]="isSelected(row)"
-                (click)="$event.stopPropagation()"
-                (change)="toggleRow(row)"
-              />
-              <ng-template #radioTpl>
-                <input
-                  type="radio"
-                  class="accent-brand-500"
-                  [checked]="isSelected(row)"
-                  (click)="$event.stopPropagation()"
-                  (change)="toggleRow(row)"
-                  name="mn-table-single-select"
-                />
-              </ng-template>
-            </label>
-          </td>
-
-          <!-- Data cells -->
-          <td
-            *ngFor="let column of dataSource.columns; trackBy: trackByKey"
-            class="text-xs px-4 py-2"
+        @for (column of dataSource.columns; track column.key) {
+          <th
+            class="text-sm px-4 py-2"
+            [class.cursor-pointer]="isSortable(column)"
+            [class.select-none]="isSortable(column)"
+            [class.hover:bg-base-200]="isSortable(column)"
             [class.text-left]="(column.align ?? 'left') === 'left'"
             [class.text-center]="column.align === 'center'"
             [class.text-right]="column.align === 'right'"
@@ -148,43 +53,172 @@
             [class.md:table-cell]="column.hiddenBelow === 'md'"
             [class.lg:table-cell]="column.hiddenBelow === 'lg'"
             [style.width]="column.width ?? null"
+            [attr.aria-sort]="currentSort?.columnKey === column.key ? (currentSort!.direction === 'asc' ? 'ascending' : 'descending') : null"
+            (click)="sort(column)"
           >
-            <ng-container *ngIf="isTemplateRef(column.cell); else stringCell">
-              <ng-container [ngTemplateOutlet]="$any(column.cell)" [ngTemplateOutletContext]="{ $implicit: row, data: row }"></ng-container>
-            </ng-container>
-            <ng-template #stringCell>{{ getCellValue(column, row) }}</ng-template>
-          </td>
+            <span class="inline-flex items-center gap-1">
+              @if (isTemplateRef(column.header)) {
+                <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
+              } @else {
+                <span>{{ column.header }}</span>
+              }
+              @if (isSortable(column)) {
+                <span class="text-[0.65rem] opacity-70 min-w-3 inline-block">{{ getSortIcon(column) }}</span>
+              }
+            </span>
+          </th>
+        }
 
-          <!-- Row actions -->
-          <td *ngIf="hasRowActions" class="text-right px-4 py-2">
-            <div class="inline-flex items-center justify-end gap-2">
-              <button
-                *ngFor="let action of getVisibleActions(row)"
-                class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                [ngClass]="action.cssClass ?? ''"
-                [disabled]="action.isDisabled ? action.isDisabled(row) : false"
-                (click)="$event.stopPropagation(); action.onClick(row)"
-                [attr.aria-label]="action.label"
+        <!-- Actions column header -->
+        @if (hasRowActions) {
+          <th class="text-sm px-4 py-2 text-right">Actions</th>
+        }
+      </tr>
+    </thead>
+
+    <tbody>
+      <!-- Loading state -->
+      @if (dataSource.isDataLoading) {
+        @for (_ of skeletonRows; track $index) {
+          <tr class="animate-pulse">
+            @if (hasSelection) {
+              <td class="px-2 py-3"><div class="h-4 w-4 rounded bg-base-300"></div></td>
+            }
+            @for (column of dataSource.columns; track column.key) {
+              <td class="px-4 py-3"
+                [class.hidden]="column.hiddenBelow === 'sm' || column.hiddenBelow === 'md' || column.hiddenBelow === 'lg'"
+                [class.sm:table-cell]="column.hiddenBelow === 'sm'"
+                [class.md:table-cell]="column.hiddenBelow === 'md'"
+                [class.lg:table-cell]="column.hiddenBelow === 'lg'"
               >
-                <span *ngIf="action.icon" [innerHTML]="action.icon"></span>
-                <span *ngIf="action.label">{{ action.label }}</span>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
+                <div class="h-4 w-3/4 rounded bg-base-300"></div>
+              </td>
+            }
+            @if (hasRowActions) {
+              <td class="px-4 py-3"><div class="h-4 w-16 rounded bg-base-300"></div></td>
+            }
+          </tr>
+        }
+      } @else {
+        <!-- Empty state -->
+        @if (filteredItems.length === 0) {
+          <tr class="bg-base-100">
+            <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
+              @if (dataSource.emptyTemplate) {
+                <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
+              } @else {
+                <div class="flex flex-col items-center gap-2 text-base-content/50">
+                  <p class="text-sm">{{ dataSource.emptyMessage }}</p>
+                </div>
+              }
+            </td>
+          </tr>
+        }
+
+        <!-- Data rows -->
+        @for (row of filteredItems; track trackByID($index, row); let odd = $odd; let last = $last) {
+          <tr
+            class="bg-base-100 transition-colors duration-150"
+            [class.bg-brand-50]="isSelected(row)"
+            [class.bg-base-200]="!isSelected(row) && odd && dataSource.appearance?.striped"
+            [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
+            [class.cursor-pointer]="!!dataSource.onRowClick"
+            [class.border-b]="!last"
+            [class.border-base-300]="!last"
+            [class.border-b-1]="last"
+            [class.border-black]="last"
+            [class.shadow-3xl]="last"
+            (click)="onRowClick(row)"
+          >
+            <!-- Selection checkbox -->
+            @if (hasSelection) {
+              <td class="w-10 text-center px-2 py-2">
+                <label>
+                  @if (isMultiSelect) {
+                    <input
+                      type="checkbox"
+                      class="accent-brand-500"
+                      [checked]="isSelected(row)"
+                      (click)="$event.stopPropagation()"
+                      (change)="toggleRow(row)"
+                    />
+                  } @else {
+                    <input
+                      type="radio"
+                      class="accent-brand-500"
+                      [checked]="isSelected(row)"
+                      (click)="$event.stopPropagation()"
+                      (change)="toggleRow(row)"
+                      name="mn-table-single-select"
+                    />
+                  }
+                </label>
+              </td>
+            }
+
+            <!-- Data cells -->
+            @for (column of dataSource.columns; track column.key) {
+              <td
+                class="text-xs px-4 py-2"
+                [class.text-left]="(column.align ?? 'left') === 'left'"
+                [class.text-center]="column.align === 'center'"
+                [class.text-right]="column.align === 'right'"
+                [class.hidden]="column.hiddenBelow === 'sm' || column.hiddenBelow === 'md' || column.hiddenBelow === 'lg'"
+                [class.sm:table-cell]="column.hiddenBelow === 'sm'"
+                [class.md:table-cell]="column.hiddenBelow === 'md'"
+                [class.lg:table-cell]="column.hiddenBelow === 'lg'"
+                [style.width]="column.width ?? null"
+              >
+                @if (isTemplateRef(column.cell)) {
+                  <ng-container [ngTemplateOutlet]="$any(column.cell)" [ngTemplateOutletContext]="{ $implicit: row, data: row }"></ng-container>
+                } @else {
+                  {{ getCellValue(column, row) }}
+                }
+              </td>
+            }
+
+            <!-- Row actions -->
+            @if (hasRowActions) {
+              <td class="text-right px-4 py-2">
+                <div class="inline-flex items-center justify-end gap-2">
+                  @for (action of getVisibleActions(row); track action.label) {
+                    <button
+                      class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      [ngClass]="action.cssClass ?? ''"
+                      [disabled]="action.isDisabled ? action.isDisabled(row) : false"
+                      (click)="$event.stopPropagation(); action.onClick(row)"
+                      [attr.aria-label]="action.label"
+                    >
+                      @if (action.icon) {
+                        <span [innerHTML]="action.icon"></span>
+                      }
+                      @if (action.label) {
+                        <span>{{ action.label }}</span>
+                      }
+                    </button>
+                  }
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      }
     </tbody>
   </table>
 </div>
 
 <!-- Load more button -->
-<div *ngIf="showLoadMore" class="flex justify-center py-4">
-  <button
-    class="px-4 py-1.5 text-sm rounded border border-brand-500 text-brand-500 hover:bg-brand-100 transition-colors disabled:opacity-50"
-    (click)="loadMoreRows()"
-    [disabled]="loadingMoreRows"
-  >
-    <span *ngIf="loadingMoreRows" class="inline-block w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mr-2"></span>
-    Load more
-  </button>
-</div>
+@if (showLoadMore) {
+  <div class="flex justify-center py-4">
+    <button
+      class="px-4 py-1.5 text-sm rounded border border-brand-500 text-brand-500 hover:bg-brand-100 transition-colors disabled:opacity-50"
+      (click)="loadMoreRows()"
+      [disabled]="loadingMoreRows"
+    >
+      @if (loadingMoreRows) {
+        <span class="inline-block w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mr-2"></span>
+      }
+      Load more
+    </button>
+  </div>
+}

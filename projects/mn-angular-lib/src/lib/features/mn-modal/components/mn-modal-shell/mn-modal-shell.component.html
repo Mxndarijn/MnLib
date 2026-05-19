@@ -1,4 +1,6 @@
-<div class="modal-backdrop absolute inset-0 bg-black/50 animate-[fadeIn_0.2s_ease-in-out]" *ngIf="showBackdrop" (click)="onBackdropClick()"></div>
+@if (showBackdrop) {
+  <div class="modal-backdrop absolute inset-0 bg-black/50 animate-[fadeIn_0.2s_ease-in-out]" (click)="onBackdropClick()"></div>
+}
 
 <div
   class="modal-container relative bg-base-100 rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
@@ -12,78 +14,91 @@
 >
   <div class="flex items-center justify-between p-6 border-b border-base-300">
     <div class="flex flex-col gap-0.5">
-      <h2 class="m-0 text-xl font-semibold text-base-content" *ngIf="config.title" id="mn-modal-title">{{ config.title }}</h2>
-      <p class="m-0 text-sm text-base-content/60 font-normal" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+      @if (config.title) {
+        <h2 class="m-0 text-xl font-semibold text-base-content" id="mn-modal-title">{{ config.title }}</h2>
+      }
+      @if (config.subtitle) {
+        <p class="m-0 text-sm text-base-content/60 font-normal">{{ config.subtitle }}</p>
+      }
     </div>
-    <button
-      *ngIf="showCloseButton"
-      class="bg-transparent border-none text-2xl cursor-pointer text-base-content/50 p-0 w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-base-200 hover:text-base-content"
-      (click)="onCloseButtonClick()"
-      aria-label="Close modal"
-    >
-      ×
-    </button>
+    @if (showCloseButton) {
+      <button
+        class="bg-transparent border-none text-2xl cursor-pointer text-base-content/50 p-0 w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-base-200 hover:text-base-content"
+        (click)="onCloseButtonClick()"
+        aria-label="Close modal"
+      >
+        ×
+      </button>
+    }
   </div>
-  <p class="m-0 px-6 text-sm text-base-content/60 leading-relaxed" *ngIf="config.description" id="mn-modal-description">{{ config.description }}</p>
+  @if (config.description) {
+    <p class="m-0 px-6 text-sm text-base-content/60 leading-relaxed" id="mn-modal-description">{{ config.description }}</p>
+  }
 
   <div class="flex-1 overflow-y-auto p-6">
-    <mn-wizard-body
-      *ngIf="config.kind === ModalKind.WIZARD"
-      [config]="asWizard(config)"
-      [modalRef]="asAny(modalRef)"
-    ></mn-wizard-body>
+    @if (config.kind === ModalKind.WIZARD) {
+      <mn-wizard-body
+        [config]="asWizard(config)"
+        [modalRef]="asAny(modalRef)"
+      ></mn-wizard-body>
+    }
 
-    <mn-form-body
-      *ngIf="config.kind === ModalKind.FORM"
-      [config]="asForm(config)"
-      [modalRef]="asAny(modalRef)"
-    ></mn-form-body>
+    @if (config.kind === ModalKind.FORM) {
+      <mn-form-body
+        [config]="asForm(config)"
+        [modalRef]="asAny(modalRef)"
+      ></mn-form-body>
+    }
 
-    <mn-confirmation-body
-      *ngIf="config.kind === ModalKind.CONFIRMATION"
-      [config]="asConfirmation(config)"
-      [modalRef]="asAny(modalRef)"
-    ></mn-confirmation-body>
+    @if (config.kind === ModalKind.CONFIRMATION) {
+      <mn-confirmation-body
+        [config]="asConfirmation(config)"
+        [modalRef]="asAny(modalRef)"
+      ></mn-confirmation-body>
+    }
 
-    <mn-custom-body-host
-      *ngIf="config.kind === ModalKind.CUSTOM"
-      [config]="asCustom(config)"
-      [modalRef]="asAny(modalRef)"
-    ></mn-custom-body-host>
+    @if (config.kind === ModalKind.CUSTOM) {
+      <mn-custom-body-host
+        [config]="asCustom(config)"
+        [modalRef]="asAny(modalRef)"
+      ></mn-custom-body-host>
+    }
   </div>
 
   <!-- Custom Footer Actions -->
-  <div *ngIf="hasCustomFooterActions" class="flex gap-3 p-6 border-t border-base-300">
-    <ng-container *ngFor="let action of leftFooterActions">
-      <button
-        mnButton
-        [data]="{
-          variant: getActionButtonVariant(action.style),
-          color: getActionButtonColor(action.style),
-          disabled: action.disabled
-        }"
-        [disabled]="action.disabled"
-        (click)="onFooterAction(action)"
-      >
-        {{ action.label }}
-      </button>
-    </ng-container>
+  @if (hasCustomFooterActions) {
+    <div class="flex gap-3 p-6 border-t border-base-300">
+      @for (action of leftFooterActions; track action.label) {
+        <button
+          mnButton
+          [data]="{
+            variant: getActionButtonVariant(action.style),
+            color: getActionButtonColor(action.style),
+            disabled: action.disabled
+          }"
+          [disabled]="action.disabled"
+          (click)="onFooterAction(action)"
+        >
+          {{ action.label }}
+        </button>
+      }
 
-    <div class="flex-1"></div>
+      <div class="flex-1"></div>
 
-    <ng-container *ngFor="let action of rightFooterActions">
-      <button
-        mnButton
-        [data]="{
-          variant: getActionButtonVariant(action.style),
-          color: getActionButtonColor(action.style),
-          disabled: action.disabled
-        }"
-        [disabled]="action.disabled"
-        (click)="onFooterAction(action)"
-      >
-        {{ action.label }}
-      </button>
-    </ng-container>
-  </div>
+      @for (action of rightFooterActions; track action.label) {
+        <button
+          mnButton
+          [data]="{
+            variant: getActionButtonVariant(action.style),
+            color: getActionButtonColor(action.style),
+            disabled: action.disabled
+          }"
+          [disabled]="action.disabled"
+          (click)="onFooterAction(action)"
+        >
+          {{ action.label }}
+        </button>
+      }
+    </div>
+  }
 </div>

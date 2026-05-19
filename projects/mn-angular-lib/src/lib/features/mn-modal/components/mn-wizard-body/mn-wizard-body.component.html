@@ -1,100 +1,112 @@
 <div class="flex flex-col gap-6">
-  <mn-custom-body-host
-    *ngIf="config.component || config.template"
-    [config]="asAny(config)"
-    [modalRef]="asAny(modalRef)"
-    class="block"
-  ></mn-custom-body-host>
+  @if (config.component || config.template) {
+    <mn-custom-body-host
+      [config]="asAny(config)"
+      [modalRef]="asAny(modalRef)"
+      class="block"
+    ></mn-custom-body-host>
+  }
 
   <div class="flex gap-2 pb-4 border-b border-base-300">
-    <div
-      *ngFor="let step of visibleSteps; let i = index"
-      class="flex items-center gap-2 flex-1"
-      [class.active]="step.id === currentStepId"
-      [class.complete]="visitedStepIds.includes(step.id) && step.id !== currentStepId"
-      [class.cursor-pointer]="isFreeFlow && canNavigateToStep(step)"
-      (click)="isFreeFlow ? goToStep(step) : null"
-    >
+    @for (step of visibleSteps; track step.id; let i = $index) {
       <div
-        class="w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-all text-sm"
-        [ngClass]="{
-          'bg-blue-500 text-white': step.id === currentStepId,
-          'bg-green-500 text-white': visitedStepIds.includes(step.id) && step.id !== currentStepId,
-          'bg-base-200 text-base-content/50': !visitedStepIds.includes(step.id) && step.id !== currentStepId
-        }"
-      >{{ i + 1 }}</div>
-      <div
-        class="text-sm"
-        [ngClass]="{
-          'text-base-content font-semibold': step.id === currentStepId,
-          'text-base-content/50': step.id !== currentStepId
-        }"
-      >{{ step.title }}</div>
-    </div>
+        class="flex items-center gap-2 flex-1"
+        [class.active]="step.id === currentStepId"
+        [class.complete]="visitedStepIds.includes(step.id) && step.id !== currentStepId"
+        [class.cursor-pointer]="isFreeFlow && canNavigateToStep(step)"
+        (click)="isFreeFlow ? goToStep(step) : null"
+      >
+        <div
+          class="w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-all text-sm"
+          [ngClass]="{
+            'bg-blue-500 text-white': step.id === currentStepId,
+            'bg-green-500 text-white': visitedStepIds.includes(step.id) && step.id !== currentStepId,
+            'bg-base-200 text-base-content/50': !visitedStepIds.includes(step.id) && step.id !== currentStepId
+          }"
+        >{{ i + 1 }}</div>
+        <div
+          class="text-sm"
+          [ngClass]="{
+            'text-base-content font-semibold': step.id === currentStepId,
+            'text-base-content/50': step.id !== currentStepId
+          }"
+        >{{ step.title }}</div>
+      </div>
+    }
   </div>
 
   <div class="min-h-48">
-    <ng-container *ngFor="let step of config.steps">
+    @for (step of config.steps; track step.id) {
       <div [style.display]="step.id === currentStepId ? 'block' : 'none'">
         <h3 class="text-lg font-semibold text-base-content mb-4">{{ step.title }}</h3>
         <div class="text-base-content/80">
           <!-- Form step -->
-          <mn-form-body
-            *ngIf="stepFormConfigs[step.id]"
-            [config]="stepFormConfigs[step.id]"
-            [modalRef]="asAny(modalRef)"
-            [hideFooter]="true"
-            [hideCustomBody]="true"
-          ></mn-form-body>
+          @if (stepFormConfigs[step.id]) {
+            <mn-form-body
+              [config]="stepFormConfigs[step.id]"
+              [modalRef]="asAny(modalRef)"
+              [hideFooter]="true"
+              [hideCustomBody]="true"
+            ></mn-form-body>
+          }
 
           <!-- Text body -->
-          <div *ngIf="!stepFormConfigs[step.id] && isTextBody(step)">
-            {{ step.body }}
-          </div>
+          @if (!stepFormConfigs[step.id] && isTextBody(step)) {
+            <div>
+              {{ step.body }}
+            </div>
+          }
 
           <!-- Dynamic content container for component/template bodies -->
           <ng-container #dynamicContainer></ng-container>
         </div>
       </div>
-    </ng-container>
+    }
   </div>
 
   <!-- Wizard-level errors (from onBeforeComplete) -->
-  <div *ngIf="wizardErrors && (wizardErrors | keyvalue).length > 0" class="flex flex-col gap-1 px-2 py-2 bg-red-50 rounded-md">
-    <div *ngFor="let err of wizardErrors | keyvalue" class="text-red-500 text-sm">
-      {{ err.value }}
+  @if (wizardErrors && (wizardErrors | keyvalue).length > 0) {
+    <div class="flex flex-col gap-1 px-2 py-2 bg-red-50 rounded-md">
+      @for (err of wizardErrors | keyvalue; track err.key) {
+        <div class="text-red-500 text-sm">
+          {{ err.value }}
+        </div>
+      }
     </div>
-  </div>
+  }
 
   <div class="flex gap-3 pt-4 border-t border-base-300">
-    <button
-      *ngIf="!currentStep?.hideBack"
-      mnButton
-      [data]="{ variant: 'outline', color: 'secondary' }"
-      (click)="back()"
-    >
-      {{ currentStep?.backLabel || (canGoBack ? labels.back : labels.close) }}
-    </button>
+    @if (!currentStep?.hideBack) {
+      <button
+        mnButton
+        [data]="{ variant: 'outline', color: 'secondary' }"
+        (click)="back()"
+      >
+        {{ currentStep?.backLabel || (canGoBack ? labels.back : labels.close) }}
+      </button>
+    }
 
     <div class="flex-1"></div>
 
-    <button
-      *ngIf="!isLastStep"
-      mnButton
-      [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid }"
-      (click)="next()"
-    >
-      {{ currentStep?.nextLabel || labels.next }}
-    </button>
+    @if (!isLastStep) {
+      <button
+        mnButton
+        [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid }"
+        (click)="next()"
+      >
+        {{ currentStep?.nextLabel || labels.next }}
+      </button>
+    }
 
-    <button
-      *ngIf="isLastStep"
-      mnButton
-      [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid || isCompleting }"
-      [disabled]="!isCurrentStepValid || isCompleting"
-      (click)="complete()"
-    >
-      {{ currentStep?.nextLabel || (isCompleting ? labels.completing : labels.complete) }}
-    </button>
+    @if (isLastStep) {
+      <button
+        mnButton
+        [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid || isCompleting }"
+        [disabled]="!isCurrentStepValid || isCompleting"
+        (click)="complete()"
+      >
+        {{ currentStep?.nextLabel || (isCompleting ? labels.completing : labels.complete) }}
+      </button>
+    }
   </div>
 </div>

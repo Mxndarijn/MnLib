@@ -1,12 +1,12 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
-import {NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {Subject, Subscription, debounceTime} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgForOf, NgIf, NgTemplateOutlet],
+  imports: [NgClass, NgTemplateOutlet],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
 })
