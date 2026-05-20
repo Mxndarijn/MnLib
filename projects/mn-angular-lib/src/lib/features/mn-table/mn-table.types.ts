@@ -18,16 +18,6 @@ export interface OffsetPaginationStrategy extends PaginationStrategy {
   totalItems?: number;
 }
 
-// ── Row Action ──
-export interface TableRowAction<T> {
-  icon?: string;
-  label?: string;
-  cssClass?: string;
-  onClick: (row: T) => void;
-  isVisible?: (row: T) => boolean;
-  isDisabled?: (row: T) => boolean;
-}
-
 // ── Column Sort Type ──
 export enum ColumnSortType {
   ALPHABETICAL = 'ALPHABETICAL',
@@ -109,9 +99,6 @@ export interface TableDataSource<T> {
   selectedRows?: BehaviorSubject<T[]>;
 
   // Row interaction
-  rowActions?: TableRowAction<T>[];
-  /** Header label for the actions column. Defaults to 'Actions' if not provided. */
-  actionsHeader?: string;
   onRowClick?: (row: T) => void;
 
   // Appearance

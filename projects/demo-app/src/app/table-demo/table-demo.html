@@ -7,17 +7,31 @@
     <mn-table [dataSource]="basicDataSource" (sortChange)="onSortChange($event)"></mn-table>
   </section>
 
+  <!-- Actions template -->
+  <ng-template #actionsTpl let-row>
+    <div class="inline-flex items-center gap-2">
+      <button
+        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors"
+        (click)="$event.stopPropagation(); onAction('Edit', row)"
+      >Edit</button>
+      <button
+        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors text-red-500"
+        (click)="$event.stopPropagation(); onAction('Delete', row)"
+      >Delete</button>
+    </div>
+  </ng-template>
+
+  <!-- Table with actions column -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Table with Actions Column</h2>
+    <mn-table [dataSource]="actionsDataSource"></mn-table>
+  </section>
+
   <!-- Selection table -->
   <section style="margin-bottom: 48px;">
     <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Multi-Select Table</h2>
     <mn-table [dataSource]="selectionDataSource" (selectionChange)="onSelectionChange($event)"></mn-table>
     <p style="margin-top: 8px; font-size: 14px; color: #666;">Selected: {{ selectedNames }}</p>
-  </section>
-
-  <!-- Row actions table -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Table with Row Actions</h2>
-    <mn-table [dataSource]="actionsDataSource"></mn-table>
   </section>
 
   <!-- Searchable table with load more -->

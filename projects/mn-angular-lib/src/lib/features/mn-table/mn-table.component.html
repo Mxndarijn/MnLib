@@ -69,10 +69,6 @@
           </th>
         }
 
-        <!-- Actions column header -->
-        @if (hasRowActions) {
-          <th class="text-sm px-4 py-2 text-right">{{ dataSource.actionsHeader ?? 'Actions' }}</th>
-        }
       </tr>
 
       <!-- Per-column filter row -->
@@ -117,9 +113,6 @@
               }
             </th>
           }
-          @if (hasRowActions) {
-            <th class="px-4 py-1"></th>
-          }
         </tr>
       }
     </thead>
@@ -141,9 +134,6 @@
               >
                 <div class="h-4 w-3/4 rounded bg-base-300"></div>
               </td>
-            }
-            @if (hasRowActions) {
-              <td class="px-4 py-3"><div class="h-4 w-16 rounded bg-base-300"></div></td>
             }
           </tr>
         }
@@ -225,29 +215,6 @@
               </td>
             }
 
-            <!-- Row actions -->
-            @if (hasRowActions) {
-              <td class="text-right px-4 py-2">
-                <div class="inline-flex items-center justify-end gap-2">
-                  @for (action of getVisibleActions(row); track action.label) {
-                    <button
-                      class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      [ngClass]="action.cssClass ?? ''"
-                      [disabled]="action.isDisabled ? action.isDisabled(row) : false"
-                      (click)="$event.stopPropagation(); action.onClick(row)"
-                      [attr.aria-label]="action.label"
-                    >
-                      @if (action.icon) {
-                        <span [innerHTML]="action.icon"></span>
-                      }
-                      @if (action.label) {
-                        <span>{{ action.label }}</span>
-                      }
-                    </button>
-                  }
-                </div>
-              </td>
-            }
           </tr>
         }
       }

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DoCheck, EventEmitter, inject, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
-import {NgClass, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {Subject, Subscription, debounceTime, skip} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 
@@ -9,7 +9,7 @@ export type ColumnFilterState = Record<string, string>;
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet],
+  imports: [NgTemplateOutlet],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -228,18 +228,9 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     return 'w-full border-collapse overflow-y-hidden';
   }
 
-  get hasRowActions(): boolean {
-    return !!this.dataSource.rowActions && this.dataSource.rowActions.length > 0;
-  }
-
-  getVisibleActions(row: T) {
-    return (this.dataSource.rowActions ?? []).filter(a => !a.isVisible || a.isVisible(row));
-  }
-
   get totalColumnCount(): number {
     let count = this.dataSource.columns.length;
     if (this.hasSelection) count++;
-    if (this.hasRowActions) count++;
     return count;
   }
 

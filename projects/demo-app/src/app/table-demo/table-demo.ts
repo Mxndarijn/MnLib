@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {MnTable, TableDataSource, ColumnSortType, SortState} from 'mn-angular-lib';
 
@@ -33,6 +33,8 @@ const EXTRA_USERS: User[] = [
 export class TableDemo {
   selectedNames = 'none';
 
+  readonly actionsTpl = viewChild.required<TemplateRef<any>>('actionsTpl');
+
   // ── Basic table ──
   basicDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
@@ -51,6 +53,29 @@ export class TableDemo {
     defaultSort: {columnKey: 'name', direction: 'asc'},
   };
 
+  // ── Actions table ──
+  actionsDataSource!: TableDataSource<User>;
+
+  ngOnInit(): void {
+    this.actionsDataSource = {
+      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+      getID: (row) => row.id,
+      emptyMessage: 'No users found.',
+      isDataLoading: false,
+      canSearch: false,
+      appearance: {hover: true, bordered: true},
+      columns: [
+        {key: 'name', header: 'Name', cell: (row) => row.name},
+        {key: 'role', header: 'Role', cell: (row) => row.role},
+        {key: 'actions', header: 'Actions', cell: this.actionsTpl(), align: 'right', width: '150px'},
+      ],
+    };
+  }
+
+  onAction(action: string, user: User): void {
+    alert(`${action} ${user.name}`);
+  }
+
   // ── Selection table ──
   selectionDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
@@ -66,25 +91,6 @@ export class TableDemo {
       {key: 'email', header: 'Email', cell: (row) => row.email},
       {key: 'role', header: 'Role', cell: (row) => row.role},
     ],
-  };
-
-  // ── Row actions table ──
-  actionsDataSource: TableDataSource<User> = {
-    dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
-    getID: (row) => row.id,
-    emptyMessage: 'No users found.',
-    isDataLoading: false,
-    canSearch: false,
-    appearance: {hover: true, bordered: true},
-    columns: [
-      {key: 'name', header: 'Name', cell: (row) => row.name},
-      {key: 'role', header: 'Role', cell: (row) => row.role},
-    ],
-    rowActions: [
-      {label: 'Edit', onClick: (row) => alert(`Edit ${row.name}`)},
-      {label: 'Delete', onClick: (row) => alert(`Delete ${row.name}`), isDisabled: (row) => row.role === 'Admin'},
-    ],
-    onRowClick: (row) => console.log('Row clicked:', row.name),
   };
 
   // ── Searchable + load more table ──
