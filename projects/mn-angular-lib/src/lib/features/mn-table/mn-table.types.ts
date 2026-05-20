@@ -110,6 +110,8 @@ export interface TableDataSource<T> {
 
   // Row interaction
   rowActions?: TableRowAction<T>[];
+  /** Header label for the actions column. Defaults to 'Actions' if not provided. */
+  actionsHeader?: string;
   onRowClick?: (row: T) => void;
 
   // Appearance
