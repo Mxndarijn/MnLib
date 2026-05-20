@@ -159,6 +159,7 @@
             [props]="asAny({
               id: asKey(rowField.field.key),
               label: asField(rowField.field).label,
+              placeholder: asField(rowField.field).placeholder,
               rows: asField(rowField.field).rows || 4,
               resize: 'vertical',
               autocomplete: asField(rowField.field).autocomplete,
