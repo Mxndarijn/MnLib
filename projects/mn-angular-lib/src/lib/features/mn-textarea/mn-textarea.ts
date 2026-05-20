@@ -139,6 +139,9 @@ export class MnTextarea implements OnInit {
     if (this.props.label) {
       this.uiConfig = { ...this.uiConfig, label: this.props.label };
     }
+    if (this.props.placeholder) {
+      this.uiConfig = { ...this.uiConfig, placeholder: this.props.placeholder };
+    }
   }
 
   // ========== ControlValueAccessor Implementation ==========

@@ -32,6 +32,9 @@ export interface MnTextareaProps {
   /** Label text displayed above the textarea */
   label?: string;
 
+  /** Placeholder text shown inside the textarea when empty */
+  placeholder?: string;
+
   // ========== Textarea-Specific Properties ==========
 
   /** Number of visible text rows */
