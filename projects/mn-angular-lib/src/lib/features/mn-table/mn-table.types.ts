@@ -67,6 +67,12 @@ export interface ColumnDefinition<T> {
   filterOptions?: ColumnFilterOption[];
   /** Placeholder text for the filter input. */
   filterPlaceholder?: string;
+  /** Whether the filter input is disabled. */
+  filterDisabled?: boolean;
+  /** Autocomplete attribute for the filter input. */
+  filterAutocomplete?: string;
+  /** Maximum character length for text filter inputs. */
+  filterMaxLength?: number;
   /** Custom filter function. Receives the row and the current filter value. */
   filterFn?: (row: T, filterValue: string) => boolean;
 }

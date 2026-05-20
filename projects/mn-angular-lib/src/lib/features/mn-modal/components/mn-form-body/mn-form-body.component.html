@@ -476,7 +476,7 @@
         mnButton
         type="button"
         [data]="{ variant: 'outline', color: 'secondary' }"
-        (click)="modalRef.dismiss(ModalCloseReason.CANCELLED)"
+        (mousedown)="modalRef.dismiss(ModalCloseReason.CANCELLED)"
       >
         {{ labels.cancel }}
       </button>

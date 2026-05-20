@@ -92,6 +92,9 @@
                     class="input input-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs text-base-content placeholder-base-content/50 focus:outline-none focus:border-brand-500 w-full"
                     [placeholder]="column.filterPlaceholder ?? ''"
                     [value]="columnFilters[column.key]"
+                    [disabled]="column.filterDisabled ?? false"
+                    [attr.autocomplete]="column.filterAutocomplete ?? null"
+                    [attr.maxlength]="column.filterMaxLength ?? null"
                     (input)="onColumnFilter(column.key, $any($event.target).value)"
                     (click)="$event.stopPropagation()"
                     [attr.aria-label]="'Filter ' + column.key"
@@ -100,6 +103,7 @@
                   <select
                     class="select select-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs text-base-content focus:outline-none focus:border-brand-500 w-full"
                     [value]="columnFilters[column.key]"
+                    [disabled]="column.filterDisabled ?? false"
                     (change)="onColumnFilter(column.key, $any($event.target).value)"
                     (click)="$event.stopPropagation()"
                     [attr.aria-label]="'Filter ' + column.key"

@@ -134,6 +134,11 @@ export class MnTextarea implements OnInit {
       this.sectionPath,
       instanceId
     );
+
+    // Allow props to override uiConfig for label and placeholder
+    if (this.props.label) {
+      this.uiConfig = { ...this.uiConfig, label: this.props.label };
+    }
   }
 
   // ========== ControlValueAccessor Implementation ==========
