@@ -50,6 +50,15 @@ export interface TableAppearance {
   bordered?: boolean;
 }
 
+// ── Column Filter Type ──
+export type ColumnFilterType = 'text' | 'select';
+
+// ── Column Filter Option ──
+export interface ColumnFilterOption {
+  label: string;
+  value: string;
+}
+
 // ── Column Definition ──
 export interface ColumnDefinition<T> {
   key: string;
@@ -60,6 +69,16 @@ export interface ColumnDefinition<T> {
   width?: string;
   align?: 'left' | 'center' | 'right';
   hiddenBelow?: 'sm' | 'md' | 'lg';
+  /** Whether this column supports per-column filtering. */
+  filterable?: boolean;
+  /** Type of filter input: 'text' for free-text, 'select' for dropdown. Defaults to 'text'. */
+  filterType?: ColumnFilterType;
+  /** Options for 'select' filter type. */
+  filterOptions?: ColumnFilterOption[];
+  /** Placeholder text for the filter input. */
+  filterPlaceholder?: string;
+  /** Custom filter function. Receives the row and the current filter value. */
+  filterFn?: (row: T, filterValue: string) => boolean;
 }
 
 // ── Table Data Source ──

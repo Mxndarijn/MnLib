@@ -74,6 +74,54 @@
           <th class="text-sm px-4 py-2 text-right">Actions</th>
         }
       </tr>
+
+      <!-- Per-column filter row -->
+      @if (hasColumnFilters) {
+        <tr class="bg-base-100 border-b border-base-300">
+          @if (hasSelection) {
+            <th class="px-2 py-1"></th>
+          }
+          @for (column of dataSource.columns; track column.key) {
+            <th
+              class="px-4 py-1"
+              [class.hidden]="column.hiddenBelow === 'sm' || column.hiddenBelow === 'md' || column.hiddenBelow === 'lg'"
+              [class.sm:table-cell]="column.hiddenBelow === 'sm'"
+              [class.md:table-cell]="column.hiddenBelow === 'md'"
+              [class.lg:table-cell]="column.hiddenBelow === 'lg'"
+            >
+              @if (column.filterable) {
+                @if ((column.filterType ?? 'text') === 'text') {
+                  <input
+                    type="text"
+                    class="input input-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs text-base-content placeholder-base-content/50 focus:outline-none focus:border-brand-500 w-full"
+                    [placeholder]="column.filterPlaceholder ?? ''"
+                    [value]="columnFilters[column.key]"
+                    (input)="onColumnFilter(column.key, $any($event.target).value)"
+                    (click)="$event.stopPropagation()"
+                    [attr.aria-label]="'Filter ' + column.key"
+                  />
+                } @else if (column.filterType === 'select') {
+                  <select
+                    class="select select-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs text-base-content focus:outline-none focus:border-brand-500 w-full"
+                    [value]="columnFilters[column.key]"
+                    (change)="onColumnFilter(column.key, $any($event.target).value)"
+                    (click)="$event.stopPropagation()"
+                    [attr.aria-label]="'Filter ' + column.key"
+                  >
+                    <option value="">{{ column.filterPlaceholder ?? 'All' }}</option>
+                    @for (opt of column.filterOptions ?? []; track opt.value) {
+                      <option [value]="opt.value">{{ opt.label }}</option>
+                    }
+                  </select>
+                }
+              }
+            </th>
+          }
+          @if (hasRowActions) {
+            <th class="px-4 py-1"></th>
+          }
+        </tr>
+      }
     </thead>
 
     <tbody>

@@ -107,6 +107,54 @@ export class TableDemo {
     ],
   };
 
+  // ── Column filters table ──
+  filterDataSource: TableDataSource<User> = {
+    dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+    getID: (row) => row.id,
+    emptyMessage: 'No users match the filters.',
+    isDataLoading: false,
+    canSearch: false,
+    appearance: {hover: true, striped: true},
+    columns: [
+      {
+        key: 'name',
+        header: 'Name',
+        cell: (row) => row.name,
+        sortType: ColumnSortType.ALPHABETICAL,
+        filterable: true,
+        filterPlaceholder: 'Filter name…',
+      },
+      {
+        key: 'email',
+        header: 'Email',
+        cell: (row) => row.email,
+        filterable: true,
+        filterPlaceholder: 'Filter email…',
+      },
+      {
+        key: 'role',
+        header: 'Role',
+        cell: (row) => row.role,
+        filterable: true,
+        filterType: 'select',
+        filterPlaceholder: 'All roles',
+        filterOptions: [
+          {label: 'Admin', value: 'Admin'},
+          {label: 'Editor', value: 'Editor'},
+          {label: 'Viewer', value: 'Viewer'},
+        ],
+      },
+      {
+        key: 'age',
+        header: 'Age',
+        cell: (row) => String(row.age),
+        sortType: ColumnSortType.NUMERICAL,
+        width: '80px',
+        align: 'right',
+      },
+    ],
+  };
+
   // ── Empty table ──
   emptyDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([]),

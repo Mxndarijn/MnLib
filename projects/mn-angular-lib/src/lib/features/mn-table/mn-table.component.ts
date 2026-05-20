@@ -3,6 +3,9 @@ import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {Subject, Subscription, debounceTime, skip} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 
+/** Map of column key to its current filter value. */
+export type ColumnFilterState = Record<string, string>;
+
 @Component({
   selector: 'mn-table',
   standalone: true,
@@ -23,6 +26,9 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   loadingMoreRows = false;
   currentSort: SortState | null = null;
   selectedIds = new Set<string>();
+
+  /** Per-column filter values keyed by column key. */
+  columnFilters: ColumnFilterState = {};
 
   private cdr = inject(ChangeDetectorRef);
   private dataSubscription?: Subscription;
@@ -46,6 +52,14 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   ngOnInit(): void {
     this.currentSort = this.dataSource.defaultSort ?? null;
+
+    // Initialize all filterable columns with empty string to avoid undefined values.
+    for (const col of this.dataSource.columns) {
+      if (col.filterable) {
+        this.columnFilters[col.key] = '';
+      }
+    }
+
     this.applyFilterAndSort(false);
 
     // Skip the initial BehaviorSubject emission (already handled above)
@@ -73,6 +87,20 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   onSearch(searchString: string): void {
     this.searchSubject.next(searchString);
+  }
+
+  // ── Column Filters ──
+
+  /** Whether any column has filtering enabled. */
+  get hasColumnFilters(): boolean {
+    return this.dataSource.columns.some(c => c.filterable);
+  }
+
+  /** Updates a column filter value and re-applies filtering. */
+  onColumnFilter(columnKey: string, value: string): void {
+    this.columnFilters[columnKey] = value;
+    this.applyFilterAndSort(false);
+    this.cdr.markForCheck();
   }
 
   // ── Sorting ──
@@ -226,9 +254,26 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   private applyFilterAndSort(searchForItems: boolean): void {
     let items = this.dataSource.dataRows.value;
 
+    // Global search filter
     if (this.dataSource.isInSearch && this.dataSource.canSearch && this.searchValue.length > 0) {
       const term = this.searchValue.toLowerCase();
       items = items.filter(row => this.dataSource.isInSearch!(row, term));
+    }
+
+    // Per-column filters
+    for (const col of this.dataSource.columns) {
+      const filterValue = this.columnFilters[col.key];
+      if (!col.filterable || !filterValue) continue;
+
+      if (col.filterFn) {
+        items = items.filter(row => col.filterFn!(row, filterValue));
+      } else {
+        const term = filterValue.toLowerCase();
+        items = items.filter(row => {
+          const cellValue = typeof col.cell === 'function' ? col.cell(row) : '';
+          return cellValue.toLowerCase().includes(term);
+        });
+      }
     }
 
     items = this.applySorting(items);
