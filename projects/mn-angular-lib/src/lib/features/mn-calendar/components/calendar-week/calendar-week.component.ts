@@ -143,7 +143,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
       this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
         this.events = events;
         this.refreshEvents();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       });
     }
 
@@ -153,12 +153,12 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
         this.buildColumns();
         this.refreshEvents();
         this.updateCurrentTime();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       });
     }
 
     // Build hour rows asynchronously (formatTimeI returns a Promise).
-    this.buildHourRows().then(() => this.cdr.detectChanges());
+    this.buildHourRows().then(() => this.cdr.markForCheck());
   }
 
   ngOnDestroy() {
