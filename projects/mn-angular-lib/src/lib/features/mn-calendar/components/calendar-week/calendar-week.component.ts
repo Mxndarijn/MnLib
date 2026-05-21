@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, Output, EventEmitter, Type } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, Output, EventEmitter, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CalendarEvent } from '../../models/calendar-event.model';
@@ -128,6 +128,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
 
   constructor(
     private layoutService: CalendarEventLayoutService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.formatter = new DefaultCalendarDateFormatter();
   }
@@ -155,7 +156,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
     }
 
     // Build hour rows asynchronously (formatTimeI returns a Promise).
-    this.buildHourRows();
+    this.buildHourRows().then(() => this.cdr.detectChanges());
   }
 
   ngOnDestroy() {
@@ -213,20 +214,21 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
   }
 
   private async buildHourRows() {
-    this.hourRows = [];
     const hours = this.resolvedConfig.endHour - this.resolvedConfig.startHour;
     this.totalRows = hours * 2;
 
+    const rows: DisplayHourRow[] = [];
     for (let i = 0; i < hours; i++) {
       const hour = this.resolvedConfig.startHour + i;
       const label = await this.formatter.formatTimeI(hour, 0);
-      this.hourRows.push({
+      rows.push({
         hour,
         topRow: i * 2 + 1,
         bottomRow: i * 2 + 3,
         hourLabel: label
       });
     }
+    this.hourRows = rows;
   }
 
   /** Builds the 7 day columns for the current week (Monday–Sunday). */

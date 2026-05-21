@@ -5,13 +5,15 @@ import {
   CalendarEvent,
   CALENDAR_DATE_FORMATTER,
   DefaultCalendarDateFormatter,
-  CALENDAR_CONFIG
+  CALENDAR_CONFIG,
+  MnTabComponent,
+  MnTabDataSource
 } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-calendar-demo',
   standalone: true,
-  imports: [CommonModule, CalendarViewComponent],
+  imports: [CommonModule, CalendarViewComponent, MnTabComponent],
   providers: [
     { provide: CALENDAR_DATE_FORMATTER, useClass: DefaultCalendarDateFormatter },
     {
@@ -33,11 +35,11 @@ import {
     .calendar-demo-wrapper {
       width: 100vw;
       margin-left: calc(-50vw + 50%);
-      height: calc(100vh - 100px);
       display: flex;
       flex-direction: column;
       padding: 0 5vw;
       box-sizing: border-box;
+      overflow-y: auto;
     }
     .calendar-demo-header {
       display: flex;
@@ -47,7 +49,7 @@ import {
     }
     .calendar-demo-header h2 { margin: 0; font-size: 18px; }
     .calendar-demo-subtitle { color: #6b7280; font-size: 12px; }
-    .calendar-demo-body { flex: 1; min-height: 0; }
+    .calendar-demo-body { min-height: 800px; }
     .calendar-demo-clicked {
       padding: 6px 12px;
       background: #f0f9ff;
@@ -60,22 +62,54 @@ import {
 })
 export class CalendarDemo {
   eventsEmitter = new EventEmitter<CalendarEvent[]>();
+  eventsEmitter2 = new EventEmitter<CalendarEvent[]>();
   clickedEvent?: CalendarEvent;
+  activeTabIndex = 0;
+
+  tabDataSource: MnTabDataSource = {
+    items: [
+      { label: 'Calendar Demo' },
+      { label: 'Calendar in Tab' }
+    ],
+    defaultActive: 0
+  };
 
   private sampleEvents: CalendarEvent[] = [];
+  private asyncEvents: CalendarEvent[] = [];
 
   constructor() {
     this.generateSampleEvents();
+    this.generateAsyncEvents();
   }
 
   loadEvents(_focusDate: Date) {
+    // Emit initial events immediately
     setTimeout(() => {
       this.eventsEmitter.emit(this.sampleEvents);
     }, 100);
+
+    // Emit additional async events after 5 seconds
+    setTimeout(() => {
+      this.eventsEmitter.emit([...this.sampleEvents, ...this.asyncEvents]);
+    }, 5000);
   }
 
   onEventClick(event: CalendarEvent) {
     this.clickedEvent = event;
+  }
+
+  onTabChange(tab: any) {
+    this.activeTabIndex = this.tabDataSource.items.indexOf(tab);
+  }
+
+  loadEvents2(_focusDate: Date) {
+    setTimeout(() => {
+      this.eventsEmitter2.emit(this.sampleEvents);
+    }, 100);
+
+    setTimeout(() => {
+      this.eventsEmitter2.emit([...this.sampleEvents, ...this.asyncEvents]);
+    }, 5000);
   }
 
   onNewEvent() {
@@ -110,6 +144,27 @@ export class CalendarDemo {
       { id: '8', title: 'Release Deploy', description: 'v2.1.0', startTime: makeDate(3, 16, 0), endTime: makeDate(3, 17, 0), color: colors[2] },
       { id: '9', title: 'Overlapping Event A', description: 'Tests overlap layout', startTime: makeDate(0, 14, 0), endTime: makeDate(0, 15, 30), color: colors[3] },
       { id: '10', title: 'Overlapping Event B', description: 'Tests overlap layout', startTime: makeDate(0, 14, 30), endTime: makeDate(0, 16, 0), color: colors[4] },
+    ];
+  }
+
+  private generateAsyncEvents() {
+    const today = new Date();
+    const colors = [
+      { id: '6', colorName: 'Teal', primaryColor: '#0d9488', secondaryColor: '#ccfbf1' },
+      { id: '7', colorName: 'Pink', primaryColor: '#be185d', secondaryColor: '#fce7f3' },
+    ];
+
+    const makeDate = (dayOffset: number, hour: number, minute = 0): Date => {
+      const d = new Date(today);
+      d.setDate(d.getDate() + dayOffset);
+      d.setHours(hour, minute, 0, 0);
+      return d;
+    };
+
+    this.asyncEvents = [
+      { id: '11', title: 'Async: Client Call', description: 'Loaded after 5s', startTime: makeDate(0, 16, 0), endTime: makeDate(0, 17, 0), color: colors[0] },
+      { id: '12', title: 'Async: Team Retro', description: 'Loaded after 5s', startTime: makeDate(1, 11, 0), endTime: makeDate(1, 12, 0), color: colors[1] },
+      { id: '13', title: 'Async: Deployment Review', description: 'Loaded after 5s', startTime: makeDate(2, 14, 0), endTime: makeDate(2, 15, 30), color: colors[0] },
     ];
   }
 }
