@@ -106,9 +106,8 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
     this.formatter = new DefaultCalendarDateFormatter();
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.resolvedConfig = this.config ? resolveCalendarConfig(this.config) : { ...DEFAULT_CALENDAR_CONFIG };
-    await this.buildHourRows();
     this.updateDayInfo();
     this.updateCurrentTime();
     this.currentTimeInterval = setInterval(() => this.updateCurrentTime(), 60000);
@@ -128,6 +127,9 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
         this.updateCurrentTime();
       });
     }
+
+    // Build hour rows asynchronously (formatTimeI returns a Promise).
+    this.buildHourRows();
   }
 
   ngOnDestroy() {
