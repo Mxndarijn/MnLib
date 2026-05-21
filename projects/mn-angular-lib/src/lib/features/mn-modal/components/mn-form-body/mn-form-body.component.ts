@@ -106,17 +106,32 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
   private languageService = inject(MnLanguageService);
 
+  private static readonly DEFAULT_LABELS: Record<string, string> = {
+    submit: 'Submit',
+    cancel: 'Cancel',
+    submitting: 'Submitting...',
+    selectPlaceholder: 'Select...',
+    loading: 'Loading...',
+    fileUploadPrompt: 'Click or drag files here',
+  };
+
+  private resolveLabel(i18nValue: string | undefined, key: string): string {
+    if (i18nValue) return i18nValue;
+    const translated = this.languageService.translate(`common.${key}`);
+    return translated === `common.${key}` ? MnFormBodyComponent.DEFAULT_LABELS[key] : translated;
+  }
+
   /** Resolved i18n labels with defaults, falling back to translated keys */
   get labels() {
     const i = this.config as any;
     const i18n = i.i18n || {};
     return {
-      submit: i18n.submit || this.languageService.translate('common.submit'),
-      cancel: i18n.cancel || this.languageService.translate('common.cancel'),
-      submitting: i18n.submitting || this.languageService.translate('common.submitting'),
-      selectPlaceholder: i18n.selectPlaceholder || this.languageService.translate('common.selectPlaceholder'),
-      loading: i18n.loading || this.languageService.translate('common.loading'),
-      fileUploadPrompt: i18n.fileUploadPrompt || this.languageService.translate('common.fileUploadPrompt'),
+      submit: this.resolveLabel(i18n.submit, 'submit'),
+      cancel: this.resolveLabel(i18n.cancel, 'cancel'),
+      submitting: this.resolveLabel(i18n.submitting, 'submitting'),
+      selectPlaceholder: this.resolveLabel(i18n.selectPlaceholder, 'selectPlaceholder'),
+      loading: this.resolveLabel(i18n.loading, 'loading'),
+      fileUploadPrompt: this.resolveLabel(i18n.fileUploadPrompt, 'fileUploadPrompt'),
     };
   }
 

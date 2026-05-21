@@ -67,12 +67,18 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
     this.modalRef.dismiss(reason);
   }
 
+  private resolveLabel(value: string | undefined, key: string, fallback: string): string {
+    if (value) return value;
+    const translated = this.languageService.translate(`common.${key}`);
+    return translated === `common.${key}` ? fallback : translated;
+  }
+
   get confirmLabel(): string {
-    return this.config.confirm?.label || this.languageService.translate('common.confirm');
+    return this.resolveLabel(this.config.confirm?.label, 'confirm', 'Confirm');
   }
 
   get cancelLabel(): string {
-    return this.config.cancel?.label || this.languageService.translate('common.cancel');
+    return this.resolveLabel(this.config.cancel?.label, 'cancel', 'Cancel');
   }
 
   get confirmStyle(): ActionStyle {

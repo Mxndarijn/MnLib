@@ -50,15 +50,29 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private languageService = inject(MnLanguageService);
 
+  private static readonly DEFAULT_LABELS: Record<string, string> = {
+    next: 'Next',
+    back: 'Back',
+    close: 'Close',
+    complete: 'Complete',
+    completing: 'Completing...',
+  };
+
+  private resolveLabel(i18nValue: string | undefined, key: string): string {
+    if (i18nValue) return i18nValue;
+    const translated = this.languageService.translate(`common.${key}`);
+    return translated === `common.${key}` ? MnWizardBodyComponent.DEFAULT_LABELS[key] : translated;
+  }
+
   /** Resolved i18n labels with defaults, falling back to translated keys */
   get labels() {
     const i18n = (this.config as any).i18n || {};
     return {
-      next: i18n.next || this.languageService.translate('common.next'),
-      back: i18n.back || this.languageService.translate('common.back'),
-      close: i18n.close || this.languageService.translate('common.close'),
-      complete: i18n.complete || this.languageService.translate('common.complete'),
-      completing: i18n.completing || this.languageService.translate('common.completing'),
+      next: this.resolveLabel(i18n.next, 'next'),
+      back: this.resolveLabel(i18n.back, 'back'),
+      close: this.resolveLabel(i18n.close, 'close'),
+      complete: this.resolveLabel(i18n.complete, 'complete'),
+      completing: this.resolveLabel(i18n.completing, 'completing'),
     };
   }
 
