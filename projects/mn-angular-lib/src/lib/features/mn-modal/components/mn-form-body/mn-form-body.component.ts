@@ -8,6 +8,7 @@ import {
   ViewChildren,
   QueryList,
   AfterViewInit,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -34,6 +35,7 @@ import { MnDatetime } from '../../../mn-datetime/mn-datetime';
 import { MnMultiSelect } from '../../../mn-multi-select/mn-multi-select';
 import { MnTextarea } from '../../../mn-textarea/mn-textarea';
 import { MnCustomFieldHostDirective } from './mn-custom-field-host.directive';
+import { MnLanguageService } from '../../../../language/mn-language.service';
 import { MnTable } from '../../../mn-table/mn-table.component';
 import { MultiSelectTableFieldConfig, SingleSelectTableFieldConfig, RatingFieldConfig, SliderFieldConfig, ColorFieldConfig } from '../../mn-modal.types';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
@@ -102,17 +104,19 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   /** Store table data sources keyed by field key for template access */
   tableDataSources: Record<string, any> = {};
 
-  /** Resolved i18n labels with defaults */
+  private languageService = inject(MnLanguageService);
+
+  /** Resolved i18n labels with defaults, falling back to translated keys */
   get labels() {
     const i = this.config as any;
     const i18n = i.i18n || {};
     return {
-      submit: i18n.submit || 'Submit',
-      cancel: i18n.cancel || 'Cancel',
-      submitting: i18n.submitting || 'Submitting...',
-      selectPlaceholder: i18n.selectPlaceholder || 'Select...',
-      loading: i18n.loading || 'Loading...',
-      fileUploadPrompt: i18n.fileUploadPrompt || 'Click or drag files here',
+      submit: i18n.submit || this.languageService.translate('common.submit'),
+      cancel: i18n.cancel || this.languageService.translate('common.cancel'),
+      submitting: i18n.submitting || this.languageService.translate('common.submitting'),
+      selectPlaceholder: i18n.selectPlaceholder || this.languageService.translate('common.selectPlaceholder'),
+      loading: i18n.loading || this.languageService.translate('common.loading'),
+      fileUploadPrompt: i18n.fileUploadPrompt || this.languageService.translate('common.fileUploadPrompt'),
     };
   }
 

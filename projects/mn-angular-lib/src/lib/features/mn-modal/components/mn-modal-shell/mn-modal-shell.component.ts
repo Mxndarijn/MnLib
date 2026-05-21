@@ -1,4 +1,4 @@
-import { Component, HostBinding, HostListener, Input, ElementRef, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, HostListener, Input, ElementRef, AfterViewInit, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MnModalRef } from '../../mn-modal-ref';
 import {
@@ -44,7 +44,7 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
   private pollingTimer: any = null;
   private pollAttempts = 0;
 
-  constructor(private el: ElementRef<HTMLElement>) {}
+  constructor(private el: ElementRef<HTMLElement>, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.startPollingIfConfigured();
@@ -133,6 +133,7 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
 
   startClosing(): Promise<void> {
     this.isClosing = true;
+    this.cdr.detectChanges();
     return new Promise(resolve => setTimeout(resolve, 150));
   }
 

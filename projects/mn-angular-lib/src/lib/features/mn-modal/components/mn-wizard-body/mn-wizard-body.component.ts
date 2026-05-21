@@ -7,6 +7,7 @@ import {
   ViewChildren,
   QueryList,
   AfterViewInit,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -26,6 +27,7 @@ import {
 import { MnButton } from '../../../mn-button/mn-button';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
+import { MnLanguageService } from '../../../../language/mn-language.service';
 
 @Component({
   selector: 'mn-wizard-body',
@@ -46,15 +48,17 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   isCompleting = false;
   wizardErrors: Record<string, string> = {};
 
-  /** Resolved i18n labels with defaults */
+  private languageService = inject(MnLanguageService);
+
+  /** Resolved i18n labels with defaults, falling back to translated keys */
   get labels() {
     const i18n = (this.config as any).i18n || {};
     return {
-      next: i18n.next || 'Next',
-      back: i18n.back || 'Back',
-      close: i18n.close || 'Close',
-      complete: i18n.complete || 'Complete',
-      completing: i18n.completing || 'Completing...',
+      next: i18n.next || this.languageService.translate('common.next'),
+      back: i18n.back || this.languageService.translate('common.back'),
+      close: i18n.close || this.languageService.translate('common.close'),
+      complete: i18n.complete || this.languageService.translate('common.complete'),
+      completing: i18n.completing || this.languageService.translate('common.completing'),
     };
   }
 

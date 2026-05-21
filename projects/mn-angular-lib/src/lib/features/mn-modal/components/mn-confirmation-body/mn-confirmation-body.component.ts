@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MnModalRef } from '../../mn-modal-ref';
@@ -11,6 +11,7 @@ import {
 import { MnButton } from '../../../mn-button/mn-button';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
+import { MnLanguageService } from '../../../../language/mn-language.service';
 
 @Component({
   selector: 'mn-confirmation-body',
@@ -27,6 +28,8 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
 
   confirmButtonStatus = 'VALID';
   hasFormFields = false;
+
+  private languageService = inject(MnLanguageService);
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -65,11 +68,11 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
   }
 
   get confirmLabel(): string {
-    return this.config.confirm?.label || 'Confirm';
+    return this.config.confirm?.label || this.languageService.translate('common.confirm');
   }
 
   get cancelLabel(): string {
-    return this.config.cancel?.label || 'Cancel';
+    return this.config.cancel?.label || this.languageService.translate('common.cancel');
   }
 
   get confirmStyle(): ActionStyle {
