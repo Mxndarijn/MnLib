@@ -117,6 +117,7 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
       this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
         this.events = events;
         this.refreshEvents();
+        this.cdr.detectChanges();
       });
     }
 
@@ -126,6 +127,7 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
         this.updateDayInfo();
         this.refreshEvents();
         this.updateCurrentTime();
+        this.cdr.detectChanges();
       });
     }
 
