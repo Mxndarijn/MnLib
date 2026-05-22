@@ -65,6 +65,14 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
       }
     }
 
+    // Pre-select rows from initialSelectedIds if provided
+    if (this.dataSource.initialSelectedIds?.length) {
+      for (const id of this.dataSource.initialSelectedIds) {
+        this.selectedIds.add(id);
+      }
+      this.emitSelection();
+    }
+
     this.applyFilterAndSort(false);
 
     // Skip the initial BehaviorSubject emission (already handled above)

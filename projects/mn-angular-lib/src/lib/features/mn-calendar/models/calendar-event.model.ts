@@ -39,6 +39,18 @@ export interface CalendarEvent {
 }
 
 /**
+ * Represents a button displayed in the calendar toolbar's top-right area.
+ */
+export interface CalendarButton {
+  /** Display label for the button. */
+  label: string;
+  /** CSS class(es) applied to the button (e.g. 'btn btn-sm btn-primary'). */
+  cssClass?: string;
+  /** Callback invoked when the button is clicked. */
+  onClick: () => void;
+}
+
+/**
  * Represents the "current time" indicator rendered as a line in week/day views.
  */
 export interface CurrentTimeCalendarEvent {

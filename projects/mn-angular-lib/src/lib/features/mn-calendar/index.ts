@@ -11,7 +11,7 @@ export { UpcomingEventsComponent } from './components/upcoming-events/upcoming-e
 export { UpcomingEventRowComponent } from './components/upcoming-event-row/upcoming-event-row.component';
 
 // Models
-export type { CalendarEvent, CurrentTimeCalendarEvent } from './models/calendar-event.model';
+export type { CalendarEvent, CurrentTimeCalendarEvent, CalendarButton } from './models/calendar-event.model';
 export type { CalendarEventData } from './models/calendar-event-data.model';
 export { CalendarView, CALENDAR_CONFIG, DEFAULT_CALENDAR_CONFIG, MN_CALENDAR_CONFIG, MN_CALENDAR_COMPONENT_NAME, provideMnCalendarConfig, resolveCalendarConfig } from './models/calendar-config.model';
 export type { CalendarConfig, HourRow, ColumnDay, MonthItem } from './models/calendar-config.model';

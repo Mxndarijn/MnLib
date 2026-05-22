@@ -460,18 +460,28 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
         const ds = tableField.tableDataSource;
         // Force multi selection mode
         ds.selectionMode = 'multi';
-        this.tableDataSources[field.key as string] = ds;
 
-        // Initialize form control with empty array if null
+        // Pre-select rows from the form's initial value
         const control = this.form.get(field.key as string);
-        if (control && control.value === null) {
+        if (control && Array.isArray(control.value) && control.value.length > 0) {
+          ds.initialSelectedIds = control.value.map((v: any) => String(v));
+        } else if (control && control.value === null) {
           control.setValue([], { emitEvent: false });
         }
+
+        this.tableDataSources[field.key as string] = ds;
       } else if (field.kind === FieldKind.SINGLE_SELECT_TABLE) {
         const tableField = field as SingleSelectTableFieldConfig<TModel>;
         const ds = tableField.tableDataSource;
         // Force single selection mode
         ds.selectionMode = 'single';
+
+        // Pre-select row from the form's initial value
+        const control = this.form.get(field.key as string);
+        if (control && control.value != null) {
+          ds.initialSelectedIds = [String(control.value)];
+        }
+
         this.tableDataSources[field.key as string] = ds;
       }
     });

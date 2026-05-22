@@ -1,7 +1,7 @@
 import { Component, DestroyRef, EventEmitter, HostListener, Inject, inject, Input, OnDestroy, OnInit, Optional, Output, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, Observable, Subject, skip, takeUntil } from 'rxjs';
-import { CalendarEvent } from '../../models/calendar-event.model';
+import { CalendarButton, CalendarEvent } from '../../models/calendar-event.model';
 import { CalendarEventData } from '../../models/calendar-event-data.model';
 import { CalendarView, CALENDAR_CONFIG, CalendarConfig, DEFAULT_CALENDAR_CONFIG, MN_CALENDAR_CONFIG, provideMnCalendarConfig, resolveCalendarConfig } from '../../models/calendar-config.model';
 import { MnLanguageService } from '../../../../language/mn-language.service';
@@ -62,6 +62,7 @@ import { UpcomingEventsComponent } from '../upcoming-events/upcoming-events.comp
       flex-wrap: wrap;
     }
     .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .view-switcher { display: flex; border: 1px solid var(--color-base-300); border-radius: 6px; overflow: hidden; }
     .view-btn {
       padding: 6px 14px;
@@ -113,6 +114,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   @Input() showButton = false;
   /** Label text for the action button. */
   @Input() buttonTitle = '';
+  /** Array of buttons to display in the toolbar's top-right area. */
+  @Input() buttons: CalendarButton[] = [];
   /** Custom event renderer component type. */
   @Input() CalendarEventComponent?: Type<CalendarEventData>;
   /** Observable or EventEmitter that pushes new event arrays into the calendar. */

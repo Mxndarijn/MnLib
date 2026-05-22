@@ -109,6 +109,8 @@ export interface TableDataSource<T> {
   // Selection
   selectionMode?: 'none' | 'single' | 'multi';
   selectedRows?: BehaviorSubject<T[]>;
+  /** IDs to pre-select when the table initializes. */
+  initialSelectedIds?: string[];
 
   // Row interaction
   onRowClick?: (row: T) => void;

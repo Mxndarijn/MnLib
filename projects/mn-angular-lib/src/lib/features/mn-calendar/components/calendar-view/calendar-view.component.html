@@ -21,6 +21,11 @@
       </div>
     </div>
     <div class="toolbar-right">
+      @for (btn of buttons; track btn.label) {
+        <button [class]="btn.cssClass || 'action-btn'" (click)="btn.onClick()">
+          {{ btn.label }}
+        </button>
+      }
       @if (showButton) {
         <button class="action-btn" (click)="ButtonClickedEvent.emit()">
           {{ buttonTitle }}
