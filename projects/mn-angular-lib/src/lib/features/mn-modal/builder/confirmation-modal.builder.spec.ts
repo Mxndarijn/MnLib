@@ -76,7 +76,7 @@ describe('ConfirmationModalBuilder', () => {
       .message('Delete this item?')
       .build();
     expect(config.title).toBe('Confirm Delete');
-    expect(config.size).toBe(ModalSize.SM);
+    expect(config.sizeWidth).toBe(ModalSize.SM);
   });
 
   it('should freeze the config', () => {

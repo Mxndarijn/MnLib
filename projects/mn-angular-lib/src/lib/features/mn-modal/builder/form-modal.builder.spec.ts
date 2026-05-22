@@ -20,7 +20,7 @@ describe('FormModalBuilder', () => {
       .sizeWidth(ModalSize.LG)
       .build();
     expect(config.title).toBe('My Form');
-    expect(config.size).toBe(ModalSize.LG);
+    expect(config.sizeWidth).toBe(ModalSize.LG);
   });
 
   it('should set layout, submitMode, and initialValue', () => {

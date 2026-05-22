@@ -190,7 +190,7 @@ describe('Integration: FormModalBuilder → MnFormBodyComponent', () => {
       .build();
 
     expect(config.kind).toBe(ModalKind.FORM);
-    expect(config.size).toBe(ModalSize.LG);
+    expect(config.sizeWidth).toBe(ModalSize.LG);
     expect(config.title).toBe('Test');
 
     setup(config);

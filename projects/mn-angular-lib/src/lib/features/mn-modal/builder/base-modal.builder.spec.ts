@@ -11,7 +11,7 @@ import {
 describe('BaseModalBuilder (via FormModalBuilder)', () => {
   it('should default size to undefined', () => {
     const config = ModalBuilder.form().build();
-    expect(config.size).toBeUndefined();
+    expect(config.sizeWidth).toBeUndefined();
   });
 
   it('should default title to undefined', () => {
@@ -57,7 +57,7 @@ describe('BaseModalBuilder (via FormModalBuilder)', () => {
       .intent(ModalIntent.WARNING)
       .build();
     expect(config.title).toBe('Chained');
-    expect(config.size).toBe(ModalSize.XL);
+    expect(config.sizeWidth).toBe(ModalSize.XL);
     expect(config.closeMode).toBe(CloseMode.GUARDED);
     expect(config.backdrop).toBe(BackdropMode.CLOSABLE);
     expect(config.keyboard).toBe(KeyboardMode.ENABLED);
