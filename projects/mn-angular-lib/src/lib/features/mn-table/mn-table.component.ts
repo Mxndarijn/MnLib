@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DoCheck, EventEmitter, inject, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
-import {NgTemplateOutlet} from '@angular/common';
+import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {Subject, Subscription, debounceTime, skip} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 
@@ -9,7 +9,7 @@ export type ColumnFilterState = Record<string, string>;
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgClass, NgTemplateOutlet],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

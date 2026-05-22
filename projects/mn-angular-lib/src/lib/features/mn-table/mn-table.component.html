@@ -161,7 +161,7 @@
         @for (row of paginatedItems; track trackByID($index, row); let odd = $odd; let last = $last) {
           <tr
             class="bg-base-100 transition-colors duration-150"
-            [class.bg-brand-50]="isSelected(row)"
+            [ngClass]="{'bg-primary/10': isSelected(row)}"
             [class.bg-base-200]="!isSelected(row) && odd && dataSource.appearance?.striped"
             [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
             [class.cursor-pointer]="!!dataSource.onRowClick"
