@@ -23,6 +23,8 @@ import {
   WizardFlowMode,
   ModalKind,
   FormModalConfig,
+  ModalFooterAction,
+  ActionStyle,
 } from '../../mn-modal.types';
 import { MnButton } from '../../../mn-button/mn-button';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
@@ -186,6 +188,13 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   async goToStep(step: WizardStepConfig): Promise<void> {
     if (!this.canNavigateToStep(step)) return;
     if (step.id === this.currentStepId) return;
+
+    // Validate current step's form before allowing direct step navigation
+    const formBody = this.getCurrentFormBody();
+    if (formBody && formBody.form.invalid) {
+      formBody.form.markAllAsTouched();
+      return;
+    }
 
     const previousStepId = this.currentStepId;
     this.currentStepId = step.id;
@@ -367,6 +376,38 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     return aggregated;
+  }
+
+  /**
+   * Maps a footer action's ActionStyle to mnButton data props.
+   * @param action The footer action configuration.
+   */
+  getFooterActionButtonData(action: ModalFooterAction<any>): any {
+    switch (action.style) {
+      case ActionStyle.DANGER:
+        return { variant: 'outline', color: 'error' };
+      case ActionStyle.PRIMARY:
+        return { variant: 'fill', color: 'primary' };
+      case ActionStyle.SECONDARY:
+        return { variant: 'outline', color: 'secondary' };
+      case ActionStyle.GHOST:
+        return { variant: 'ghost', color: 'secondary' };
+      default:
+        return { variant: 'outline', color: 'secondary' };
+    }
+  }
+
+  /**
+   * Handles a custom footer action click.
+   * @param action The footer action configuration.
+   */
+  async handleFooterAction(action: ModalFooterAction<any>): Promise<void> {
+    if (action.handler) {
+      await action.handler(this.modalRef as any);
+    }
+    if (action.closesModal) {
+      this.modalRef.close((action.closeReason || ModalCloseReason.PROGRAMMATIC) as any);
+    }
   }
 
   private async notifyStepChange(previousStepId: ModalStepId, direction: NavigationDirection): Promise<void> {

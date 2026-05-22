@@ -72,7 +72,20 @@ export class MnDatetime implements OnInit {
   // ========== ControlValueAccessor Implementation ==========
 
   writeValue(val: unknown): void {
-    this.value = val != null ? String(val) : null;
+    if (val != null) {
+      let str = String(val);
+      // Convert ISO 8601 strings (e.g. "2025-01-01T10:00:00.000Z") to datetime-local format
+      if (str.includes('T') && (str.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(str))) {
+        const date = new Date(str);
+        if (!isNaN(date.getTime())) {
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          str = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+      }
+      this.value = str;
+    } else {
+      this.value = null;
+    }
   }
 
   registerOnChange(fn: any): void {
