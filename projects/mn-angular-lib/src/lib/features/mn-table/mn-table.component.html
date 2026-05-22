@@ -28,7 +28,7 @@
               <label>
                 <input
                   type="checkbox"
-                  class="accent-brand-500"
+                  class="checkbox checkbox-sm checkbox-primary"
                   [checked]="allSelected"
                   (change)="toggleAll()"
                   aria-label="Select all rows"
@@ -176,24 +176,13 @@
             @if (hasSelection) {
               <td class="w-10 text-center px-2 py-2">
                 <label>
-                  @if (isMultiSelect) {
-                    <input
-                      type="checkbox"
-                      class="accent-brand-500"
-                      [checked]="isSelected(row)"
-                      (click)="$event.stopPropagation()"
-                      (change)="toggleRow(row)"
-                    />
-                  } @else {
-                    <input
-                      type="radio"
-                      class="accent-brand-500"
-                      [checked]="isSelected(row)"
-                      (click)="$event.stopPropagation()"
-                      (change)="toggleRow(row)"
-                      name="mn-table-single-select"
-                    />
-                  }
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm checkbox-primary"
+                    [checked]="isSelected(row)"
+                    (click)="$event.stopPropagation()"
+                    (change)="toggleRow(row)"
+                  />
                 </label>
               </td>
             }
