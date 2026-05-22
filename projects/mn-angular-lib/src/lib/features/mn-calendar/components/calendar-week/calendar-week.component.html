@@ -37,7 +37,7 @@
           <div class="current-time-rule"></div>
         </div>
       }
-      @for (event of displayEvents; track event.id) {
+      @for (event of displayEvents; track $index) {
         <div class="week-event"
           [style.grid-row]="getEventRow(event)"
           [style.grid-column]="getEventColumn(event)"

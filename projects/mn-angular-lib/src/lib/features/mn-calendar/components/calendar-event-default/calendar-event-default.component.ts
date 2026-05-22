@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, Optional } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarEventData } from '../../models/calendar-event-data.model';
 import { CalendarEvent } from '../../models/calendar-event.model';
@@ -56,7 +56,8 @@ export class CalendarEventDefaultComponent implements CalendarEventData, OnInit 
   private formatter: CalendarDateFormatter;
 
   constructor(
-    @Optional() @Inject(CALENDAR_DATE_FORMATTER) formatter: CalendarDateFormatter | null
+    @Optional() @Inject(CALENDAR_DATE_FORMATTER) formatter: CalendarDateFormatter | null,
+    private cdr: ChangeDetectorRef,
   ) {
     this.formatter = formatter ?? new DefaultCalendarDateFormatter();
   }
@@ -66,6 +67,7 @@ export class CalendarEventDefaultComponent implements CalendarEventData, OnInit 
       const start = await this.formatter.formatTime(this.event.startTime);
       const end = await this.formatter.formatTime(this.event.endTime);
       this.formattedTime = `${start} - ${end}`;
+      this.cdr.markForCheck();
     }
   }
 }
