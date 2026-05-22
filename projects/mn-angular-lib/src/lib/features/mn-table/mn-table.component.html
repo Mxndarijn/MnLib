@@ -158,7 +158,7 @@
         }
 
         <!-- Data rows -->
-        @for (row of filteredItems; track trackByID($index, row); let odd = $odd; let last = $last) {
+        @for (row of paginatedItems; track trackByID($index, row); let odd = $odd; let last = $last) {
           <tr
             class="bg-base-100 transition-colors duration-150"
             [class.bg-brand-50]="isSelected(row)"
@@ -239,5 +239,70 @@
       }
       Load more
     </button>
+  </div>
+}
+
+<!-- Pagination controls -->
+@if (isPaginated && totalPages > 1) {
+  <div class="flex items-center justify-between px-2 py-3 text-sm text-base-content">
+    <div class="flex items-center gap-2">
+      <span>Rows per page:</span>
+      <select
+        class="select select-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs focus:outline-none focus:border-brand-500"
+        [value]="pageSize"
+        (change)="onPageSizeChange(+$any($event.target).value)"
+        aria-label="Rows per page"
+      >
+        @for (opt of resolvedPageSizeOptions; track opt) {
+          <option [value]="opt" [selected]="opt === pageSize">{{ opt }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <span class="text-xs mr-2">{{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > filteredItems.length ? filteredItems.length : currentPage * pageSize }} of {{ filteredItems.length }}</span>
+
+      <button
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(1)"
+        aria-label="First page"
+      >«</button>
+
+      <button
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+        aria-label="Previous page"
+      >‹</button>
+
+      @for (page of visiblePages; track page) {
+        <button
+          class="px-2.5 py-1 rounded border transition-colors text-xs"
+          [class.border-brand-500]="page === currentPage"
+          [class.bg-brand-500]="page === currentPage"
+          [class.text-white]="page === currentPage"
+          [class.border-base-300]="page !== currentPage"
+          [class.hover:bg-base-200]="page !== currentPage"
+          (click)="goToPage(page)"
+          [attr.aria-label]="'Page ' + page"
+          [attr.aria-current]="page === currentPage ? 'page' : null"
+        >{{ page }}</button>
+      }
+
+      <button
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)"
+        aria-label="Next page"
+      >›</button>
+
+      <button
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(totalPages)"
+        aria-label="Last page"
+      >»</button>
+    </div>
   </div>
 }

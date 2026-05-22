@@ -15,7 +15,7 @@
         [attr.aria-label]="item.date.toDateString()">
         <span class="day-number">{{ item.dayNumber }}</span>
         <div class="month-events">
-          @for (event of item.events.slice(0, 3); track event.id) {
+          @for (event of item.events.slice(0, 3); track $index) {
             <div
               class="month-event-dot"
               [style.background-color]="event.color.primaryColor"

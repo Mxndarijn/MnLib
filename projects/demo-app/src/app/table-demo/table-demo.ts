@@ -19,6 +19,27 @@ const SAMPLE_USERS: User[] = [
   {id: '5', name: 'Eve Davis', email: 'eve@example.com', role: 'Editor', age: 27, joinedAt: '2024-01-05'},
 ];
 
+const PAGINATED_USERS: User[] = [
+  {id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', age: 32, joinedAt: '2023-01-15'},
+  {id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'Editor', age: 28, joinedAt: '2023-03-22'},
+  {id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'Viewer', age: 45, joinedAt: '2022-11-01'},
+  {id: '4', name: 'Diana Prince', email: 'diana@example.com', role: 'Admin', age: 30, joinedAt: '2024-06-10'},
+  {id: '5', name: 'Eve Davis', email: 'eve@example.com', role: 'Editor', age: 27, joinedAt: '2024-01-05'},
+  {id: '6', name: 'Frank Miller', email: 'frank@example.com', role: 'Viewer', age: 38, joinedAt: '2024-08-20'},
+  {id: '7', name: 'Grace Lee', email: 'grace@example.com', role: 'Editor', age: 29, joinedAt: '2024-09-12'},
+  {id: '8', name: 'Hank Wilson', email: 'hank@example.com', role: 'Viewer', age: 41, joinedAt: '2023-05-18'},
+  {id: '9', name: 'Ivy Chen', email: 'ivy@example.com', role: 'Admin', age: 26, joinedAt: '2024-02-14'},
+  {id: '10', name: 'Jack Turner', email: 'jack@example.com', role: 'Editor', age: 35, joinedAt: '2023-07-30'},
+  {id: '11', name: 'Karen White', email: 'karen@example.com', role: 'Viewer', age: 33, joinedAt: '2022-12-05'},
+  {id: '12', name: 'Leo Martinez', email: 'leo@example.com', role: 'Admin', age: 40, joinedAt: '2023-09-01'},
+  {id: '13', name: 'Mia Robinson', email: 'mia@example.com', role: 'Editor', age: 24, joinedAt: '2024-04-22'},
+  {id: '14', name: 'Noah Clark', email: 'noah@example.com', role: 'Viewer', age: 37, joinedAt: '2023-11-10'},
+  {id: '15', name: 'Olivia Hall', email: 'olivia@example.com', role: 'Admin', age: 31, joinedAt: '2024-07-03'},
+  {id: '16', name: 'Paul Adams', email: 'paul@example.com', role: 'Editor', age: 29, joinedAt: '2023-02-28'},
+  {id: '17', name: 'Quinn Baker', email: 'quinn@example.com', role: 'Viewer', age: 44, joinedAt: '2022-10-15'},
+  {id: '18', name: 'Ruby Scott', email: 'ruby@example.com', role: 'Admin', age: 36, joinedAt: '2024-05-19'},
+];
+
 const EXTRA_USERS: User[] = [
   {id: '6', name: 'Frank Miller', email: 'frank@example.com', role: 'Viewer', age: 38, joinedAt: '2024-08-20'},
   {id: '7', name: 'Grace Lee', email: 'grace@example.com', role: 'Editor', age: 29, joinedAt: '2024-09-12'},
@@ -159,6 +180,29 @@ export class TableDemo {
         align: 'right',
       },
     ],
+  };
+
+  // ── Paginated table ──
+  paginatedDataSource: TableDataSource<User> = {
+    dataRows: new BehaviorSubject<User[]>([...PAGINATED_USERS]),
+    getID: (row) => row.id,
+    emptyMessage: 'No users found.',
+    isDataLoading: false,
+    canSearch: true,
+    searchPlaceholder: 'Search paginated users...',
+    isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
+    paginationMode: 'paginated',
+    pageSize: 5,
+    pageSizeOptions: [5, 10, 15],
+    appearance: {hover: true, striped: true},
+    columns: [
+      {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
+      {key: 'email', header: 'Email', cell: (row) => row.email, sortType: ColumnSortType.ALPHABETICAL, hiddenBelow: 'sm'},
+      {key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center'},
+      {key: 'age', header: 'Age', cell: (row) => String(row.age), sortType: ColumnSortType.NUMERICAL, width: '80px', align: 'right'},
+      {key: 'joined', header: 'Joined', cell: (row) => row.joinedAt, sortType: ColumnSortType.DATE, hiddenBelow: 'md'},
+    ],
+    defaultSort: {columnKey: 'name', direction: 'asc'},
   };
 
   // ── Empty table ──

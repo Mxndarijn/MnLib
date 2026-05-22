@@ -22,10 +22,14 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   @Output() rowClick = new EventEmitter<T>();
 
   filteredItems: T[] = [];
+  paginatedItems: T[] = [];
   searchValue = '';
   loadingMoreRows = false;
   currentSort: SortState | null = null;
   selectedIds = new Set<string>();
+
+  currentPage = 1;
+  pageSize = 10;
 
   /** Per-column filter values keyed by column key. */
   columnFilters: ColumnFilterState = {};
@@ -52,6 +56,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   ngOnInit(): void {
     this.currentSort = this.dataSource.defaultSort ?? null;
+    this.pageSize = this.dataSource.pageSize ?? 10;
 
     // Initialize all filterable columns with empty string to avoid undefined values.
     for (const col of this.dataSource.columns) {
@@ -86,6 +91,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   // ── Search ──
 
   onSearch(searchString: string): void {
+    this.currentPage = 1;
     this.searchSubject.next(searchString);
   }
 
@@ -99,6 +105,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   /** Updates a column filter value and re-applies filtering. */
   onColumnFilter(columnKey: string, value: string): void {
     this.columnFilters[columnKey] = value;
+    this.currentPage = 1;
     this.applyFilterAndSort(false);
     this.cdr.markForCheck();
   }
@@ -203,6 +210,57 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     return mode === 'load-more' && hasMore;
   }
 
+  // ── Paginated Mode ──
+
+  get isPaginated(): boolean {
+    return this.dataSource.paginationMode === 'paginated';
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+  }
+
+  get resolvedPageSizeOptions(): number[] {
+    return this.dataSource.pageSizeOptions ?? [5, 10, 25, 50];
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.applyPagination();
+    this.cdr.markForCheck();
+  }
+
+  onPageSizeChange(newSize: number): void {
+    this.pageSize = newSize;
+    this.currentPage = 1;
+    this.applyPagination();
+    this.cdr.markForCheck();
+  }
+
+  get visiblePages(): number[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const delta = 2;
+    const pages: number[] = [];
+    for (let i = Math.max(1, current - delta); i <= Math.min(total, current + delta); i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  private applyPagination(): void {
+    if (this.isPaginated) {
+      if (this.currentPage > this.totalPages) {
+        this.currentPage = this.totalPages;
+      }
+      const start = (this.currentPage - 1) * this.pageSize;
+      this.paginatedItems = this.filteredItems.slice(start, start + this.pageSize);
+    } else {
+      this.paginatedItems = this.filteredItems;
+    }
+  }
+
   // ── Template helpers ──
 
   isTemplateRef(value: any): value is TemplateRef<any> {
@@ -269,6 +327,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
     items = this.applySorting(items);
     this.filteredItems = items;
+    this.applyPagination();
 
     if (searchForItems) {
       this.loadMoreRows();

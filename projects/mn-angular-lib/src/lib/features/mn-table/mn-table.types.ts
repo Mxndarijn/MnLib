@@ -97,6 +97,12 @@ export interface TableDataSource<T> {
   paginationStrategy?: PaginationStrategy;
   loadAdditionalRows?: () => Promise<T[]>;
 
+  /** Number of rows per page when paginationMode is 'paginated'. Defaults to 10. */
+  pageSize?: number;
+
+  /** Options for the page-size selector dropdown. Defaults to [5, 10, 25, 50]. */
+  pageSizeOptions?: number[];
+
   // Sorting
   defaultSort?: SortState;
 
