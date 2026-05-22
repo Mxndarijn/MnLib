@@ -72,7 +72,7 @@ describe('ConfirmationModalBuilder', () => {
   it('should set title and size from base builder', () => {
     const config = ModalBuilder.confirmation()
       .title('Confirm Delete')
-      .size(ModalSize.SM)
+      .sizeWidth(ModalSize.SM)
       .message('Delete this item?')
       .build();
     expect(config.title).toBe('Confirm Delete');

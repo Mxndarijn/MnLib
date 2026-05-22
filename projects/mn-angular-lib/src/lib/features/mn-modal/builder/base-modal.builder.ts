@@ -48,8 +48,15 @@ export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>,
     return this;
   }
 
-  size(size: ModalSize): this {
-    this.config.size = size;
+  /** Set the width of the modal */
+  sizeWidth(size: ModalSize): this {
+    this.config.sizeWidth = size;
+    return this;
+  }
+
+  /** Set the height of the modal (e.g. '400px', '50vh', '90vh') */
+  sizeHeight(height: string): this {
+    this.config.sizeHeight = height;
     return this;
   }
 

@@ -5,6 +5,7 @@
 <div
   class="modal-container relative bg-base-100 rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
   [ngClass]="[containerSizeClass, animationClass]"
+  [style.height]="containerHeightStyle"
   role="dialog"
   aria-modal="true"
   [attr.aria-labelledby]="config.title ? 'mn-modal-title' : null"

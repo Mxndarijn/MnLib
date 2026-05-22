@@ -185,7 +185,7 @@ describe('Integration: FormModalBuilder → MnFormBodyComponent', () => {
   it('should preserve config kind and size from builder', () => {
     const config = ModalBuilder.form<TestUser>()
       .title('Test')
-      .size(ModalSize.LG)
+      .sizeWidth(ModalSize.LG)
       .field({ kind: FieldKind.TEXT, key: 'firstName', label: 'First Name' })
       .build();
 

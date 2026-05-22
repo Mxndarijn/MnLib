@@ -724,7 +724,10 @@ export interface BaseModalConfig<TResult = unknown> {
   title?: string;
   subtitle?: string;
   description?: string;
-  size?: ModalSize;
+  /** Width of the modal (uses ModalSize enum) */
+  sizeWidth?: ModalSize;
+  /** Height of the modal (e.g. '400px', '50vh', '90vh') */
+  sizeHeight?: string;
   closeMode?: CloseMode;
   closeGuard?: () => Promise<boolean> | boolean;
   backdrop?: BackdropMode;

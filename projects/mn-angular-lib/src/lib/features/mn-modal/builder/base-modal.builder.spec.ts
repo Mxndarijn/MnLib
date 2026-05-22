@@ -50,7 +50,7 @@ describe('BaseModalBuilder (via FormModalBuilder)', () => {
   it('should support method chaining', () => {
     const config = ModalBuilder.form()
       .title('Chained')
-      .size(ModalSize.XL)
+      .sizeWidth(ModalSize.XL)
       .closeMode(CloseMode.GUARDED)
       .backdrop(BackdropMode.CLOSABLE)
       .keyboard(KeyboardMode.ENABLED)

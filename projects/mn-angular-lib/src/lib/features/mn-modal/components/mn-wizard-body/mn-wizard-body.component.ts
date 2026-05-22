@@ -385,7 +385,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   getFooterActionButtonData(action: ModalFooterAction<any>): any {
     switch (action.style) {
       case ActionStyle.DANGER:
-        return { variant: 'outline', color: 'error' };
+        return { variant: 'outline', color: 'danger' };
       case ActionStyle.PRIMARY:
         return { variant: 'fill', color: 'primary' };
       case ActionStyle.SECONDARY:

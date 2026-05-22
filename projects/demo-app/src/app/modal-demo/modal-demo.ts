@@ -68,7 +68,7 @@ export class ModalDemo {
       .title('Confirm Action')
       .message('Are you sure you want to proceed with this action?')
       .tone(ConfirmationTone.DEFAULT)
-      .size(ModalSize.SM)
+      .sizeWidth(ModalSize.SM)
       .confirmAction({
         label: 'Yes, proceed',
         style: ActionStyle.PRIMARY,
@@ -96,7 +96,7 @@ export class ModalDemo {
       .title('Delete Account')
       .message('This action cannot be undone. Are you sure you want to delete your account?')
       .tone(ConfirmationTone.DANGER)
-      .size(ModalSize.SM)
+      .sizeWidth(ModalSize.SM)
       .closeMode(CloseMode.GUARDED)
       .closeGuard(() => window.confirm('Are you sure you want to close this dialog?'))
       .confirmAction({
@@ -120,7 +120,7 @@ export class ModalDemo {
   openFormModal() {
     const config = ModalBuilder.form<UserFormModel, UserFormModel>()
       .title('User Information')
-      .size(ModalSize.LG)
+      .sizeWidth(ModalSize.LG)
       .addRow(2, (row) => {
         row.add({
           kind: FieldKind.TEXT,
@@ -266,7 +266,7 @@ export class ModalDemo {
       .title('Registration Wizard')
       .subtitle('Complete all steps to create your account')
       .description('Please fill in the required information in each step.')
-      .size(ModalSize.LG)
+      .sizeWidth(ModalSize.LG)
       .flow(WizardFlowMode.LINEAR)
       .addStep('Account Information', (s) => {
         s.field({ kind: FieldKind.TEXT, key: 'email', label: 'Email Address', placeholder: 'user@example.com', validators: [Validators.required, Validators.email] })
@@ -323,7 +323,7 @@ export class ModalDemo {
     const config = ModalBuilder.custom()
       .title('User Overview')
       .subtitle('Manage your team members')
-      .size(ModalSize.LG)
+      .sizeWidth(ModalSize.LG)
       .template(this.customTemplate)
       .build();
 
@@ -338,7 +338,7 @@ export class ModalDemo {
   openLargeModal() {
     const config = ModalBuilder.confirmation()
       .title('Large Modal Example')
-      .size(ModalSize.XL)
+      .sizeWidth(ModalSize.XL)
       .message('This is a large modal that takes up more screen space. It can be useful for displaying more content or complex forms.')
       .confirmAction({
         label: 'Got it',
@@ -354,7 +354,7 @@ export class ModalDemo {
     const config = ModalBuilder.custom()
       .title('Track Reservation Details')
       .subtitle('Reservation #1234')
-      .size(ModalSize.MD)
+      .sizeWidth(ModalSize.MD)
       .footerActions([
         {
           label: 'Close',
@@ -404,7 +404,7 @@ export class ModalDemo {
       .title('Email Verification')
       .subtitle('Checking your email status...')
       .message('We sent a verification email. This modal will auto-close once verified.')
-      .size(ModalSize.SM)
+      .sizeWidth(ModalSize.SM)
       .polling({
         interval: 2000,
         maxAttempts: 10,
@@ -443,7 +443,7 @@ export class ModalDemo {
     const config = ModalBuilder.form<WeaponInfo, WeaponInfo>()
       .title('Weapon Information')
       .subtitle('View weapon details')
-      .size(ModalSize.LG)
+      .sizeWidth(ModalSize.LG)
       .fieldGroup('General Information', 'Basic weapon identification details', (g) => {
         g.addRow(2, (row) => {
           row.add({ kind: FieldKind.TEXT, key: 'name', label: 'Weapon Name', readOnly: true });
@@ -526,7 +526,7 @@ export class ModalDemo {
     const config = ModalBuilder.form<AssignModel, AssignModel>()
       .title('Assign Team Members')
       .subtitle('Select members for the project team')
-      .size(ModalSize.LG)
+      .sizeWidth(ModalSize.LG)
       .field({
         kind: FieldKind.TEXT,
         key: 'teamName',
@@ -557,7 +557,7 @@ export class ModalDemo {
   openFullScreenModal() {
     const config = ModalBuilder.confirmation()
       .title('Full Screen Modal')
-      .size(ModalSize.FULL)
+      .sizeWidth(ModalSize.FULL)
       .message('This modal takes up 95% of the screen, useful for immersive experiences or complex workflows.')
       .confirmAction({
         label: 'Close',
@@ -578,7 +578,7 @@ export class ModalDemo {
     }
     const config = ModalBuilder.form<HybridModel>()
       .title('Hybrid Modal')
-      .size(ModalSize.MD)
+      .sizeWidth(ModalSize.MD)
       .template(this.customHeader)
       .field({
         kind: FieldKind.TEXT,
@@ -600,7 +600,7 @@ export class ModalDemo {
   openHybridConfirmationModal() {
     const config = ModalBuilder.confirmation()
       .title('Confirm with details')
-      .size(ModalSize.MD)
+      .sizeWidth(ModalSize.MD)
       .template(this.confirmationDetail)
       .fieldGroup('Verification Details', 'Please provide additional context for this action', (g) => {
         g.addRow(2, (row) => {
@@ -674,7 +674,7 @@ export class ModalDemo {
     const config = ModalBuilder.form<AdvancedModel>()
       .title('Advanced Form Features')
       .subtitle('Showcase of masking, updateOn, and auto-focus')
-      .size(ModalSize.MD)
+      .sizeWidth(ModalSize.MD)
       .field({
         kind: FieldKind.TEXT,
         key: 'autoFocused',
@@ -724,7 +724,7 @@ export class ModalDemo {
       const config2 = ModalBuilder.form<SecondModel>()
         .title('Second Modal')
         .subtitle('This modal is stacked on top of the first one.')
-        .size(ModalSize.SM)
+        .sizeWidth(ModalSize.SM)
         .animation('zoom')
         .field({
           kind: FieldKind.TEXT,
@@ -745,7 +745,7 @@ export class ModalDemo {
     const config = ModalBuilder.form<FirstModel>()
       .title('First Modal')
       .subtitle('Click the button below to open another modal on top.')
-      .size(ModalSize.MD)
+      .sizeWidth(ModalSize.MD)
       .animation('fade')
       .field({
         kind: FieldKind.TEXT,
@@ -771,6 +771,64 @@ export class ModalDemo {
     this.modalService.open(config);
   }
 
+  // Wizard with Additional Buttons Demo
+  openWizardWithAdditionalButtons() {
+    const config = ModalBuilder.wizard()
+      .title('Registration Wizard')
+      .subtitle('Complete all steps to create your account')
+      .sizeWidth(ModalSize.LG)
+      .flow(WizardFlowMode.LINEAR)
+      .addStep('Account Information', (s) => {
+        s.field({ kind: FieldKind.TEXT, key: 'email', label: 'Email Address', placeholder: 'user@example.com', validators: [Validators.required, Validators.email] })
+        .field({ kind: FieldKind.PASSWORD, key: 'password', label: 'Password', placeholder: '********', validators: [Validators.required, Validators.minLength(8)] });
+      }, 'account')
+      .addStep('Profile Details', (s) => {
+        s.row(2)
+          .addToRow({ kind: FieldKind.TEXT, key: 'firstName', label: 'First Name', validators: [Validators.required] })
+          .addToRow({ kind: FieldKind.TEXT, key: 'lastName', label: 'Last Name', validators: [Validators.required] });
+      }, 'profile')
+      .addStep('Preferences', (s) => {
+        s.field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [
+          { label: 'User', value: 'user' },
+          { label: 'Editor', value: 'editor' },
+          { label: 'Admin', value: 'admin' },
+        ], validators: [Validators.required] })
+        .field({ kind: FieldKind.CHECKBOX, key: 'newsletter', label: 'Subscribe to newsletter' });
+      }, 'preferences')
+      .addStep('Complete', (s) => {
+        s.body('Thank you for registering! Review your information and finish.');
+      }, 'complete')
+      .footerActions([
+        {
+          label: 'Save Draft',
+          style: ActionStyle.SECONDARY,
+          position: 'left',
+          handler: async (ref: ModalRef<unknown>) => {
+            this.lastResult = 'Wizard: Draft saved';
+            console.log('Draft saved');
+          },
+        },
+        {
+          label: 'Reset',
+          style: ActionStyle.DANGER,
+          position: 'right',
+          handler: async (ref: ModalRef<unknown>) => {
+            this.lastResult = 'Wizard: Form reset';
+            console.log('Form reset');
+          },
+        },
+      ])
+      .onComplete({
+        handle: async (result) => {
+          console.log('Wizard completed:', result);
+          this.lastResult = `Wizard with Buttons Completed: visited ${result.visitedStepIds.join(', ')}`;
+        },
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
   openFluentValidationDemo() {
     interface FluentModel {
       email: string;
@@ -778,7 +836,7 @@ export class ModalDemo {
     }
     const config = ModalBuilder.form<FluentModel>()
       .title('Fluent Validation Demo')
-      .size(ModalSize.MD)
+      .sizeWidth(ModalSize.MD)
       .fieldWithValidators({
         kind: FieldKind.TEXT,
         key: 'email',

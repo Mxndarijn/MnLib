@@ -17,7 +17,7 @@ describe('FormModalBuilder', () => {
   it('should set title and size', () => {
     const config = ModalBuilder.form()
       .title('My Form')
-      .size(ModalSize.LG)
+      .sizeWidth(ModalSize.LG)
       .build();
     expect(config.title).toBe('My Form');
     expect(config.size).toBe(ModalSize.LG);

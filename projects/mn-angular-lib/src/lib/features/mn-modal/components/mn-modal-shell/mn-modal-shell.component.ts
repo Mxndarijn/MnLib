@@ -121,7 +121,7 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
   }
 
   @HostBinding('class') get hostClasses(): string {
-    const size = this.config.size || ModalSize.MD;
+    const size = this.config.sizeWidth || ModalSize.MD;
     const closing = this.isClosing ? ' closing' : '';
     const animType = typeof this.config.animation === 'string'
       ? this.config.animation
@@ -177,14 +177,21 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
   }
 
   get containerSizeClass(): string {
-    switch (this.config.size || ModalSize.MD) {
+    switch (this.config.sizeWidth || ModalSize.MD) {
       case ModalSize.SM: return 'w-96';
       case ModalSize.MD: return 'w-[32rem]';
       case ModalSize.LG: return 'w-[48rem]';
       case ModalSize.XL: return 'w-[64rem]';
-      case ModalSize.FULL: return 'w-[95vw] h-[95vh] max-h-[95vh]';
+      case ModalSize.FULL: return 'w-[95vw]';
       default: return 'w-[32rem]';
     }
+  }
+
+  get containerHeightStyle(): string | null {
+    if (this.config.sizeWidth === ModalSize.FULL && !this.config.sizeHeight) {
+      return '95vh';
+    }
+    return this.config.sizeHeight || null;
   }
 
   get showCloseButton(): boolean {
