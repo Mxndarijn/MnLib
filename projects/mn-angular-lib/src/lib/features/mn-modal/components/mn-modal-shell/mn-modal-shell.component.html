@@ -65,8 +65,8 @@
     }
   </div>
 
-  <!-- Custom Footer Actions -->
-  @if (hasCustomFooterActions) {
+  <!-- Custom Footer Actions (not for wizard modals, they render their own) -->
+  @if (hasCustomFooterActions && config.kind !== ModalKind.WIZARD) {
     <div class="flex gap-3 p-6 border-t border-base-300">
       @for (action of leftFooterActions; track action.label) {
         <button

@@ -86,7 +86,39 @@
       </button>
     }
 
+    <!-- Custom footer actions (left-positioned, e.g. Delete) -->
+    @if (config.footerActions) {
+      @for (action of config.footerActions; track action.label) {
+        @if (action.position === 'left') {
+          <button
+            mnButton
+            [data]="getFooterActionButtonData(action)"
+            [disabled]="action.disabled || false"
+            (click)="handleFooterAction(action)"
+          >
+            {{ action.label }}
+          </button>
+        }
+      }
+    }
+
     <div class="flex-1"></div>
+
+    <!-- Custom footer actions (right-positioned) -->
+    @if (config.footerActions) {
+      @for (action of config.footerActions; track action.label) {
+        @if (action.position !== 'left') {
+          <button
+            mnButton
+            [data]="getFooterActionButtonData(action)"
+            [disabled]="action.disabled || false"
+            (click)="handleFooterAction(action)"
+          >
+            {{ action.label }}
+          </button>
+        }
+      }
+    }
 
     @if (!isLastStep) {
       <button
