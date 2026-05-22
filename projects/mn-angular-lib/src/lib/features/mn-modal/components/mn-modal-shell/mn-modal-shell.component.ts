@@ -191,7 +191,15 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
     if (this.config.sizeWidth === ModalSize.FULL && !this.config.sizeHeight) {
       return '95vh';
     }
-    return this.config.sizeHeight || null;
+    if (!this.config.sizeHeight) return null;
+    switch (this.config.sizeHeight) {
+      case ModalSize.SM: return '30vh';
+      case ModalSize.MD: return '50vh';
+      case ModalSize.LG: return '70vh';
+      case ModalSize.XL: return '85vh';
+      case ModalSize.FULL: return '95vh';
+      default: return null;
+    }
   }
 
   get showCloseButton(): boolean {

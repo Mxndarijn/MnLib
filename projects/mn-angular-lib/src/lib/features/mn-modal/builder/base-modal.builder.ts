@@ -54,9 +54,9 @@ export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>,
     return this;
   }
 
-  /** Set the height of the modal (e.g. '400px', '50vh', '90vh') */
-  sizeHeight(height: string): this {
-    this.config.sizeHeight = height;
+  /** Set the height of the modal */
+  sizeHeight(size: ModalSize): this {
+    this.config.sizeHeight = size;
     return this;
   }
 

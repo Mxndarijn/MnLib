@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" [class.h-full]="config.sizeHeight">
   @if (config.component || config.template) {
     <mn-custom-body-host
       [config]="asAny(config)"
@@ -35,7 +35,7 @@
     }
   </div>
 
-  <div class="min-h-48">
+  <div class="min-h-48 flex-1">
     @for (step of config.steps; track step.id) {
       <div [style.display]="step.id === currentStepId ? 'block' : 'none'">
         <h3 class="text-lg font-semibold text-base-content mb-4">{{ step.title }}</h3>
