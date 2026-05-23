@@ -15,11 +15,13 @@
             }
           </div>
           <button
+            mnButton
+            [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
             (click)="dismissAlert(a.id)"
-            class="shrink-0 inline-flex items-center justify-center h-5 w-5 rounded-full hover:bg-black/5 transition-colors"
+            class="shrink-0"
             aria-label="Close"
           >
-            <span class="text-lg leading-none">&times;</span>
+            &times;
           </button>
         </div>
       }

@@ -88,4 +88,7 @@ export interface MnMultiSelectUIConfig {
    * These override built-in error messages but are overridden by props.errorMessages.
    */
   errorMessages?: Record<string, string>;
+
+  /** Text shown when no options match the search filter */
+  noOptionsFound?: string;
 }

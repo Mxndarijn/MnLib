@@ -120,4 +120,12 @@ export interface TableDataSource<T> {
 
   // Toolbar
   toolbarTemplate?: TemplateRef<any>;
+
+  // Labels / i18n
+  labels?: TableLabels;
+}
+
+export interface TableLabels {
+  loadMore?: string;
+  rowsPerPage?: string;
 }

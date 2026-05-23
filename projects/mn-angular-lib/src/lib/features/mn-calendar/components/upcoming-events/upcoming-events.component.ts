@@ -39,16 +39,19 @@ export class UpcomingEventsComponent implements OnInit, OnDestroy {
 
   upcomingEvents: CalendarEvent[] = [];
   title: string;
+  noEventsMessage: string;
 
   private destroy$ = new Subject<void>();
 
   constructor() {
     this.title = DEFAULT_CALENDAR_CONFIG.upcomingEventsTitle;
+    this.noEventsMessage = DEFAULT_CALENDAR_CONFIG.noUpcomingEvents;
   }
 
   ngOnInit() {
     const resolved = this.config ? resolveCalendarConfig(this.config) : { ...DEFAULT_CALENDAR_CONFIG };
     this.title = resolved.upcomingEventsTitle;
+    this.noEventsMessage = resolved.noUpcomingEvents;
 
     if (this.eventsChanged) {
       this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {

@@ -11,6 +11,7 @@ import { CalendarMonthComponent } from '../calendar-month/calendar-month.compone
 import { CalendarWeekComponent } from '../calendar-week/calendar-week.component';
 import { CalendarDayComponent } from '../calendar-day/calendar-day.component';
 import { UpcomingEventsComponent } from '../upcoming-events/upcoming-events.component';
+import { MnButton } from '../../../mn-button/mn-button';
 
 /**
  * Main calendar orchestrator component.
@@ -44,7 +45,8 @@ import { UpcomingEventsComponent } from '../upcoming-events/upcoming-events.comp
     CalendarMonthComponent,
     CalendarWeekComponent,
     CalendarDayComponent,
-    UpcomingEventsComponent
+    UpcomingEventsComponent,
+    MnButton
   ],
   templateUrl: './calendar-view.component.html',
   providers: [

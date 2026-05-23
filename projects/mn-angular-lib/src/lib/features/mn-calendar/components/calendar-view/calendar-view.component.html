@@ -4,6 +4,8 @@
       <div class="view-switcher" role="tablist" aria-label="Calendar view">
         @for (view of viewOptions; track view.value) {
           <button
+            mnButton
+            [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
             class="view-btn"
             role="tab"
             [attr.aria-selected]="currentView === view.value"
@@ -14,20 +16,20 @@
         }
       </div>
       <div class="date-nav">
-        <button class="nav-btn" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
+        <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" class="nav-btn" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
         <input type="date" [value]="dateInputValue" (change)="onDateInputChange($event)" class="date-input" aria-label="Select date" />
-        <button class="nav-btn" (click)="navigateNext()" aria-label="Next">&#8250;</button>
-        <button class="today-btn" (click)="goToToday()">{{ config.todayLabel }}</button>
+        <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" class="nav-btn" (click)="navigateNext()" aria-label="Next">&#8250;</button>
+        <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" class="today-btn" (click)="goToToday()">{{ config.todayLabel }}</button>
       </div>
     </div>
     <div class="toolbar-right">
       @for (btn of buttons; track btn.label) {
-        <button [class]="btn.cssClass || 'action-btn'" (click)="btn.onClick()">
+        <button mnButton [data]="btn.buttonData || {}" (click)="btn.onClick()">
           {{ btn.label }}
         </button>
       }
       @if (showButton) {
-        <button class="action-btn" (click)="ButtonClickedEvent.emit()">
+        <button mnButton [data]="{}" (click)="ButtonClickedEvent.emit()">
           {{ buttonTitle }}
         </button>
       }

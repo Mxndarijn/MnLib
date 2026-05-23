@@ -113,6 +113,10 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     selectPlaceholder: 'Select...',
     loading: 'Loading...',
     fileUploadPrompt: 'Click or drag files here',
+    fieldRequired: 'This field is required',
+    loadingOptions: 'Loading options...',
+    accepted: 'Accepted:',
+    maxSize: 'Max size:',
   };
 
   private resolveLabel(i18nValue: string | undefined, key: string): string {
@@ -132,6 +136,10 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
       selectPlaceholder: this.resolveLabel(i18n.selectPlaceholder, 'selectPlaceholder'),
       loading: this.resolveLabel(i18n.loading, 'loading'),
       fileUploadPrompt: this.resolveLabel(i18n.fileUploadPrompt, 'fileUploadPrompt'),
+      fieldRequired: this.resolveLabel(i18n.fieldRequired, 'fieldRequired'),
+      loadingOptions: this.resolveLabel(i18n.loadingOptions, 'loadingOptions'),
+      accepted: this.resolveLabel(i18n.accepted, 'accepted'),
+      maxSize: this.resolveLabel(i18n.maxSize, 'maxSize'),
     };
   }
 

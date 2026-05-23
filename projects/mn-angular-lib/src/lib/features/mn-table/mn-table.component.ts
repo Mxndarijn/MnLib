@@ -2,6 +2,8 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DoCheck, EventEmi
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {Subject, Subscription, debounceTime, skip} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
+import {MnButton} from '../mn-button/mn-button';
+import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 
 /** Map of column key to its current filter value. */
 export type ColumnFilterState = Record<string, string>;
@@ -9,7 +11,7 @@ export type ColumnFilterState = Record<string, string>;
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnHiddenBelowDirective],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

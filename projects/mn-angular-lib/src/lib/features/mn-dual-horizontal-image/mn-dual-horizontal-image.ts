@@ -4,7 +4,8 @@ import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
 import {provideMnComponentConfig} from '../../config';
 
 export interface MnDualHorizontalImageConfig {
-  images?: MnDualHorizontalImageTypes[]
+  images?: MnDualHorizontalImageTypes[];
+  noImagesFound?: string;
 }
 
 export const MN_LIB_DUAL_HORIZONTAL_IMAGE = new InjectionToken<MnDualHorizontalImageConfig>('MN_LIB_DUAL_HORIZONTAL_IMAGE');

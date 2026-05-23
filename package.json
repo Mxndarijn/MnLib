@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint:i18n": "node tools/lint-hardcoded-strings.js"
   },
   "prettier": {
     "printWidth": 100,

@@ -17,6 +17,7 @@ import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
 import { MnConfirmationBodyComponent } from '../mn-confirmation-body/mn-confirmation-body.component';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
 import { MnButton } from '../../../mn-button/mn-button';
+import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
 
 @Component({
   selector: 'mn-modal-shell',
@@ -28,6 +29,7 @@ import { MnButton } from '../../../mn-button/mn-button';
     MnConfirmationBodyComponent,
     MnCustomBodyHostComponent,
     MnButton,
+    MnFooterActionsComponent,
   ],
   templateUrl: './mn-modal-shell.component.html',
   styleUrls: ['./mn-modal-shell.component.css'],

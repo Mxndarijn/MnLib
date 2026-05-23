@@ -86,38 +86,14 @@
       </button>
     }
 
-    <!-- Custom footer actions (left-positioned, e.g. Delete) -->
+    <!-- Custom footer actions -->
     @if (config.footerActions) {
-      @for (action of config.footerActions; track action.label) {
-        @if (action.position === 'left') {
-          <button
-            mnButton
-            [data]="getFooterActionButtonData(action)"
-            [disabled]="action.disabled || false"
-            (click)="handleFooterAction(action)"
-          >
-            {{ action.label }}
-          </button>
-        }
-      }
-    }
-
-    <div class="flex-1"></div>
-
-    <!-- Custom footer actions (right-positioned) -->
-    @if (config.footerActions) {
-      @for (action of config.footerActions; track action.label) {
-        @if (action.position !== 'left') {
-          <button
-            mnButton
-            [data]="getFooterActionButtonData(action)"
-            [disabled]="action.disabled || false"
-            (click)="handleFooterAction(action)"
-          >
-            {{ action.label }}
-          </button>
-        }
-      }
+      <mn-footer-actions
+        [actions]="config.footerActions"
+        (actionClick)="handleFooterAction($event)"
+      ></mn-footer-actions>
+    } @else {
+      <div class="flex-1"></div>
     }
 
     @if (!isLastStep) {

@@ -29,12 +29,13 @@ import {
 import { MnButton } from '../../../mn-button/mn-button';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
+import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
 import { MnLanguageService } from '../../../../language/mn-language.service';
 
 @Component({
   selector: 'mn-wizard-body',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent],
+  imports: [CommonModule, ReactiveFormsModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, MnFooterActionsComponent],
   templateUrl: './mn-wizard-body.component.html',
   styleUrls: ['./mn-wizard-body.component.css'],
 })

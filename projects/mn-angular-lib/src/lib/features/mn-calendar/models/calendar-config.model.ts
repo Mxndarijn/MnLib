@@ -28,6 +28,8 @@ export interface CalendarConfig {
   todayLabel: string;
   /** Title shown above the upcoming-events sidebar. Default: `'Upcoming events'`. */
   upcomingEventsTitle: string;
+  /** Message shown when there are no upcoming events. Default: `'No upcoming events'`. */
+  noUpcomingEvents: string;
   /** Display labels for each calendar view mode. */
   viewLabels: Record<string, string>;
   /** Abbreviated day names starting from Monday (length 7). Derived from `locale` when not set. */
@@ -65,6 +67,7 @@ export const DEFAULT_CALENDAR_CONFIG: CalendarConfig = (() => {
     locale,
     todayLabel: 'Today',
     upcomingEventsTitle: 'Upcoming events',
+    noUpcomingEvents: 'No upcoming events',
     viewLabels: { MONTH: 'Month', WEEK: 'Week', DAY: 'Day' },
     shortDayNames: names.short,
     longDayNames: names.long,

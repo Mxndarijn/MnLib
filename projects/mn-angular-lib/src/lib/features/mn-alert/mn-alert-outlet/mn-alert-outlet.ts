@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import {MnAlertStore} from '../mn-alert.store';
 import {MnAlert} from '../mn-alert.types';
 import {mnAlertVariants} from '../mn-alertVariants';
+import {MnButton} from '../../mn-button/mn-button';
 
 export interface MnAlertTemplateContext {
   $implicit: MnAlert;
@@ -15,7 +16,7 @@ export interface MnAlertTemplateContext {
 @Component({
   selector: 'mn-alert-outlet',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MnButton],
   templateUrl: './mn-alert-outlet.html',
   styleUrl: './mn-alert-outlet.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

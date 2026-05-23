@@ -1,5 +1,6 @@
 import { Type } from '@angular/core';
 import { ColorPreset } from './color-preset.model';
+import { MnButtonTypes } from '../../mn-button/mn-buttonTypes';
 
 /**
  * Represents a single calendar event.
@@ -44,8 +45,8 @@ export interface CalendarEvent {
 export interface CalendarButton {
   /** Display label for the button. */
   label: string;
-  /** CSS class(es) applied to the button (e.g. 'btn btn-sm btn-primary'). */
-  cssClass?: string;
+  /** Button styling configuration passed to the mnButton directive. */
+  buttonData?: Partial<MnButtonTypes>;
   /** Callback invoked when the button is clicked. */
   onClick: () => void;
 }

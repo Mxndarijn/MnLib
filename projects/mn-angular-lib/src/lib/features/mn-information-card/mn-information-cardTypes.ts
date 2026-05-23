@@ -1,13 +1,8 @@
 import { MnInformationCardVariants } from './mn-information-cardVariants';
 
-// TODO make global image type
-export interface MnImageType {
-  id: number;
-  url: string;
-  alt?: string;
-}
+export type { MnImageType } from '../../shared/types';
 
-export interface MnInformationCardBaseData  {
+export interface MnInformationCardBaseData {
   id: number;
   bottomBorder?: MnInformationCardVariants['bottomBorder'];
   shadow?: MnInformationCardVariants['shadow'];
@@ -18,4 +13,4 @@ export interface MnInformationCardBaseData  {
 }
 
 export type MnInformationCardData<TExtra = unknown> =
-  MnInformationCardBaseData  & TExtra;
+  MnInformationCardBaseData & TExtra;

@@ -93,7 +93,7 @@
           </div>
           @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
             <div class="text-red-500 text-xs pl-2 pt-1">
-              This field is required
+              {{ labels.fieldRequired }}
             </div>
           }
           @if (getFieldError(asKey(rowField.field.key))) {
@@ -174,7 +174,7 @@
           @if (isFieldLoading(asKey(rowField.field.key))) {
             <div class="flex items-center gap-2 py-2 text-sm text-base-content/50">
               <div class="w-4 h-4 border-2 border-base-300 border-t-blue-500 rounded-full animate-spin"></div>
-              Loading options...
+              {{ labels.loadingOptions }}
             </div>
           }
           @if (!isFieldLoading(asKey(rowField.field.key))) {
@@ -200,43 +200,11 @@
       }
 
       @case (FieldKind.MULTI_SELECT_TABLE) {
-        <div class="flex flex-col gap-1">
-          <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
-            {{ asField(rowField.field).label }}
-            @if (hasRequiredValidator(rowField.field)) {
-              <span class="text-red-500">*</span>
-            }
-          </label>
-          <mn-table
-            [dataSource]="tableDataSources[asKey(rowField.field.key)]"
-            (selectionChange)="onTableSelectionChange(rowField.field, $event)"
-          ></mn-table>
-          @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
-            <div class="text-red-500 text-xs pl-2 pt-1">
-              This field is required
-            </div>
-          }
-        </div>
+        <ng-container [ngTemplateOutlet]="selectTableTemplate" [ngTemplateOutletContext]="{ $implicit: rowField }"></ng-container>
       }
 
       @case (FieldKind.SINGLE_SELECT_TABLE) {
-        <div class="flex flex-col gap-1">
-          <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
-            {{ asField(rowField.field).label }}
-            @if (hasRequiredValidator(rowField.field)) {
-              <span class="text-red-500">*</span>
-            }
-          </label>
-          <mn-table
-            [dataSource]="tableDataSources[asKey(rowField.field.key)]"
-            (selectionChange)="onTableSelectionChange(rowField.field, $event)"
-          ></mn-table>
-          @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
-            <div class="text-red-500 text-xs pl-2 pt-1">
-              This field is required
-            </div>
-          }
-        </div>
+        <ng-container [ngTemplateOutlet]="selectTableTemplate" [ngTemplateOutletContext]="{ $implicit: rowField }"></ng-container>
       }
 
       @case (FieldKind.COLOR) {
@@ -261,6 +229,8 @@
             <div class="flex gap-1.5 mt-1">
               @for (swatch of asField(rowField.field).swatches; track swatch) {
                 <button
+                  mnButton
+                  [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
                   type="button"
                   class="w-6 h-6 rounded-md border border-base-300 cursor-pointer transition-transform hover:scale-110"
                   [style.background-color]="swatch"
@@ -273,7 +243,7 @@
           }
           @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
             <div class="text-red-500 text-xs pl-2 pt-1">
-              This field is required
+              {{ labels.fieldRequired }}
             </div>
           }
         </div>
@@ -290,6 +260,8 @@
           <div class="flex items-center gap-1">
             @for (star of getRatingRange(rowField.field); track star) {
               <button
+                mnButton
+                [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
                 type="button"
                 class="text-2xl cursor-pointer transition-colors focus:outline-none"
                 [class.text-yellow-400]="star <= getRatingValue(rowField.field)"
@@ -304,7 +276,7 @@
           </div>
           @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
             <div class="text-red-500 text-xs pl-2 pt-1">
-              This field is required
+              {{ labels.fieldRequired }}
             </div>
           }
         </div>
@@ -341,7 +313,7 @@
           </div>
           @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
             <div class="text-red-500 text-xs pl-2 pt-1">
-              This field is required
+              {{ labels.fieldRequired }}
             </div>
           }
         </div>
@@ -374,10 +346,10 @@
               </svg>
               <p class="text-sm text-base-content/50">{{ labels.fileUploadPrompt }}</p>
               @if (asField(rowField.field).accept) {
-                <p class="text-xs text-base-content/40">Accepted: {{ asField(rowField.field).accept }}</p>
+                <p class="text-xs text-base-content/40">{{ labels.accepted }} {{ asField(rowField.field).accept }}</p>
               }
               @if (asField(rowField.field).maxSize) {
-                <p class="text-xs text-base-content/40">Max size: {{ formatFileSize(asField(rowField.field).maxSize) }}</p>
+                <p class="text-xs text-base-content/40">{{ labels.maxSize }} {{ formatFileSize(asField(rowField.field).maxSize) }}</p>
               }
             </div>
           </div>
@@ -387,7 +359,7 @@
               @for (file of getSelectedFiles(asKey(rowField.field.key)); track file.name; let i = $index) {
                 <div class="flex items-center justify-between px-3 py-1.5 bg-base-200 rounded-lg text-sm">
                   <span class="text-base-content truncate">{{ file.name }} ({{ formatFileSize(file.size) }})</span>
-                  <button type="button" class="text-base-content/40 hover:text-red-500 ml-2 cursor-pointer" (click)="removeFile(asKey(rowField.field.key), i)">&times;</button>
+                  <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" type="button" class="text-base-content/40 hover:text-red-500 ml-2 cursor-pointer" (click)="removeFile(asKey(rowField.field.key), i)">&times;</button>
                 </div>
               }
             </div>
@@ -422,6 +394,27 @@
         {{ getFieldError(asKey(rowField.field.key)) }}
       </div>
     }
+  </ng-template>
+
+  <!-- Shared template for MULTI_SELECT_TABLE and SINGLE_SELECT_TABLE -->
+  <ng-template #selectTableTemplate let-rowField>
+    <div class="flex flex-col gap-1">
+      <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
+        {{ asField(rowField.field).label }}
+        @if (hasRequiredValidator(rowField.field)) {
+          <span class="text-red-500">*</span>
+        }
+      </label>
+      <mn-table
+        [dataSource]="tableDataSources[asKey(rowField.field.key)]"
+        (selectionChange)="onTableSelectionChange(rowField.field, $event)"
+      ></mn-table>
+      @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
+        <div class="text-red-500 text-xs pl-2 pt-1">
+          {{ labels.fieldRequired }}
+        </div>
+      }
+    </div>
   </ng-template>
 
   <!-- Field Groups (sections with headers) -->
