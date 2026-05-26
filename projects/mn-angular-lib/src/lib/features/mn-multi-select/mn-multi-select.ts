@@ -1,4 +1,4 @@
-import {Component, DestroyRef, ElementRef, HostListener, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, ElementRef, HostListener, inject, InjectionToken, Input, OnInit, Optional, Self, ViewChild} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnMultiSelectProps, MnMultiSelectOption, MnMultiSelectErrorMessageData, MnMultiSelectUIConfig} from './mn-multi-selectTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -30,11 +30,17 @@ export class MnMultiSelect implements OnInit {
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
 
+  /** Reference to the trigger element for positioning the dropdown */
+  @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
+
   /** Currently selected values */
   selectedValues: unknown[] = [];
   isOpen = false;
   isDisabled = false;
   searchTerm = '';
+
+  /** Dropdown position calculated from trigger bounding rect */
+  dropdownStyle: { top: string; left: string; width: string } = { top: '0px', left: '0px', width: '0px' };
 
   private onChange: (val: any) => void = () => {};
   private onTouched: () => void = () => {};
@@ -95,9 +101,22 @@ export class MnMultiSelect implements OnInit {
   toggle(): void {
     if (this.isDisabled) return;
     this.isOpen = !this.isOpen;
-    if (!this.isOpen) {
+    if (this.isOpen) {
+      this.updateDropdownPosition();
+    } else {
       this.searchTerm = '';
     }
+  }
+
+  /** Calculates the fixed position for the dropdown based on the trigger element */
+  private updateDropdownPosition(): void {
+    if (!this.triggerRef) return;
+    const rect = this.triggerRef.nativeElement.getBoundingClientRect();
+    this.dropdownStyle = {
+      top: `${rect.bottom}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+    };
   }
 
   @HostListener('document:click', ['$event'])
@@ -107,6 +126,16 @@ export class MnMultiSelect implements OnInit {
         this.isOpen = false;
         this.searchTerm = '';
       }
+    }
+  }
+
+  /** Closes the dropdown when the page or a scrollable parent is scrolled */
+  @HostListener('window:scroll', [])
+  @HostListener('window:resize', [])
+  onWindowScrollOrResize(): void {
+    if (this.isOpen) {
+      this.isOpen = false;
+      this.searchTerm = '';
     }
   }
 

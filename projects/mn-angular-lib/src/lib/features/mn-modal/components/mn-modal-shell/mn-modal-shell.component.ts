@@ -133,10 +133,15 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
     return `modal-shell modal-${size}${closing}${animation}${stacked}`;
   }
 
+  /** Triggers the closing animation. Deferred to avoid NG0100 when called during a CD cycle. */
   startClosing(): Promise<void> {
-    this.isClosing = true;
-    this.cdr.detectChanges();
-    return new Promise(resolve => setTimeout(resolve, 150));
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.isClosing = true;
+        this.cdr.detectChanges();
+        setTimeout(resolve, 150);
+      });
+    });
   }
 
   @HostListener('document:keydown.escape', ['$event'])
