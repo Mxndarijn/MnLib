@@ -16,7 +16,6 @@ import { MnWizardBodyComponent } from '../mn-wizard-body/mn-wizard-body.componen
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
 import { MnConfirmationBodyComponent } from '../mn-confirmation-body/mn-confirmation-body.component';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
-import { MnButton } from '../../../mn-button/mn-button';
 import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
 
 @Component({
@@ -28,7 +27,6 @@ import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions
     MnFormBodyComponent,
     MnConfirmationBodyComponent,
     MnCustomBodyHostComponent,
-    MnButton,
     MnFooterActionsComponent,
   ],
   templateUrl: './mn-modal-shell.component.html',

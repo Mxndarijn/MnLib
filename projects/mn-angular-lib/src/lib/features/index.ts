@@ -9,6 +9,7 @@ export * from './mn-datetime'
 export * from './mn-multi-select'
 export * from './mn-modal'
 export * from './mn-table'
+export * from './mn-list'
 export * from './mn-calendar'
 export * from './mn-tab'
 

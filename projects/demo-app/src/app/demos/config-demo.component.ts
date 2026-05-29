@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { MnSectionDirective, MnInstanceDirective } from 'mn-angular-lib';
+import { MnSectionDirective } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-config-demo',
   standalone: true,
-  imports: [MnSectionDirective, MnInstanceDirective],
+  imports: [MnSectionDirective],
   template: `
     <div class="container" mn-section="root">
       <h1>mn-config Demo</h1>

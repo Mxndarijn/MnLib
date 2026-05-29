@@ -11,6 +11,7 @@ import {ModalDemo} from './modal-demo/modal-demo';
 import {TableDemo} from './table-demo/table-demo';
 import {LanguageDemo} from './language-demo/language-demo';
 import {CalendarDemo} from './calendar-demo/calendar-demo';
+import {ListDemo} from './list-demo/list-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -25,6 +26,7 @@ export const routes: Routes = [
   {path: 'demos/modal-demo', component: ModalDemo, title: 'Modal Demo' },
   {path: 'demos/table-demo', component: TableDemo, title: 'Table Demo' },
   {path: 'demos/language-demo', component: LanguageDemo, title: 'Language Demo' },
-  {path: 'demos/calendar-demo', component: CalendarDemo, title: 'Calendar Demo' }
+  {path: 'demos/calendar-demo', component: CalendarDemo, title: 'Calendar Demo' },
+  {path: 'demos/list-demo', component: ListDemo, title: 'List Demo' }
   // Future demos can be added here following the same pattern
 ];
