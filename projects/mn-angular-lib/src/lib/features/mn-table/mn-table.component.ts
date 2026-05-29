@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DoCheck, EventEmi
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {Subject, Subscription, debounceTime, skip} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
-import {MnButton} from '../mn-button/mn-button';
+import {MnButton} from '../mn-button';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 
 /** Map of column key to its current filter value. */
@@ -251,9 +251,15 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   get visiblePages(): number[] {
     const total = this.totalPages;
     const current = this.currentPage;
-    const delta = 2;
+    const maxVisible = 3;
+    let start = Math.max(1, current - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+    if (end > total) {
+      end = total;
+      start = Math.max(1, end - maxVisible + 1);
+    }
     const pages: number[] = [];
-    for (let i = Math.max(1, current - delta); i <= Math.min(total, current + delta); i++) {
+    for (let i = start; i <= end; i++) {
       pages.push(i);
     }
     return pages;

@@ -243,8 +243,8 @@
 
       <button
         mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary' }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         [disabled]="currentPage === 1"
         (click)="goToPage(1)"
         aria-label="First page"
@@ -252,8 +252,8 @@
 
       <button
         mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary' }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         [disabled]="currentPage === 1"
         (click)="goToPage(currentPage - 1)"
         aria-label="Previous page"
@@ -262,11 +262,11 @@
       @for (page of visiblePages; track page) {
         <button
           mnButton
-          [data]="{ size: 'sm', variant: 'outline', color: 'secondary' }"
-          class="px-2.5 py-1 rounded border transition-colors text-xs"
-          [class.border-brand-500]="page === currentPage"
-          [class.bg-brand-500]="page === currentPage"
-          [class.text-white]="page === currentPage"
+          [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
+          class="px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
+          [class.border-secondary]="page === currentPage"
+          [class.text-accent]="page === currentPage"
+          [class.text-white]="page !== currentPage"
           [class.border-base-300]="page !== currentPage"
           [class.hover:bg-base-200]="page !== currentPage"
           (click)="goToPage(page)"
@@ -277,8 +277,8 @@
 
       <button
         mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary' }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         [disabled]="currentPage === totalPages"
         (click)="goToPage(currentPage + 1)"
         aria-label="Next page"
@@ -286,8 +286,8 @@
 
       <button
         mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary' }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         [disabled]="currentPage === totalPages"
         (click)="goToPage(totalPages)"
         aria-label="Last page"
