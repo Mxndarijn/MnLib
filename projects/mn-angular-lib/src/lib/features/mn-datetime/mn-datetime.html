@@ -24,6 +24,7 @@
     [ngClass]="inputClasses"
     (input)="handleInput(($any($event.target)).value)"
     (blur)="handleBlur()"
+    class="hover:cursor-pointer hover:bg-base-200"
   />
 
   @if (showError) {

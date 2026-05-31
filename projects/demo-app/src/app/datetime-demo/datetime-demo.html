@@ -1,0 +1,66 @@
+<h2>MnDatetime Demo - Modes, Variants & Validation</h2>
+
+<p>
+  This demo showcases the MnDatetime component with different modes
+  (<code>datetime-local</code>, <code>date</code>, <code>time</code>),
+  size/border-radius variants, min/max constraints, and error handling.
+</p>
+
+<form [formGroup]="form">
+  <!-- Example 1: Datetime-local (default) with required validation -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 1: Datetime-local (Default Mode)</h3>
+    <p>
+      Default <code>datetime-local</code> mode with required validation and built-in error messages.
+    </p>
+    <mn-lib-datetime
+      formControlName="appointment"
+      [props]="appointmentProps"
+    ></mn-lib-datetime>
+  </div>
+
+  <!-- Example 2: Date-only mode -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 2: Date-only Mode</h3>
+    <p>
+      Uses <code>mode: 'date'</code> for date-only input with larger size and border radius.
+    </p>
+    <mn-lib-datetime
+      formControlName="birthday"
+      [props]="birthdayProps"
+    ></mn-lib-datetime>
+  </div>
+
+  <!-- Example 3: Time-only mode -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 3: Time-only Mode</h3>
+    <p>
+      Uses <code>mode: 'time'</code> with a 15-minute step interval and custom error messages.
+    </p>
+    <mn-lib-datetime
+      formControlName="meetingTime"
+      [props]="meetingTimeProps"
+    ></mn-lib-datetime>
+  </div>
+
+  <!-- Example 4: Min/Max constraints with full width -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 4: Min/Max Constraints & Full Width</h3>
+    <p>
+      Datetime-local with <code>min</code>/<code>max</code> constraints, full width, shadow, and small size variant.
+    </p>
+    <mn-lib-datetime
+      formControlName="deadline"
+      [props]="deadlineProps"
+    ></mn-lib-datetime>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <button type="button" (click)="form.markAllAsTouched()">
+      Show All Validation Errors
+    </button>
+    <button type="button" (click)="form.reset()" style="margin-left: 10px;">
+      Reset Form
+    </button>
+  </div>
+</form>
