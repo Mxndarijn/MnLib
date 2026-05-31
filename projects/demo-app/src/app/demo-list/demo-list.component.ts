@@ -34,7 +34,6 @@ export class DemoListComponent {
     {title: 'Table demo', path: '/demos/table-demo', description: 'Generic table with sorting, selection, row actions, search, and pagination.'},
     {title: 'Language demo', path: '/demos/language-demo', description: 'Language service with locale switching, translate pipe, interpolation, and config integration.'},
     {title: 'Calendar demo', path: '/demos/calendar-demo', description: 'Calendar with week, day, and month views, event layout, upcoming events sidebar, and pluggable event renderers.'},
-    {title: 'List demo', path: '/demos/list-demo', description: 'Generic list with search, selection, load more, pagination, and custom item templates.'},
-    {title: 'Datetime demo', path: '/demos/datetime-demo', description: 'Datetime input with date, time, and datetime-local modes, min/max constraints, and error handling.'}
+    {title: 'List demo', path: '/demos/list-demo', description: 'Generic list with search, selection, load more, pagination, and custom item templates.'}
   ];
 }
