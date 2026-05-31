@@ -4,7 +4,7 @@
     <div>
       <input
         type="text"
-        class="input input-sm rounded border border-base-300 bg-base-200 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-brand-500 w-full max-w-xs"
+        class="input input-sm rounded border border-base-300 bg-base-100 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-primary w-full max-w-xs"
         [placeholder]="dataSource.searchPlaceholder ?? 'Search...'"
         (input)="onSearch($any($event.target).value)"
         aria-label="Search table"
@@ -83,7 +83,7 @@
                 @if ((column.filterType ?? 'text') === 'text') {
                   <input
                     type="text"
-                    class="input input-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs text-base-content placeholder-base-content/50 focus:outline-none focus:border-brand-500 w-full"
+                    class="input input-xs rounded border border-base-300 bg-base-100 p-2 text-xs text-base-content placeholder-base-content/50 mb-2 focus:outline-none focus:border-primary w-full hover:bg-base-200 hover:cursor-pointer"
                     [placeholder]="column.filterPlaceholder ?? ''"
                     [value]="columnFilters[column.key]"
                     [disabled]="column.filterDisabled ?? false"
@@ -95,7 +95,7 @@
                   />
                 } @else if (column.filterType === 'select') {
                   <select
-                    class="select select-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs text-base-content focus:outline-none focus:border-brand-500 w-full"
+                    class="select select-xs rounded border border-base-300 bg-base-100 p-2 text-xs text-base-content focus:outline-none focus:border-primary w-full hover:bg-base-200 hover:cursor-pointer mb-2"
                     [value]="columnFilters[column.key]"
                     [disabled]="column.filterDisabled ?? false"
                     (change)="onColumnFilter(column.key, $any($event.target).value)"
@@ -151,7 +151,7 @@
         <!-- Data rows -->
         @for (row of paginatedItems; track trackByID($index, row); let odd = $odd; let last = $last) {
           <tr
-            class="bg-base-100 transition-colors duration-150"
+            class="bg-base-100 transition-colors duration-150 hover:cursor-pointer"
             [ngClass]="{'bg-primary/10': isSelected(row)}"
             [class.bg-base-200]="!isSelected(row) && odd && dataSource.appearance?.striped"
             [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
