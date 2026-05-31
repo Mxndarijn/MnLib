@@ -209,6 +209,13 @@ export class MnInputField implements OnInit {
     // Apply mask if available
     if (this.props.mask && typeof this.adapter.applyMask === 'function') {
       finalValue = this.adapter.applyMask(raw, this.props.mask);
+
+      // Force-update the DOM input when the mask stripped characters,
+      // because Angular won't re-render if this.value hasn't changed.
+      if (finalValue !== raw) {
+        const input = this.el.nativeElement.querySelector('input');
+        if (input) input.value = finalValue;
+      }
     }
 
     this.value = finalValue;
