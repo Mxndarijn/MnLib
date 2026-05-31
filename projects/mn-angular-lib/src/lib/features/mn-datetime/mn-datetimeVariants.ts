@@ -26,7 +26,7 @@ export const mnDatetimeVariants = tv({
       true: 'w-full',
     },
     hover: {
-      true: 'hover:cursor-pointer hover:bg-base-200',
+      true: 'hover:cursor-pointer hover:bg-base-200 transition-colors duration-300 ease-in-out',
     },
   },
   defaultVariants: {

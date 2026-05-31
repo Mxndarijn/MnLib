@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from 'tailwind-variants';
 
 export const mnButtonVariants = tv({
-  base: 'hover:cursor-pointer',
+  base: 'hover:cursor-pointer transition-colors duration-300 ease-in-out',
   variants: {
     size: {
       sm: 'px-2 py-1 text-sm',
@@ -69,7 +69,7 @@ export const mnButtonVariants = tv({
     size: 'md',
     variant: 'fill',
     color: 'primary',
-    borderRadius: 'xl',
+    borderRadius: 'lg',
     disabled: false,
   },
 });
