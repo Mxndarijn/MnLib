@@ -32,6 +32,7 @@ export const mnDatetimeVariants = tv({
   defaultVariants: {
     size: 'md',
     borderRadius: 'md',
+    hover: true,
   },
 });
 
