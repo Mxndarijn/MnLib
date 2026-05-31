@@ -25,6 +25,9 @@ export const mnDatetimeVariants = tv({
     fullWidth: {
       true: 'w-full',
     },
+    hover: {
+      true: 'hover:cursor-pointer hover:bg-base-200',
+    },
   },
   defaultVariants: {
     size: 'md',

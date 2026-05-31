@@ -4,9 +4,9 @@ import {MnDatetimeProps, MnDatetimeErrorMessageData, MnDatetimeUIConfig, MnDatet
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnDatetimeVariants} from './mn-datetimeVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnConfigService} from "../../config/mn-config.service";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
-import {MnLanguageService} from "../../language/mn-language.service";
+import {MnConfigService} from "../../config";
+import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
+import {MnLanguageService} from "../../language";
 import {skip} from "rxjs";
 
 export const MN_DATETIME_CONFIG = new InjectionToken<MnDatetimeUIConfig>('MN_DATETIME_CONFIG');
@@ -186,6 +186,7 @@ export class MnDatetime implements OnInit {
       borderRadius: this.props.borderRadius,
       shadow: this.props.shadow,
       fullWidth: this.props.fullWidth,
+      hover: this.props.hover,
     });
   }
 }

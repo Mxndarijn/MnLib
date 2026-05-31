@@ -52,6 +52,9 @@ export interface MnDatetimeProps {
   /** Whether the datetime field should take full width of its container */
   fullWidth?: MnDatetimeVariants['fullWidth'];
 
+  /** Whether to apply hover effect (cursor pointer and background change) */
+  hover?: MnDatetimeVariants['hover'];
+
   // ========== Error Message Configuration ==========
 
   /** Custom error messages mapped by validator error key */

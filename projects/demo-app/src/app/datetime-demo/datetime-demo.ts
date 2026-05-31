@@ -16,12 +16,13 @@ export class DatetimeDemo {
     deadline: new FormControl(''),
   });
 
-  // Example 1: Default datetime-local mode with required validation
+  // Example 1: Default datetime-local mode with required validation and hover
   appointmentProps = {
     id: 'appointment',
     label: 'Appointment',
     placeholder: 'Select date and time',
     mode: 'datetime-local',
+    hover: true,
   } satisfies MnDatetimeProps;
 
   // Example 2: Date-only mode
@@ -58,5 +59,6 @@ export class DatetimeDemo {
     shadow: true,
     size: 'sm',
     borderRadius: 'sm',
+    hover: true,
   } satisfies MnDatetimeProps;
 }
