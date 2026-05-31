@@ -394,6 +394,7 @@ export class MnInputField implements OnInit {
       borderRadius: this.props.borderRadius,
       shadow: this.props.shadow,
       fullWidth: this.props.fullWidth,
+      hover: this.props.hover,
     });
   }
 }

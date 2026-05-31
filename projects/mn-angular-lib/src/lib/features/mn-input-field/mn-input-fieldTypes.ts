@@ -78,6 +78,9 @@ export interface MnInputBaseProps {
   /** Whether the input should take full width of its container */
   fullWidth?: MnInputVariants['fullWidth'];
 
+  /** Whether to apply hover effect (cursor pointer and background change) */
+  hover?: MnInputVariants['hover'];
+
   // ========== Error Message Configuration ==========
 
   /**

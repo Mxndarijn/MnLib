@@ -10,7 +10,7 @@
   <div style="margin-bottom: 30px;">
     <h3>Example 1: Default Built-in Error Messages</h3>
     <p>
-      Uses built-in English error messages.
+      Uses built-in English error messages with <code>hover: true</code> for interactive styling.
       Label and Placeholder come from <code>defaults['mn-input-field']</code> in <code>mn-config.json5</code>.
     </p>
     <mn-lib-input-field class="block w-[200px]"
@@ -23,7 +23,7 @@
   <div style="margin-bottom: 30px;" mn-section="section-a">
     <h3>Example 2: Custom Error Messages & Section Override</h3>
     <p>
-      <code>useBuiltInErrorMessages: false</code> - Only uses custom error messages.
+      <code>useBuiltInErrorMessages: false</code> - Only uses custom error messages with <code>hover: true</code>.
       Label and Placeholder come from <code>overrides['root']['section-a']['#mn-input-email']</code> because <code>props.id</code> is 'email'.
     </p>
     <mn-lib-input-field

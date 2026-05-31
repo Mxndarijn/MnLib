@@ -45,6 +45,7 @@ export class InputFieldDemo {
   nameProps = {
     id: 'name',
     type: 'text',
+    hover: true,
   } satisfies MnInputProps;
 
   // Example 2: Custom error messages with built-ins disabled
@@ -60,6 +61,7 @@ export class InputFieldDemo {
       email: 'The email format is incorrect',
     },
     defaultErrorMessage: 'Invalid email field',
+    hover: true,
   } satisfies MnInputProps;
 
   // Example 3: Priority-based error display (shows one error at a time based on priority)
