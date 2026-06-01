@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from 'tailwind-variants';
 
 export const mnInputFieldVariants = tv({
-  base: 'bg-base-100 border-1 border-base-300 placeholder-base-content/50 text-base-content text-sm',
+  base: 'bg-base-100 border-1 border-base-300 placeholder-base-content/50 text-base-content text-sm outline-none focus:ring-1 focus:ring-primary',
   variants: {
 
     shadow: {
