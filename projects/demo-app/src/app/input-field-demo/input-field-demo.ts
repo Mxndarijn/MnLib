@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import {MnInputField, MnInputProps, MnInstanceDirective, MnSectionDirective} from 'mn-angular-lib';
+import {MnInputField, MnInputProps, MnSectionDirective} from 'mn-angular-lib';
 
 /**
  * Custom validator: disallows the letter 'x' in the input value
@@ -45,6 +45,8 @@ export class InputFieldDemo {
   nameProps = {
     id: 'name',
     type: 'text',
+    label: 'Name',
+    placeholder: 'Enter your name',
     hover: true,
   } satisfies MnInputProps;
 
@@ -52,6 +54,8 @@ export class InputFieldDemo {
   emailProps = {
     id: 'email',
     type: 'email',
+    label: 'Email',
+    placeholder: 'Enter your email address',
     shadow: true,
     size: 'md',
     borderRadius: 'md',
@@ -68,6 +72,8 @@ export class InputFieldDemo {
   usernameProps = {
     id: 'username',
     type: 'text',
+    label: 'Username',
+    placeholder: 'Enter your username',
     size: 'md',
     borderRadius: 'md',
     errorMessages: {
@@ -83,6 +89,8 @@ export class InputFieldDemo {
   passwordProps = {
     id: 'password',
     type: 'password',
+    label: 'Password',
+    placeholder: 'Enter your password',
     size: 'md',
     borderRadius: 'md',
     showAllErrors: true, // NEW: Display all validation errors simultaneously

@@ -1,15 +1,19 @@
 <!-- Toolbar: search + custom toolbar template -->
 <div class="flex flex-row items-center justify-end gap-2 mb-3">
   @if (dataSource.canSearch) {
-    <div>
-      <input
-        type="text"
-        class="input input-sm rounded border border-base-300 bg-base-100 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-primary w-full max-w-xs"
-        [placeholder]="dataSource.searchPlaceholder ?? 'Search...'"
-        (input)="onSearch($any($event.target).value)"
-        aria-label="Search table"
-      />
-    </div>
+      <mn-lib-input-field
+        [props]="{
+          id: 'mn-table-search',
+          type: 'search',
+          label: '',
+          placeholder: dataSource.searchPlaceholder ?? 'Search...',
+          size: 'sm',
+          borderRadius: 'md',
+          fullWidth: true
+        }"
+        [ngModel]="searchValue"
+        (ngModelChange)="onSearch($event)"
+      ></mn-lib-input-field>
   }
   @if (dataSource.toolbarTemplate) {
     <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
@@ -72,30 +76,33 @@
       @if (hasColumnFilters) {
         <tr class="bg-base-100 border-b border-base-300">
           @if (hasSelection) {
-            <th class="px-2 py-1"></th>
+            <th class="px-2 py-1 "></th>
           }
           @for (column of dataSource.columns; track column.key) {
             <th
-              class="px-4 py-1"
+              class="px-4 py-2"
               [mnHiddenBelow]="column.hiddenBelow"
             >
               @if (column.filterable) {
                 @if ((column.filterType ?? 'text') === 'text') {
-                  <input
-                    type="text"
-                    class="input input-xs rounded border border-base-300 bg-base-100 p-2 text-xs text-base-content placeholder-base-content/50 mb-2 focus:outline-none focus:border-primary w-full hover:bg-base-200 hover:cursor-pointer"
-                    [placeholder]="column.filterPlaceholder ?? ''"
-                    [value]="columnFilters[column.key]"
-                    [disabled]="column.filterDisabled ?? false"
-                    [attr.autocomplete]="column.filterAutocomplete ?? null"
-                    [attr.maxlength]="column.filterMaxLength ?? null"
-                    (input)="onColumnFilter(column.key, $any($event.target).value)"
-                    (click)="$event.stopPropagation()"
-                    [attr.aria-label]="'Filter ' + column.key"
-                  />
+                  <mn-lib-input-field
+                    [props]="{
+                      id: 'mn-table-filter-' + column.key,
+                      type: 'text',
+                      label: '',
+                      placeholder: column.filterPlaceholder ?? '',
+                      autocomplete: column.filterAutocomplete ?? undefined,
+                      size: 'sm',
+                      borderRadius: 'md',
+                      fullWidth: true,
+                      hover: true
+                    }"
+                    [ngModel]="columnFilters[column.key]"
+                    (ngModelChange)="onColumnFilter(column.key, $event)"
+                  ></mn-lib-input-field>
                 } @else if (column.filterType === 'select') {
                   <select
-                    class="select select-xs rounded border border-base-300 bg-base-100 p-2 text-xs text-base-content focus:outline-none focus:border-primary w-full hover:bg-base-200 hover:cursor-pointer mb-2"
+                    class="select select-xs rounded border border-base-300 bg-base-100 p-2 text-sm text-base-content focus:outline-none focus:border-primary w-full hover:bg-base-200 hover:cursor-pointer "
                     [value]="columnFilters[column.key]"
                     [disabled]="column.filterDisabled ?? false"
                     (change)="onColumnFilter(column.key, $any($event.target).value)"

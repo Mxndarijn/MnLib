@@ -15,9 +15,9 @@ import {AbstractControl, FormsModule, NgControl, ValidationErrors, Validators} f
 import {pickAdapter} from './mn-input-field-adapters';
 import {mnInputFieldVariants} from './mn-input-fieldVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnConfigService} from "../../config/mn-config.service";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
-import {MnLanguageService} from "../../language/mn-language.service";
+import {MnConfigService} from "../../config";
+import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
+import {MnLanguageService} from "../../language";
 import {skip} from "rxjs";
 
 export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('MN_INPUT_FIELD_CONFIG');
@@ -140,10 +140,8 @@ export class MnInputField implements OnInit {
     );
 
     // Allow props to override uiConfig for label and placeholder
-    if (this.props.label) {
-      this.uiConfig = { ...this.uiConfig, label: this.props.label };
-    }
-    if (this.props.placeholder) {
+    if (this.props) {
+    this.uiConfig = { ...this.uiConfig, label: this.props.label };
       this.uiConfig = { ...this.uiConfig, placeholder: this.props.placeholder };
     }
   }
