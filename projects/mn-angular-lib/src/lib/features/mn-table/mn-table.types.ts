@@ -103,6 +103,9 @@ export interface TableDataSource<T> {
   /** Options for the page-size selector dropdown. Defaults to [5, 10, 25, 50]. */
   pageSizeOptions?: number[];
 
+  /** Callback invoked when the user changes the page size via the dropdown. */
+  onPageSizeChange?: (newSize: number) => void;
+
   // Sorting
   defaultSort?: SortState;
 

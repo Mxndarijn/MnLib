@@ -248,6 +248,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     this.currentPage = 1;
     this.applyPagination();
     this.cdr.markForCheck();
+    this.dataSource.onPageSizeChange?.(newSize);
   }
 
   get visiblePages(): number[] {
