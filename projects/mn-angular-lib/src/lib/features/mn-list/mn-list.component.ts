@@ -15,11 +15,13 @@ import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {ListDataSource} from './mn-list.types';
 import {MnButton} from '../mn-button';
+import {MnSelect, MnSelectOption} from '../mn-select';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'mn-list',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnSelect, FormsModule],
   templateUrl: './mn-list.component.html',
   styleUrl: './mn-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -215,6 +217,11 @@ export class MnList<T = any> implements OnInit, OnDestroy, DoCheck {
     return this.dataSource.pageSizeOptions ?? [5, 10, 25, 50];
   }
 
+  /** Page-size options formatted for mn-select. */
+  get pageSizeSelectOptions(): MnSelectOption<number>[] {
+    return this.resolvedPageSizeOptions.map(opt => ({label: String(opt), value: opt}));
+  }
+
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
@@ -315,6 +322,14 @@ export class MnList<T = any> implements OnInit, OnDestroy, DoCheck {
     if (mode === 'load-more' || mode === 'infinite-scroll') {
       if (!this.dataSource.onLoadMore && !this.dataSource.loadAdditionalRows && !this.dataSource.paginationStrategy) {
         throw new Error(`[MnList] paginationMode is '${mode}' but no load-more mechanism is provided. Provide 'onLoadMore', 'loadAdditionalRows', or 'paginationStrategy'.`);
+      }
+    }
+    // Validate pageSize is one of pageSizeOptions when pagination is active
+    if (mode && mode !== 'none') {
+      const options = this.dataSource.pageSizeOptions ?? [5, 10, 25, 50];
+      const size = this.dataSource.pageSize ?? 10;
+      if (!options.includes(size)) {
+        throw new Error(`[MnList] pageSize '${size}' is not one of the allowed pageSizeOptions [${options.join(', ')}]. pageSize must be one of pageSizeOptions.`);
       }
     }
   }

@@ -136,16 +136,15 @@
   <div class="flex items-center justify-between px-2 py-3 text-sm text-base-content">
     <div class="flex items-center gap-2">
       <span>{{ dataSource.labels?.rowsPerPage || 'Items per page:' }}</span>
-      <select
-        class="select select-xs rounded border border-base-300 bg-base-200 px-2 py-1 text-xs focus:outline-none focus:border-brand-500"
-        [value]="pageSize"
-        (change)="onPageSizeChange(+$any($event.target).value)"
-        aria-label="Items per page"
-      >
-        @for (opt of resolvedPageSizeOptions; track opt) {
-          <option [value]="opt" [selected]="opt === pageSize">{{ opt }}</option>
-        }
-      </select>
+      <mn-lib-select
+        (ngModelChange)="onPageSizeChange($event)"
+        [ngModel]="pageSize"
+        [props]="{
+          id: 'mn-list-page-size',
+          options: pageSizeSelectOptions,
+          size: 'sm'
+        }"
+      ></mn-lib-select>
     </div>
 
     <div class="flex items-center gap-1">

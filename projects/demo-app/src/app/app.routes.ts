@@ -1,8 +1,8 @@
-import { Routes } from '@angular/router';
-import { DemoListComponent } from './demo-list/demo-list.component';
+import {Routes} from '@angular/router';
+import {DemoListComponent} from './demo-list/demo-list.component';
 import {ButtonDemo} from './button-demo/button-demo';
-import { AlertsDemoComponent } from './demos/alerts-demo.component';
-import { ConfigDemoComponent } from './demos/config-demo.component';
+import {AlertsDemoComponent} from './demos/alerts-demo.component';
+import {ConfigDemoComponent} from './demos/config-demo.component';
 import {DualHorizontalImageDemo} from './dual-horizontal-image-demo/dual-horizontal-image-demo';
 import {InformationCardDemo} from './information-card-demo/information-card-demo';
 import {InputFieldDemo} from './input-field-demo/input-field-demo';
@@ -13,6 +13,7 @@ import {LanguageDemo} from './language-demo/language-demo';
 import {CalendarDemo} from './calendar-demo/calendar-demo';
 import {ListDemo} from './list-demo/list-demo';
 import {DatetimeDemo} from './datetime-demo/datetime-demo';
+import {SelectDemo} from './select-demo/select-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -29,6 +30,7 @@ export const routes: Routes = [
   {path: 'demos/language-demo', component: LanguageDemo, title: 'Language Demo' },
   {path: 'demos/calendar-demo', component: CalendarDemo, title: 'Calendar Demo' },
   {path: 'demos/list-demo', component: ListDemo, title: 'List Demo' },
-  {path: 'demos/datetime-demo', component: DatetimeDemo, title: 'Datetime Demo' }
+  {path: 'demos/datetime-demo', component: DatetimeDemo, title: 'Datetime Demo'},
+  {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'}
   // Future demos can be added here following the same pattern
 ];

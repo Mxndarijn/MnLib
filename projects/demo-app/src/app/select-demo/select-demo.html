@@ -1,0 +1,62 @@
+<h2>MnSelect Demo - Native Browser Select</h2>
+
+<p>
+  This demo showcases the <code>mn-lib-select</code> component which uses the native browser
+  <code>&lt;select&gt;</code> element with ControlValueAccessor, validation, and tailwind-variants styling.
+</p>
+
+<form [formGroup]="form" mn-section="root">
+  <!-- Example 1: Basic required select -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 1: Required Select with Validation</h3>
+    <p>
+      A basic select with <code>Validators.required</code>. Shows built-in error message when touched without selecting.
+    </p>
+    <mn-lib-select [props]="countryProps"
+                   class="block w-[300px]"
+                   formControlName="country"
+    ></mn-lib-select>
+    <p style="margin-top: 8px; font-size: 14px; color: gray;">
+      Selected: <strong>{{ selectedCountry }}</strong>
+    </p>
+  </div>
+
+  <!-- Example 2: Disabled options and custom styling -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 2: Disabled Options & Custom Styling</h3>
+    <p>
+      Uses <code>size: 'lg'</code> and <code>borderRadius: 'lg'</code>. The "XXL" option is disabled.
+    </p>
+    <mn-lib-select [props]="sizeProps"
+                   class="block w-[300px]"
+                   formControlName="size"
+    ></mn-lib-select>
+    <p style="margin-top: 8px; font-size: 14px; color: gray;">
+      Selected: <strong>{{ selectedSize }}</strong>
+    </p>
+  </div>
+
+  <!-- Example 3: Custom error messages -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 3: Custom Error Messages</h3>
+    <p>
+      Uses custom <code>errorMessages</code> to override the built-in "Please select an option" message.
+    </p>
+    <mn-lib-select [props]="priorityProps"
+                   class="block w-[300px]"
+                   formControlName="priority"
+    ></mn-lib-select>
+    <p style="margin-top: 8px; font-size: 14px; color: gray;">
+      Selected: <strong>{{ selectedPriority }}</strong>
+    </p>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <button (click)="form.markAllAsTouched()" type="button">
+      Show All Validation Errors
+    </button>
+    <button (click)="form.reset()" style="margin-left: 10px;" type="button">
+      Reset Form
+    </button>
+  </div>
+</form>

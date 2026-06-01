@@ -14,18 +14,19 @@ import {
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
+import {MnSelect, MnSelectOption} from '../mn-select';
 import {MnButton} from '../mn-button';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnInputField} from '../mn-input-field';
 import {FormsModule} from '@angular/forms';
 
 /** Map of column key to its current filter value. */
-export type ColumnFilterState = Record<string, string>;
+export type ColumnFilterState = Record<string, string | undefined>;
 
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton, MnHiddenBelowDirective, MnInputField, FormsModule],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnHiddenBelowDirective, MnInputField, MnSelect, FormsModule],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -286,6 +287,20 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     return this.dataSource.pageSizeOptions ?? [5, 10, 25, 50];
   }
 
+  /** Page-size options formatted for mn-select. */
+  get pageSizeSelectOptions(): MnSelectOption<number>[] {
+    return this.resolvedPageSizeOptions.map(opt => ({label: String(opt), value: opt}));
+  }
+
+  /** Filter options formatted for mn-select for a given column. */
+  getFilterSelectOptions(column: ColumnDefinition<T>): MnSelectOption<string>[] {
+    const placeholder = column.filterPlaceholder ?? 'All';
+    return [
+      {label: placeholder, value: ''},
+      ...(column.filterOptions ?? []).map(opt => ({label: opt.label, value: String(opt.value)})),
+    ];
+  }
+
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
@@ -464,6 +479,14 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     if (mode === 'load-more' || mode === 'infinite-scroll') {
       if (!this.dataSource.onLoadMore && !this.dataSource.loadAdditionalRows && !this.dataSource.paginationStrategy) {
         throw new Error(`[MnTable] paginationMode is '${mode}' but no load-more mechanism is provided. Provide 'onLoadMore', 'loadAdditionalRows', or 'paginationStrategy'.`);
+      }
+    }
+    // Validate pageSize is one of pageSizeOptions when pagination is active
+    if (mode && mode !== 'none') {
+      const options = this.dataSource.pageSizeOptions ?? [5, 10, 25, 50];
+      const size = this.dataSource.pageSize ?? 10;
+      if (!options.includes(size)) {
+        throw new Error(`[MnTable] pageSize '${size}' is not one of the allowed pageSizeOptions [${options.join(', ')}]. pageSize must be one of pageSizeOptions.`);
       }
     }
   }

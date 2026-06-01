@@ -1,0 +1,50 @@
+<div [class.is-fullwidth]="props.fullWidth" class="flex flex-col h-full">
+  @if (uiConfig.label || props.label) {
+    <label [attr.for]="resolvedId" class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!">
+      <p>{{ uiConfig.label || props.label }}</p>
+      @if (isRequired()) {
+        <span class="text-red-500">*</span>
+      }
+    </label>
+  }
+
+  <select
+    (blur)="handleBlur()"
+    (change)="onSelectChange($event)"
+    [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
+    [attr.aria-invalid]="showError || null"
+    [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || props.label || null"
+    [disabled]="isDisabled"
+    [id]="resolvedId"
+    [name]="resolvedName"
+    [ngClass]="selectClasses"
+  >
+    @if (props.placeholder || uiConfig.placeholder) {
+      <option [selected]="selectedValue == null" [value]="''" disabled>
+        {{ uiConfig.placeholder || props.placeholder }}
+      </option>
+    }
+    @for (opt of props.options; track opt.value) {
+      <option
+        [disabled]="opt.disabled"
+        [selected]="isSelected(opt)"
+        [value]="optionIndex(opt)"
+      >{{ opt.label }}
+      </option>
+    }
+  </select>
+
+  @if (showError) {
+    @if (props.showAllErrors) {
+      <div class="flex flex-col gap-y-1 mt-1">
+        @for (error of errorMessages; track $index) {
+          <lib-mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></lib-mn-error-message>
+        }
+      </div>
+    } @else {
+      @if (errorMessage != null) {
+        <lib-mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></lib-mn-error-message>
+      }
+    }
+  }
+</div>

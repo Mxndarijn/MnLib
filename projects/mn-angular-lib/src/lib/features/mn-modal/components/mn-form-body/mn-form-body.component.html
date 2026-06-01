@@ -59,41 +59,13 @@
 
       @case (FieldKind.SELECT) {
         <div class="flex flex-col">
-          <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content" [for]="asKey(rowField.field.key)">
-            {{ asField(rowField.field).label }}
-            @if (hasRequiredValidator(rowField.field)) {
-              <span class="text-red-500">*</span>
-            }
-          </label>
-          <div class="relative">
-            <select
-              [id]="asKey(rowField.field.key)"
-              [formControlName]="asKey(rowField.field.key)"
-              class="w-full px-3 py-2 border border-base-300 rounded-xl text-base text-base-content bg-base-100 transition-all appearance-none pr-8 focus:outline-none focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10 select-arrow"
-              [class.opacity-50]="isFieldLoading(asKey(rowField.field.key)) || isFieldDisabled(rowField.field)"
-              [attr.disabled]="isFieldDisabled(rowField.field) || isFieldReadOnly(rowField.field) ? '' : null"
-            >
-              <option value="" disabled selected hidden>
-                {{ isFieldLoading(asKey(rowField.field.key)) ? labels.loading : labels.selectPlaceholder }}
-              </option>
-              @for (option of getFieldOptions(rowField.field); track option.value) {
-                <option
-                  [value]="option.value"
-                  [disabled]="option.state === 'disabled'"
-                >
-                  {{ option.label }}
-                </option>
-              }
-            </select>
-            @if (isFieldLoading(asKey(rowField.field.key))) {
-              <div class="absolute right-8 top-1/2 -translate-y-1/2">
-                <div class="w-4 h-4 border-2 border-base-300 border-t-blue-500 rounded-full animate-spin"></div>
-              </div>
-            }
-          </div>
-          @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
-            <div class="text-red-500 text-xs pl-2 pt-1">
-              {{ labels.fieldRequired }}
+          <mn-lib-select
+            [formControlName]="asKey(rowField.field.key)"
+            [props]="getSelectProps(rowField.field)"
+          ></mn-lib-select>
+          @if (isFieldLoading(asKey(rowField.field.key))) {
+            <div class="flex items-center gap-1 pl-2 pt-1">
+              <div class="w-4 h-4 border-2 border-base-300 border-t-blue-500 rounded-full animate-spin"></div>
             </div>
           }
           @if (getFieldError(asKey(rowField.field.key))) {

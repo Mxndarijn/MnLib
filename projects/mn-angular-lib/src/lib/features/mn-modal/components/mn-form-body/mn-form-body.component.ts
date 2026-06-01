@@ -1,49 +1,52 @@
 import {
-  Component,
-  Input,
-  OnInit,
-  OnDestroy,
-  Output,
-  EventEmitter,
-  ViewChildren,
-  QueryList,
   AfterViewInit,
+  Component,
+  EventEmitter,
   inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  QueryList,
+  ViewChildren,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { MnModalRef } from '../../mn-modal-ref';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {Subscription} from 'rxjs';
+import {MnModalRef} from '../../mn-modal-ref';
 import {
-  FormModalConfig,
-  FormLayoutMode,
-  FormRow,
-  FormRowField,
+  FieldDataSource,
+  FieldKind,
+  FileFieldConfig,
   FormFieldConfig,
   FormFieldGroup,
-  FieldKind,
-  SubmitMode,
+  FormModalConfig,
+  FormRow,
+  FormRowField,
   ModalCloseReason,
+  MultiSelectTableFieldConfig,
+  RatingFieldConfig,
   SelectOption,
-  FieldDataSource,
-  FileFieldConfig,
+  SingleSelectTableFieldConfig,
+  SliderFieldConfig,
+  SubmitMode,
 } from '../../mn-modal.types';
-import { MnButton } from '../../../mn-button';
-import { MnInputField } from '../../../mn-input-field';
-import { MnCheckbox } from '../../../mn-checkbox/mn-checkbox';
-import { MnDatetime } from '../../../mn-datetime/mn-datetime';
-import { MnMultiSelect } from '../../../mn-multi-select/mn-multi-select';
-import { MnTextarea } from '../../../mn-textarea/mn-textarea';
-import { MnCustomFieldHostDirective } from './mn-custom-field-host.directive';
-import { MnLanguageService } from '../../../../language/mn-language.service';
-import { MnTable } from '../../../mn-table/mn-table.component';
-import { MultiSelectTableFieldConfig, SingleSelectTableFieldConfig, RatingFieldConfig, SliderFieldConfig, ColorFieldConfig } from '../../mn-modal.types';
-import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
+import {MnButton} from '../../../mn-button';
+import {MnInputField} from '../../../mn-input-field';
+import {MnCheckbox} from '../../../mn-checkbox';
+import {MnDatetime} from '../../../mn-datetime';
+import {MnMultiSelect} from '../../../mn-multi-select';
+import {MnTextarea} from '../../../mn-textarea';
+import {MnSelect, MnSelectOption} from '../../../mn-select';
+import {MnCustomFieldHostDirective} from './mn-custom-field-host.directive';
+import {MnLanguageService} from '../../../../language';
+import {MnTable} from '../../../mn-table';
+import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
 
 @Component({
   selector: 'mn-form-body',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent],
+  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnSelect, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent],
   templateUrl: './mn-form-body.component.html',
   styleUrls: ['./mn-form-body.component.css'],
 })
@@ -339,7 +342,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
   isGroupVisible(group: FormFieldGroup<TModel>): boolean {
     const key = group.title || `group-${this.fieldGroups.indexOf(group)}`;
-    return this.groupVisibility[key] !== false;
+    return this.groupVisibility[key];
   }
 
   // =========================
@@ -390,7 +393,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   }
 
   isFieldVisible(field: FormFieldConfig<TModel>): boolean {
-    return this.fieldVisibility[field.key as string] !== false;
+    return this.fieldVisibility[field.key as string];
   }
 
   // =========================
@@ -431,17 +434,8 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     });
   }
 
-  private async loadFieldOptions(key: string, dataSource: FieldDataSource, formValue: any): Promise<void> {
-    this.fieldLoading[key] = true;
-    try {
-      const options = await dataSource.load(formValue);
-      this.fieldOptions[key] = options;
-    } catch (error) {
-      console.error(`Failed to load options for field '${key}':`, error);
-      this.fieldOptions[key] = [];
-    } finally {
-      this.fieldLoading[key] = false;
-    }
+  isFieldLoading(key: string): boolean {
+    return this.fieldLoading[key];
   }
 
   /** Get options for a field — uses dataSource options if available, otherwise static options */
@@ -453,8 +447,34 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     return (field as any).options || [];
   }
 
-  isFieldLoading(key: string): boolean {
-    return this.fieldLoading[key] === true;
+  /** Convert SelectOption[] to MnSelectOption[] for mn-lib-select */
+  getSelectOptions(field: FormFieldConfig<TModel>): MnSelectOption[] {
+    return this.getFieldOptions(field).map(o => ({
+      label: o.label,
+      value: o.value,
+      disabled: o.state === 'disabled',
+    }));
+  }
+
+  getSelectProps(field: FormFieldConfig<TModel>): any {
+    return {
+      id: field.key as string,
+      label: this.asField(field).label,
+      placeholder: this.isFieldLoading(field.key as string) ? this.labels.loading : this.labels.selectPlaceholder,
+      options: this.getSelectOptions(field),
+    };
+  }
+
+  private async loadFieldOptions(key: string, dataSource: FieldDataSource, formValue: any): Promise<void> {
+    this.fieldLoading[key] = true;
+    try {
+      this.fieldOptions[key] = await dataSource.load(formValue);
+    } catch (error) {
+      console.error(`Failed to load options for field '${key}':`, error);
+      this.fieldOptions[key] = [];
+    } finally {
+      this.fieldLoading[key] = false;
+    }
   }
 
   // =========================

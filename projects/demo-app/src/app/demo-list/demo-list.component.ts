@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 
-import { RouterLink } from '@angular/router';
+import {RouterLink} from '@angular/router';
 import {MnButton} from 'mn-angular-lib';
 
 interface DemoItem {
@@ -35,6 +35,15 @@ export class DemoListComponent {
     {title: 'Language demo', path: '/demos/language-demo', description: 'Language service with locale switching, translate pipe, interpolation, and config integration.'},
     {title: 'Calendar demo', path: '/demos/calendar-demo', description: 'Calendar with week, day, and month views, event layout, upcoming events sidebar, and pluggable event renderers.'},
     {title: 'List demo', path: '/demos/list-demo', description: 'Generic list with search, selection, load more, pagination, and custom item templates.'},
-    {title: 'Datetime demo', path: '/demos/datetime-demo', description: 'Datetime input with date, time, and datetime-local modes, variants, and validation.'}
+    {
+      title: 'Datetime demo',
+      path: '/demos/datetime-demo',
+      description: 'Datetime input with date, time, and datetime-local modes, variants, and validation.'
+    },
+    {
+      title: 'Select demo',
+      path: '/demos/select-demo',
+      description: 'Native browser select with ControlValueAccessor, validation, disabled options, and styling variants.'
+    }
   ];
 }
