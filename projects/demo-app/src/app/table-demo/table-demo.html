@@ -53,6 +53,15 @@
     <mn-table [dataSource]="paginatedDataSource" (sortChange)="onSortChange($event)"></mn-table>
   </section>
 
+  <!-- Client-side paginated table -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Client-Side Paginated Table</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>paginationMode:
+      'client-side-pagination'</code>. All data is loaded upfront; pagination, search, and sorting happen entirely in
+      the browser.</p>
+    <mn-table (sortChange)="onSortChange($event)" [dataSource]="clientPaginatedDataSource"></mn-table>
+  </section>
+
   <!-- Empty table -->
   <section style="margin-bottom: 48px;">
     <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Empty Table</h2>

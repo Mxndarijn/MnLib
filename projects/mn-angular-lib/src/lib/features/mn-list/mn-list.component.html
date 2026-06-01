@@ -85,7 +85,7 @@
       >
         <!-- Selection checkbox -->
         @if (hasSelection) {
-          <div class="flex-shrink-0">
+          <div class="shrink-0">
             <label>
               <input
                 type="checkbox"
@@ -132,7 +132,7 @@
 }
 
 <!-- Pagination controls -->
-@if (isPaginated && totalPages > 1) {
+@if (isPaginated && (totalPages > 1 || isServerPaginated)) {
   <div class="flex items-center justify-between px-2 py-3 text-sm text-base-content">
     <div class="flex items-center gap-2">
       <span>{{ dataSource.labels?.rowsPerPage || 'Items per page:' }}</span>
@@ -149,7 +149,9 @@
     </div>
 
     <div class="flex items-center gap-1">
-      <span class="text-xs mr-2">{{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > filteredItems.length ? filteredItems.length : currentPage * pageSize }} of {{ filteredItems.length }}</span>
+      <span class="text-xs mr-2">{{ (currentPage - 1) * pageSize + 1 }}
+        –{{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
+        of {{ totalItemCount }}</span>
 
       <button
         mnButton

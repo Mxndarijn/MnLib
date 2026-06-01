@@ -93,7 +93,7 @@ export interface TableDataSource<T> {
   searchForAdditionalItems?: (searchValue: string) => Promise<T[]>;
 
   // Pagination
-  paginationMode?: 'none' | 'load-more' | 'paginated' | 'infinite-scroll';
+  paginationMode?: 'none' | 'load-more' | 'paginated' | 'client-side-pagination' | 'infinite-scroll';
   paginationStrategy?: PaginationStrategy;
   loadAdditionalRows?: () => Promise<T[]>;
 
@@ -105,6 +105,32 @@ export interface TableDataSource<T> {
 
   /** Callback invoked when the user changes the page size via the dropdown. */
   onPageSizeChange?: (newSize: number) => void;
+
+  /**
+   * Total number of items on the server.
+   * When set, pagination and infinite-scroll use this instead of filteredItems.length.
+   */
+  totalItems?: number;
+
+  /**
+   * Callback invoked when the user navigates to a different page.
+   * When provided, the table delegates pagination to the consumer (server-side).
+   * The consumer is responsible for fetching the new page data and updating dataRows.
+   */
+  onPageChange?: (page: number) => void;
+
+  /**
+   * Callback invoked when the user types in the search box (server-side search).
+   * When provided, the table skips client-side filtering and delegates to the consumer.
+   */
+  onServerSearch?: (searchValue: string) => void;
+
+  /**
+   * Callback invoked when the user scrolls to the bottom in infinite-scroll mode.
+   * When provided, the table delegates loading more rows to the consumer (server-side).
+   * The consumer is responsible for appending new data to dataRows.
+   */
+  onLoadMore?: () => void;
 
   // Sorting
   defaultSort?: SortState;

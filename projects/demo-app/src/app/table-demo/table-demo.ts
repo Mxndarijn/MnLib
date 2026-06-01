@@ -1,6 +1,6 @@
 import {Component, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {MnTable, TableDataSource, ColumnSortType, SortState} from 'mn-angular-lib';
+import {ColumnSortType, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
 
 interface User {
   id: string;
@@ -19,7 +19,7 @@ const SAMPLE_USERS: User[] = [
   {id: '5', name: 'Eve Davis', email: 'eve@example.com', role: 'Editor', age: 27, joinedAt: '2024-01-05'},
 ];
 
-const PAGINATED_USERS: User[] = [
+const ALL_USERS: User[] = [
   {id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', age: 32, joinedAt: '2023-01-15'},
   {id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'Editor', age: 28, joinedAt: '2023-03-22'},
   {id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'Viewer', age: 45, joinedAt: '2022-11-01'},
@@ -40,11 +40,6 @@ const PAGINATED_USERS: User[] = [
   {id: '18', name: 'Ruby Scott', email: 'ruby@example.com', role: 'Admin', age: 36, joinedAt: '2024-05-19'},
 ];
 
-const EXTRA_USERS: User[] = [
-  {id: '6', name: 'Frank Miller', email: 'frank@example.com', role: 'Viewer', age: 38, joinedAt: '2024-08-20'},
-  {id: '7', name: 'Grace Lee', email: 'grace@example.com', role: 'Editor', age: 29, joinedAt: '2024-09-12'},
-];
-
 @Component({
   selector: 'app-table-demo',
   standalone: true,
@@ -63,6 +58,7 @@ export class TableDemo {
     emptyMessage: 'No users found.',
     isDataLoading: false,
     canSearch: false,
+    paginationMode: 'none',
     appearance: {hover: true, striped: true},
     columns: [
       {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
@@ -73,30 +69,6 @@ export class TableDemo {
     ],
     defaultSort: {columnKey: 'name', direction: 'asc'},
   };
-
-  // ── Actions table ──
-  actionsDataSource!: TableDataSource<User>;
-
-  ngOnInit(): void {
-    this.actionsDataSource = {
-      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
-      getID: (row) => row.id,
-      emptyMessage: 'No users found.',
-      isDataLoading: false,
-      canSearch: false,
-      appearance: {hover: true, bordered: true},
-      columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name},
-        {key: 'role', header: 'Role', cell: (row) => row.role},
-        {key: 'actions', header: 'Actions', cell: this.actionsTpl(), align: 'right', width: '150px'},
-      ],
-    };
-  }
-
-  onAction(action: string, user: User): void {
-    alert(`${action} ${user.name}`);
-  }
-
   // ── Selection table ──
   selectionDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
@@ -104,6 +76,7 @@ export class TableDemo {
     emptyMessage: 'No users found.',
     isDataLoading: false,
     canSearch: false,
+    paginationMode: 'none',
     selectionMode: 'multi',
     selectedRows: new BehaviorSubject<User[]>([]),
     appearance: {hover: true},
@@ -113,27 +86,6 @@ export class TableDemo {
       {key: 'role', header: 'Role', cell: (row) => row.role},
     ],
   };
-
-  // ── Searchable + load more table ──
-  searchDataSource: TableDataSource<User> = {
-    dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
-    getID: (row) => row.id,
-    emptyMessage: 'No users match your search.',
-    isDataLoading: false,
-    canSearch: true,
-    searchPlaceholder: 'Search users...',
-    isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
-    paginationMode: 'load-more',
-    loadAdditionalRows: () => new Promise(resolve => setTimeout(() => resolve(EXTRA_USERS), 800)),
-    appearance: {hover: true, compact: true},
-    columns: [
-      {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
-      {key: 'email', header: 'Email', cell: (row) => row.email},
-      {key: 'role', header: 'Role', cell: (row) => row.role},
-      {key: 'age', header: 'Age', cell: (row) => String(row.age), sortType: ColumnSortType.NUMERICAL, align: 'right'},
-    ],
-  };
-
   // ── Column filters table ──
   filterDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
@@ -141,6 +93,7 @@ export class TableDemo {
     emptyMessage: 'No users match the filters.',
     isDataLoading: false,
     canSearch: false,
+    paginationMode: 'none',
     appearance: {hover: true, striped: true},
     columns: [
       {
@@ -181,19 +134,78 @@ export class TableDemo {
       },
     ],
   };
-
-  // ── Paginated table ──
+  // ── Client-side paginated table ──
+  clientPaginatedDataSource: TableDataSource<User> = {
+    dataRows: new BehaviorSubject<User[]>([...ALL_USERS]),
+    getID: (row) => row.id,
+    emptyMessage: 'No users found.',
+    isDataLoading: false,
+    canSearch: true,
+    searchPlaceholder: 'Search client-side...',
+    isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
+    paginationMode: 'client-side-pagination',
+    pageSize: 5,
+    pageSizeOptions: [5, 10, 15],
+    appearance: {hover: true, striped: true},
+    columns: [
+      {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
+      {key: 'email', header: 'Email', cell: (row) => row.email},
+      {key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center'},
+      {
+        key: 'age',
+        header: 'Age',
+        cell: (row) => String(row.age),
+        sortType: ColumnSortType.NUMERICAL,
+        width: '80px',
+        align: 'right'
+      },
+    ],
+  };
+  // ── Empty table ──
+  emptyDataSource: TableDataSource<User> = {
+    dataRows: new BehaviorSubject<User[]>([]),
+    getID: (row) => row.id,
+    emptyMessage: 'No data available. Try adding some users.',
+    isDataLoading: false,
+    canSearch: false,
+    paginationMode: 'none',
+    columns: [
+      {key: 'name', header: 'Name', cell: (row) => row.name},
+      {key: 'email', header: 'Email', cell: (row) => row.email},
+    ],
+  };
+  // ── Actions table ──
+  actionsDataSource!: TableDataSource<User>;
+  // ── Server-side pagination state ──
+  private paginatedPage = 1;
+  private paginatedSize = 5;
+  private paginatedSearch = '';
+  // ── Paginated table (server-side) ──
   paginatedDataSource: TableDataSource<User> = {
-    dataRows: new BehaviorSubject<User[]>([...PAGINATED_USERS]),
+    dataRows: new BehaviorSubject<User[]>([]),
     getID: (row) => row.id,
     emptyMessage: 'No users found.',
     isDataLoading: false,
     canSearch: true,
     searchPlaceholder: 'Search paginated users...',
-    isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
     paginationMode: 'paginated',
     pageSize: 5,
     pageSizeOptions: [5, 10, 15],
+    totalItems: ALL_USERS.length,
+    onPageChange: (page) => {
+      this.paginatedPage = page;
+      this.fetchPaginatedPage();
+    },
+    onPageSizeChange: (size) => {
+      this.paginatedSize = size;
+      this.paginatedPage = 1;
+      this.fetchPaginatedPage();
+    },
+    onServerSearch: (term) => {
+      this.paginatedSearch = term;
+      this.paginatedPage = 1;
+      this.fetchPaginatedPage();
+    },
     appearance: {hover: true, striped: true},
     columns: [
       {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
@@ -204,19 +216,59 @@ export class TableDemo {
     ],
     defaultSort: {columnKey: 'name', direction: 'asc'},
   };
-
-  // ── Empty table ──
-  emptyDataSource: TableDataSource<User> = {
+  private loadMoreLoaded = 5;
+  private loadMoreSearch = '';
+  // ── Searchable + load more table (server-side) ──
+  searchDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([]),
     getID: (row) => row.id,
-    emptyMessage: 'No data available. Try adding some users.',
+    emptyMessage: 'No users match your search.',
     isDataLoading: false,
-    canSearch: false,
+    canSearch: true,
+    searchPlaceholder: 'Search users...',
+    paginationMode: 'load-more',
+    totalItems: ALL_USERS.length,
+    onLoadMore: () => this.fetchLoadMoreBatch(false),
+    onServerSearch: (term) => {
+      this.loadMoreSearch = term;
+      this.loadMoreLoaded = 5;
+      this.fetchLoadMoreBatch(true);
+    },
+    appearance: {hover: true, compact: true},
     columns: [
-      {key: 'name', header: 'Name', cell: (row) => row.name},
+      {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
       {key: 'email', header: 'Email', cell: (row) => row.email},
+      {key: 'role', header: 'Role', cell: (row) => row.role},
+      {key: 'age', header: 'Age', cell: (row) => String(row.age), sortType: ColumnSortType.NUMERICAL, align: 'right'},
     ],
   };
+
+  onAction(action: string, user: User): void {
+    alert(`${action} ${user.name}`);
+  }
+
+  ngOnInit(): void {
+    this.actionsDataSource = {
+      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+      getID: (row) => row.id,
+      emptyMessage: 'No users found.',
+      isDataLoading: false,
+      canSearch: false,
+      paginationMode: 'none',
+      appearance: {hover: true, bordered: true},
+      columns: [
+        {key: 'name', header: 'Name', cell: (row) => row.name},
+        {key: 'role', header: 'Role', cell: (row) => row.role},
+        {key: 'actions', header: 'Actions', cell: this.actionsTpl(), align: 'right', width: '150px'},
+      ],
+    };
+
+    // Initialize paginated table with first page
+    this.fetchPaginatedPage();
+
+    // Initialize load-more table with first batch
+    this.fetchLoadMoreBatch(true);
+  }
 
   onSortChange(sort: SortState | null): void {
     console.log('Sort changed:', sort);
@@ -224,5 +276,36 @@ export class TableDemo {
 
   onSelectionChange(selected: User[]): void {
     this.selectedNames = selected.length > 0 ? selected.map(u => u.name).join(', ') : 'none';
+  }
+
+  // ── Server-side simulation helpers ──
+
+  private getFilteredUsers(search: string): User[] {
+    if (!search) return ALL_USERS;
+    const term = search.toLowerCase();
+    return ALL_USERS.filter(u => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+  }
+
+  private fetchPaginatedPage(): void {
+    const filtered = this.getFilteredUsers(this.paginatedSearch);
+    const start = (this.paginatedPage - 1) * this.paginatedSize;
+    const page = filtered.slice(start, start + this.paginatedSize);
+    this.paginatedDataSource.totalItems = filtered.length;
+    this.paginatedDataSource.dataRows.next(page);
+  }
+
+  private fetchLoadMoreBatch(reset: boolean): void {
+    const filtered = this.getFilteredUsers(this.loadMoreSearch);
+    if (reset) {
+      const batch = filtered.slice(0, this.loadMoreLoaded);
+      this.searchDataSource.totalItems = filtered.length;
+      this.searchDataSource.dataRows.next(batch);
+    } else {
+      const nextBatch = filtered.slice(this.loadMoreLoaded, this.loadMoreLoaded + 5);
+      this.loadMoreLoaded += nextBatch.length;
+      const current = this.searchDataSource.dataRows.value;
+      this.searchDataSource.totalItems = filtered.length;
+      this.searchDataSource.dataRows.next([...current, ...nextBatch]);
+    }
   }
 }

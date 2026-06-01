@@ -1,6 +1,18 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DoCheck, EventEmitter, inject, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DoCheck,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef
+} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
-import {Subject, Subscription, debounceTime, skip} from 'rxjs';
+import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 import {MnButton} from '../mn-button';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
@@ -56,41 +68,16 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     }
   }
 
-  ngOnInit(): void {
-    this.currentSort = this.dataSource.defaultSort ?? null;
-    this.pageSize = this.dataSource.pageSize ?? 10;
-
-    // Initialize all filterable columns with empty string to avoid undefined values.
-    for (const col of this.dataSource.columns) {
-      if (col.filterable) {
-        this.columnFilters[col.key] = '';
-      }
+  get showLoadMore(): boolean {
+    const mode = this.dataSource.paginationMode ?? 'load-more';
+    // Server-side load-more: check if there are more items to load.
+    if (this.dataSource.onLoadMore) {
+      const totalItems = this.dataSource.totalItems ?? 0;
+      return mode === 'load-more' && this.filteredItems.length < totalItems;
     }
-
-    // Pre-select rows from initialSelectedIds if provided
-    if (this.dataSource.initialSelectedIds?.length) {
-      for (const id of this.dataSource.initialSelectedIds) {
-        this.selectedIds.add(id);
-      }
-      this.emitSelection();
-    }
-
-    this.applyFilterAndSort(false);
-
-    // Skip the initial BehaviorSubject emission (already handled above)
-    // to avoid triggering markForCheck during the first change detection cycle.
-    this.dataSubscription = this.dataSource.dataRows.pipe(skip(1)).subscribe(() => {
-      this.applyFilterAndSort(false);
-      this.cdr.markForCheck();
-    });
-
-    this.searchSubscription = this.searchSubject
-      .pipe(debounceTime(300))
-      .subscribe(value => {
-        this.searchValue = value;
-        this.applyFilterAndSort(true);
-        this.cdr.markForCheck();
-      });
+    const strategy = this.dataSource.paginationStrategy;
+    const hasMore = strategy ? strategy.hasMoreRows : !!this.dataSource.loadAdditionalRows;
+    return mode === 'load-more' && hasMore;
   }
 
   ngOnDestroy(): void {
@@ -100,9 +87,9 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   // ── Search ──
 
-  onSearch(searchString: string): void {
-    this.currentPage = 1;
-    this.searchSubject.next(searchString);
+  get isPaginated(): boolean {
+    const mode = this.dataSource.paginationMode;
+    return mode === 'paginated' || mode === 'client-side-pagination';
   }
 
   // ── Column Filters ──
@@ -200,7 +187,87 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   // ── Pagination ──
 
+  /** Whether the table delegates pagination to the consumer (server-side). */
+  get isServerPaginated(): boolean {
+    const mode = this.dataSource.paginationMode ?? 'load-more';
+    return mode === 'paginated' || mode === 'load-more';
+  }
+
+  /** Whether the table delegates search to the consumer (server-side). */
+  get isServerSearched(): boolean {
+    return !!this.dataSource.onServerSearch;
+  }
+
+  // ── Paginated Mode ──
+
+  /** Total number of items, accounting for server-side pagination. */
+  get totalItemCount(): number {
+    if (this.isServerPaginated && this.dataSource.totalItems != null) {
+      return this.dataSource.totalItems;
+    }
+    return this.filteredItems.length;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalItemCount / this.pageSize));
+  }
+
+  ngOnInit(): void {
+    this.validateDataSource();
+    this.currentSort = this.dataSource.defaultSort ?? null;
+    this.pageSize = this.dataSource.pageSize ?? 10;
+
+    // Initialize all filterable columns with empty string to avoid undefined values.
+    for (const col of this.dataSource.columns) {
+      if (col.filterable) {
+        this.columnFilters[col.key] = '';
+      }
+    }
+
+    // Pre-select rows from initialSelectedIds if provided
+    if (this.dataSource.initialSelectedIds?.length) {
+      for (const id of this.dataSource.initialSelectedIds) {
+        this.selectedIds.add(id);
+      }
+      this.emitSelection();
+    }
+
+    this.applyFilterAndSort(false);
+
+    // Skip the initial BehaviorSubject emission (already handled above)
+    // to avoid triggering markForCheck during the first change detection cycle.
+    this.dataSubscription = this.dataSource.dataRows.pipe(skip(1)).subscribe(() => {
+      this.applyFilterAndSort(false);
+      this.cdr.markForCheck();
+    });
+
+    this.searchSubscription = this.searchSubject
+      .pipe(debounceTime(300))
+      .subscribe(value => {
+        this.searchValue = value;
+        this.applyFilterAndSort(true);
+        this.cdr.markForCheck();
+      });
+  }
+
+  onSearch(searchString: string): void {
+    this.currentPage = 1;
+    if (this.isServerSearched) {
+      this.searchValue = searchString;
+      this.dataSource.onServerSearch!(searchString);
+      this.cdr.markForCheck();
+    } else {
+      this.searchSubject.next(searchString);
+    }
+  }
+
   loadMoreRows(): void {
+    // Server-side infinite scroll: delegate to consumer callback.
+    if (this.dataSource.onLoadMore) {
+      this.dataSource.onLoadMore();
+      return;
+    }
+
     if (!this.dataSource.loadAdditionalRows || this.loadingMoreRows) return;
 
     this.loadingMoreRows = true;
@@ -213,23 +280,6 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
       .catch(() => this.loadingMoreRows = false);
   }
 
-  get showLoadMore(): boolean {
-    const mode = this.dataSource.paginationMode ?? 'load-more';
-    const strategy = this.dataSource.paginationStrategy;
-    const hasMore = strategy ? strategy.hasMoreRows : !!this.dataSource.loadAdditionalRows;
-    return mode === 'load-more' && hasMore;
-  }
-
-  // ── Paginated Mode ──
-
-  get isPaginated(): boolean {
-    return this.dataSource.paginationMode === 'paginated';
-  }
-
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-  }
-
   get resolvedPageSizeOptions(): number[] {
     return this.dataSource.pageSizeOptions ?? [5, 10, 25, 50];
   }
@@ -237,16 +287,23 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
-    this.applyPagination();
+    if (this.dataSource.paginationMode === 'client-side-pagination') {
+      this.applyPagination();
+    } else {
+      this.dataSource.onPageChange?.(page);
+    }
     this.cdr.markForCheck();
   }
 
   onPageSizeChange(newSize: number): void {
     this.pageSize = newSize;
     this.currentPage = 1;
-    this.applyPagination();
+    if (this.dataSource.paginationMode === 'client-side-pagination') {
+      this.applyPagination();
+    } else {
+      this.dataSource.onPageSizeChange?.(newSize);
+    }
     this.cdr.markForCheck();
-    this.dataSource.onPageSizeChange?.(newSize);
   }
 
   get visiblePages(): number[] {
@@ -267,13 +324,11 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   }
 
   private applyPagination(): void {
-    if (this.isPaginated) {
-      if (this.currentPage > this.totalPages) {
-        this.currentPage = this.totalPages;
-      }
+    if (this.dataSource.paginationMode === 'client-side-pagination') {
       const start = (this.currentPage - 1) * this.pageSize;
       this.paginatedItems = this.filteredItems.slice(start, start + this.pageSize);
     } else {
+      // Server always provides the correct page/slice — no client-side slicing.
       this.paginatedItems = this.filteredItems;
     }
   }
@@ -320,8 +375,8 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   private applyFilterAndSort(searchForItems: boolean): void {
     let items = this.dataSource.dataRows.value;
 
-    // Global search filter
-    if (this.dataSource.isInSearch && this.dataSource.canSearch && this.searchValue.length > 0) {
+    // Skip client-side search filtering when server handles it.
+    if (!this.isServerSearched && this.dataSource.isInSearch && this.dataSource.canSearch && this.searchValue.length > 0) {
       const term = this.searchValue.toLowerCase();
       items = items.filter(row => this.dataSource.isInSearch!(row, term));
     }
@@ -392,6 +447,23 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     this.dataSource.dataRows.next(merged);
     this.loadingMoreRows = false;
     this.applyFilterAndSort(false);
+  }
+
+  private validateDataSource(): void {
+    const mode = this.dataSource.paginationMode;
+    if (mode === 'paginated') {
+      if (!this.dataSource.onPageChange) {
+        throw new Error(`[MnTable] paginationMode is 'paginated' but 'onPageChange' callback is missing. Server-side pagination requires 'onPageChange'.`);
+      }
+      if (this.dataSource.totalItems == null) {
+        throw new Error(`[MnTable] paginationMode is 'paginated' but 'totalItems' is missing. Server-side pagination requires 'totalItems'.`);
+      }
+    }
+    if (mode === 'load-more' || mode === 'infinite-scroll') {
+      if (!this.dataSource.onLoadMore && !this.dataSource.loadAdditionalRows && !this.dataSource.paginationStrategy) {
+        throw new Error(`[MnTable] paginationMode is '${mode}' but no load-more mechanism is provided. Provide 'onLoadMore', 'loadAdditionalRows', or 'paginationStrategy'.`);
+      }
+    }
   }
 
   private emitSelection(): void {
