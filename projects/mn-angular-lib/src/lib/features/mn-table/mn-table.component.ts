@@ -16,6 +16,7 @@ import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 import {MnSelect, MnSelectOption} from '../mn-select';
 import {MnButton} from '../mn-button';
+import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnInputField} from '../mn-input-field';
 import {FormsModule} from '@angular/forms';
@@ -26,7 +27,7 @@ export type ColumnFilterState = Record<string, string | undefined>;
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton, MnHiddenBelowDirective, MnInputField, MnSelect, FormsModule],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnCheckbox, MnHiddenBelowDirective, MnInputField, MnSelect, FormsModule],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

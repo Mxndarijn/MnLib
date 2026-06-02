@@ -15,13 +15,14 @@ import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {ListDataSource} from './mn-list.types';
 import {MnButton} from '../mn-button';
+import {MnCheckbox} from '../mn-checkbox';
 import {MnSelect, MnSelectOption} from '../mn-select';
 import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'mn-list',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton, MnSelect, FormsModule],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnCheckbox, MnSelect, FormsModule],
   templateUrl: './mn-list.component.html',
   styleUrl: './mn-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

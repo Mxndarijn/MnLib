@@ -29,15 +29,11 @@
         @if (hasSelection) {
           <th class="w-10 text-center text-sm bg-base-200 px-2 py-2">
             @if (isMultiSelect) {
-              <label>
-                <input
-                  type="checkbox"
-                  class="checkbox checkbox-sm checkbox-primary"
-                  [checked]="allSelected"
-                  (change)="toggleAll()"
-                  aria-label="Select all rows"
-                />
-              </label>
+              <mn-lib-checkbox
+                (checkedChange)="toggleAll()"
+                [checked]="allSelected"
+                [props]="{ id: 'mn-table-select-all', size: 'sm' }"
+              ></mn-lib-checkbox>
             }
           </th>
         }
@@ -170,16 +166,12 @@
           >
             <!-- Selection checkbox -->
             @if (hasSelection) {
-              <td class="w-10 text-center px-2 py-2">
-                <label>
-                  <input
-                    type="checkbox"
-                    class="checkbox checkbox-sm checkbox-primary"
-                    [checked]="isSelected(row)"
-                    (click)="$event.stopPropagation()"
-                    (change)="toggleRow(row)"
-                  />
-                </label>
+              <td (click)="$event.stopPropagation()" class="w-10 text-center px-2 py-2">
+                <mn-lib-checkbox
+                  (checkedChange)="toggleRow(row)"
+                  [checked]="isSelected(row)"
+                  [props]="{ id: 'mn-table-row-' + $index, size: 'sm' }"
+                ></mn-lib-checkbox>
               </td>
             }
 

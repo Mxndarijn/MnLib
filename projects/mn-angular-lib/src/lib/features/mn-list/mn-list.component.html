@@ -53,16 +53,11 @@
     <!-- Select all (multi-select) -->
     @if (isMultiSelect && filteredItems.length > 0) {
       <div class="flex items-center gap-2 px-4 py-2 bg-base-200 text-sm">
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            class="checkbox checkbox-sm checkbox-primary"
-            [checked]="allSelected"
-            (change)="toggleAll()"
-            aria-label="Select all items"
-          />
-          <span class="text-xs text-base-content/70">Select all</span>
-        </label>
+        <mn-lib-checkbox
+          (checkedChange)="toggleAll()"
+          [checked]="allSelected"
+          [props]="{ id: 'mn-list-select-all', label: 'Select all', size: 'sm' }"
+        ></mn-lib-checkbox>
       </div>
       @if (dataSource.appearance?.dividers !== false) {
         <div class="border-b border-base-300"></div>
@@ -85,16 +80,12 @@
       >
         <!-- Selection checkbox -->
         @if (hasSelection) {
-          <div class="shrink-0">
-            <label>
-              <input
-                type="checkbox"
-                class="checkbox checkbox-sm checkbox-primary"
-                [checked]="isSelected(item)"
-                (click)="$event.stopPropagation()"
-                (change)="toggleItem(item)"
-              />
-            </label>
+          <div (click)="$event.stopPropagation()" class="shrink-0">
+            <mn-lib-checkbox
+              (checkedChange)="toggleItem(item)"
+              [checked]="isSelected(item)"
+              [props]="{ id: 'mn-list-item-' + $index, size: 'sm' }"
+            ></mn-lib-checkbox>
           </div>
         }
 

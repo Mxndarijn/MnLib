@@ -1,12 +1,12 @@
-import { tv, type VariantProps } from 'tailwind-variants';
+import {tv, type VariantProps} from 'tailwind-variants';
 
 export const mnCheckboxVariants = tv({
-  base: 'accent-brand-500 cursor-pointer',
+  base: 'checkbox checkbox-primary cursor-pointer',
   variants: {
     size: {
-      sm: 'w-4 h-4',
-      md: 'w-5 h-5',
-      lg: 'w-6 h-6',
+      sm: 'checkbox-sm',
+      md: 'checkbox-md',
+      lg: 'checkbox-lg',
     },
     borderRadius: {
       none: 'rounded-none',

@@ -1,6 +1,18 @@
-import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  InjectionToken,
+  Input,
+  OnChanges,
+  OnInit,
+  Optional,
+  Output,
+  Self
+} from '@angular/core';
 import {NgClass} from '@angular/common';
-import {MnCheckboxProps, MnCheckboxErrorMessageData, MnCheckboxUIConfig} from './mn-checkboxTypes';
+import {MnCheckboxErrorMessageData, MnCheckboxProps, MnCheckboxUIConfig} from './mn-checkboxTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnCheckboxVariants} from './mn-checkboxVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
@@ -17,10 +29,16 @@ export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHE
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-checkbox.html',
 })
-export class MnCheckbox implements OnInit {
+export class MnCheckbox implements OnInit, OnChanges {
   protected uiConfig: MnCheckboxUIConfig = {};
 
   @Input({ required: true }) props!: MnCheckboxProps;
+
+  /** Direct checked binding for non-form usage */
+  @Input() checked?: boolean;
+
+  /** Emits when checked state changes (for non-form usage) */
+  @Output() checkedChange = new EventEmitter<boolean>();
 
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
@@ -70,6 +88,13 @@ export class MnCheckbox implements OnInit {
     this.value = !!val;
   }
 
+  /** Sync value from checked input when not using forms */
+  ngOnChanges(): void {
+    if (this.checked !== undefined) {
+      this.value = this.checked;
+    }
+  }
+
   registerOnChange(fn: any): void {
     this.onChange = fn;
   }
@@ -87,6 +112,7 @@ export class MnCheckbox implements OnInit {
   handleChange(checked: boolean): void {
     this.value = checked;
     this.onChange(checked);
+    this.checkedChange.emit(checked);
   }
 
   handleBlur(): void {
