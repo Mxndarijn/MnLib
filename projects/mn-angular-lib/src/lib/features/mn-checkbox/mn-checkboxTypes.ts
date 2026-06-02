@@ -1,5 +1,5 @@
-import { MnCheckboxVariants } from './mn-checkboxVariants';
-import { ValidationErrors } from '@angular/forms';
+import {MnCheckboxVariants, MnCheckboxWrapperVariants} from './mn-checkboxVariants';
+import {ValidationErrors} from '@angular/forms';
 
 export type MnCheckboxErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
 
@@ -22,6 +22,12 @@ export interface MnCheckboxProps {
 
   /** Border radius variant (default: 'sm') */
   borderRadius?: MnCheckboxVariants['borderRadius'];
+
+  /** Whether the checkbox wrapper should take full width */
+  fullWidth?: MnCheckboxWrapperVariants['fullWidth'];
+
+  /** Whether to show hover effect on the label row (default: true) */
+  hover?: MnCheckboxWrapperVariants['hover'];
 
   // ========== Error Message Configuration ==========
 
