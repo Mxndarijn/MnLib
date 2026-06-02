@@ -14,11 +14,11 @@ import {
 import {NgClass} from '@angular/common';
 import {MnCheckboxErrorMessageData, MnCheckboxProps, MnCheckboxUIConfig} from './mn-checkboxTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
-import {mnCheckboxVariants} from './mn-checkboxVariants';
+import {mnCheckboxVariants, mnCheckboxWrapperVariants} from './mn-checkboxVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnConfigService} from "../../config/mn-config.service";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
-import {MnLanguageService} from "../../language/mn-language.service";
+import {MnConfigService} from "../../config";
+import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
+import {MnLanguageService} from "../../language";
 import {skip} from "rxjs";
 
 export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHECKBOX_CONFIG');
@@ -188,6 +188,14 @@ export class MnCheckbox implements OnInit, OnChanges {
     return mnCheckboxVariants({
       size: this.props.size,
       borderRadius: this.props.borderRadius,
+    });
+  }
+
+  get wrapperClasses(): string {
+    return mnCheckboxWrapperVariants({
+      size: this.props.size,
+      fullWidth: this.props.fullWidth,
+      hover: this.props.hover,
     });
   }
 }
