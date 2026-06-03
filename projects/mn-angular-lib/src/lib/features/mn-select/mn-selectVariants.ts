@@ -1,7 +1,7 @@
 import {tv, type VariantProps} from 'tailwind-variants';
 
 export const mnSelectVariants = tv({
-  base: 'bg-base-100 border-1 border-base-300 text-base-content text-sm cursor-pointer',
+  base: 'bg-base-100 border-1 border-base-300 text-base-content text-sm cursor-pointer hover:bg-base-200 transition-colors duration-300',
   variants: {
     shadow: {
       true: 'shadow-lg',
