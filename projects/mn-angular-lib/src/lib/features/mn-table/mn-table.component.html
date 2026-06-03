@@ -2,6 +2,7 @@
 <div class="flex flex-row items-center justify-end gap-2 mb-3">
   @if (dataSource.canSearch) {
       <mn-lib-input-field
+        class="w-80"
         [props]="{
           id: 'mn-table-search',
           type: 'search',
@@ -236,7 +237,7 @@
 
     <div class="flex items-center gap-1">
       <span class="text-xs mr-2">{{ (currentPage - 1) * pageSize + 1 }}
-        –{{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
+        – {{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
         of {{ totalItemCount }}</span>
 
       <button
