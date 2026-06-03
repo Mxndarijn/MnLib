@@ -20,6 +20,7 @@ import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnInputField} from '../mn-input-field';
 import {FormsModule} from '@angular/forms';
+import {MnLanguageService} from '../../language';
 
 /** Map of column key to its current filter value. */
 export type ColumnFilterState = Record<string, string | undefined>;
@@ -53,9 +54,11 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   columnFilters: ColumnFilterState = {};
 
   private cdr = inject(ChangeDetectorRef);
+  private lang = inject(MnLanguageService);
   private dataSubscription?: Subscription;
   private searchSubject = new Subject<string>();
   private searchSubscription?: Subscription;
+  private langSubscription?: Subscription;
 
   /** Tracks the previous toolbar template reference for change detection. */
   private previousToolbarTemplate?: TemplateRef<any>;
@@ -87,6 +90,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   ngOnDestroy(): void {
     this.dataSubscription?.unsubscribe();
     this.searchSubscription?.unsubscribe();
+    this.langSubscription?.unsubscribe();
   }
 
   // ── Search ──
@@ -218,6 +222,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   ngOnInit(): void {
     this.validateDataSource();
+    this.resolveTranslationKeys();
     this.currentSort = this.dataSource.defaultSort ?? null;
     this.pageSize = this.dataSource.pageSize ?? 10;
 
@@ -252,6 +257,41 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
         this.applyFilterAndSort(true);
         this.cdr.markForCheck();
       });
+
+    // Re-resolve translation keys when the locale changes.
+    this.langSubscription = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveTranslationKeys();
+      this.cdr.markForCheck();
+    });
+  }
+
+  /**
+   * Resolves all translation keys (headerKey, filterPlaceholderKey, emptyMessageKey, etc.)
+   * into their corresponding display strings using MnLanguageService.
+   */
+  private resolveTranslationKeys(): void {
+    for (const col of this.dataSource.columns) {
+      if (col.headerKey) {
+        col.header = this.lang.t(col.headerKey);
+      }
+      if (col.filterPlaceholderKey) {
+        col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
+      }
+    }
+    if (this.dataSource.emptyMessageKey) {
+      this.dataSource.emptyMessage = this.lang.t(this.dataSource.emptyMessageKey);
+    }
+    if (this.dataSource.searchPlaceholderKey) {
+      this.dataSource.searchPlaceholder = this.lang.t(this.dataSource.searchPlaceholderKey);
+    }
+    if (this.dataSource.labels) {
+      if (this.dataSource.labels.loadMoreKey) {
+        this.dataSource.labels.loadMore = this.lang.t(this.dataSource.labels.loadMoreKey);
+      }
+      if (this.dataSource.labels.rowsPerPageKey) {
+        this.dataSource.labels.rowsPerPage = this.lang.t(this.dataSource.labels.rowsPerPageKey);
+      }
+    }
   }
 
   onSearch(searchString: string): void {

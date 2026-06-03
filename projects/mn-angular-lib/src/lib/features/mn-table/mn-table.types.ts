@@ -53,6 +53,8 @@ export interface ColumnFilterOption {
 export interface ColumnDefinition<T> {
   key: string;
   header: string | TemplateRef<any>;
+  /** Translation key for the column header. When set, mn-table resolves it via MnLanguageService and keeps it updated on locale change. */
+  headerKey?: string;
   cell: ((row: T) => string) | TemplateRef<any>;
   sortType?: ColumnSortType;
   getRawValueToSort?: (row: T) => any;
@@ -67,6 +69,8 @@ export interface ColumnDefinition<T> {
   filterOptions?: ColumnFilterOption[];
   /** Placeholder text for the filter input. */
   filterPlaceholder?: string;
+  /** Translation key for the filter placeholder. When set, mn-table resolves it via MnLanguageService. */
+  filterPlaceholderKey?: string;
   /** Whether the filter input is disabled. */
   filterDisabled?: boolean;
   /** Autocomplete attribute for the filter input. */
@@ -83,12 +87,16 @@ export interface TableDataSource<T> {
   columns: ColumnDefinition<T>[];
   getID: (row: T) => string;
   emptyMessage: string;
+  /** Translation key for the empty message. When set, mn-table resolves it via MnLanguageService. */
+  emptyMessageKey?: string;
   emptyTemplate?: TemplateRef<any>;
   isDataLoading: boolean;
 
   // Search
   canSearch: boolean;
   searchPlaceholder?: string;
+  /** Translation key for the search placeholder. When set, mn-table resolves it via MnLanguageService. */
+  searchPlaceholderKey?: string;
   isInSearch?: (row: T, searchValue: string) => boolean;
   searchForAdditionalItems?: (searchValue: string) => Promise<T[]>;
 
@@ -156,5 +164,9 @@ export interface TableDataSource<T> {
 
 export interface TableLabels {
   loadMore?: string;
+  /** Translation key for the "Load more" button label. */
+  loadMoreKey?: string;
   rowsPerPage?: string;
+  /** Translation key for the "Rows per page" label. */
+  rowsPerPageKey?: string;
 }
