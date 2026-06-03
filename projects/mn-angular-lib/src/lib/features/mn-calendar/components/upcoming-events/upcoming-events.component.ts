@@ -1,9 +1,9 @@
-import { Component, Input, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable, Subject, takeUntil } from 'rxjs';
-import { CalendarEvent } from '../../models/calendar-event.model';
-import { CalendarConfig, DEFAULT_CALENDAR_CONFIG, resolveCalendarConfig } from '../../models/calendar-config.model';
-import { UpcomingEventRowComponent } from '../upcoming-event-row/upcoming-event-row.component';
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Observable, Subject, takeUntil} from 'rxjs';
+import {CalendarEvent} from '../../models/calendar-event.model';
+import {CalendarConfig, DEFAULT_CALENDAR_CONFIG, resolveCalendarConfig} from '../../models/calendar-config.model';
+import {UpcomingEventRowComponent} from '../upcoming-event-row/upcoming-event-row.component';
 
 /**
  * Sidebar component that lists the next 10 upcoming events
@@ -29,7 +29,7 @@ import { UpcomingEventRowComponent } from '../upcoming-event-row/upcoming-event-
     }
   `]
 })
-export class UpcomingEventsComponent implements OnInit, OnDestroy {
+export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
   /** Observable that emits the full event list whenever it changes. */
   @Input() eventsChanged!: Observable<CalendarEvent[]>;
   /** Resolved calendar configuration passed from the parent view. */
@@ -46,6 +46,15 @@ export class UpcomingEventsComponent implements OnInit, OnDestroy {
   constructor() {
     this.title = DEFAULT_CALENDAR_CONFIG.upcomingEventsTitle;
     this.noEventsMessage = DEFAULT_CALENDAR_CONFIG.noUpcomingEvents;
+  }
+
+  /** Re-read labels when the config input changes (e.g. after a locale switch). */
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['config'] && this.config) {
+      const resolved = resolveCalendarConfig(this.config);
+      this.title = resolved.upcomingEventsTitle;
+      this.noEventsMessage = resolved.noUpcomingEvents;
+    }
   }
 
   ngOnInit() {

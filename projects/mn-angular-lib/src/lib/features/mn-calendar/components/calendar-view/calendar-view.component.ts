@@ -1,17 +1,38 @@
-import { Component, DestroyRef, EventEmitter, HostListener, Inject, inject, Input, OnDestroy, OnInit, Optional, Output, Type } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BehaviorSubject, Observable, Subject, skip, takeUntil } from 'rxjs';
-import { CalendarButton, CalendarEvent } from '../../models/calendar-event.model';
-import { CalendarEventData } from '../../models/calendar-event-data.model';
-import { CalendarView, CALENDAR_CONFIG, CalendarConfig, DEFAULT_CALENDAR_CONFIG, MN_CALENDAR_CONFIG, provideMnCalendarConfig, resolveCalendarConfig } from '../../models/calendar-config.model';
-import { MnLanguageService } from '../../../../language/mn-language.service';
-import { CALENDAR_DATE_FORMATTER, CalendarDateFormatter } from '../../services/calendar-date-formatter';
-import { DefaultCalendarDateFormatter } from '../../services/default-calendar-date-formatter';
-import { CalendarMonthComponent } from '../calendar-month/calendar-month.component';
-import { CalendarWeekComponent } from '../calendar-week/calendar-week.component';
-import { CalendarDayComponent } from '../calendar-day/calendar-day.component';
-import { UpcomingEventsComponent } from '../upcoming-events/upcoming-events.component';
-import { MnButton } from '../../../mn-button/mn-button';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  HostListener,
+  Inject,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Optional,
+  Output,
+  Type
+} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {BehaviorSubject, skip, Subject, takeUntil} from 'rxjs';
+import {CalendarButton, CalendarEvent} from '../../models/calendar-event.model';
+import {CalendarEventData} from '../../models/calendar-event-data.model';
+import {
+  CALENDAR_CONFIG,
+  CalendarConfig,
+  CalendarView,
+  DEFAULT_CALENDAR_CONFIG,
+  MN_CALENDAR_CONFIG,
+  provideMnCalendarConfig,
+  resolveCalendarConfig
+} from '../../models/calendar-config.model';
+import {MnLanguageService} from '../../../../language/mn-language.service';
+import {CALENDAR_DATE_FORMATTER, CalendarDateFormatter} from '../../services/calendar-date-formatter';
+import {DefaultCalendarDateFormatter} from '../../services/default-calendar-date-formatter';
+import {CalendarMonthComponent} from '../calendar-month/calendar-month.component';
+import {CalendarWeekComponent} from '../calendar-week/calendar-week.component';
+import {CalendarDayComponent} from '../calendar-day/calendar-day.component';
+import {UpcomingEventsComponent} from '../upcoming-events/upcoming-events.component';
+import {MnButton} from '../../../mn-button/mn-button';
 
 /**
  * Main calendar orchestrator component.
@@ -145,6 +166,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private formatter: CalendarDateFormatter;
   protected config: CalendarConfig;
+  /** Reference to the injected mn-config object (mutated in-place on locale change). */
+  private readonly mnConfigRef: CalendarConfig | null;
   private readonly destroyRef = inject(DestroyRef);
   private readonly lang = inject(MnLanguageService);
 
@@ -154,6 +177,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     @Optional() @Inject(CALENDAR_CONFIG) legacyConfig: CalendarConfig | null
   ) {
     this.formatter = formatter ?? new DefaultCalendarDateFormatter();
+    // Keep a reference to the injected config so we can re-read it after locale changes.
+    this.mnConfigRef = mnConfig;
     // Priority: mn-config system > legacy CALENDAR_CONFIG > built-in defaults
     const raw = mnConfig ?? legacyConfig ?? undefined;
     this.config = resolveCalendarConfig(raw as Partial<CalendarConfig> | undefined);
@@ -251,6 +276,10 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
   /** Rebuilds view options and labels from the current config. */
   private rebuildFromConfig() {
+    // Re-resolve from the injected config reference which is mutated in-place by the provider on locale change.
+    if (this.mnConfigRef) {
+      this.config = resolveCalendarConfig(this.mnConfigRef as Partial<CalendarConfig>);
+    }
     this.viewOptions = [
       { value: CalendarView.MONTH, label: this.config.viewLabels['MONTH'] ?? 'Month' },
       { value: CalendarView.WEEK, label: this.config.viewLabels['WEEK'] ?? 'Week' },
