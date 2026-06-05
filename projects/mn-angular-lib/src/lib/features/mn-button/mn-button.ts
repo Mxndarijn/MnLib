@@ -19,6 +19,7 @@ export class MnButton {
       color: this.data.color,
       borderRadius: this.data.borderRadius,
       disabled: this.data.disabled,
+      noWrap: this.data.noWrap,
     });
   }
   // For accessibility (works for both <button> and <a>)
