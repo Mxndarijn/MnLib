@@ -42,7 +42,7 @@
         <!-- Data columns -->
         @for (column of dataSource.columns; track column.key) {
           <th
-            class="text-sm px-4 py-2"
+            class="text-sm px-4 py-2 whitespace-nowrap"
             [class.cursor-pointer]="isSortable(column)"
             [class.select-none]="isSortable(column)"
             [class.hover:bg-base-200]="isSortable(column)"
