@@ -15,6 +15,7 @@ export class MnBadge {
     return mnBadgeVariants({
       size: this.data.size,
       color: this.data.color,
+      wrap: this.data.wrap,
     });
   }
 }

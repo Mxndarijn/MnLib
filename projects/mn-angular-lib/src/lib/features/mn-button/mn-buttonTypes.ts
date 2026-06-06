@@ -6,5 +6,5 @@ export interface MnButtonTypes {
   borderRadius: MnButtonVariants['borderRadius'];
   color: MnButtonVariants['color'];
   disabled?: MnButtonVariants['disabled'];
-  noWrap?: MnButtonVariants['noWrap'];
+  wrap?: MnButtonVariants['wrap'];
 }

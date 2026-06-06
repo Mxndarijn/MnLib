@@ -30,6 +30,15 @@
       </div>
     </div>
 
+    <!-- Wrap variants -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Wrap variants</h1>
+      <div class="flex flex-row items-center gap-x-2 max-w-xs">
+        <span mnBadge>No wrap (default)</span>
+        <span mnBadge [data]="{ wrap: true }">This is a long text that will wrap when needed</span>
+      </div>
+    </div>
+
     <!-- Default (no data) -->
     <div class="flex flex-col gap-y-4">
       <h1>Default (primary, md)</h1>

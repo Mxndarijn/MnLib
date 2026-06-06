@@ -10,6 +10,11 @@ export const mnBadgeVariants = tv({
       xl: 'px-3 py-1.5 text-lg',
     },
 
+    wrap: {
+      true: 'whitespace-normal',
+      false: 'whitespace-nowrap',
+    },
+
     color: {
       primary: 'bg-primary/20 border-primary text-primary',
       secondary: 'bg-neutral/20 border-neutral text-neutral',
@@ -24,6 +29,7 @@ export const mnBadgeVariants = tv({
   defaultVariants: {
     size: 'md',
     color: 'primary',
+    wrap: false,
   },
 });
 

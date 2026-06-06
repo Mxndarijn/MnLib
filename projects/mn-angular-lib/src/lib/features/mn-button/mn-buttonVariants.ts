@@ -40,8 +40,9 @@ export const mnButtonVariants = tv({
     disabled: {
       true: 'opacity-50 pointer-events-none',
     },
-    noWrap: {
-      true: 'whitespace-nowrap',
+    wrap: {
+      true: 'whitespace-normal',
+      false: 'whitespace-nowrap',
     }
   },
 
@@ -82,7 +83,7 @@ export const mnButtonVariants = tv({
     color: 'primary',
     borderRadius: 'lg',
     disabled: false,
-    noWrap: true,
+    wrap: false,
   },
 });
 
