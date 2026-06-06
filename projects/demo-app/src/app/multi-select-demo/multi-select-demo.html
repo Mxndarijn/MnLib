@@ -1,0 +1,62 @@
+<h2>MnMultiSelect Demo</h2>
+
+<p>
+  This demo showcases the <code>mn-lib-multi-select</code> component with ControlValueAccessor,
+  validation, searchable options, max selections, and disabled options.
+</p>
+
+<form [formGroup]="form" mn-section="root">
+  <!-- Example 1: Basic required multi-select -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 1: Required Multi-Select with Validation</h3>
+    <p>
+      A basic multi-select with <code>Validators.required</code>. Shows error when touched without selecting.
+    </p>
+    <mn-lib-multi-select [props]="fruitsProps"
+                         class="block w-[300px]"
+                         formControlName="fruits"
+    ></mn-lib-multi-select>
+    <p style="margin-top: 8px; font-size: 14px; color: gray;">
+      Selected: <strong>{{ selectedFruits }}</strong>
+    </p>
+  </div>
+
+  <!-- Example 2: Searchable with max selections -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 2: Searchable with Max 3 Selections</h3>
+    <p>
+      Uses <code>searchable: true</code> and <code>maxSelections: 3</code>. Once 3 items are selected, remaining options are disabled.
+    </p>
+    <mn-lib-multi-select [props]="colorsProps"
+                         class="block w-[300px]"
+                         formControlName="colors"
+    ></mn-lib-multi-select>
+    <p style="margin-top: 8px; font-size: 14px; color: gray;">
+      Selected: <strong>{{ selectedColors }}</strong>
+    </p>
+  </div>
+
+  <!-- Example 3: Disabled options and custom error messages -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 3: Disabled Options & Custom Error Messages</h3>
+    <p>
+      The "COBOL" option is disabled. Uses custom <code>errorMessages</code> for the required validator.
+    </p>
+    <mn-lib-multi-select [props]="languagesProps"
+                         class="block w-[300px]"
+                         formControlName="languages"
+    ></mn-lib-multi-select>
+    <p style="margin-top: 8px; font-size: 14px; color: gray;">
+      Selected: <strong>{{ selectedLanguages }}</strong>
+    </p>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <button (click)="form.markAllAsTouched()" type="button">
+      Show All Validation Errors
+    </button>
+    <button (click)="form.reset()" style="margin-left: 10px;" type="button">
+      Reset Form
+    </button>
+  </div>
+</form>

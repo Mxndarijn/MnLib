@@ -54,6 +54,11 @@ export class DemoListComponent {
       title: 'Icon demo',
       path: '/demos/icon-demo',
       description: 'Custom icon component with attribute shorthand, color variants, and custom sizes.'
+    },
+    {
+      title: 'Multi-Select demo',
+      path: '/demos/multi-select-demo',
+      description: 'Multi-select with searchable options, max selections, disabled options, and validation.'
     }
   ];
 }

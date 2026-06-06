@@ -16,6 +16,7 @@ import {DatetimeDemo} from './datetime-demo/datetime-demo';
 import {SelectDemo} from './select-demo/select-demo';
 import {BadgeDemo} from './badge-demo/badge-demo';
 import {IconDemo} from './icon-demo/icon-demo';
+import {MultiSelectDemo} from './multi-select-demo/multi-select-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -35,5 +36,6 @@ export const routes: Routes = [
   {path: 'demos/datetime-demo', component: DatetimeDemo, title: 'Datetime Demo'},
   {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'},
   {path: 'demos/badge-demo', component: BadgeDemo, title: 'Badge Demo'},
-  {path: 'demos/icon-demo', component: IconDemo, title: 'Icon Demo'}
+  {path: 'demos/icon-demo', component: IconDemo, title: 'Icon Demo'},
+  {path: 'demos/multi-select-demo', component: MultiSelectDemo, title: 'Multi-Select Demo'}
 ];
