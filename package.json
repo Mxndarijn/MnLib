@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint:i18n": "node tools/lint-hardcoded-strings.js"
+    "lint:i18n": "node tools/lint-hardcoded-strings.js",
+    "generate:icons": "node tools/generate-icon-directive.js"
   },
   "prettier": {
     "printWidth": 100,
