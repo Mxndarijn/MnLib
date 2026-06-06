@@ -11,7 +11,7 @@ import {
   ViewChildren,
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {MnModalRef} from '../../mn-modal-ref';
 import {
@@ -73,6 +73,9 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   /** Track which fields are currently visible (for conditional fields) */
   fieldVisibility: Record<string, boolean> = {};
 
+  /** Track which fields are currently conditionally required */
+  fieldConditionallyRequired: Record<string, boolean> = {};
+
   /** Track loading state per field for async data sources */
   fieldLoading: Record<string, boolean> = {};
 
@@ -96,6 +99,11 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   }
 
   hasRequiredValidator(field: any): boolean {
+    // Check if conditionallyRequired is currently active
+    if (field.conditionallyRequired) {
+      const formValue = this.form?.value ?? {};
+      if (field.conditionallyRequired(formValue)) return true;
+    }
     const validators = field.validators as any[] | undefined;
     if (!validators) return false;
     // Check if Validators.required is in the array by testing a dummy control
@@ -350,10 +358,11 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   // =========================
 
   private initializeVisibility(): void {
+    const formValue = this.form.value;
     this.config.fields.forEach(field => {
       const key = field.key as string;
       const fieldAny = field as any;
-      const isVisible = fieldAny.visible ? fieldAny.visible(this.form.value) : true;
+      const isVisible = fieldAny.visible ? fieldAny.visible(formValue) : true;
       this.fieldVisibility[key] = isVisible;
 
       // If initially hidden, clear validators so they don't block submit
@@ -362,6 +371,18 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
         if (control) {
           control.clearValidators();
           control.updateValueAndValidity({ emitEvent: false });
+        }
+      } else if (fieldAny.conditionallyRequired) {
+        // Initialize conditionallyRequired state for visible fields
+        const isRequired = fieldAny.conditionallyRequired(formValue);
+        this.fieldConditionallyRequired[key] = isRequired;
+        if (isRequired) {
+          const control = this.form.get(key);
+          if (control) {
+            const validators = this.buildValidators(fieldAny, formValue);
+            control.setValidators(validators);
+            control.updateValueAndValidity({emitEvent: false});
+          }
         }
       }
     });
@@ -383,13 +404,54 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
           control.clearValidators();
           control.updateValueAndValidity({ emitEvent: false });
         } else if (isVisible && !wasVisible) {
-          // Restore validators
-          const validators = (fieldAny as any).validators || [];
+          // Restore validators (including conditionallyRequired if active)
+          const validators = this.buildValidators(fieldAny, formValue);
           control.setValidators(validators);
-          control.updateValueAndValidity({ emitEvent: false });
+          control.updateValueAndValidity({emitEvent: false});
+        } else if (isVisible) {
+          // Update conditionallyRequired for visible fields
+          this.updateConditionallyRequired(fieldAny, formValue);
         }
       }
     });
+  }
+
+  /**
+   * Builds the full validator array for a field, including conditionallyRequired.
+   * @param fieldAny The field configuration.
+   * @param formValue The current form values.
+   * @returns Array of validators to apply.
+   */
+  private buildValidators(fieldAny: any, formValue: any): any[] {
+    const baseValidators = fieldAny.validators ? [...fieldAny.validators] : [];
+    if (fieldAny.conditionallyRequired && fieldAny.conditionallyRequired(formValue)) {
+      if (!baseValidators.includes(Validators.required)) {
+        baseValidators.push(Validators.required);
+      }
+    }
+    return baseValidators;
+  }
+
+  /**
+   * Updates the conditionallyRequired state for a single field and adjusts validators.
+   * @param fieldAny The field configuration.
+   * @param formValue The current form values.
+   */
+  private updateConditionallyRequired(fieldAny: any, formValue: any): void {
+    if (!fieldAny.conditionallyRequired) return;
+    const key = fieldAny.key as string;
+    const wasRequired = this.fieldConditionallyRequired[key] ?? false;
+    const isRequired = fieldAny.conditionallyRequired(formValue);
+    this.fieldConditionallyRequired[key] = isRequired;
+
+    if (isRequired !== wasRequired) {
+      const control = this.form.get(key);
+      if (control) {
+        const validators = this.buildValidators(fieldAny, formValue);
+        control.setValidators(validators);
+        control.updateValueAndValidity({emitEvent: false});
+      }
+    }
   }
 
   isFieldVisible(field: FormFieldConfig<TModel>): boolean {
