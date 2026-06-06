@@ -14,6 +14,7 @@ export class MnBadge {
   get hostClasses(): string {
     return mnBadgeVariants({
       size: this.data.size,
+      variant: this.data.variant,
       color: this.data.color,
       wrap: this.data.wrap,
     });
