@@ -371,12 +371,14 @@
   <!-- Shared template for MULTI_SELECT_TABLE and SINGLE_SELECT_TABLE -->
   <ng-template #selectTableTemplate let-rowField>
     <div class="flex flex-col gap-1">
-      <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
-        {{ asField(rowField.field).label }}
-        @if (hasRequiredValidator(rowField.field)) {
-          <span class="text-red-500">*</span>
-        }
-      </label>
+      @if (asField(rowField.field).label) {
+        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
+          {{ asField(rowField.field).label }}
+          @if (hasRequiredValidator(rowField.field)) {
+            <span class="text-red-500">*</span>
+          }
+        </label>
+      }
       <mn-table
         [dataSource]="tableDataSources[asKey(rowField.field.key)]"
         (selectionChange)="onTableSelectionChange(rowField.field, $event)"
