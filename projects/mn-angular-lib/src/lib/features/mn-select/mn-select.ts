@@ -93,7 +93,8 @@ export class MnSelect implements OnInit {
   }
 
   writeValue(val: unknown): void {
-    this.selectedValue = val ?? null;
+    // Treat empty string as null so the placeholder is shown and the control stays properly invalid
+    this.selectedValue = (val === '' || val == null) ? null : val;
   }
 
   registerOnChange(fn: any): void {
