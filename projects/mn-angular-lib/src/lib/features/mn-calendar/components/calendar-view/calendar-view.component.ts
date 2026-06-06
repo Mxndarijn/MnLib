@@ -33,6 +33,8 @@ import {CalendarWeekComponent} from '../calendar-week/calendar-week.component';
 import {CalendarDayComponent} from '../calendar-day/calendar-day.component';
 import {UpcomingEventsComponent} from '../upcoming-events/upcoming-events.component';
 import {MnButton} from '../../../mn-button/mn-button';
+import {MnDatetime} from '../../../mn-datetime/mn-datetime';
+import {FormsModule} from '@angular/forms';
 
 /**
  * Main calendar orchestrator component.
@@ -67,7 +69,9 @@ import {MnButton} from '../../../mn-button/mn-button';
     CalendarWeekComponent,
     CalendarDayComponent,
     UpcomingEventsComponent,
-    MnButton
+    MnButton,
+    MnDatetime,
+    FormsModule
   ],
   templateUrl: './calendar-view.component.html',
   providers: [
@@ -253,6 +257,13 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   /** Handles the date-picker input change. */
   onDateInputChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
+    if (value) {
+      this.setFocusDay(new Date(value));
+    }
+  }
+
+  /** Handles the mn-lib-datetime ngModel change. */
+  onDateStringChange(value: string) {
     if (value) {
       this.setFocusDay(new Date(value));
     }

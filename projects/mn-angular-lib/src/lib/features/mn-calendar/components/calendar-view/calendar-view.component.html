@@ -1,25 +1,23 @@
 <div class="calendar-view" role="application" aria-label="Calendar">
   <div class="calendar-toolbar">
     <div class="toolbar-left">
+      <button mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }"  (click)="goToToday()">{{ config.todayLabel }}</button>
+      <div class="date-nav">
+        <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }"  (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
+        <mn-lib-datetime [props]="{ id: 'calendar-date-picker', mode: 'date', size: 'md' }" [ngModel]="dateInputValue" (ngModelChange)="onDateStringChange($event)"></mn-lib-datetime>
+        <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }"  (click)="navigateNext()" aria-label="Next">&#8250;</button>
+      </div>
       <div class="view-switcher" role="tablist" aria-label="Calendar view">
         @for (view of viewOptions; track view.value) {
           <button
             mnButton
-            [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
-            class="view-btn"
+            [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
             role="tab"
             [attr.aria-selected]="currentView === view.value"
-            [class.active]="currentView === view.value"
             (click)="switchView(view.value)">
             {{ view.label }}
           </button>
         }
-      </div>
-      <div class="date-nav">
-        <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" class="nav-btn" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
-        <input type="date" [value]="dateInputValue" (change)="onDateInputChange($event)" class="date-input" aria-label="Select date" />
-        <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" class="nav-btn" (click)="navigateNext()" aria-label="Next">&#8250;</button>
-        <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" class="today-btn" (click)="goToToday()">{{ config.todayLabel }}</button>
       </div>
     </div>
     <div class="toolbar-right">

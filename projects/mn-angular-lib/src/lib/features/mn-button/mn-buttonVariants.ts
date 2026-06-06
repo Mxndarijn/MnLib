@@ -24,6 +24,7 @@ export const mnButtonVariants = tv({
       warning: '',
       success: '',
       accent: '',
+      gray: '',
     },
 
     borderRadius: {
@@ -54,6 +55,7 @@ export const mnButtonVariants = tv({
     { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content hover:brightness-60' },
     { variant: 'fill', color: 'success',   class: 'bg-success text-success-content hover:brightness-60' },
     { variant: 'fill', color: 'accent',    class: 'bg-accent text-accent-content hover:brightness-60' },
+    { variant: 'fill', color: 'gray',     class: 'bg-base-content/10 text-base-content/70 hover:bg-base-content/20' },
     // Outline
     { variant: 'outline', color: 'primary',   class: 'border-primary text-primary hover:bg-primary/10' },
     { variant: 'outline', color: 'secondary', class: 'border-neutral text-neutral hover:bg-neutral/10' },
@@ -61,6 +63,7 @@ export const mnButtonVariants = tv({
     { variant: 'outline', color: 'warning',   class: 'border-warning text-warning hover:bg-warning/10' },
     { variant: 'outline', color: 'success',   class: 'border-success text-success hover:bg-success/10' },
     { variant: 'outline', color: 'accent',    class: 'border-accent text-accent hover:bg-accent/10' },
+    { variant: 'outline', color: 'gray',     class: 'border-base-content/70 text-base-content/70 hover:bg-base-content/10' },
     // Text
     { variant: 'text', color: 'primary',   class: 'text-primary hover:bg-primary/10' },
     { variant: 'text', color: 'secondary', class: 'text-neutral hover:bg-neutral/10' },
@@ -68,6 +71,7 @@ export const mnButtonVariants = tv({
     { variant: 'text', color: 'warning',   class: 'text-warning hover:bg-warning/10' },
     { variant: 'text', color: 'success',   class: 'text-success hover:bg-success/10' },
     { variant: 'text', color: 'accent',    class: 'text-accent hover:bg-accent/10' },
+    { variant: 'text', color: 'gray',     class: 'text-base-content/70 hover:bg-base-content/10' },
     // Text Underline
     { variant: 'textUnderline', color: 'primary',   class: 'text-primary underline underline-offset-2 hover:bg-primary/10' },
     { variant: 'textUnderline', color: 'secondary', class: 'text-neutral underline underline-offset-2 hover:bg-neutral/10' },
@@ -75,6 +79,7 @@ export const mnButtonVariants = tv({
     { variant: 'textUnderline', color: 'warning',   class: 'text-warning underline underline-offset-2 hover:bg-warning/10' },
     { variant: 'textUnderline', color: 'success',   class: 'text-success underline underline-offset-2 hover:bg-success/10' },
     { variant: 'textUnderline', color: 'accent',    class: 'text-accent underline underline-offset-2 hover:bg-accent/10' },
+    { variant: 'textUnderline', color: 'gray',     class: 'text-base-content/70 underline underline-offset-2 hover:bg-base-content/10' },
   ],
 
   defaultVariants: {
