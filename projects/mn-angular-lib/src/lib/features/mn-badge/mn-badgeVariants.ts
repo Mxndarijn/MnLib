@@ -22,7 +22,7 @@ export const mnBadgeVariants = tv({
       warning: 'bg-warning/20 border-warning text-warning',
       success: 'bg-success/20 border-success text-success',
       accent: 'bg-accent/20 border-accent text-accent',
-      lightgray: 'bg-base-content/20 border-base-content text-base-content/70',
+      lightgray: 'bg-base-content/10 border-base-content/70 text-base-content/70',
     },
   },
 
