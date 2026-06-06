@@ -574,7 +574,7 @@ describe('Feature 4: WizardFlowMode.FREE', () => {
     setup(config);
     fixture.detectChanges();
 
-    const stepIndicators = fixture.nativeElement.querySelectorAll('.flex.items-center.gap-2.flex-1');
+    const stepIndicators = fixture.nativeElement.querySelectorAll('.flex-col.items-center.gap-1');
     expect(stepIndicators.length).toBe(2);
     // In FREE mode, indicators should have cursor-pointer class
     expect(stepIndicators[1].classList.contains('cursor-pointer')).toBeTrue();
