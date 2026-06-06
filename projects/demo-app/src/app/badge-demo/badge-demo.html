@@ -1,0 +1,40 @@
+<div class="container">
+  <div class="header">
+    <h1>Badge Demo</h1>
+    <p>Showcase of all badge color variants</p>
+  </div>
+
+  <section class="flex flex-col gap-y-10">
+    <!-- All variants in a row -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Color variants</h1>
+      <div class="flex flex-row gap-x-2">
+        <span mnBadge [data]="{ color: 'primary' }">Primary</span>
+        <span mnBadge [data]="{ color: 'secondary' }">Secondary</span>
+        <span mnBadge [data]="{ color: 'danger' }">Danger</span>
+        <span mnBadge [data]="{ color: 'warning' }">Warning</span>
+        <span mnBadge [data]="{ color: 'success' }">Success</span>
+        <span mnBadge [data]="{ color: 'accent' }">Accent</span>
+      </div>
+    </div>
+
+    <!-- Sizes -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Size variants</h1>
+      <div class="flex flex-row items-center gap-x-2">
+        <span mnBadge [data]="{ size: 'sm' }">Small</span>
+        <span mnBadge [data]="{ size: 'md' }">Medium</span>
+        <span mnBadge [data]="{ size: 'lg' }">Large</span>
+        <span mnBadge [data]="{ size: 'xl' }">Extra Large</span>
+      </div>
+    </div>
+
+    <!-- Default (no data) -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Default (primary, md)</h1>
+      <div class="flex flex-row gap-x-2">
+        <span mnBadge>Default badge</span>
+      </div>
+    </div>
+  </section>
+</div>

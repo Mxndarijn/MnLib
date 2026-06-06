@@ -44,6 +44,11 @@ export class DemoListComponent {
       title: 'Select demo',
       path: '/demos/select-demo',
       description: 'Native browser select with ControlValueAccessor, validation, disabled options, and styling variants.'
+    },
+    {
+      title: 'Badge demo',
+      path: '/demos/badge-demo',
+      description: 'Badge component with color variants using tailwind-variants.'
     }
   ];
 }

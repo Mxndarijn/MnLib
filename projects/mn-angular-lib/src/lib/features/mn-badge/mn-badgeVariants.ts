@@ -1,0 +1,29 @@
+import { tv, type VariantProps } from 'tailwind-variants';
+
+export const mnBadgeVariants = tv({
+  base: 'inline-flex items-center rounded-md border font-semibold',
+  variants: {
+    size: {
+      sm: 'px-1.5 py-0.5 text-xs',
+      md: 'px-2 py-0.5 text-sm',
+      lg: 'px-2.5 py-1 text-base',
+      xl: 'px-3 py-1.5 text-lg',
+    },
+
+    color: {
+      primary: 'bg-primary/20 border-primary text-primary',
+      secondary: 'bg-neutral/20 border-neutral text-neutral',
+      danger: 'bg-error/20 border-error text-error',
+      warning: 'bg-warning/20 border-warning text-warning',
+      success: 'bg-success/20 border-success text-success',
+      accent: 'bg-accent/20 border-accent text-accent',
+    },
+  },
+
+  defaultVariants: {
+    size: 'md',
+    color: 'primary',
+  },
+});
+
+export type MnBadgeVariants = VariantProps<typeof mnBadgeVariants>;

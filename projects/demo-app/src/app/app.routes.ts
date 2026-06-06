@@ -14,6 +14,7 @@ import {CalendarDemo} from './calendar-demo/calendar-demo';
 import {ListDemo} from './list-demo/list-demo';
 import {DatetimeDemo} from './datetime-demo/datetime-demo';
 import {SelectDemo} from './select-demo/select-demo';
+import {BadgeDemo} from './badge-demo/badge-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -31,6 +32,7 @@ export const routes: Routes = [
   {path: 'demos/calendar-demo', component: CalendarDemo, title: 'Calendar Demo' },
   {path: 'demos/list-demo', component: ListDemo, title: 'List Demo' },
   {path: 'demos/datetime-demo', component: DatetimeDemo, title: 'Datetime Demo'},
-  {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'}
+  {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'},
+  {path: 'demos/badge-demo', component: BadgeDemo, title: 'Badge Demo'}
   // Future demos can be added here following the same pattern
 ];

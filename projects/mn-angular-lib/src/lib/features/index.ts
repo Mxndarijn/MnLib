@@ -1,4 +1,5 @@
 export * from './mn-alert';
+export * from './mn-badge';
 export * from './mn-button';
 export * from './mn-input-field';
 export * from './mn-dual-horizontal-image';
