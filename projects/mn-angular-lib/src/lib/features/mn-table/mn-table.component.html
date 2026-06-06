@@ -1,24 +1,31 @@
-<!-- Toolbar: search + custom toolbar template -->
-<div class="flex flex-row items-center justify-end gap-2 mb-3">
-  @if (dataSource.canSearch) {
+<!-- Toolbar: custom toolbar template + search -->
+<div class="flex flex-row items-center justify-between gap-2 mb-3">
+  <div class="flex items-center gap-2">
+    @if (dataSource.toolbarLeftTemplate) {
+      <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
+    }
+  </div>
+  <div class="flex items-center gap-2">
+    @if (dataSource.canSearch) {
       <mn-lib-input-field
         class="w-80"
         [props]="{
-          id: 'mn-table-search',
-          type: 'search',
-          label: '',
-          placeholder: dataSource.searchPlaceholder ?? 'Search...',
-          size: 'sm',
-          borderRadius: 'md',
-          fullWidth: true
-        }"
+            id: 'mn-table-search',
+            type: 'search',
+            label: '',
+            placeholder: dataSource.searchPlaceholder ?? 'Search...',
+            size: 'sm',
+            borderRadius: 'md',
+            fullWidth: true
+          }"
         [ngModel]="searchValue"
         (ngModelChange)="onSearch($event)"
       ></mn-lib-input-field>
-  }
-  @if (dataSource.toolbarTemplate) {
-    <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
-  }
+    }
+    @if (dataSource.toolbarRightTemplate) {
+      <ng-container [ngTemplateOutlet]="dataSource.toolbarRightTemplate"></ng-container>
+    }
+  </div>
 </div>
 
 <!-- Table wrapper with horizontal scroll -->
