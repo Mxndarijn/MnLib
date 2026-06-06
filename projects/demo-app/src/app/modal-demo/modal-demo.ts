@@ -1,26 +1,24 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Validators } from '@angular/forms';
+import {Component, TemplateRef, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Validators} from '@angular/forms';
 import {
+  ActionStyle,
+  CloseMode,
+  ColumnDefinition,
+  ColumnSortType,
+  ConfirmationTone,
+  FieldKind,
   MnButton,
   MnModalService,
   ModalBuilder,
-  ModalSize,
-  ConfirmationTone,
-  ActionStyle,
   ModalCloseReason,
-  FieldKind,
-  FormLayoutMode,
-  WizardFlowMode,
-  StepState,
-  ValidationStatus,
-  CloseMode,
   ModalRef,
+  ModalSize,
   TableDataSource,
-  ColumnDefinition,
-  ColumnSortType,
+  ValidationStatus,
+  WizardFlowMode,
 } from 'mn-angular-lib';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject} from 'rxjs';
 
 interface UserFormModel {
   firstName: string;
@@ -265,7 +263,6 @@ export class ModalDemo {
     const config = ModalBuilder.wizard()
       .title('Registration Wizard')
       .subtitle('Complete all steps to create your account')
-      .description('Please fill in the required information in each step.')
       .sizeWidth(ModalSize.LG)
       .flow(WizardFlowMode.LINEAR)
       .addStep('Account Information', (s) => {

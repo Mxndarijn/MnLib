@@ -1,16 +1,6 @@
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  inject,
-  InjectionToken,
-  Input,
-  OnInit,
-  Optional,
-  Self
-} from '@angular/core';
+import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
 import {CommonModule, NgClass} from '@angular/common';
-import {MnInputProps, MnErrorMessageData, MnInputFieldUIConfig} from './mn-input-fieldTypes';
+import {MnErrorMessageData, MnInputFieldUIConfig, MnInputProps} from './mn-input-fieldTypes';
 import {AbstractControl, FormsModule, NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {pickAdapter} from './mn-input-field-adapters';
 import {mnInputFieldVariants} from './mn-input-fieldVariants';
@@ -338,6 +328,12 @@ export class MnInputField implements OnInit {
     // If the message is a function, call it with error arguments
     if (typeof msgDef === 'function') {
       return msgDef(errorArgs, errors);
+    }
+    // Interpolate {{placeholder}} tokens with error arguments (e.g. {{requiredLength}})
+    if (errorArgs && typeof errorArgs === 'object') {
+      return msgDef.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) =>
+        errorArgs[key] !== undefined ? String(errorArgs[key]) : `{{${key}}}`
+      );
     }
     return msgDef;
   }

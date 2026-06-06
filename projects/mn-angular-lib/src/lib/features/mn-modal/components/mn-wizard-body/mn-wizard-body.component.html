@@ -7,47 +7,51 @@
     ></mn-custom-body-host>
   }
 
-  <div class="relative flex items-start pb-4 border-b border-base-300">
-    <!-- Background line spanning from first circle center to last circle center -->
-    <div
-      class="absolute top-[15px] h-0.5 bg-base-300 z-0"
-      [style.left]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
-      [style.right]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
-    ></div>
-
-    <!-- Progress fill line -->
-    @if (visibleSteps.length > 1) {
+  <div class="pb-4 border-b border-base-300 -mx-6 px-6 -mt-4">
+    <div class="relative flex items-start">
+      <!-- Background line spanning from first circle center to last circle center -->
       <div
-        class="absolute top-[15px] h-0.5 bg-success z-[1] transition-all duration-500"
         [style.left]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
-        [style.width]="'calc(' + (currentProgressIndex / (visibleSteps.length - 1)) * (100 - 100 / visibleSteps.length) + '%)'"
+        [style.right]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
+        class="absolute top-[15px] h-1 bg-base-300 z-0"
       ></div>
-    }
 
-    @for (step of visibleSteps; track step.id; let i = $index; let last = $last) {
-      <div
-        class="relative flex flex-col items-center gap-1 z-10 w-0 flex-1"
-        [class.cursor-pointer]="isFreeFlow && canNavigateToStep(step)"
-        (click)="isFreeFlow ? goToStep(step) : null"
-      >
+      <!-- Progress fill line -->
+      @if (visibleSteps.length > 1) {
         <div
-          class="w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-all text-sm"
-          [ngClass]="{
-            'bg-primary text-primary-content': step.id === currentStepId,
-            'bg-success text-success-content': visitedStepIds.includes(step.id) && step.id !== currentStepId,
-            'bg-base-200 text-base-content/50': !visitedStepIds.includes(step.id) && step.id !== currentStepId
-          }"
-        >{{ i + 1 }}</div>
-        <div
-          class="text-xs text-center whitespace-nowrap"
-          [ngClass]="{
-            'text-base-content font-semibold': step.id === currentStepId,
-            'text-base-content/50': step.id !== currentStepId
-          }"
-        >{{ step.title }}</div>
+          [style.left]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
+          [style.width]="'calc(' + (currentProgressIndex / (visibleSteps.length - 1)) * (100 - 100 / visibleSteps.length) + '%)'"
+          class="absolute top-[15px] h-1 bg-success z-[1] transition-all duration-500"
+        ></div>
+      }
 
-      </div>
-    }
+      @for (step of visibleSteps; track step.id; let i = $index; let last = $last) {
+        <div
+          (click)="isFreeFlow ? goToStep(step) : null"
+          [class.cursor-pointer]="isFreeFlow && canNavigateToStep(step)"
+          class="relative flex flex-col items-center gap-1 z-10 w-0 flex-1"
+        >
+          <div
+            [ngClass]="{
+              'bg-primary text-primary-content': step.id === currentStepId,
+              'bg-success text-success-content': visitedStepIds.includes(step.id) && step.id !== currentStepId,
+              'bg-base-200 text-base-content/50': !visitedStepIds.includes(step.id) && step.id !== currentStepId
+            }"
+            class="w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-all text-sm"
+          >{{ i + 1 }}
+          </div>
+          <div
+            [ngClass]="{
+              'text-base-content font-semibold': step.id === currentStepId,
+              'text-base-content/50': step.id !== currentStepId
+            }"
+            class="text-xs text-center whitespace-nowrap"
+          >{{ step.title }}
+          </div>
+
+        </div>
+      }
+    </div>
   </div>
 
   <div class="min-h-48 flex-1">

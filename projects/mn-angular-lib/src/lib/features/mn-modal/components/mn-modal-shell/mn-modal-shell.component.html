@@ -13,7 +13,9 @@
   tabindex="-1"
   (click)="$event.stopPropagation()"
 >
-  <div class="flex items-center justify-between p-6 border-b border-base-300">
+  <div [class.border-b]="config.kind !== ModalKind.WIZARD"
+       [class.border-base-300]="config.kind !== ModalKind.WIZARD"
+       class="flex items-center justify-between p-6">
     <div class="flex flex-col gap-0.5">
       @if (config.title) {
         <h2 class="m-0 text-xl font-semibold text-base-content" id="mn-modal-title">{{ config.title }}</h2>
