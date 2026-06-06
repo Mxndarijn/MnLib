@@ -1,0 +1,43 @@
+<div class="container">
+  <div class="header">
+    <h1>Icon Demo</h1>
+    <p>Showcase of the mn-icon component with custom icons</p>
+  </div>
+
+  <section class="flex flex-col gap-y-10">
+    <!-- Attribute shorthand -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Attribute shorthand</h1>
+      <div class="flex flex-row items-center gap-x-4">
+        <mn-icon mnIconPistol></mn-icon>
+        <span>mnIconPistol</span>
+      </div>
+    </div>
+
+    <!-- Color variants -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Color variants</h1>
+      <div class="flex flex-row items-center gap-x-4">
+        <mn-icon mnIconPistol [data]="{ color: 'current' }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ color: 'primary' }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ color: 'secondary' }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ color: 'danger' }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ color: 'warning' }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ color: 'success' }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ color: 'accent' }"></mn-icon>
+      </div>
+    </div>
+
+    <!-- Custom sizes -->
+    <div class="flex flex-col gap-y-4">
+      <h1>Custom sizes</h1>
+      <div class="flex flex-row items-center gap-x-4">
+        <mn-icon mnIconPistol [data]="{ size: 14 }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ size: 18 }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ size: 24 }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ size: 32 }"></mn-icon>
+        <mn-icon mnIconPistol [data]="{ size: 48 }"></mn-icon>
+      </div>
+    </div>
+  </section>
+</div>

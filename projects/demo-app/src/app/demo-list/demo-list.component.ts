@@ -49,6 +49,11 @@ export class DemoListComponent {
       title: 'Badge demo',
       path: '/demos/badge-demo',
       description: 'Badge component with color variants using tailwind-variants.'
+    },
+    {
+      title: 'Icon demo',
+      path: '/demos/icon-demo',
+      description: 'Custom icon component with attribute shorthand, color variants, and custom sizes.'
     }
   ];
 }
