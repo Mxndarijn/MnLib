@@ -9,6 +9,7 @@
   }
 
   <input
+    #dateInput
     [id]="resolvedId"
     [attr.name]="resolvedName"
     [type]="resolvedMode"
@@ -22,6 +23,8 @@
     [attr.step]="props.step || null"
     [value]="value ?? ''"
     [ngClass]="inputClasses"
+    class="cursor-pointer"
+    (click)="dateInput.showPicker?.()"
     (input)="handleInput(($any($event.target)).value)"
     (blur)="handleBlur()"
   />
