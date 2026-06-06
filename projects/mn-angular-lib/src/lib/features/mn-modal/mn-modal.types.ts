@@ -1,7 +1,8 @@
-import { Type, TemplateRef } from '@angular/core';
+import {TemplateRef, Type} from '@angular/core';
+import {Observable} from 'rxjs';
+import {TableDataSource} from '../mn-table/mn-table.types';
+
 export { Type, TemplateRef };
-import { Observable } from 'rxjs';
-import { TableDataSource } from '../mn-table/mn-table.types';
 
 // =========================
 // Enums / Value Types
@@ -166,6 +167,12 @@ export type ModalInputMap = Record<string, unknown>;
  */
 export type FieldVisibilityCondition<TModel = any> = (formValue: Partial<TModel>) => boolean;
 
+/**
+ * A condition function that receives the current form values and returns
+ * whether the field should be required.
+ */
+export type FieldRequiredCondition<TModel = any> = (formValue: Partial<TModel>) => boolean;
+
 // =========================
 // Cross-Field Validation
 // =========================
@@ -307,6 +314,8 @@ export interface TextFieldConfig<TModel = unknown> {
   disabled?: boolean;
   /** Condition to show/hide this field based on other field values */
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   /** Input mask (e.g., '(000) 000-0000') */
   mask?: string;
   /** Autocomplete attribute */
@@ -330,6 +339,8 @@ export interface NumberFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -345,6 +356,8 @@ export interface SelectFieldConfig<TModel = unknown, TValue = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
   /** Async data source for loading options dynamically */
@@ -361,6 +374,8 @@ export interface CheckboxFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -377,6 +392,8 @@ export interface DateFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -392,6 +409,8 @@ export interface TextareaFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -410,6 +429,8 @@ export interface DatetimeFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -427,6 +448,8 @@ export interface MultiSelectFieldConfig<TModel = unknown, TValue = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
   /** Async data source for loading options dynamically */
@@ -443,6 +466,8 @@ export interface PasswordFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -460,6 +485,8 @@ export interface MultiSelectTableFieldConfig<TModel = unknown, TRow = any> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -477,6 +504,8 @@ export interface SingleSelectTableFieldConfig<TModel = unknown, TRow = any> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -494,6 +523,8 @@ export interface ColorFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -513,6 +544,8 @@ export interface RatingFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -536,6 +569,8 @@ export interface SliderFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -557,6 +592,8 @@ export interface FileFieldConfig<TModel = unknown> {
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -570,6 +607,8 @@ export interface CustomFieldConfig<TModel = unknown> {
   validators?: any[];
   asyncValidators?: any[];
   visible?: FieldVisibilityCondition<TModel>;
+  /** Condition to dynamically mark this field as required based on other field values */
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
   autoFocus?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }

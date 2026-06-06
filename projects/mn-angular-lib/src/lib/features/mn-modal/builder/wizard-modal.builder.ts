@@ -1,18 +1,18 @@
-import { BaseModalBuilder } from './base-modal.builder';
-import { StepBuilder } from './step.builder';
-import { FormLayoutBuilder } from './form-layout.builder';
+import {BaseModalBuilder} from './base-modal.builder';
+import {StepBuilder} from './step.builder';
+import {FormLayoutBuilder} from './form-layout.builder';
 import {
-  WizardModalConfig,
-  ModalKind,
-  WizardStepConfig,
-  ModalStepId,
-  WizardFlowMode,
-  WizardStepChangeHandler,
-  ModalResultHandler,
-  WizardResult,
-  WizardBeforeCompleteValidator,
   FormFieldConfig,
   FormFieldGroup,
+  ModalKind,
+  ModalResultHandler,
+  ModalStepId,
+  WizardBeforeCompleteValidator,
+  WizardFlowMode,
+  WizardModalConfig,
+  WizardResult,
+  WizardStepChangeHandler,
+  WizardStepConfig,
 } from '../mn-modal.types';
 
 export class WizardModalBuilder<TResult = WizardResult> extends BaseModalBuilder<
@@ -32,6 +32,14 @@ export class WizardModalBuilder<TResult = WizardResult> extends BaseModalBuilder
    */
   initialValue(value: Partial<TResult>): this {
     this.config.initialValue = value;
+    return this;
+  }
+
+  /**
+   * Description is not supported for wizard modals.
+   * Use step-level body text instead.
+   */
+  override description(_description: string): this {
     return this;
   }
 
