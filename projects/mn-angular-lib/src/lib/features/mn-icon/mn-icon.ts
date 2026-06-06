@@ -2,7 +2,6 @@ import { Component, HostBinding, Input, OnChanges, OnInit, inject, ElementRef } 
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MnIconTypes } from './mn-iconTypes';
 import { mnIconVariants } from './mn-iconVariants';
-import { MnIconRegistry } from './mn-icon-registry.service';
 import { MN_ICON_MAP } from './mn-icon-map';
 
 @Component({
@@ -12,10 +11,8 @@ import { MN_ICON_MAP } from './mn-icon-map';
 })
 export class MnIcon implements OnChanges, OnInit {
   @Input() data: Partial<MnIconTypes> = {};
-  @Input() mnIconPistol: any;
 
   private sanitizer = inject(DomSanitizer);
-  private registry = inject(MnIconRegistry);
   private el = inject(ElementRef);
 
   svgContent: SafeHtml = '';
@@ -58,8 +55,26 @@ export class MnIcon implements OnChanges, OnInit {
   private updateContent(): void {
     const name = this.data.name ?? this.resolvedName;
     if (name) {
-      const raw = MN_ICON_MAP[name] ?? this.registry.get(name);
-      this.svgContent = raw ? this.sanitizer.bypassSecurityTrustHtml(raw) : '';
+      const raw = MN_ICON_MAP[name];
+      if (raw) {
+        const size = this.iconSize;
+        const isFullSvg = raw.trim().startsWith('<svg');
+        if (isFullSvg) {
+          const sized = raw.replace(/<svg([^>]*)>/, (_match: string, attrs: string) => {
+            let updated = attrs.replace(/width="[^"]*"/, `width="${size}"`);
+            updated = updated.replace(/height="[^"]*"/, `height="${size}"`);
+            if (!attrs.includes('width=')) updated += ` width="${size}"`;
+            if (!attrs.includes('height=')) updated += ` height="${size}"`;
+            return `<svg${updated}>`;
+          });
+          this.svgContent = this.sanitizer.bypassSecurityTrustHtml(sized);
+        } else {
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${raw}</svg>`;
+          this.svgContent = this.sanitizer.bypassSecurityTrustHtml(svg);
+        }
+      } else {
+        this.svgContent = '';
+      }
     } else {
       this.svgContent = '';
     }

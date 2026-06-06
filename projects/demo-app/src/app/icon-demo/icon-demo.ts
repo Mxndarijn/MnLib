@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { MnIcon } from 'mn-angular-lib';
+import { MnIcon, MnIconAttributes } from 'mn-angular-lib';
 
 @Component({
   selector: 'app-icon-demo',
   imports: [
-    MnIcon
+    MnIcon,
+    MnIconAttributes
   ],
   templateUrl: './icon-demo.html',
 })
