@@ -24,7 +24,7 @@
     [value]="value ?? ''"
     [ngClass]="inputClasses"
     class="cursor-pointer"
-    (click)="dateInput.showPicker?.()"
+    (click)="dateInput.showPicker()"
     (input)="handleInput(($any($event.target)).value)"
     (blur)="handleBlur()"
   />

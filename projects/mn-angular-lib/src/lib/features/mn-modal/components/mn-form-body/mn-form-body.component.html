@@ -6,7 +6,7 @@
   ></mn-custom-body-host>
 }
 
-<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
+<form (ngSubmit)="submit()" [formGroup]="form" class="flex flex-col gap-6 h-full">
   <!-- Shared field rendering template (must be inside form for formControlName) -->
   <ng-template #fieldTemplate let-rowField>
     @switch (rowField.field.kind) {
@@ -437,7 +437,7 @@
   }
 
   @if (!hideFooter) {
-    <div class="flex gap-3 pt-4 border-t border-base-300">
+    <div class="flex gap-3 pt-4 border-t border-base-300 mt-auto">
       <button
         mnButton
         type="button"
