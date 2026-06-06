@@ -26,11 +26,11 @@ import {
   ModalFooterAction,
   ActionStyle,
 } from '../../mn-modal.types';
-import { MnButton } from '../../../mn-button/mn-button';
+import { MnButton } from '../../../mn-button';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
 import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
-import { MnLanguageService } from '../../../../language/mn-language.service';
+import { MnLanguageService } from '../../../../language';
 
 @Component({
   selector: 'mn-wizard-body',
@@ -177,6 +177,11 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.currentVisibleIndex === this.visibleSteps.length - 1;
   }
 
+  /** Index of the current step for the progress line */
+  get currentProgressIndex(): number {
+    return this.currentVisibleIndex;
+  }
+
   get isFreeFlow(): boolean {
     return this.config.flow === WizardFlowMode.FREE;
   }
@@ -296,6 +301,10 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const prevStep = this.visibleSteps[this.currentVisibleIndex - 1];
     const previousStepId = this.currentStepId;
+
+    // Remove current step from visited so the circle resets
+    this.visitedStepIds = this.visitedStepIds.filter(id => id !== this.currentStepId);
+
     this.currentStepId = prevStep.id;
 
     await this.notifyStepChange(previousStepId, NavigationDirection.BACKWARD);
