@@ -826,6 +826,58 @@ export class ModalDemo {
     this.modalService.open(config);
   }
 
+  // Fixed Height Form Modal — demonstrates buttons pinned to bottom
+  openFixedHeightFormModal() {
+    interface SimpleModel {
+      name: string;
+    }
+
+    const config = ModalBuilder.form<SimpleModel>()
+      .title('Fixed Height Form')
+      .subtitle('Buttons stay at the bottom even with minimal content')
+      .sizeWidth(ModalSize.MD)
+      .sizeHeight(ModalSize.LG)
+      .field({
+        kind: FieldKind.TEXT,
+        key: 'name',
+        label: 'Your Name',
+        placeholder: 'Enter your name',
+        validators: [Validators.required],
+      })
+      .onComplete({
+        handle: async (result) => {
+          this.lastResult = `Fixed Height Form: ${JSON.stringify(result)}`;
+        },
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  // Fixed Height Wizard Modal — demonstrates buttons pinned to bottom
+  openFixedHeightWizardModal() {
+    const config = ModalBuilder.wizard()
+      .title('Fixed Height Wizard')
+      .subtitle('Buttons stay at the bottom even with minimal content')
+      .sizeWidth(ModalSize.MD)
+      .sizeHeight(ModalSize.LG)
+      .flow(WizardFlowMode.LINEAR)
+      .addStep('Step One', (s) => {
+        s.body('This step has very little content, but the buttons should still be at the bottom.');
+      }, 'one')
+      .addStep('Step Two', (s) => {
+        s.field({kind: FieldKind.TEXT, key: 'note', label: 'A Note', placeholder: 'Type something...'});
+      }, 'two')
+      .onComplete({
+        handle: async (result) => {
+          this.lastResult = `Fixed Height Wizard completed: visited ${result.visitedStepIds.join(', ')}`;
+        },
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
   openFluentValidationDemo() {
     interface FluentModel {
       email: string;

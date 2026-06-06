@@ -173,6 +173,29 @@
       </div>
     </div>
 
+    <!-- Fixed Height (Bottom-Pinned Buttons) -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold text-base-content mb-4">Fixed Height (Bottom-Pinned Buttons)</h2>
+      <p class="text-base-content/60 text-sm -mt-3">Demonstrates that form/wizard buttons stick to the bottom when the
+        modal has a fixed height and content doesn't fill the space.</p>
+      <div class="flex flex-row gap-x-2">
+        <button
+          (click)="openFixedHeightFormModal()"
+          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+          mnButton
+        >
+          Fixed Height Form
+        </button>
+        <button
+          (click)="openFixedHeightWizardModal()"
+          [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
+          mnButton
+        >
+          Fixed Height Wizard
+        </button>
+      </div>
+    </div>
+
     <!-- Size Variations -->
     <div class="flex flex-col gap-y-4">
       <h2 class="text-2xl font-semibold text-base-content mb-4">Modal Sizes</h2>

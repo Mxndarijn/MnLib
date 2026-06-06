@@ -13,7 +13,7 @@
       <div
         [style.left]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
         [style.right]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
-        class="absolute top-[15px] h-1 bg-base-300 z-0"
+        class="absolute top-3.75 h-1 bg-base-300 z-0"
       ></div>
 
       <!-- Progress fill line -->
@@ -21,7 +21,7 @@
         <div
           [style.left]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
           [style.width]="'calc(' + (currentProgressIndex / (visibleSteps.length - 1)) * (100 - 100 / visibleSteps.length) + '%)'"
-          class="absolute top-[15px] h-1 bg-success z-[1] transition-all duration-500"
+          class="absolute top-3.75 h-1 bg-success z-1 transition-all duration-500"
         ></div>
       }
 
