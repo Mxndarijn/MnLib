@@ -8,7 +8,7 @@
   <div class="flex flex-col min-[375px]:flex-row items-center gap-2 w-full min-[375px]:w-auto">
     @if (dataSource.canSearch) {
       <mn-lib-input-field
-        class="w-full min-[375px]:w-64"
+        class="w-full min-[375px]:max-w-64 min-[375px]:flex-1"
         [props]="{
             id: 'mn-table-search',
             type: 'search',
