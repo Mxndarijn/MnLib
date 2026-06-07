@@ -1,11 +1,11 @@
 <!-- Toolbar: custom toolbar template + search -->
-<div class="flex flex-row items-center justify-between gap-2 mb-3">
+<div class="flex flex-row md:flex-col items-center justify-between gap-2 mb-3">
   <div class="flex items-center gap-2">
     @if (dataSource.toolbarLeftTemplate) {
       <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
     }
   </div>
-  <div class="flex flex-row md:flex-col items-center gap-2">
+  <div class="flex items-center gap-2">
     @if (dataSource.canSearch) {
       <mn-lib-input-field
         [props]="{
