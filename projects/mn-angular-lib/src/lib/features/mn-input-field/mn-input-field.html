@@ -25,6 +25,7 @@
     [ngModel]="value"
     [ngClass]="inputClasses"
     (input)="handleInput(($any($event.target)).value)"
+    (search)="handleInput(($any($event.target)).value)"
     (blur)="handleBlur()"
   />
 
