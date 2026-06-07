@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from 'tailwind-variants';
 
 export const mnAlertVariants = tv({
-  base: 'flex items-start gap-3 p-4 border rounded-xl shadow-sm transition-all duration-300',
+  base: 'flex items-start gap-3 p-4 border rounded-xl shadow-sm transition-all duration-300 w-full max-sm:rounded-none',
   variants: {
     kind: {
       success: 'bg-success/10 border-success/30 text-success',
