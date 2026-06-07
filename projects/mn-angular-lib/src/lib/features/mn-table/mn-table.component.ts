@@ -315,7 +315,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
     if (!this.dataSource.loadAdditionalRows || this.loadingMoreRows) return;
 
     this.loadingMoreRows = true;
-    const promise = (this.searchValue.length > 0 && this.dataSource.searchForAdditionalItems)
+    const promise = (this.searchValue && this.searchValue.length > 0 && this.dataSource.searchForAdditionalItems)
       ? this.dataSource.searchForAdditionalItems(this.searchValue)
       : this.dataSource.loadAdditionalRows();
 
@@ -431,10 +431,10 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   // ── Private ──
 
   private applyFilterAndSort(searchForItems: boolean): void {
-    let items = this.dataSource.dataRows.value;
+    let items = this.dataSource.dataRows.value ?? [];
 
     // Skip client-side search filtering when server handles it.
-    if (!this.isServerSearched && this.dataSource.isInSearch && this.dataSource.canSearch && this.searchValue.length > 0) {
+    if (!this.isServerSearched && this.dataSource.isInSearch && this.dataSource.canSearch && this.searchValue && this.searchValue.length > 0) {
       const term = this.searchValue.toLowerCase();
       items = items.filter(row => this.dataSource.isInSearch!(row, term));
     }
