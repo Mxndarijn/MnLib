@@ -450,7 +450,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
         const term = filterValue.toLowerCase();
         items = items.filter(row => {
           const cellValue = typeof col.cell === 'function' ? col.cell(row) : '';
-          return cellValue.toLowerCase().includes(term);
+          return (cellValue ?? '').toLowerCase().includes(term);
         });
       }
     }
@@ -533,7 +533,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   }
 
   private emitSelection(): void {
-    const rows = this.dataSource.dataRows.value.filter(r => this.selectedIds.has(this.dataSource.getID(r)));
+    const rows = (this.dataSource.dataRows.value ?? []).filter(r => this.selectedIds.has(this.dataSource.getID(r)));
     this.dataSource.selectedRows?.next(rows);
     this.selectionChange.emit(rows);
   }
