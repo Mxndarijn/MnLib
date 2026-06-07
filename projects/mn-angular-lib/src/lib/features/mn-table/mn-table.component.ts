@@ -60,17 +60,17 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   private searchSubscription?: Subscription;
   private langSubscription?: Subscription;
 
-  /** Tracks the previous toolbar template reference for change detection. */
-  private previousToolbarTemplate?: TemplateRef<any>;
+  /** Tracks the previous toolbar left template reference for change detection. */
+  private previousToolbarLeftTemplate?: TemplateRef<any>;
 
   /**
    * Checks for changes to dataSource properties that are not covered
-   * by Angular's default change detection (e.g. toolbarTemplate).
+   * by Angular's default change detection (e.g. toolbarLeftTemplate).
    */
   ngDoCheck(): void {
-    const currentTemplate = this.dataSource?.toolbarTemplate;
-    if (currentTemplate !== this.previousToolbarTemplate) {
-      this.previousToolbarTemplate = currentTemplate;
+    const currentTemplate = this.dataSource?.toolbarLeftTemplate;
+    if (currentTemplate !== this.previousToolbarLeftTemplate) {
+      this.previousToolbarLeftTemplate = currentTemplate;
       this.cdr.markForCheck();
     }
   }

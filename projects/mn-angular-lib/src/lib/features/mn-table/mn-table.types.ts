@@ -156,7 +156,10 @@ export interface TableDataSource<T> {
   appearance?: TableAppearance;
 
   // Toolbar
-  toolbarTemplate?: TemplateRef<any>;
+  /** Template rendered on the left side of the toolbar (before the search field). */
+  toolbarLeftTemplate?: TemplateRef<any>;
+  /** Template rendered on the right side of the toolbar (after the search field). */
+  toolbarRightTemplate?: TemplateRef<any>;
 
   // Labels / i18n
   labels?: TableLabels;
