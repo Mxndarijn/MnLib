@@ -5,7 +5,7 @@
       <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
     }
   </div>
-  <div class="flex flex-col [400px]:flex-row items-center gap-2">
+  <div class="flex flex-col min-[375px]:flex-row items-center gap-2">
     @if (dataSource.canSearch) {
       <mn-lib-input-field
         [props]="{
