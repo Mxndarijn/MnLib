@@ -243,7 +243,7 @@
     </div>
 
     <div class="flex items-center gap-1">
-      <span class="text-xs mr-2">{{ (currentPage - 1) * pageSize + 1 }}
+      <span class="text-xs mr-2 hidden md:inline">{{ (currentPage - 1) * pageSize + 1 }}
         – {{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
         of {{ totalItemCount }}</span>
 

@@ -134,6 +134,11 @@ import {FormsModule} from '@angular/forms';
       .calendar-sidebar { display: none; }
       .calendar-main { overflow-y: auto; }
     }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .calendar-content { grid-template-columns: 1fr; }
+      .calendar-sidebar { display: none; }
+    }
   `]
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
