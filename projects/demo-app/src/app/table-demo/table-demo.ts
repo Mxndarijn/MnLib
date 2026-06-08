@@ -1,6 +1,6 @@
-import {Component, TemplateRef, viewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {ColumnSortType, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
+import {ColumnSortType, MnButton, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
 
 interface User {
   id: string;
@@ -43,13 +43,14 @@ const ALL_USERS: User[] = [
 @Component({
   selector: 'app-table-demo',
   standalone: true,
-  imports: [MnTable],
+  imports: [MnTable, MnButton],
   templateUrl: './table-demo.html',
 })
-export class TableDemo {
+export class TableDemo implements OnInit {
   selectedNames = 'none';
 
   readonly actionsTpl = viewChild.required<TemplateRef<any>>('actionsTpl');
+  readonly toolbarRightTpl = viewChild.required<TemplateRef<any>>('toolbarRightTpl');
 
   // ── Basic table ──
   basicDataSource: TableDataSource<User> = {
@@ -243,11 +244,34 @@ export class TableDemo {
     ],
   };
 
+  onToolbarAction(): void {
+    alert('Toolbar button clicked!');
+  }
+
   onAction(action: string, user: User): void {
     alert(`${action} ${user.name}`);
   }
 
+  toolbarRightDataSource!: TableDataSource<User>;
+
   ngOnInit(): void {
+    this.toolbarRightDataSource = {
+      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+      getID: (row) => row.id,
+      emptyMessage: 'No users found.',
+      isDataLoading: false,
+      canSearch: true,
+      searchPlaceholder: 'Search users...',
+      paginationMode: 'none',
+      toolbarRightTemplate: this.toolbarRightTpl(),
+      appearance: {hover: true, striped: true},
+      isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
+      columns: [
+        {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
+        {key: 'email', header: 'Email', cell: (row) => row.email},
+        {key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center'},
+      ],
+    };
     this.actionsDataSource = {
       dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
       getID: (row) => row.id,

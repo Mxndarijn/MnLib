@@ -7,6 +7,20 @@
     <mn-table [dataSource]="basicDataSource" (sortChange)="onSortChange($event)"></mn-table>
   </section>
 
+  <!-- Toolbar right template -->
+  <ng-template #toolbarRightTpl>
+    <button mnButton [data]="{ color: 'primary', size: 'sm', variant: 'fill' }" (click)="onToolbarAction()">
+      Add User
+    </button>
+  </ng-template>
+
+  <!-- Table with toolbar right button -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Table with Toolbar Right Button</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>toolbarRightTemplate</code> to place an <code>mnButton</code> in the toolbar next to the search field.</p>
+    <mn-table [dataSource]="toolbarRightDataSource"></mn-table>
+  </section>
+
   <!-- Actions template -->
   <ng-template #actionsTpl let-row>
     <div class="inline-flex items-center gap-2">

@@ -49,13 +49,13 @@ export const mnButtonVariants = tv({
 
   compoundVariants: [
     // Fill
-    { variant: 'fill', color: 'primary',   class: 'bg-primary text-primary-content hover:brightness-60' },
-    { variant: 'fill', color: 'secondary', class: 'bg-neutral text-neutral-content hover:brightness-60' },
-    { variant: 'fill', color: 'danger',    class: 'bg-error text-error-content hover:brightness-60' },
-    { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content hover:brightness-60' },
-    { variant: 'fill', color: 'success',   class: 'bg-success text-success-content hover:brightness-60' },
-    { variant: 'fill', color: 'accent',    class: 'bg-accent text-accent-content hover:brightness-60' },
-    { variant: 'fill', color: 'gray',     class: 'bg-base-content/10 text-base-content/70 hover:bg-base-content/20' },
+    { variant: 'fill', color: 'primary',   class: 'bg-primary text-primary-content border border-primary hover:brightness-60' },
+    { variant: 'fill', color: 'secondary', class: 'bg-neutral text-neutral-content border border-neutral hover:brightness-60' },
+    { variant: 'fill', color: 'danger',    class: 'bg-error text-error-content border border-error hover:brightness-60' },
+    { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content border border-warning hover:brightness-60' },
+    { variant: 'fill', color: 'success',   class: 'bg-success text-success-content border border-success hover:brightness-60' },
+    { variant: 'fill', color: 'accent',    class: 'bg-accent text-accent-content border border-accent hover:brightness-60' },
+    { variant: 'fill', color: 'gray',     class: 'bg-base-content/10 text-base-content/70 border border-base-content/10 hover:bg-base-content/20' },
     // Outline
     { variant: 'outline', color: 'primary',   class: 'border-primary text-primary hover:bg-primary/10' },
     { variant: 'outline', color: 'secondary', class: 'border-neutral text-neutral hover:bg-neutral/10' },
