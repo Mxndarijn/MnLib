@@ -228,8 +228,8 @@
 
 <!-- Pagination controls -->
 @if (isPaginated && (totalPages > 1 || isServerPaginated)) {
-  <div class="flex items-center justify-between px-2 py-3 text-sm text-base-content">
-    <div class="flex items-center gap-2">
+  <div class="flex items-center justify-center md:justify-between px-2 py-3 text-sm text-base-content">
+    <div class="hidden md:flex items-center gap-2">
       <span>{{ dataSource.labels?.rowsPerPage || 'Rows:' }}</span>
       <mn-lib-select
         (ngModelChange)="onPageSizeChange($event)"
