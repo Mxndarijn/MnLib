@@ -193,10 +193,32 @@
                 [mnHiddenBelow]="column.hiddenBelow"
                 [style.width]="column.width ?? null"
               >
-                @if (isTemplateRef(column.cell)) {
-                  <ng-container [ngTemplateOutlet]="$any(column.cell)" [ngTemplateOutletContext]="{ $implicit: row, data: row }"></ng-container>
+                @if (column.cellSm) {
+                  <!-- Default cell: hidden below the cellSm breakpoint -->
+                  <span [mnShowAbove]="column.cellSm.below">
+                    @if (isTemplateRef(column.cell)) {
+                      <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }"
+                                    [ngTemplateOutlet]="$any(column.cell)"></ng-container>
+                    } @else {
+                      {{ getCellValue(column, row) }}
+                    }
+                  </span>
+                  <!-- Small cell: shown only below the cellSm breakpoint -->
+                  <span [mnShowBelow]="column.cellSm.below">
+                    @if (isTemplateRef(column.cellSm.cell)) {
+                      <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }"
+                                    [ngTemplateOutlet]="$any(column.cellSm.cell)"></ng-container>
+                    } @else {
+                      {{ getCellSmValue(column, row) }}
+                    }
+                  </span>
                 } @else {
-                  {{ getCellValue(column, row) }}
+                  @if (isTemplateRef(column.cell)) {
+                    <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }"
+                                  [ngTemplateOutlet]="$any(column.cell)"></ng-container>
+                  } @else {
+                    {{ getCellValue(column, row) }}
+                  }
                 }
               </td>
             }

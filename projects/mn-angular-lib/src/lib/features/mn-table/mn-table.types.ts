@@ -56,6 +56,8 @@ export interface ColumnDefinition<T> {
   /** Translation key for the column header. When set, mn-table resolves it via MnLanguageService and keeps it updated on locale change. */
   headerKey?: string;
   cell: ((row: T) => string) | TemplateRef<any>;
+  /** Alternative cell renderer shown below the given breakpoint. When set, `cell` is hidden below this breakpoint and `cellSm` is shown instead. */
+  cellSm?: { below: 'sm' | 'md' | 'lg'; cell: ((row: T) => string) | TemplateRef<any> };
   sortType?: ColumnSortType;
   getRawValueToSort?: (row: T) => any;
   width?: string;
