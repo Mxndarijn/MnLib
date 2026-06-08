@@ -1,14 +1,23 @@
-<div class="w-full mb-10 flex justify-center">
-  <div class="inline-flex rounded-lg p-2 bg-base-100 shadow-md">
-    <div role="tablist" class="tabs flex">
+<div class="mb-10">
+  <div
+    class="flex justify-start scrollbar-hide"
+    [class.overflow-x-auto]="scrollable"
+    [class.overflow-y-hidden]="scrollable"
+  >
+    <div
+      role="tablist"
+      class="tabs flex flex-nowrap -mb-[1px] border-b border-base-300"
+      [class.w-full]="justified"
+    >
       @for (item of dataSource.items; track item.label) {
         <div
           role="tab"
-          class="tab px-4 min-w-36 py-2 border-b-2 cursor-pointer select-none transition-colors"
-          [class.text-brand-500]="currentActive === item"
+          class="tab px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center"
+          [class.flex-1]="justified"
+          [class.text-primary]="currentActive === item"
           [class.font-bold]="currentActive === item"
-          [class.border-brand-500]="currentActive === item"
-          [class.border-base-300]="currentActive !== item"
+          [class.border-primary]="currentActive === item"
+          [class.border-transparent]="currentActive !== item"
           [class.text-base-content]="currentActive !== item"
           [attr.aria-selected]="currentActive === item"
           (click)="setActive(item)"

@@ -17,6 +17,7 @@ import {SelectDemo} from './select-demo/select-demo';
 import {BadgeDemo} from './badge-demo/badge-demo';
 import {IconDemo} from './icon-demo/icon-demo';
 import {MultiSelectDemo} from './multi-select-demo/multi-select-demo';
+import {TabDemo} from './tab-demo/tab-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -37,5 +38,6 @@ export const routes: Routes = [
   {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'},
   {path: 'demos/badge-demo', component: BadgeDemo, title: 'Badge Demo'},
   {path: 'demos/icon-demo', component: IconDemo, title: 'Icon Demo'},
-  {path: 'demos/multi-select-demo', component: MultiSelectDemo, title: 'Multi-Select Demo'}
+  {path: 'demos/multi-select-demo', component: MultiSelectDemo, title: 'Multi-Select Demo'},
+  {path: 'demos/tab-demo', component: TabDemo, title: 'Tab Demo'}
 ];

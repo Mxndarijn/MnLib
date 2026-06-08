@@ -1,0 +1,29 @@
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl font-bold mb-6">Tab Demo</h1>
+  <p class="mb-6 opacity-70">
+    Tabs take only as much space as their content by default. Use the <code>justified</code> property to make them fill the container.
+  </p>
+
+  <section class="mb-10">
+    <h2 class="text-xl font-semibold mb-2">Basic Tabs (Natural Width)</h2>
+    <p class="text-sm opacity-60 mb-4">Tabs take the natural width of their content with padding.</p>
+    <mn-tab [dataSource]="shortTabDataSource" [scrollable]="true" (activeChange)="onTabChange($event)"></mn-tab>
+  </section>
+
+  <section class="mb-10">
+    <h2 class="text-xl font-semibold mb-2">Justified Tabs</h2>
+    <p class="text-sm opacity-60 mb-4">Tabs stretch to fill the container width using <code>[justified]="true"</code>.</p>
+    <mn-tab [dataSource]="shortTabDataSource" [justified]="true" [scrollable]="true" (activeChange)="onTabChange($event)"></mn-tab>
+  </section>
+
+  <section class="mb-10">
+    <h2 class="text-xl font-semibold mb-2">Responsive Scrolling</h2>
+    <p class="text-sm opacity-60 mb-4">Tabs will scroll horizontally on small screens if they overflow (scrollbar hidden).</p>
+    <mn-tab [dataSource]="tabDataSource" [scrollable]="true" (activeChange)="onTabChange($event)"></mn-tab>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Current Active Tab (Log)</h2>
+    <p class="text-base-content opacity-70">Check the console for tab click and change events.</p>
+  </section>
+</div>

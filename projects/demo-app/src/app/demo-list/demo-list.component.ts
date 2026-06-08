@@ -59,6 +59,11 @@ export class DemoListComponent {
       title: 'Multi-Select demo',
       path: '/demos/multi-select-demo',
       description: 'Multi-select with searchable options, max selections, disabled options, and validation.'
+    },
+    {
+      title: 'Tab demo',
+      path: '/demos/tab-demo',
+      description: 'Tab component with data source, active tab management, and click callbacks.'
     }
   ];
 }
