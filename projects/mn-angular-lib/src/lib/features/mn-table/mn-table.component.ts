@@ -18,6 +18,8 @@ import {MnSelect, MnSelectOption} from '../mn-select';
 import {MnButton} from '../mn-button';
 import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
+import {MnShowAboveDirective} from './mn-show-above.directive';
+import {MnShowBelowDirective} from './mn-show-below.directive';
 import {MnInputField} from '../mn-input-field';
 import {FormsModule} from '@angular/forms';
 import {MnLanguageService} from '../../language';
@@ -28,7 +30,7 @@ export type ColumnFilterState = Record<string, string | undefined>;
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton, MnCheckbox, MnHiddenBelowDirective, MnInputField, MnSelect, FormsModule],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, FormsModule],
   templateUrl: './mn-table.component.html',
   styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -399,6 +401,12 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   getCellValue(column: ColumnDefinition<T>, row: T): string {
     if (typeof column.cell === 'function') return column.cell(row);
+    return '';
+  }
+
+  /** Returns the small-screen cell value for a column with cellSm defined. */
+  getCellSmValue(column: ColumnDefinition<T>, row: T): string {
+    if (column.cellSm && typeof column.cellSm.cell === 'function') return column.cellSm.cell(row);
     return '';
   }
 
