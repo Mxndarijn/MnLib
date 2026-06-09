@@ -190,7 +190,7 @@
             <!-- Data cells -->
             @for (column of dataSource.columns; track column.key) {
               <td
-                class="text-xs px-4 py-2"
+                class="text-xs px-2 py-1 md:px-4 md:py-2"
                 [class.text-left]="(column.align ?? 'left') === 'left'"
                 [class.text-center]="column.align === 'center'"
                 [class.text-right]="column.align === 'right'"
