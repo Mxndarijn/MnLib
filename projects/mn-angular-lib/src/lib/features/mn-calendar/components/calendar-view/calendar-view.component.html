@@ -3,7 +3,7 @@
   @if (isMobileView) {
     <!-- Mobile (<375px): two rows — Today+action / date-nav -->
     <div class="flex flex-col gap-2 py-3">
-      <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
         <button mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
           {{ config.todayLabel }}
         </button>
