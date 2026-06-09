@@ -245,8 +245,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private checkMobileView() {
     const wasMobile = this.isMobileView;
     const width = window.innerWidth;
-    this.isMobileView = width < 420;
-    this.isTabletView = width >= 420 && width < 1024;
+    this.isMobileView = width < 475;
+    this.isTabletView = width >= 475 && width < 1024;
     if (this.isMobileView && !wasMobile) {
       this.currentView = CalendarView.DAY;
     }

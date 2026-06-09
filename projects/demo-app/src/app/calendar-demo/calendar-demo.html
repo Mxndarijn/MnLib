@@ -7,7 +7,7 @@
   <div class="calendar-demo-body">
     <app-calendar-view
       [showButton]="true"
-      [buttonTitle]="'New Event'"
+      [buttonTitle]="'Plan onderhoud'"
       [NewCalendarItemsEvent]="eventsEmitter"
       (RequestNewCalendarItemsEvent)="loadEvents($event)"
       (CalendarItemClickedEvent)="onEventClick($event)"
@@ -15,17 +15,22 @@
     </app-calendar-view>
   </div>
 
-  <div *ngIf="clickedEvent" class="calendar-demo-clicked">
+  @if (clickedEvent) {
+  <div class="calendar-demo-clicked">
     <strong>Last clicked:</strong> {{ clickedEvent.title }} ({{ clickedEvent.startTime | date:'short' }} - {{ clickedEvent.endTime | date:'short' }})
   </div>
+  }
 
   <mn-tab [dataSource]="tabDataSource" (activeChange)="onTabChange($event)"></mn-tab>
 
-  <div *ngIf="activeTabIndex === 0" class="calendar-demo-body">
+  @if (activeTabIndex === 0) {
+  <div class="calendar-demo-body">
     <p style="padding: 16px; color: #6b7280;">Select the <strong>"Calendar in Tab"</strong> tab to see a second calendar instance.</p>
   </div>
+  }
 
-  <div *ngIf="activeTabIndex === 1" class="calendar-demo-body">
+  @if (activeTabIndex === 1) {
+  <div class="calendar-demo-body">
     <app-calendar-view
       [showButton]="true"
       [buttonTitle]="'New Event'"
@@ -35,4 +40,5 @@
       (ButtonClickedEvent)="onNewEvent()">
     </app-calendar-view>
   </div>
+  }
 </div>
