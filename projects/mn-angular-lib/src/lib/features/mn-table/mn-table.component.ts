@@ -32,7 +32,6 @@ export type ColumnFilterState = Record<string, string | undefined>;
   standalone: true,
   imports: [NgClass, NgTemplateOutlet, MnButton, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, FormsModule],
   templateUrl: './mn-table.component.html',
-  styleUrl: './mn-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
