@@ -25,15 +25,15 @@ import {
   provideMnCalendarConfig,
   resolveCalendarConfig
 } from '../../models/calendar-config.model';
-import {MnLanguageService} from '../../../../language/mn-language.service';
+import {MnLanguageService} from '../../../../language';
 import {CALENDAR_DATE_FORMATTER, CalendarDateFormatter} from '../../services/calendar-date-formatter';
 import {DefaultCalendarDateFormatter} from '../../services/default-calendar-date-formatter';
 import {CalendarMonthComponent} from '../calendar-month/calendar-month.component';
 import {CalendarWeekComponent} from '../calendar-week/calendar-week.component';
 import {CalendarDayComponent} from '../calendar-day/calendar-day.component';
 import {UpcomingEventsComponent} from '../upcoming-events/upcoming-events.component';
-import {MnButton} from '../../../mn-button/mn-button';
-import {MnDatetime} from '../../../mn-datetime/mn-datetime';
+import {MnButton} from '../../../mn-button';
+import {MnDatetime} from '../../../mn-datetime';
 import {FormsModule} from '@angular/forms';
 
 /**
@@ -77,69 +77,7 @@ import {FormsModule} from '@angular/forms';
   providers: [
     provideMnCalendarConfig(DEFAULT_CALENDAR_CONFIG),
   ],
-  styles: [`
-    :host { display: flex; flex-direction: column; width: 100%; height: 100%; }
-    .calendar-view { width: 100%; height: 100%; font-family: inherit; display: flex; flex-direction: column; }
-    .calendar-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .view-switcher { display: flex; border: 1px solid var(--color-base-300); border-radius: 6px; overflow: hidden; }
-    .view-btn {
-      padding: 6px 14px;
-      border: none;
-      background: var(--color-base-100);
-      cursor: pointer;
-      font-size: 13px;
-      transition: background 0.15s;
-    }
-    .view-btn:hover { background: var(--color-base-200); }
-    .view-btn.active { background: var(--color-primary); color: var(--color-primary-content, white); }
-    .date-nav { display: flex; align-items: center; gap: 4px; }
-    .nav-btn {
-      width: 32px; height: 32px; border: 1px solid var(--color-base-300); border-radius: 6px;
-      background: var(--color-base-100); cursor: pointer; font-size: 18px; display: flex;
-      align-items: center; justify-content: center;
-    }
-    .nav-btn:hover { background: var(--color-base-200); }
-    .date-input {
-      padding: 4px 8px; border: 1px solid var(--color-base-300); border-radius: 6px; background: var(--color-base-100); color: var(--color-base-content);
-      font-size: 13px;
-    }
-    .today-btn {
-      padding: 6px 12px; border: 1px solid var(--color-base-300); border-radius: 6px;
-      background: var(--color-base-100); cursor: pointer; font-size: 13px; color: var(--color-base-content);
-    }
-    .today-btn:hover { background: var(--color-base-200); }
-    .action-btn {
-      padding: 8px 16px; border: none; border-radius: 6px;
-      background: var(--color-primary); color: var(--color-primary-content, white); cursor: pointer; font-size: 13px;
-    }
-    .action-btn:hover { opacity: 0.85; }
-    .calendar-content { display: grid; grid-template-columns: 1fr 220px; gap: 12px; flex: 1; min-height: 0; }
-    .calendar-main { min-width: 0; min-height: 0; overflow: hidden; }
-    .calendar-sidebar { border-left: 1px solid var(--color-base-300); overflow: auto; }
-
-    @media (max-width: 767px) {
-      .calendar-toolbar { padding: 8px 0; }
-      .toolbar-left { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .view-switcher { display: none; }
-      .calendar-content { grid-template-columns: 1fr; }
-      .calendar-sidebar { display: none; }
-      .calendar-main { overflow-y: auto; }
-    }
-
-    @media (min-width: 768px) and (max-width: 1023px) {
-      .calendar-content { grid-template-columns: 1fr; }
-      .calendar-sidebar { display: none; }
-    }
-  `]
+  styles: [`:host { display: flex; flex-direction: column; width: 100%; height: 100%; }`]
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
   /** Whether to show the action button in the toolbar. */
@@ -166,6 +104,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   dateInputValue = '';
   viewOptions: { value: CalendarView; label: string }[] = [];
   isMobileView = false;
+  isTabletView = false;
 
   /** BehaviorSubject so late-subscribing child views receive the last emitted events. */
   internalEventsChanged = new BehaviorSubject<CalendarEvent[]>([]);
@@ -305,7 +244,9 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
   private checkMobileView() {
     const wasMobile = this.isMobileView;
-    this.isMobileView = window.innerWidth < this.config.mobileBreakpoint;
+    const width = window.innerWidth;
+    this.isMobileView = width < 420;
+    this.isTabletView = width >= 420 && width < 1024;
     if (this.isMobileView && !wasMobile) {
       this.currentView = CalendarView.DAY;
     }
