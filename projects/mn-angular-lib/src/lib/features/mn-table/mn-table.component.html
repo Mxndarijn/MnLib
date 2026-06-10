@@ -7,10 +7,10 @@
       </div>
     }
   </div>
-  <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:w-auto">
+  <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
     @if (dataSource.canSearch) {
       <mn-lib-input-field
-        class="w-full min-[375px]:max-w-64 min-[375px]:flex-1"
+        class="w-full min-[375px]:flex-1 min-[480px]:max-w-64"
         [props]="{
             id: 'mn-table-search',
             type: 'search',
@@ -239,8 +239,7 @@
   <div class="flex justify-center py-4">
     <button
       mnButton
-      [data]="{ size: 'sm', variant: 'outline', color: 'primary' }"
-      class="px-4 py-1.5 text-sm rounded border border-brand-500 text-brand-500 hover:bg-brand-100 transition-colors disabled:opacity-50"
+      [data]="{ size: 'md', variant: 'outline', color: 'primary' }"
       (click)="loadMoreRows()"
       [disabled]="loadingMoreRows"
     >
