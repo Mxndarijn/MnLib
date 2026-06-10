@@ -294,13 +294,8 @@
       @for (page of visiblePages; track page) {
         <button
           mnButton
-          [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
+          [data]="{ size: 'sm', variant: 'text', color: page === currentPage ? 'primary' : 'gray' }"
           class="px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
-          [class.border-secondary]="page === currentPage"
-          [class.text-accent]="page === currentPage"
-          [class.text-white]="page !== currentPage"
-          [class.border-base-300]="page !== currentPage"
-          [class.hover:bg-base-200]="page !== currentPage"
           (click)="goToPage(page)"
           [attr.aria-label]="'Page ' + page"
           [attr.aria-current]="page === currentPage ? 'page' : null"
