@@ -23,6 +23,10 @@
           (click)="setActive(item)"
         >
           {{ item.label | mnTranslate }}
+          @if (item.badge && item.badge > 0) {
+            <span
+              class="inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] text-[10px] font-bold bg-accent text-accent-content rounded-full ml-1.5 px-1">{{ item.badge }}</span>
+          }
         </div>
       }
     </div>

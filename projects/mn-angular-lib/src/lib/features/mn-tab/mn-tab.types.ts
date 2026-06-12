@@ -8,6 +8,8 @@ export interface MnTabItem {
   onClick?: () => void;
   /** Callback invoked when this tab is deactivated. */
   onDeactivate?: () => void;
+  /** Optional notification count shown as a badge on the tab. Hidden when 0 or absent. */
+  badge?: number;
 }
 
 /**
