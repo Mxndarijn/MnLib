@@ -1,3 +1,5 @@
+import {Signal} from '@angular/core';
+
 /**
  * Configuration for a single tab item.
  */
@@ -8,8 +10,8 @@ export interface MnTabItem {
   onClick?: () => void;
   /** Callback invoked when this tab is deactivated. */
   onDeactivate?: () => void;
-  /** Optional notification count shown as a badge on the tab. Hidden when 0 or absent. */
-  badge?: number;
+  /** Optional notification count shown as a badge on the tab. Accepts a plain number or a Signal<number>. Hidden when 0 or absent. */
+  badge?: number | Signal<number>;
 }
 
 /**
