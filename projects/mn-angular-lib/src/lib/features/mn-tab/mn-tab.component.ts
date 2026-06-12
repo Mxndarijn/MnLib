@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { MnTranslatePipe } from '../../language';
-import { MnTabDataSource, MnTabItem } from './mn-tab.types';
-import { CommonModule } from '@angular/common';
+import {Component, EventEmitter, Input, isSignal, OnInit, Output} from '@angular/core';
+import {MnTranslatePipe} from '../../language';
+import {MnTabDataSource, MnTabItem} from './mn-tab.types';
+import {CommonModule} from '@angular/common';
+import {MnBadge} from '../mn-badge';
 
 /**
  * Tab component that renders a horizontal tab bar.
@@ -10,7 +11,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'mn-tab',
   standalone: true,
-  imports: [MnTranslatePipe, CommonModule],
+  imports: [MnTranslatePipe, CommonModule, MnBadge],
   templateUrl: './mn-tab.component.html',
 })
 export class MnTabComponent implements OnInit {
@@ -43,6 +44,15 @@ export class MnTabComponent implements OnInit {
     ) {
       this.currentActive = this.dataSource.items[this.dataSource.defaultActive];
     }
+  }
+
+  /**
+   * Returns the resolved badge value for a tab item, supporting both plain numbers and Signal<number>.
+   * @param item - The tab item whose badge to resolve.
+   */
+  getBadge(item: MnTabItem): number | undefined {
+    if (isSignal(item.badge)) return item.badge();
+    return item.badge;
   }
 
   /**
