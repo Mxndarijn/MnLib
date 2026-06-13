@@ -1,11 +1,11 @@
 // projects/mn-angular-lib/src/lib/mn-mn-alert/mn-mn-alert.service.ts
-import { Injectable, Inject, Optional } from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import { MnAlertStore } from './mn-alert.store';
 import { MnAlert, MnAlertId } from './mn-alert.types';
 import { MN_ALERT_CONFIG, DEFAULT_MN_ALERT_CONFIG, MnAlertConfig, MnAlertKind } from './mn-alert.tokens';
 import { MnAlertVariants } from './mn-alertVariants';
 
-export interface MnShowInput {
+export type MnShowInput = {
   title: string;
   subTitle?: string;
   duration?: number;
@@ -18,14 +18,15 @@ export interface MnShowInput {
 
 @Injectable({ providedIn: 'root' })
 export class MnAlertService {
+  private readonly store = inject(MnAlertStore);
+
   private readonly cfg: Required<MnAlertConfig>;
   private readonly userDurations?: Partial<Record<MnAlertKind, number | null>>;
   private readonly hasUserDurations: boolean;
 
-  constructor(
-    private readonly store: MnAlertStore,
-    @Optional() @Inject(MN_ALERT_CONFIG) cfg: MnAlertConfig | null
-  ) {
+  constructor() {
+    const cfg = inject<MnAlertConfig | null>(MN_ALERT_CONFIG, {optional: true});
+
     this.userDurations = cfg?.durations;
     this.hasUserDurations = !!cfg?.durations;
     this.cfg = {

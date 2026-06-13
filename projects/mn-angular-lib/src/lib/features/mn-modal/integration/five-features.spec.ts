@@ -1,25 +1,32 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import { Validators, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { Observable, of, delay, timer, map } from 'rxjs';
+import {Observable, of, timer, map} from 'rxjs';
 import { ModalBuilder } from '../builder/modal.builder';
 import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
 import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
 import {
   FieldKind,
-  ModalKind,
-  ModalCloseReason,
   WizardFlowMode,
-  ValidationStatus,
   WizardBeforeCompleteValidator,
+  FormModalConfig,
+  WizardModalConfig,
+  TextFieldConfig,
+  FileFieldConfig,
+  ModalStepId,
 } from '../mn-modal.types';
+import {MnModalRef} from '../mn-modal-ref';
 
-function createMockModalRef(): any {
+function createMockModalRef(): MnModalRef {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
-    afterClosed$: { subscribe: () => {} },
-  };
+    afterClosed$: {
+      subscribe: () => {
+      }
+    } as unknown as MnModalRef['afterClosed$'],
+    update: jasmine.createSpy('update'),
+  } as unknown as MnModalRef;
 }
 
 // =============================================================
@@ -28,7 +35,7 @@ function createMockModalRef(): any {
 describe('Feature 1: Field-Level Async Validators', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -36,7 +43,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup(config: FormModalConfig) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
@@ -54,7 +61,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
   }
 
   it('should register async validators on form controls', () => {
-    interface Model { username: string; }
+    type Model = { username: string; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.TEXT,
@@ -71,7 +78,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
   });
 
   it('should mark control as PENDING while async validator runs', fakeAsync(() => {
-    interface Model { username: string; }
+    type Model = { username: string; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.TEXT,
@@ -95,7 +102,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
   }));
 
   it('should validate as VALID when async validator passes', fakeAsync(() => {
-    interface Model { username: string; }
+    type Model = { username: string; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.TEXT,
@@ -116,7 +123,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
   }));
 
   it('should combine sync and async validators', fakeAsync(() => {
-    interface Model { username: string; }
+    type Model = { username: string; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.TEXT,
@@ -153,7 +160,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
   }));
 
   it('should block form submit when async validator marks field invalid', fakeAsync(() => {
-    interface Model { username: string; }
+    type Model = { username: string; }
     const handler = { handle: jasmine.createSpy('handle') };
     const config = ModalBuilder.form<Model>()
       .field({
@@ -178,7 +185,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
   }));
 
   it('should support async validators on multiple field types', fakeAsync(() => {
-    interface Model { email: string; code: number; }
+    type Model = { email: string; code: number; }
     const asyncVal: AsyncValidatorFn = (ctrl) =>
       timer(10).pipe(map(() => ctrl.value === 'bad' || ctrl.value === 99 ? { invalid: true } : null));
 
@@ -214,7 +221,7 @@ describe('Feature 1: Field-Level Async Validators', () => {
 describe('Feature 2: Cross-Step Validation (onBeforeComplete)', () => {
   let component: MnWizardBodyComponent;
   let fixture: ComponentFixture<MnWizardBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -222,7 +229,7 @@ describe('Feature 2: Cross-Step Validation (onBeforeComplete)', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup(config: WizardModalConfig) {
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
@@ -323,7 +330,7 @@ describe('Feature 2: Cross-Step Validation (onBeforeComplete)', () => {
 describe('Feature 3: Dynamic Step Visibility in Wizard', () => {
   let component: MnWizardBodyComponent;
   let fixture: ComponentFixture<MnWizardBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -331,7 +338,7 @@ describe('Feature 3: Dynamic Step Visibility in Wizard', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup(config: WizardModalConfig) {
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
@@ -426,7 +433,7 @@ describe('Feature 3: Dynamic Step Visibility in Wizard', () => {
 describe('Feature 4: WizardFlowMode.FREE', () => {
   let component: MnWizardBodyComponent;
   let fixture: ComponentFixture<MnWizardBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -434,7 +441,7 @@ describe('Feature 4: WizardFlowMode.FREE', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup(config: WizardModalConfig) {
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
@@ -587,7 +594,7 @@ describe('Feature 4: WizardFlowMode.FREE', () => {
 describe('Feature 5: File Upload Fields', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -595,7 +602,7 @@ describe('Feature 5: File Upload Fields', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup(config: FormModalConfig) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
@@ -610,7 +617,7 @@ describe('Feature 5: File Upload Fields', () => {
   }
 
   it('should create a form control for FILE field', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -625,7 +632,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should handle file selection via onFileChange', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -637,7 +644,7 @@ describe('Feature 5: File Upload Fields', () => {
     setup(config);
 
     const file = createMockFile('test.pdf', 100);
-    const event = { target: { files: [file], value: '' } } as any;
+    const event = {target: {files: [file], value: ''}} as unknown as Event;
     component.onFileChange(config.fields[0], event);
 
     expect(component.getSelectedFiles('doc').length).toBe(1);
@@ -645,7 +652,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should filter out oversized files when maxSize is set', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -659,7 +666,7 @@ describe('Feature 5: File Upload Fields', () => {
 
     const bigFile = createMockFile('big.pdf', 100);
     const smallFile = createMockFile('small.pdf', 30);
-    const event = { target: { files: [bigFile, smallFile], value: '' } } as any;
+    const event = {target: {files: [bigFile, smallFile], value: ''}} as unknown as Event;
     component.onFileChange(config.fields[0], event);
 
     expect(component.getSelectedFiles('doc').length).toBe(1);
@@ -667,7 +674,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should enforce maxFiles limit', () => {
-    interface Model { docs: File[]; }
+    type Model = { docs: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -685,14 +692,14 @@ describe('Feature 5: File Upload Fields', () => {
       createMockFile('b.pdf', 10),
       createMockFile('c.pdf', 10),
     ];
-    const event = { target: { files, value: '' } } as any;
+    const event = {target: {files, value: ''}} as unknown as Event;
     component.onFileChange(config.fields[0], event);
 
     expect(component.getSelectedFiles('docs').length).toBe(2);
   });
 
   it('should remove a file by index', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -705,7 +712,7 @@ describe('Feature 5: File Upload Fields', () => {
     setup(config);
 
     const files = [createMockFile('a.pdf', 10), createMockFile('b.pdf', 10)];
-    const event = { target: { files, value: '' } } as any;
+    const event = {target: {files, value: ''}} as unknown as Event;
     component.onFileChange(config.fields[0], event);
 
     expect(component.getSelectedFiles('doc').length).toBe(2);
@@ -716,7 +723,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should set form control value to null when all files removed', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -728,7 +735,7 @@ describe('Feature 5: File Upload Fields', () => {
     setup(config);
 
     const file = createMockFile('test.pdf', 10);
-    const event = { target: { files: [file], value: '' } } as any;
+    const event = {target: {files: [file], value: ''}} as unknown as Event;
     component.onFileChange(config.fields[0], event);
 
     component.removeFile('doc', 0);
@@ -736,7 +743,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should format file sizes correctly', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.FILE, key: 'doc', label: 'Doc' })
       .build();
@@ -749,7 +756,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should render file upload drop zone in template', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -768,7 +775,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should support required validation on file fields', async () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const handler = { handle: jasmine.createSpy('handle') };
     const config = ModalBuilder.form<Model>()
       .field({
@@ -793,7 +800,7 @@ describe('Feature 5: File Upload Fields', () => {
   });
 
   it('should keep only one file when multiple is not set', () => {
-    interface Model { avatar: File[]; }
+    type Model = { avatar: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -806,7 +813,7 @@ describe('Feature 5: File Upload Fields', () => {
     setup(config);
 
     const files = [createMockFile('a.jpg', 10), createMockFile('b.jpg', 10)];
-    const event = { target: { files, value: '' } } as any;
+    const event = {target: {files, value: ''}} as unknown as Event;
     component.onFileChange(config.fields[0], event);
 
     expect(component.getSelectedFiles('avatar').length).toBe(1);
@@ -818,8 +825,8 @@ describe('Feature 5: File Upload Fields', () => {
 // =============================================================
 describe('Builder: asyncValidators in field config', () => {
   it('should preserve asyncValidators in built form config', () => {
-    interface Model { email: string; }
-    const asyncVal = (ctrl: AbstractControl) => of(null);
+    type Model = { email: string; }
+    const asyncVal = (_ctrl: AbstractControl) => of(null);
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.TEXT,
@@ -829,12 +836,12 @@ describe('Builder: asyncValidators in field config', () => {
       })
       .build();
 
-    expect((config.fields[0] as any).asyncValidators).toBeDefined();
-    expect((config.fields[0] as any).asyncValidators.length).toBe(1);
+    expect((config.fields[0] as TextFieldConfig<{ email: string }>).asyncValidators).toBeDefined();
+    expect((config.fields[0] as TextFieldConfig<{ email: string }>).asyncValidators!.length).toBe(1);
   });
 
   it('should preserve asyncValidators in step builder field config', () => {
-    const asyncVal = (ctrl: AbstractControl) => of(null);
+    const asyncVal = (_ctrl: AbstractControl) => of(null);
     const config = ModalBuilder.wizard()
       .addStep('Step', (s) => {
         s.field({
@@ -846,13 +853,13 @@ describe('Builder: asyncValidators in field config', () => {
       })
       .build();
 
-    expect((config.steps[0].fields![0] as any).asyncValidators.length).toBe(1);
+    expect((config.steps[0].fields![0] as TextFieldConfig).asyncValidators!.length).toBe(1);
   });
 });
 
 describe('Builder: FileFieldConfig', () => {
   it('should preserve file field config properties', () => {
-    interface Model { doc: File[]; }
+    type Model = { doc: File[]; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.FILE,
@@ -865,7 +872,7 @@ describe('Builder: FileFieldConfig', () => {
       })
       .build();
 
-    const field = config.fields[0] as any;
+    const field = config.fields[0] as FileFieldConfig<{ doc: File[] }>;
     expect(field.kind).toBe(FieldKind.FILE);
     expect(field.accept).toBe('.pdf');
     expect(field.multiple).toBeTrue();
@@ -891,7 +898,7 @@ describe('Builder: FileFieldConfig', () => {
 
 describe('Wizard: step visible condition in builder', () => {
   it('should set visible condition via StepBuilder.visible()', () => {
-    const condition = (data: any) => data['step-0']?.plan === 'premium';
+    const condition = (data: Record<ModalStepId, Record<string, unknown>>) => (data['step-0'] as Record<string, unknown>)?.['plan'] === 'premium';
     const config = ModalBuilder.wizard()
       .addStep('Plan', (s) => s.body('Choose'))
       .addStep('Premium Features', (s) => {

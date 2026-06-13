@@ -2,6 +2,7 @@ import {
   Component,
   Input,
   OnInit,
+  Type,
   ViewChild,
   ViewContainerRef,
   ComponentRef,
@@ -41,20 +42,20 @@ export class MnCustomBodyHostComponent implements OnInit {
     }
   }
 
-  attachComponent(component: any): void {
+  attachComponent(component: Type<unknown>): void {
     this.componentRef = this.container.createComponent(component);
 
     // Pass inputs to the component
     if (this.config.inputs) {
       Object.entries(this.config.inputs).forEach(([key, value]) => {
-        (this.componentRef!.instance as any)[key] = value;
+        (this.componentRef!.instance as Record<string, unknown>)[key] = value;
       });
     }
 
     // Pass modalRef if the component has a modalRef property
-    const instance = this.componentRef.instance as any;
+    const instance = this.componentRef.instance as Record<string, unknown>;
     if (instance && 'modalRef' in instance) {
-      instance.modalRef = this.modalRef;
+      instance['modalRef'] = this.modalRef;
     }
   }
 

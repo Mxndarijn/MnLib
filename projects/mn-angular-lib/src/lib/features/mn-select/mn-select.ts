@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnSelectErrorMessageData, MnSelectOption, MnSelectProps, MnSelectUIConfig} from './mn-selectTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -18,6 +18,8 @@ export const MN_SELECT_CONFIG = new InjectionToken<MnSelectUIConfig>('MN_SELECT_
   templateUrl: './mn-select.html',
 })
 export class MnSelect implements OnInit {
+  ngControl = inject(NgControl, {optional: true, self: true});
+
   @Input({required: true}) props!: MnSelectProps;
   /** Currently selected value */
   selectedValue: unknown = null;
@@ -32,7 +34,7 @@ export class MnSelect implements OnInit {
     required: 'Please select an option',
   };
 
-  constructor(@Optional() @Self() public ngControl: NgControl) {
+  constructor() {
     if (this.ngControl) this.ngControl.valueAccessor = this;
   }
 
@@ -97,11 +99,11 @@ export class MnSelect implements OnInit {
     this.selectedValue = (val === '' || val == null) ? null : val;
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (val: unknown) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
@@ -144,7 +146,7 @@ export class MnSelect implements OnInit {
     return this.control.hasValidator(Validators.required);
   }
 
-  private onChange: (val: any) => void = () => {
+  private onChange: (val: unknown) => void = () => {
   };
 
   private onTouched: () => void = () => {

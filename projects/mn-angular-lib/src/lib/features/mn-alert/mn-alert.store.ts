@@ -13,7 +13,11 @@ export class MnAlertStore {
 
   show(partial: Omit<MnAlert, 'id'>): MnAlertId {
     // Ensure every alert has a numeric duration: use provided or fall back to per-kind default
-    const computedDuration = (partial as any).duration ?? (DEFAULT_MN_ALERT_CONFIG.durations as any)[(partial as any).kind] ?? DEFAULT_MN_ALERT_CONFIG.fallbackDuration;
+    const computedDuration = (partial as {
+      duration?: number
+    }).duration ?? (DEFAULT_MN_ALERT_CONFIG.durations as Record<string, number>)[(partial as {
+      kind?: string
+    }).kind ?? ''] ?? DEFAULT_MN_ALERT_CONFIG.fallbackDuration;
     const a: MnAlert = { id: uid(), ...partial, duration: computedDuration } as MnAlert;
     this._alerts$.next([...this._alerts$.value, a]);
 

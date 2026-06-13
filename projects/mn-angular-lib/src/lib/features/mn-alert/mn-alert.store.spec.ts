@@ -1,7 +1,6 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { firstValueFrom, take } from 'rxjs';
 import { MnAlertStore } from './mn-alert.store';
-import { MnAlert } from './mn-alert.types';
 
 describe('MnAlertStore', () => {
   let store: MnAlertStore;

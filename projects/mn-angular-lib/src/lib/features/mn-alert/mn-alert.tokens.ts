@@ -4,7 +4,7 @@ import { MnAlert } from './mn-alert.types';
 
 export type MnAlertKind = 'success' | 'info' | 'warning' | 'error' | 'default';
 
-export interface MnAlertConfig {
+export type MnAlertConfig = {
   durations?: Partial<Record<MnAlertKind, number | null>>;
   cssClasses?: Partial<Record<MnAlertKind, string>>;
   icons?: Partial<Record<MnAlertKind, unknown>>;

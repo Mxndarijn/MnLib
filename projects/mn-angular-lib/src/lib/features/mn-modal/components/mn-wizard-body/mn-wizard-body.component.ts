@@ -25,8 +25,10 @@ import {
   FormModalConfig,
   ModalFooterAction,
   ActionStyle,
+  ModalRef,
 } from '../../mn-modal.types';
 import { MnButton } from '../../../mn-button';
+import {MnButtonTypes} from '../../../mn-button/mn-buttonTypes';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
 import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
 import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
@@ -40,6 +42,8 @@ import { MnLanguageService } from '../../../../language';
   styleUrls: ['./mn-wizard-body.component.css'],
 })
 export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() config!: WizardModalConfig;
   @Input() modalRef!: MnModalRef<WizardResult>;
 
@@ -69,23 +73,21 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Resolved i18n labels with defaults, falling back to translated keys */
   get labels() {
-    const i18n = (this.config as any).i18n || {};
+    const i18n = (this.config as { i18n?: Record<string, string> }).i18n || {};
     return {
-      next: this.resolveLabel(i18n.next, 'next'),
-      back: this.resolveLabel(i18n.back, 'back'),
-      close: this.resolveLabel(i18n.close, 'close'),
-      complete: this.resolveLabel(i18n.complete, 'complete'),
-      completing: this.resolveLabel(i18n.completing, 'completing'),
+      next: this.resolveLabel(i18n['next'], 'next'),
+      back: this.resolveLabel(i18n['back'], 'back'),
+      close: this.resolveLabel(i18n['close'], 'close'),
+      complete: this.resolveLabel(i18n['complete'], 'complete'),
+      completing: this.resolveLabel(i18n['completing'], 'completing'),
     };
   }
 
   /** Pre-built form configs keyed by step id — only for steps that have fields */
-  stepFormConfigs: Record<ModalStepId, FormModalConfig<any, any>> = {};
+  stepFormConfigs: Record<ModalStepId, FormModalConfig<unknown, unknown>> = {};
 
   private statusSubscription?: Subscription;
   private formBodiesSubscription?: Subscription;
-
-  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     // Pre-build form configs for all form-driven steps
@@ -107,7 +109,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
           initialValue: mergedInitialValue,
           readOnly: this.config.readOnly,
           disabled: this.config.disabled
-        } as FormModalConfig<any, any>;
+        } as FormModalConfig<unknown, unknown>;
       }
     }
 
@@ -133,10 +135,6 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.statusSubscription?.unsubscribe();
     this.formBodiesSubscription?.unsubscribe();
-  }
-
-  asAny(val: any): any {
-    return val;
   }
 
   isTextBody(step: WizardStepConfig): boolean {
@@ -216,7 +214,6 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Find the MnFormBodyComponent for the current step */
   private getCurrentFormBody(): MnFormBodyComponent | undefined {
     if (!this.formBodies) return undefined;
-    const stepIndex = this.currentStepIndex;
     // formBodies only contains entries for steps that have stepFormConfigs
     // We need to find which form body index corresponds to the current step
     const formStepIds = this.config.steps
@@ -371,8 +368,8 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /** Collect form data from all form-driven steps, namespaced by step ID */
-  private getAggregatedData(): Record<ModalStepId, Record<string, any>> {
-    const aggregated: Record<ModalStepId, Record<string, any>> = {};
+  private getAggregatedData(): Record<ModalStepId, Record<string, unknown>> {
+    const aggregated: Record<ModalStepId, Record<string, unknown>> = {};
     if (!this.formBodies) return aggregated;
 
     const formStepIds = this.config.steps
@@ -392,7 +389,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
    * Maps a footer action's ActionStyle to mnButton data props.
    * @param action The footer action configuration.
    */
-  getFooterActionButtonData(action: ModalFooterAction<any>): any {
+  getFooterActionButtonData(action: ModalFooterAction<unknown>): Partial<MnButtonTypes> {
     switch (action.style) {
       case ActionStyle.DANGER:
         return { variant: 'outline', color: 'danger' };
@@ -401,7 +398,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       case ActionStyle.SECONDARY:
         return { variant: 'outline', color: 'secondary' };
       case ActionStyle.GHOST:
-        return { variant: 'ghost', color: 'secondary' };
+        return {variant: 'text', color: 'secondary'};
       default:
         return { variant: 'outline', color: 'secondary' };
     }
@@ -411,12 +408,12 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
    * Handles a custom footer action click.
    * @param action The footer action configuration.
    */
-  async handleFooterAction(action: ModalFooterAction<any>): Promise<void> {
+  async handleFooterAction(action: ModalFooterAction<unknown>): Promise<void> {
     if (action.handler) {
-      await action.handler(this.modalRef as any);
+      await action.handler(this.modalRef as unknown as ModalRef<unknown>);
     }
     if (action.closesModal) {
-      this.modalRef.close((action.closeReason || ModalCloseReason.PROGRAMMATIC) as any);
+      this.modalRef.close((action.closeReason || ModalCloseReason.PROGRAMMATIC) as unknown as WizardResult);
     }
   }
 

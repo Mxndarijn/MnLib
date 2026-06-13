@@ -4,7 +4,7 @@
  * `primaryColor` is used for the left border accent; `secondaryColor` for the
  * background fill. Both should be valid CSS colour values.
  */
-export interface ColorPreset {
+export type ColorPreset = {
   /** Unique identifier. */
   id: string;
   /** Human-readable colour name (e.g. "Blue"). */

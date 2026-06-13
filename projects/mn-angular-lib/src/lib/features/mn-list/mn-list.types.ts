@@ -3,7 +3,7 @@ import {BehaviorSubject} from 'rxjs';
 import {PaginationStrategy} from '../mn-table';
 
 // ── List Appearance ──
-export interface ListAppearance {
+export type ListAppearance = {
   /** Show a divider between items. Defaults to true. */
   dividers?: boolean;
   /** Highlight item on hover. Defaults to true. */
@@ -15,15 +15,15 @@ export interface ListAppearance {
 }
 
 // ── List Data Source ──
-export interface ListDataSource<T> {
+export type ListDataSource<T> = {
   dataRows: BehaviorSubject<T[]>;
   getID: (row: T) => string;
 
   /** Template used to render each list item. Receives the item as `$implicit` and `data`. */
-  itemTemplate: TemplateRef<any>;
+  itemTemplate: TemplateRef<unknown>;
 
   emptyMessage: string;
-  emptyTemplate?: TemplateRef<any>;
+  emptyTemplate?: TemplateRef<unknown>;
   isDataLoading: boolean;
 
   // Search
@@ -83,13 +83,13 @@ export interface ListDataSource<T> {
   appearance?: ListAppearance;
 
   // Toolbar
-  toolbarTemplate?: TemplateRef<any>;
+  toolbarTemplate?: TemplateRef<unknown>;
 
   // Labels / i18n
   labels?: ListLabels;
 }
 
-export interface ListLabels {
+export type ListLabels = {
   loadMore?: string;
   rowsPerPage?: string;
 }

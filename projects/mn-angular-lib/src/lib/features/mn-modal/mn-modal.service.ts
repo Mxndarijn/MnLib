@@ -16,27 +16,27 @@ import { MnModalShellComponent } from './components/mn-modal-shell/mn-modal-shel
 export class MnModalService {
   private readonly appRef = inject(ApplicationRef);
   private readonly injector = inject(EnvironmentInjector);
-  private readonly modalStack: MnModalRef<any>[] = [];
+  private readonly modalStack: MnModalRef<unknown>[] = [];
 
-  open<TResult = any>(config: ModalConfig<TResult>): MnModalRef<TResult> {
+  open<TResult = unknown, TModel = unknown>(config: ModalConfig<TResult, TModel>): MnModalRef<TResult> {
     // Create the modal shell component
-    const componentRef: ComponentRef<MnModalShellComponent<TResult>> = createComponent(MnModalShellComponent as any, {
+    const componentRef = createComponent(MnModalShellComponent, {
       environmentInjector: this.injector,
-    });
+    }) as unknown as ComponentRef<MnModalShellComponent<TResult>>;
 
-    // Set the config on the component
-    componentRef.instance.config = config;
+    // TModel is erased at the shell boundary — the shell only needs TResult
+    componentRef.instance.config = config as ModalConfig<TResult>;
 
     // Create modal ref
-    const modalRef = new MnModalRef<TResult>(componentRef, config);
+    const modalRef = new MnModalRef<TResult>(componentRef, config as ModalConfig<TResult>);
     componentRef.instance.modalRef = modalRef;
 
     // Update stack and dim previous modal
     if (this.modalStack.length > 0) {
       const prevModal = this.modalStack[this.modalStack.length - 1];
-      prevModal.component.isStacked = true;
+      (prevModal.component as MnModalShellComponent<unknown>).isStacked = true;
     }
-    this.modalStack.push(modalRef);
+    this.modalStack.push(modalRef as unknown as MnModalRef<unknown>);
 
     // Attach to application
     this.appRef.attachView(componentRef.hostView);
@@ -49,12 +49,12 @@ export class MnModalService {
       domElem.remove();
 
       // Update stack
-      const index = this.modalStack.indexOf(modalRef);
+      const index = this.modalStack.indexOf(modalRef as unknown as MnModalRef<unknown>);
       if (index > -1) {
         this.modalStack.splice(index, 1);
         if (this.modalStack.length > 0) {
           const topModal = this.modalStack[this.modalStack.length - 1];
-          topModal.component.isStacked = false;
+          (topModal.component as MnModalShellComponent<unknown>).isStacked = false;
         }
       }
     });

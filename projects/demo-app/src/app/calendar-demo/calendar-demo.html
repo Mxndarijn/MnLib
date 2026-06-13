@@ -5,14 +5,14 @@
   </div>
 
   <div class="calendar-demo-body">
-    <app-calendar-view
+    <mn-calendar-view
       [showButton]="true"
       [buttonTitle]="'Plan onderhoud'"
       [NewCalendarItemsEvent]="eventsEmitter"
       (RequestNewCalendarItemsEvent)="loadEvents($event)"
       (CalendarItemClickedEvent)="onEventClick($event)"
       (ButtonClickedEvent)="onNewEvent()">
-    </app-calendar-view>
+    </mn-calendar-view>
   </div>
 
   @if (clickedEvent) {
@@ -31,14 +31,14 @@
 
   @if (activeTabIndex === 1) {
   <div class="calendar-demo-body">
-    <app-calendar-view
+    <mn-calendar-view
       [showButton]="true"
       [buttonTitle]="'New Event'"
       [NewCalendarItemsEvent]="eventsEmitter2"
       (RequestNewCalendarItemsEvent)="loadEvents2($event)"
       (CalendarItemClickedEvent)="onEventClick($event)"
       (ButtonClickedEvent)="onNewEvent()">
-    </app-calendar-view>
+    </mn-calendar-view>
   </div>
   }
 </div>

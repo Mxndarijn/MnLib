@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, OnInit, Optional } from '@angular/core';
+﻿import {ChangeDetectorRef, Component, OnInit, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarEventData } from '../../models/calendar-event-data.model';
 import { CalendarEvent } from '../../models/calendar-event.model';
@@ -12,7 +12,7 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
  * with the event's colour scheme applied as background and left-border accent.
  */
 @Component({
-  selector: 'app-calendar-event-default',
+  selector: 'mn-calendar-event-default',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-event-default.component.html',
@@ -49,16 +49,17 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
   `]
 })
 export class CalendarEventDefaultComponent implements CalendarEventData, OnInit {
+  private cdr = inject(ChangeDetectorRef);
+
   /** The event to render. Set by {@link CalendarEventComponent} after creation. */
   event!: CalendarEvent;
   formattedTime = '';
 
   private formatter: CalendarDateFormatter;
 
-  constructor(
-    @Optional() @Inject(CALENDAR_DATE_FORMATTER) formatter: CalendarDateFormatter | null,
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
+    const formatter = inject<CalendarDateFormatter | null>(CALENDAR_DATE_FORMATTER, {optional: true});
+
     this.formatter = formatter ?? new DefaultCalendarDateFormatter();
   }
 

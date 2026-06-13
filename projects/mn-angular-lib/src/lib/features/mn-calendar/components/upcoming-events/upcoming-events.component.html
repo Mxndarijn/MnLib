@@ -1,10 +1,10 @@
-<div class="upcoming-events" role="complementary" aria-label="Upcoming events">
+﻿<div class="upcoming-events" role="complementary" aria-label="Upcoming events">
   <div class="upcoming-title">{{ title }}</div>
   @for (event of upcomingEvents; track $index) {
-    <app-upcoming-event-row
+    <mn-upcoming-event-row
       [event]="event"
       (eventClicked)="eventClicked.emit($event)">
-    </app-upcoming-event-row>
+    </mn-upcoming-event-row>
   }
   @if (upcomingEvents.length === 0) {
     <div class="no-events">{{ noEventsMessage }}</div>

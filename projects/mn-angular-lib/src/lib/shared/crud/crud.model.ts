@@ -7,7 +7,7 @@ import {HttpErrorResponse, HttpHeaders, HttpStatusCode} from '@angular/common/ht
  * and retry information — so consumers can log, display, or act on
  * failures without inspecting the raw HTTP response.
  */
-export interface ApiError {
+export type ApiError = {
   status: HttpStatusCode | null;
   message: string;
   details?: unknown;
@@ -27,7 +27,7 @@ export interface ApiError {
  * transport-level details such as the HTTP status code, response
  * headers, and the final URL after any redirects.
  */
-export interface ResultMeta {
+export type ResultMeta = {
   statusCode?: number;
   headers?: HttpHeaders;
   url?: string;
@@ -41,7 +41,7 @@ export interface ResultMeta {
  *
  * @template T The type of the response data.
  */
-export interface SuccessResult<T> {
+export type SuccessResult<T> = {
   ok: true;
   data: T;
   meta?: ResultMeta;
@@ -53,7 +53,7 @@ export interface SuccessResult<T> {
  * Discriminated by `ok: false`. Use `result.ok` to narrow the union
  * before accessing `error`.
  */
-export interface FailureResult {
+export type FailureResult = {
   ok: false;
   error: ApiError;
   meta?: ResultMeta;

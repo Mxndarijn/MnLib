@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { CalendarDateFormatter } from './calendar-date-formatter';
 import { CALENDAR_CONFIG, CalendarConfig, DEFAULT_CALENDAR_CONFIG } from '../models/calendar-config.model';
@@ -18,9 +18,9 @@ import { CALENDAR_CONFIG, CalendarConfig, DEFAULT_CALENDAR_CONFIG } from '../mod
 export class DefaultCalendarDateFormatter implements CalendarDateFormatter {
   private readonly locale: string;
 
-  constructor(
-    @Optional() @Inject(CALENDAR_CONFIG) config?: CalendarConfig | null
-  ) {
+  constructor() {
+    const config = inject<CalendarConfig | null>(CALENDAR_CONFIG, {optional: true});
+
     this.locale = config?.locale ?? DEFAULT_CALENDAR_CONFIG.locale;
   }
 

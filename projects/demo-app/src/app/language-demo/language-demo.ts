@@ -3,7 +3,7 @@ import { MnLanguageService, MnTranslatePipe, MnConfigService, provideMnComponent
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 
-export interface ReactiveConfigDemo {
+export type ReactiveConfigDemo = {
   title: string;
   description: string;
   label: string;

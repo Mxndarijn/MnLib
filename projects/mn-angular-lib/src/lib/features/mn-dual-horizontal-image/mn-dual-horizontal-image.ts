@@ -1,9 +1,9 @@
-import {Component, inject, InjectionToken, Input} from '@angular/core';
+import {Component, inject, InjectionToken} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
 import {provideMnComponentConfig} from '../../config';
 
-export interface MnDualHorizontalImageConfig {
+export type MnDualHorizontalImageConfig = {
   images?: MnDualHorizontalImageTypes[];
   noImagesFound?: string;
 }

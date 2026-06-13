@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 
 @Component({
-  selector: 'lib-mn-lib',
+  selector: 'mn-lib',
   imports: [],
   template: `
     <p>

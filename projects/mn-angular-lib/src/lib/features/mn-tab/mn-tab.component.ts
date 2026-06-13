@@ -22,13 +22,13 @@ export class MnTabComponent implements OnInit {
    * Whether to enable horizontal scrolling when items overflow.
    * If true, tabs will scroll horizontally instead of shrinking too much.
    */
-  @Input() scrollable: boolean = false;
+  @Input() scrollable = false;
 
   /**
    * Whether tabs should stretch to fill the available width.
    * Defaults to false, so tabs only take as much space as their content.
    */
-  @Input() justified: boolean = false;
+  @Input() justified = false;
 
   /** Emits the newly activated tab item whenever the active tab changes. */
   @Output() activeChange = new EventEmitter<MnTabItem>();

@@ -1,6 +1,7 @@
 import { ModalBuilder } from './modal.builder';
 import {
   ActionStyle,
+  ConfirmationModalConfig,
   ConfirmationTone,
   FieldKind,
   ModalCloseReason,
@@ -83,7 +84,7 @@ describe('ConfirmationModalBuilder', () => {
     const config = ModalBuilder.confirmation()
       .message('Test')
       .build();
-    expect(() => (config as any).message = 'changed').toThrow();
+    expect(() => (config as ConfirmationModalConfig).message = 'changed').toThrow();
   });
 
   it('should default message to empty string', () => {

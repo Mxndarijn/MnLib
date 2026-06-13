@@ -11,19 +11,20 @@ import {
   ModalCloseReason,
   ModalKind,
 } from '../../mn-modal.types';
+import {MnModalRef} from '../../mn-modal-ref';
 
-function createMockModalRef(): any {
+function createMockModalRef(): MnModalRef<boolean> {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
     afterClosed$: { subscribe: () => {} },
-  };
+  } as unknown as MnModalRef<boolean>;
 }
 
 describe('MnConfirmationBodyComponent', () => {
-  let component: MnConfirmationBodyComponent<any>;
-  let fixture: ComponentFixture<MnConfirmationBodyComponent<any>>;
-  let mockModalRef: any;
+  let component: MnConfirmationBodyComponent<boolean>;
+  let fixture: ComponentFixture<MnConfirmationBodyComponent<boolean>>;
+  let mockModalRef: MnModalRef<boolean>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

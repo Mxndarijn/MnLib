@@ -1,4 +1,4 @@
-<div [class.is-fullwidth]="props.fullWidth" class="flex flex-col items-center">
+﻿<div [class.is-fullwidth]="props.fullWidth" class="flex flex-col items-center">
   <label [attr.for]="resolvedId" [ngClass]="wrapperClasses"
          class="flex flex-row items-center gap-x-2 select-none cursor-pointer">
     <input
@@ -29,12 +29,12 @@
     @if (props.showAllErrors) {
       <div class="flex flex-col gap-y-1 mt-1">
         @for (error of errorMessages; track $index) {
-          <lib-mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></lib-mn-error-message>
+          <mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></mn-error-message>
         }
       </div>
     } @else {
-      @if (errorMessage != null) {
-        <lib-mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></lib-mn-error-message>
+      @if (errorMessage !== null) {
+        <mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></mn-error-message>
       }
     }
   }

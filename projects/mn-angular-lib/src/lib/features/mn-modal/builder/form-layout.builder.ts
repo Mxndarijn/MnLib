@@ -1,36 +1,46 @@
-import { Validators } from '@angular/forms';
+import {Validators, ValidatorFn} from '@angular/forms';
 import {
   FormFieldConfig,
   FormFieldGroup,
   FormRow,
   FormRowField,
   FormValidator,
+  StepBodyConfig,
 } from '../mn-modal.types';
 
 /**
  * Shared interface for configurations that support form layouts.
  */
-export interface FormContainerConfig<TModel = any> {
+export type FormContainerConfig<TModel = unknown> = {
   fields?: FormFieldConfig<TModel>[];
   rows?: FormRow<TModel>[];
   fieldGroups?: FormFieldGroup<TModel>[];
   formValidators?: FormValidator<TModel>[];
-  groupValidators?: any[];
+  groupValidators?: ValidatorFn[];
   initialValue?: Partial<TModel>;
-  body?: any;
+  body?: StepBodyConfig;
 }
+
+type WithAutoFocus = { autoFocus?: boolean };
+type WithValidators = { validators?: ValidatorFn[] };
+
+/**
+ * A self-referential type so that field-group builder methods can be chained.
+ * e.g. g.field(...).field(...).field(...)
+ */
+export type ChainableGroupBuilder<TModel> = FormLayoutBuilder<TModel, ChainableGroupBuilder<TModel>>;
 
 /**
  * A builder class that provides form layout capabilities (fields, rows, groups).
  * This can be used as a delegate to avoid code duplication between FormModalBuilder and StepBuilder.
  */
-export class FormLayoutBuilder<TModel = any, TParent = any> {
+export class FormLayoutBuilder<TModel = unknown, TParent = unknown> {
   private currentRow: FormRowField<TModel>[] = [];
   private currentRowColumns = 1;
 
   constructor(
     private readonly config: FormContainerConfig<TModel>,
-    private readonly parent: TParent
+    private parent: TParent
   ) {
     this.config.fields = this.config.fields || [];
     this.config.rows = this.config.rows || [];
@@ -39,7 +49,7 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
   /**
    * Add a custom body/content to the form/step.
    */
-  body(body: any): TParent {
+  body(body: StepBodyConfig): TParent {
     this.config.body = body;
     return this.parent;
   }
@@ -63,7 +73,7 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
    * Start a new row with the specified number of columns.
    * All subsequent `addToRow()` calls will add fields to this row.
    */
-  row(columns: number = 2): TParent {
+  row(columns = 2): TParent {
     this.flushCurrentRow();
     this.currentRowColumns = columns;
     return this.parent;
@@ -74,7 +84,7 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
    * @param field - The field configuration
    * @param span - How many columns this field should span (default: 1)
    */
-  addToRow(field: FormFieldConfig<TModel>, span: number = 1): TParent {
+  addToRow(field: FormFieldConfig<TModel>, span = 1): TParent {
     this.config.fields = this.config.fields || [];
     this.config.fields.push(field);
     this.currentRow.push({ field, span });
@@ -96,7 +106,7 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
     this.flushCurrentRow();
     const rowFields: FormRowField<TModel>[] = [];
     buildFn({
-      add: (field: FormFieldConfig<TModel>, span: number = 1) => {
+      add: (field: FormFieldConfig<TModel>, span = 1) => {
         this.config.fields = this.config.fields || [];
         this.config.fields.push(field);
         rowFields.push({ field, span });
@@ -122,7 +132,7 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
    */
   fieldGroup(
     title: string,
-    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
+    buildFn: (group: ChainableGroupBuilder<TModel>) => void
   ): TParent;
   /**
    * Add a field group with title, description, and a functional builder.
@@ -130,12 +140,12 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
   fieldGroup(
     title: string,
     description: string,
-    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
+    buildFn: (group: ChainableGroupBuilder<TModel>) => void
   ): TParent;
   fieldGroup(
     arg1: string | FormFieldGroup<TModel>,
-    arg2?: string | ((group: FormLayoutBuilder<TModel, any>) => void),
-    arg3?: (group: FormLayoutBuilder<TModel, any>) => void
+    arg2?: string | ((group: ChainableGroupBuilder<TModel>) => void),
+    arg3?: (group: ChainableGroupBuilder<TModel>) => void
   ): TParent {
     this.flushCurrentRow();
 
@@ -147,7 +157,7 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
 
     const title = arg1;
     let description: string | undefined;
-    let buildFn: (group: FormLayoutBuilder<TModel, any>) => void;
+    let buildFn: (group: ChainableGroupBuilder<TModel>) => void;
 
     if (typeof arg2 === 'string') {
       description = arg2;
@@ -160,10 +170,12 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
       fields: [],
       rows: [],
     };
-    const groupBuilder = new FormLayoutBuilder<TModel, any>(groupConfig, {} as any);
-    // Overwrite the groupBuilder's parent to itself for proper chaining within the group
-    (groupBuilder as any).parent = groupBuilder;
-    buildFn(groupBuilder);
+    const groupBuilder = new FormLayoutBuilder<TModel, ChainableGroupBuilder<TModel>>(
+      groupConfig,
+      null as unknown as ChainableGroupBuilder<TModel>
+    );
+    (groupBuilder as ChainableGroupBuilder<TModel>).parent = groupBuilder as ChainableGroupBuilder<TModel>;
+    buildFn(groupBuilder as ChainableGroupBuilder<TModel>);
     groupBuilder.flushCurrentRow();
 
     const group: FormFieldGroup<TModel> = {
@@ -209,7 +221,7 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
   /**
    * Add Angular FormGroup-level validators.
    */
-  groupValidators(validators: any[]): TParent {
+  groupValidators(validators: ValidatorFn[]): TParent {
     this.config.groupValidators = validators;
     return this.parent;
   }
@@ -226,19 +238,18 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
    * Set the field to be focused when the form initializes.
    */
   focus(key: keyof TModel): TParent {
-    // Clear autoFocus from other fields first to ensure only one is focused
     this.config.fields?.forEach(f => {
-      (f as any).autoFocus = false;
+      (f as WithAutoFocus).autoFocus = false;
     });
     this.config.fieldGroups?.forEach(g => {
       g.fields.forEach(f => {
-        (f as any).autoFocus = false;
+        (f as WithAutoFocus).autoFocus = false;
       });
     });
 
-    const field = this.config.fields?.find(f => f.key === key);
+    const field = this.config.fields?.find(f => (f as unknown as { key: keyof TModel }).key === key);
     if (field) {
-      (field as any).autoFocus = true;
+      (field as WithAutoFocus).autoFocus = true;
     }
     return this.parent;
   }
@@ -247,8 +258,8 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
    * Wraps a field with a fluent API for validation.
    */
   fieldWithValidators(field: FormFieldConfig<TModel>): FieldValidatorBuilder<TModel, TParent> {
-    const fieldAny = field as any;
-    fieldAny.validators = fieldAny.validators || [];
+    const fieldWithV = field as WithValidators;
+    fieldWithV.validators = fieldWithV.validators || [];
     this.field(field);
     return new FieldValidatorBuilder(field, this.parent);
   }
@@ -271,54 +282,54 @@ export class FormLayoutBuilder<TModel = any, TParent = any> {
 /**
  * A builder for adding validation rules to a field fluently.
  */
-export class FieldValidatorBuilder<TModel = any, TParent = any> {
+export class FieldValidatorBuilder<TModel = unknown, TParent = unknown> {
   constructor(
     private field: FormFieldConfig<TModel>,
     private parent: TParent
   ) {
-    this.field.validators = this.field.validators || [];
+    (this.field as WithValidators).validators = (this.field as WithValidators).validators || [];
   }
 
-  required(message?: string): this {
-    this.field.validators!.push(Validators.required);
+  required(_message?: string): this {
+    (this.field as WithValidators).validators!.push(Validators.required);
     return this;
   }
 
   minLength(length: number): this {
-    this.field.validators!.push(Validators.minLength(length));
+    (this.field as WithValidators).validators!.push(Validators.minLength(length));
     return this;
   }
 
   maxLength(length: number): this {
-    this.field.validators!.push(Validators.maxLength(length));
+    (this.field as WithValidators).validators!.push(Validators.maxLength(length));
     return this;
   }
 
   pattern(pattern: string | RegExp): this {
-    this.field.validators!.push(Validators.pattern(pattern));
+    (this.field as WithValidators).validators!.push(Validators.pattern(pattern));
     return this;
   }
 
   email(): this {
-    this.field.validators!.push(Validators.email);
+    (this.field as WithValidators).validators!.push(Validators.email);
     return this;
   }
 
   min(value: number): this {
-    this.field.validators!.push(Validators.min(value));
+    (this.field as WithValidators).validators!.push(Validators.min(value));
     return this;
   }
 
   max(value: number): this {
-    this.field.validators!.push(Validators.max(value));
+    (this.field as WithValidators).validators!.push(Validators.max(value));
     return this;
   }
 
   /**
    * Add a custom validator.
    */
-  custom(validator: any): this {
-    this.field.validators!.push(validator);
+  custom(validator: ValidatorFn): this {
+    (this.field as WithValidators).validators!.push(validator);
     return this;
   }
 
@@ -328,8 +339,4 @@ export class FieldValidatorBuilder<TModel = any, TParent = any> {
   done(): TParent {
     return this.parent;
   }
-
-  // Allow continuing with other builder methods by proxying to parent if needed,
-  // but usually .done() is clearer.
-  // For convenience, we can add some common layout methods here too or just use .done()
 }

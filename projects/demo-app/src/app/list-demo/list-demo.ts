@@ -1,8 +1,8 @@
-import {Component, TemplateRef, viewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ListDataSource, MnList} from 'mn-angular-lib';
 
-interface User {
+type User = {
   id: string;
   name: string;
   email: string;
@@ -43,14 +43,14 @@ const ALL_USERS: User[] = [
   imports: [MnList],
   templateUrl: './list-demo.html',
 })
-export class ListDemo {
+export class ListDemo implements OnInit {
   selectedNames = 'none';
 
-  readonly basicItemTpl = viewChild.required<TemplateRef<any>>('basicItemTpl');
-  readonly selectionItemTpl = viewChild.required<TemplateRef<any>>('selectionItemTpl');
-  readonly searchItemTpl = viewChild.required<TemplateRef<any>>('searchItemTpl');
-  readonly paginatedItemTpl = viewChild.required<TemplateRef<any>>('paginatedItemTpl');
-  readonly clientPaginatedItemTpl = viewChild.required<TemplateRef<any>>('clientPaginatedItemTpl');
+  readonly basicItemTpl = viewChild.required<TemplateRef<unknown>>('basicItemTpl');
+  readonly selectionItemTpl = viewChild.required<TemplateRef<unknown>>('selectionItemTpl');
+  readonly searchItemTpl = viewChild.required<TemplateRef<unknown>>('searchItemTpl');
+  readonly paginatedItemTpl = viewChild.required<TemplateRef<unknown>>('paginatedItemTpl');
+  readonly clientPaginatedItemTpl = viewChild.required<TemplateRef<unknown>>('clientPaginatedItemTpl');
   // ── Searchable + load more list (server-side) ──
   searchDataSource!: ListDataSource<User>;
   // ── Paginated list (server-side) ──

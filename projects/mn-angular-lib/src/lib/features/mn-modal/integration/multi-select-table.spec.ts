@@ -7,23 +7,25 @@ import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.com
 import {
   FieldKind,
   ModalKind,
+  ModalRef,
   FormModalConfig,
   MultiSelectTableFieldConfig,
 } from '../mn-modal.types';
-import { TableDataSource, ColumnDefinition, ColumnSortType } from '../../mn-table/mn-table.types';
+import {TableDataSource, ColumnSortType} from '../../mn-table/mn-table.types';
 
-interface TestRow {
+type TestRow = {
   id: string;
   name: string;
   email: string;
 }
 
-function createMockModalRef(): any {
+function createMockModalRef(): ModalRef<unknown> {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
     afterClosed$: { subscribe: () => {} },
-  };
+    update: jasmine.createSpy('update'),
+  } as unknown as ModalRef<unknown>;
 }
 
 function createTestDataSource(rows?: TestRow[]): TableDataSource<TestRow> {
@@ -45,6 +47,10 @@ function createTestDataSource(rows?: TestRow[]): TableDataSource<TestRow> {
   };
 }
 
+type ItemsModel = { items: string[] };
+type ItemsNameModel = { name: string; items: string[] };
+type ModeItemsModel = { mode: string; items: string[] };
+
 describe('Feature: Multi-Select Table Field', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
@@ -55,11 +61,11 @@ describe('Feature: Multi-Select Table Field', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig<any, any>) {
+  function setup(config: FormModalConfig<unknown, unknown>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     component.config = config;
-    component.modalRef = createMockModalRef();
+    component.modalRef = createMockModalRef() as unknown as typeof component.modalRef;
     fixture.detectChanges();
   }
 
@@ -70,7 +76,7 @@ describe('Feature: Multi-Select Table Field', () => {
   });
 
   it('builder should accept MULTI_SELECT_TABLE field', () => {
-    interface M { selected: string[]; }
+    type M = { selected: string[]; }
     const ds = createTestDataSource();
     const config = ModalBuilder.form<M>()
       .field({
@@ -83,11 +89,11 @@ describe('Feature: Multi-Select Table Field', () => {
 
     expect(config.fields.length).toBe(1);
     expect(config.fields[0].kind).toBe(FieldKind.MULTI_SELECT_TABLE);
-    expect((config.fields[0] as any).tableDataSource).toBe(ds);
+    expect((config.fields[0] as MultiSelectTableFieldConfig<M, TestRow>).tableDataSource).toBe(ds);
   });
 
   it('builder should preserve getRowValue function', () => {
-    interface M { selected: string[]; }
+    type M = { selected: string[]; }
     const ds = createTestDataSource();
     const getVal = (r: TestRow) => r.email;
     const config = ModalBuilder.form<M>()
@@ -112,7 +118,7 @@ describe('Feature: Multi-Select Table Field', () => {
       fields: [
         { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds },
       ],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     expect(component.form.contains('items')).toBeTrue();
   });
@@ -124,7 +130,7 @@ describe('Feature: Multi-Select Table Field', () => {
       fields: [
         { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds },
       ],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     expect(component.form.get('items')!.value).toEqual([]);
   });
@@ -137,7 +143,7 @@ describe('Feature: Multi-Select Table Field', () => {
       fields: [
         { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds },
       ],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     expect(ds.selectionMode).toBe('multi');
   });
@@ -149,14 +155,14 @@ describe('Feature: Multi-Select Table Field', () => {
       fields: [
         { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds },
       ],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     expect(component.tableDataSources['items']).toBe(ds);
   });
 
   it('onTableSelectionChange should update form control with row IDs', () => {
     const ds = createTestDataSource();
-    const field: any = {
+    const field: MultiSelectTableFieldConfig<ItemsModel, TestRow> = {
       kind: FieldKind.MULTI_SELECT_TABLE,
       key: 'items',
       label: 'Items',
@@ -165,7 +171,7 @@ describe('Feature: Multi-Select Table Field', () => {
     setup({
       kind: ModalKind.FORM,
       fields: [field],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     const selectedRows = [
       { id: '1', name: 'Alice', email: 'alice@test.com' },
@@ -178,7 +184,7 @@ describe('Feature: Multi-Select Table Field', () => {
 
   it('onTableSelectionChange should use custom getRowValue', () => {
     const ds = createTestDataSource();
-    const field: any = {
+    const field: MultiSelectTableFieldConfig<ItemsModel, TestRow> = {
       kind: FieldKind.MULTI_SELECT_TABLE,
       key: 'items',
       label: 'Items',
@@ -188,7 +194,7 @@ describe('Feature: Multi-Select Table Field', () => {
     setup({
       kind: ModalKind.FORM,
       fields: [field],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     const selectedRows = [
       { id: '1', name: 'Alice', email: 'alice@test.com' },
@@ -200,7 +206,7 @@ describe('Feature: Multi-Select Table Field', () => {
 
   it('onTableSelectionChange should mark control as touched', () => {
     const ds = createTestDataSource();
-    const field: any = {
+    const field: MultiSelectTableFieldConfig<ItemsModel, TestRow> = {
       kind: FieldKind.MULTI_SELECT_TABLE,
       key: 'items',
       label: 'Items',
@@ -209,7 +215,7 @@ describe('Feature: Multi-Select Table Field', () => {
     setup({
       kind: ModalKind.FORM,
       fields: [field],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     expect(component.form.get('items')!.touched).toBeFalse();
     component.onTableSelectionChange(field, [{ id: '1', name: 'A', email: 'a@b.com' }]);
@@ -223,7 +229,7 @@ describe('Feature: Multi-Select Table Field', () => {
       fields: [
         { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds, validators: [Validators.required] },
       ],
-    } as any);
+    } as FormModalConfig<ItemsModel, unknown>);
 
     // Empty array should be invalid with required validator
     // Note: Validators.required considers [] as valid (non-null), so we test with null
@@ -237,7 +243,7 @@ describe('Feature: Multi-Select Table Field', () => {
   it('should block submit when required MULTI_SELECT_TABLE is empty (null)', async () => {
     const ds = createTestDataSource();
     const handler = { handle: jasmine.createSpy('handle') };
-    const config: any = {
+    const config: FormModalConfig<ItemsModel, unknown> = {
       kind: ModalKind.FORM,
       fields: [
         { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds, validators: [Validators.required] },
@@ -256,13 +262,13 @@ describe('Feature: Multi-Select Table Field', () => {
   it('should submit successfully with selected table rows', async () => {
     const ds = createTestDataSource();
     const handler = { handle: jasmine.createSpy('handle').and.returnValue(Promise.resolve()) };
-    const field: any = {
+    const field: MultiSelectTableFieldConfig<ItemsModel, TestRow> = {
       kind: FieldKind.MULTI_SELECT_TABLE,
       key: 'items',
       label: 'Items',
       tableDataSource: ds,
     };
-    const config: any = {
+    const config: FormModalConfig<ItemsModel, unknown> = {
       kind: ModalKind.FORM,
       fields: [field],
       onComplete: handler,
@@ -288,7 +294,7 @@ describe('Feature: Multi-Select Table Field', () => {
         { kind: FieldKind.TEXT, key: 'name', label: 'Name', validators: [Validators.required] },
         { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds },
       ],
-    } as any);
+    } as FormModalConfig<ItemsNameModel, unknown>);
 
     expect(component.form.contains('name')).toBeTrue();
     expect(component.form.contains('items')).toBeTrue();
@@ -301,9 +307,15 @@ describe('Feature: Multi-Select Table Field', () => {
       kind: ModalKind.FORM,
       fields: [
         { kind: FieldKind.SELECT, key: 'mode', label: 'Mode', options: [{ label: 'A', value: 'a' }, { label: 'B', value: 'b' }] },
-        { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds, visible: (f: any) => f.mode === 'b' },
+        {
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: ds,
+          visible: (f: Partial<ModeItemsModel>) => f.mode === 'b'
+        },
       ],
-    } as any);
+    } as FormModalConfig<ModeItemsModel, unknown>);
 
     // Initially mode is null, so items should be hidden
     expect(component.fieldVisibility['items']).toBeFalse();

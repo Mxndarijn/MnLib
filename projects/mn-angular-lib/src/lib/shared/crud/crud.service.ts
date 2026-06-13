@@ -10,7 +10,7 @@ import {API_BASE_URL} from './crud.tokens';
  * Passed to the `CrudService` constructor to define which API
  * resource the service operates on.
  */
-export interface CrudConfig {
+export type CrudConfig = {
   endpoint: string;
 }
 

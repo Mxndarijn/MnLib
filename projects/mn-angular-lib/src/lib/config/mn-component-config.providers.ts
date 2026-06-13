@@ -2,7 +2,6 @@ import { DestroyRef, InjectionToken, Optional, Provider } from '@angular/core';
 import { MN_INSTANCE_ID, MN_SECTION_PATH } from '../context/mn-context.tokens';
 import { MnConfigService } from './mn-config.service';
 import { MnLanguageService } from '../language/mn-language.service';
-import { skip } from 'rxjs';
 
 /**
  * Helper to provide a resolved, typed component config via DI.
@@ -51,8 +50,8 @@ export function provideMnComponentConfig<T extends object>(
       const sub = lang.locale$.subscribe(() => {
         const updated = resolveConfig();
         // Mutate the existing object in place so all template bindings pick up the new values.
-        for (const key of Object.keys(updated) as Array<keyof T>) {
-          (cfg as any)[key] = (updated as any)[key];
+        for (const key of Object.keys(updated)) {
+          (cfg as Record<string, unknown>)[key] = (updated as Record<string, unknown>)[key];
         }
       });
 

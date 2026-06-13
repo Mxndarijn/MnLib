@@ -1,8 +1,8 @@
 <div class="flex flex-col gap-6 h-full">
   @if (config.component || config.template) {
     <mn-custom-body-host
-      [config]="asAny(config)"
-      [modalRef]="asAny(modalRef)"
+      [config]="$any(config)"
+      [modalRef]="$any(modalRef)"
       class="block"
     ></mn-custom-body-host>
   }
@@ -27,7 +27,9 @@
 
       @for (step of visibleSteps; track step.id; let i = $index; ) {
         <div
+          (keyup.enter)="isFreeFlow ? goToStep(step) : null"
           (click)="isFreeFlow ? goToStep(step) : null"
+          [attr.tabindex]="isFreeFlow && canNavigateToStep(step) ? 0 : null"
           [class.cursor-pointer]="isFreeFlow && canNavigateToStep(step)"
           class="relative flex flex-col items-center gap-1 z-10 w-0 flex-1"
         >
@@ -63,7 +65,7 @@
           @if (stepFormConfigs[step.id]) {
             <mn-form-body
               [config]="stepFormConfigs[step.id]"
-              [modalRef]="asAny(modalRef)"
+              [modalRef]="$any(modalRef)"
               [hideFooter]="true"
               [hideCustomBody]="true"
             ></mn-form-body>
@@ -109,7 +111,7 @@
     @if (config.footerActions) {
       <mn-footer-actions
         [actions]="config.footerActions"
-        (actionClick)="handleFooterAction($event)"
+        (actionClick)="handleFooterAction($any($event))"
       ></mn-footer-actions>
     } @else {
       <div class="flex-1"></div>

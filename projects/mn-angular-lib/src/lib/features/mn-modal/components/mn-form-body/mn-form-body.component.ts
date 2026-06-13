@@ -8,15 +8,25 @@ import {
   OnInit,
   Output,
   QueryList,
+  Type,
   ViewChildren,
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  AbstractControlOptions,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {MnModalRef} from '../../mn-modal-ref';
 import {
   FieldDataSource,
   FieldKind,
+  FieldRequiredCondition,
+  FieldVisibilityCondition,
   FileFieldConfig,
   FormFieldConfig,
   FormFieldGroup,
@@ -24,6 +34,8 @@ import {
   FormRow,
   FormRowField,
   ModalCloseReason,
+  ModalI18nLabels,
+  ModalInputMap,
   MultiSelectTableFieldConfig,
   RatingFieldConfig,
   SelectOption,
@@ -37,11 +49,59 @@ import {MnCheckbox} from '../../../mn-checkbox';
 import {MnDatetime} from '../../../mn-datetime';
 import {MnMultiSelect} from '../../../mn-multi-select';
 import {MnTextarea} from '../../../mn-textarea';
-import {MnSelect, MnSelectOption} from '../../../mn-select';
+import {MnSelect, MnSelectOption, MnSelectProps} from '../../../mn-select';
 import {MnCustomFieldHostDirective} from './mn-custom-field-host.directive';
 import {MnLanguageService} from '../../../../language';
-import {MnTable} from '../../../mn-table';
+import {MnTable, TableDataSource} from '../../../mn-table';
 import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
+
+/**
+ * A structural "view" over the {@link FormFieldConfig} discriminated union that
+ * exposes every member-specific property as optional. The template and several
+ * helpers need to read properties that only exist on some union members (e.g.
+ * `placeholder`, `swatches`, `mode`, `dataSource`, `validators`). Casting the
+ * field to this view keeps that access type-checked without resorting to `any`.
+ */
+type FormFieldView<TModel> = FormFieldConfig<TModel> & {
+  label?: string;
+  placeholder?: string;
+  validators?: ValidatorFn[];
+  asyncValidators?: ValidatorFn[];
+  updateOn?: 'change' | 'blur' | 'submit';
+  options?: SelectOption[];
+  dataSource?: FieldDataSource;
+  disabled?: boolean;
+  readOnly?: boolean;
+  visible?: FieldVisibilityCondition<TModel>;
+  conditionallyRequired?: FieldRequiredCondition<TModel>;
+  autoFocus?: boolean;
+  defaultValue?: unknown;
+  mask?: string;
+  autocomplete?: string;
+  minDate?: string;
+  maxDate?: string;
+  mode?: 'date' | 'time' | 'datetime-local';
+  min?: number | string;
+  max?: number | string;
+  step?: number;
+  rows?: number;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  maxSelections?: number;
+  swatches?: string[];
+  showValue?: boolean;
+  unit?: string;
+  accept?: string;
+  multiple?: boolean;
+  // Non-optional in the view: the template only reads these inside the
+  // matching @case/@if guards where the runtime value is always present.
+  // Keeping them non-undefined avoids spurious template type errors that the
+  // previous `any` cast masked, without changing runtime behavior.
+  maxSize: number;
+  maxFiles?: number;
+  component: Type<unknown>;
+  inputs?: ModalInputMap;
+};
 
 @Component({
   selector: 'mn-form-body',
@@ -50,7 +110,9 @@ import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-h
   templateUrl: './mn-form-body.component.html',
   styleUrls: ['./mn-form-body.component.css'],
 })
-export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnInit, OnDestroy, AfterViewInit {
+export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements OnInit, OnDestroy, AfterViewInit {
+  private fb = inject(FormBuilder);
+
   @Input() config!: FormModalConfig<TModel, TResult>;
   @Input() modalRef!: MnModalRef<TResult>;
   @Input() hideFooter = false;
@@ -84,27 +146,31 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
   private valueChangesSubscription?: Subscription;
 
-  constructor(private fb: FormBuilder) {}
-
-  asField(field: any): any {
-    return field;
+  asField(field: FormFieldConfig<TModel>): FormFieldView<TModel> {
+    return field as FormFieldView<TModel>;
   }
 
-  asKey(key: any): string {
+  asKey(key: keyof TModel | string): string {
     return key as string;
   }
 
-  asAny(val: any): any {
+  // The template builds untyped `props` object literals and passes them to
+  // strongly-typed child component `[props]` inputs. There is no single static
+  // type for those literals, so this identity bridge must return `any` to keep
+  // the template assignment-compatible. This is a genuine template-bridge case.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  asAny(val: unknown): any {
     return val;
   }
 
-  hasRequiredValidator(field: any): boolean {
+  hasRequiredValidator(field: FormFieldConfig<TModel>): boolean {
+    const view = field as FormFieldView<TModel>;
     // Check if conditionallyRequired is currently active
-    if (field.conditionallyRequired) {
-      const formValue = this.form?.value ?? {};
-      if (field.conditionallyRequired(formValue)) return true;
+    if (view.conditionallyRequired) {
+      const formValue = (this.form?.value ?? {}) as Partial<TModel>;
+      if (view.conditionallyRequired(formValue)) return true;
     }
-    const validators = field.validators as any[] | undefined;
+    const validators = view.validators;
     if (!validators) return false;
     // Check if Validators.required is in the array by testing a dummy control
     const control = this.fb.control(null, validators);
@@ -113,7 +179,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   }
 
   /** Store table data sources keyed by field key for template access */
-  tableDataSources: Record<string, any> = {};
+  tableDataSources: Record<string, TableDataSource<unknown>> = {};
 
   private languageService = inject(MnLanguageService);
 
@@ -138,8 +204,12 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
   /** Resolved i18n labels with defaults, falling back to translated keys */
   get labels() {
-    const i = this.config as any;
-    const i18n = i.i18n || {};
+    // The config's i18n map may carry extra keys beyond ModalI18nLabels (e.g.
+    // fieldRequired, loadingOptions), so widen the type to expose them as
+    // declared optional properties (keeps dot access type-checked).
+    const i18n: ModalI18nLabels &
+      Partial<Record<'fieldRequired' | 'loadingOptions' | 'accepted' | 'maxSize', string>> =
+      this.config.i18n || {};
     return {
       submit: this.resolveLabel(i18n.submit, 'submit'),
       cancel: this.resolveLabel(i18n.cancel, 'cancel'),
@@ -180,7 +250,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   }
 
   public applyAutoFocus(): void {
-    const autoFocusField = this.config.fields.find(f => (f as any).autoFocus);
+    const autoFocusField = this.config.fields.find(f => (f as FormFieldView<TModel>).autoFocus);
     if (!autoFocusField) return;
 
     const key = autoFocusField.key as string;
@@ -195,9 +265,9 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
       }
 
       // Try finding in MnTextarea components
-      const textarea = this.textareas?.find(f => (f as any).props?.id === key);
-      if (textarea && typeof (textarea as any).focus === 'function') {
-        (textarea as any).focus();
+      const textarea = this.textareas?.find(f => f.props?.id === key);
+      if (textarea) {
+        textarea.focus();
         return;
       }
 
@@ -212,15 +282,15 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   }
 
   private initializeForm(): void {
-    const formControls: Record<string, any> = {};
+    const formControls: Record<string, [unknown, AbstractControlOptions]> = {};
 
     this.config.fields.forEach(field => {
-      const fieldConfig = field as any;
-      let initialValue = this.config.initialValue?.[field.key as keyof TModel] ?? null;
+      const fieldConfig = field as FormFieldView<TModel>;
+      let initialValue: unknown = this.config.initialValue?.[field.key as keyof TModel] ?? null;
 
       // Handle checkbox default values
       if (field.kind === FieldKind.CHECKBOX && initialValue === null) {
-        initialValue = (fieldConfig.defaultValue ?? false) as any;
+        initialValue = fieldConfig.defaultValue ?? false;
       }
 
     const validators = fieldConfig.validators || [];
@@ -247,20 +317,20 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
     // Apply disabled/readOnly state to controls
     this.config.fields.forEach(field => {
-      const fieldAny = field as any;
+      const fieldView = field as FormFieldView<TModel>;
       const control = this.form.get(field.key as string);
-      if (control && (fieldAny.disabled || fieldAny.readOnly)) {
+      if (control && (fieldView.disabled || fieldView.readOnly)) {
         control.disable();
       }
     });
   }
 
   isFieldReadOnly(field: FormFieldConfig<TModel>): boolean {
-    return this.config.readOnly === true || (field as any).readOnly === true;
+    return this.config.readOnly === true || (field as FormFieldView<TModel>).readOnly === true;
   }
 
   isFieldDisabled(field: FormFieldConfig<TModel>): boolean {
-    return this.config.disabled === true || (field as any).disabled === true;
+    return this.config.disabled === true || (field as FormFieldView<TModel>).disabled === true;
   }
 
   /** Track which field groups are currently visible */
@@ -275,8 +345,8 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
       (this.config.fieldGroups || []).forEach(g => {
         (g.rows || []).forEach(r => r.fields.forEach(f => fieldsInGroups.add(f.field.key as string)));
         // Also check if group has flat fields list (compatibility)
-        if ((g as any).fields) {
-          (g as any).fields.forEach((f: any) => fieldsInGroups.add(f.key as string));
+        if (g.fields) {
+          g.fields.forEach(f => fieldsInGroups.add(f.key as string));
         }
       });
 
@@ -336,8 +406,8 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
       } else if (isVisible && !wasVisible) {
         // Group became visible — restore validators
         group.fields.forEach(field => {
-          const fieldAny = field as any;
-          const validators = fieldAny.validators || [];
+          const fieldView = field as FormFieldView<TModel>;
+          const validators = fieldView.validators || [];
           const control = this.form.get(field.key as string);
           if (control) {
             control.setValidators(validators);
@@ -358,11 +428,11 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   // =========================
 
   private initializeVisibility(): void {
-    const formValue = this.form.value;
+    const formValue = this.form.value as Partial<TModel>;
     this.config.fields.forEach(field => {
       const key = field.key as string;
-      const fieldAny = field as any;
-      const isVisible = fieldAny.visible ? fieldAny.visible(formValue) : true;
+      const fieldView = field as FormFieldView<TModel>;
+      const isVisible = fieldView.visible ? fieldView.visible(formValue) : true;
       this.fieldVisibility[key] = isVisible;
 
       // If initially hidden, clear validators so they don't block submit
@@ -372,14 +442,14 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
           control.clearValidators();
           control.updateValueAndValidity({ emitEvent: false });
         }
-      } else if (fieldAny.conditionallyRequired) {
+      } else if (fieldView.conditionallyRequired) {
         // Initialize conditionallyRequired state for visible fields
-        const isRequired = fieldAny.conditionallyRequired(formValue);
+        const isRequired = fieldView.conditionallyRequired(formValue);
         this.fieldConditionallyRequired[key] = isRequired;
         if (isRequired) {
           const control = this.form.get(key);
           if (control) {
-            const validators = this.buildValidators(fieldAny, formValue);
+            const validators = this.buildValidators(fieldView, formValue);
             control.setValidators(validators);
             control.updateValueAndValidity({emitEvent: false});
           }
@@ -389,12 +459,12 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
   }
 
   private updateVisibility(): void {
-    const formValue = this.form.value;
+    const formValue = this.form.value as Partial<TModel>;
     this.config.fields.forEach(field => {
       const key = field.key as string;
-      const fieldAny = field as any;
+      const fieldView = field as FormFieldView<TModel>;
       const wasVisible = this.fieldVisibility[key];
-      const isVisible = fieldAny.visible ? fieldAny.visible(formValue) : true;
+      const isVisible = fieldView.visible ? fieldView.visible(formValue) : true;
       this.fieldVisibility[key] = isVisible;
 
       // When a field becomes hidden, clear its validators so it doesn't block submit
@@ -405,12 +475,12 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
           control.updateValueAndValidity({ emitEvent: false });
         } else if (isVisible && !wasVisible) {
           // Restore validators (including conditionallyRequired if active)
-          const validators = this.buildValidators(fieldAny, formValue);
+          const validators = this.buildValidators(fieldView, formValue);
           control.setValidators(validators);
           control.updateValueAndValidity({emitEvent: false});
         } else if (isVisible) {
           // Update conditionallyRequired for visible fields
-          this.updateConditionallyRequired(fieldAny, formValue);
+          this.updateConditionallyRequired(fieldView, formValue);
         }
       }
     });
@@ -418,13 +488,13 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
   /**
    * Builds the full validator array for a field, including conditionallyRequired.
-   * @param fieldAny The field configuration.
+   * @param field The field configuration view.
    * @param formValue The current form values.
    * @returns Array of validators to apply.
    */
-  private buildValidators(fieldAny: any, formValue: any): any[] {
-    const baseValidators = fieldAny.validators ? [...fieldAny.validators] : [];
-    if (fieldAny.conditionallyRequired && fieldAny.conditionallyRequired(formValue)) {
+  private buildValidators(field: FormFieldView<TModel>, formValue: Partial<TModel>): ValidatorFn[] {
+    const baseValidators = field.validators ? [...field.validators] : [];
+    if (field.conditionallyRequired && field.conditionallyRequired(formValue)) {
       if (!baseValidators.includes(Validators.required)) {
         baseValidators.push(Validators.required);
       }
@@ -434,20 +504,20 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
   /**
    * Updates the conditionallyRequired state for a single field and adjusts validators.
-   * @param fieldAny The field configuration.
+   * @param field The field configuration view.
    * @param formValue The current form values.
    */
-  private updateConditionallyRequired(fieldAny: any, formValue: any): void {
-    if (!fieldAny.conditionallyRequired) return;
-    const key = fieldAny.key as string;
+  private updateConditionallyRequired(field: FormFieldView<TModel>, formValue: Partial<TModel>): void {
+    if (!field.conditionallyRequired) return;
+    const key = field.key as string;
     const wasRequired = this.fieldConditionallyRequired[key] ?? false;
-    const isRequired = fieldAny.conditionallyRequired(formValue);
+    const isRequired = field.conditionallyRequired(formValue);
     this.fieldConditionallyRequired[key] = isRequired;
 
     if (isRequired !== wasRequired) {
       const control = this.form.get(key);
       if (control) {
-        const validators = this.buildValidators(fieldAny, formValue);
+        const validators = this.buildValidators(field, formValue);
         control.setValidators(validators);
         control.updateValueAndValidity({emitEvent: false});
       }
@@ -489,9 +559,9 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
 
   private initializeDataSources(): void {
     this.config.fields.forEach(field => {
-      const fieldAny = field as any;
-      if (fieldAny.dataSource) {
-        this.loadFieldOptions(field.key as string, fieldAny.dataSource, this.form.value);
+      const fieldView = field as FormFieldView<TModel>;
+      if (fieldView.dataSource) {
+        this.loadFieldOptions(field.key as string, fieldView.dataSource, this.form.value as Partial<TModel>);
       }
     });
   }
@@ -506,7 +576,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     if (this.fieldOptions[key] !== undefined) {
       return this.fieldOptions[key];
     }
-    return (field as any).options || [];
+    return (field as FormFieldView<TModel>).options || [];
   }
 
   /** Convert SelectOption[] to MnSelectOption[] for mn-lib-select */
@@ -518,7 +588,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     }));
   }
 
-  getSelectProps(field: FormFieldConfig<TModel>): any {
+  getSelectProps(field: FormFieldConfig<TModel>): MnSelectProps {
     return {
       id: field.key as string,
       label: this.asField(field).label,
@@ -527,7 +597,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     };
   }
 
-  private async loadFieldOptions(key: string, dataSource: FieldDataSource, formValue: any): Promise<void> {
+  private async loadFieldOptions(key: string, dataSource: FieldDataSource, formValue: Partial<TModel>): Promise<void> {
     this.fieldLoading[key] = true;
     try {
       this.fieldOptions[key] = await dataSource.load(formValue);
@@ -554,7 +624,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
         // Pre-select rows from the form's initial value
         const control = this.form.get(field.key as string);
         if (control && Array.isArray(control.value) && control.value.length > 0) {
-          ds.initialSelectedIds = control.value.map((v: any) => String(v));
+          ds.initialSelectedIds = control.value.map((v: unknown) => String(v));
         } else if (control && control.value === null) {
           control.setValue([], { emitEvent: false });
         }
@@ -577,7 +647,7 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     });
   }
 
-  onTableSelectionChange(field: FormFieldConfig<TModel>, selectedRows: any[]): void {
+  onTableSelectionChange(field: FormFieldConfig<TModel>, selectedRows: unknown[]): void {
     if (field.kind === FieldKind.SINGLE_SELECT_TABLE) {
       const tableField = field as SingleSelectTableFieldConfig<TModel>;
       const getVal = tableField.getRowValue || tableField.tableDataSource.getID;
@@ -690,17 +760,17 @@ export class MnFormBodyComponent<TModel = any, TResult = TModel> implements OnIn
     });
   }
 
-  private previousFormValue: Record<string, any> = {};
+  private previousFormValue: Partial<TModel> = {};
 
-  private reloadDependentDataSources(formValue: any): void {
+  private reloadDependentDataSources(formValue: Partial<TModel>): void {
     this.config.fields.forEach(field => {
-      const fieldAny = field as any;
-      const dataSource: FieldDataSource | undefined = fieldAny.dataSource;
+      const fieldView = field as FormFieldView<TModel>;
+      const dataSource: FieldDataSource | undefined = fieldView.dataSource;
       if (!dataSource?.dependsOn) return;
 
       // Check if any dependency changed
-      const changed = dataSource.dependsOn.some((depKey: any) => {
-        return formValue[depKey] !== this.previousFormValue[depKey];
+      const changed = dataSource.dependsOn.some(depKey => {
+        return formValue[depKey as keyof TModel] !== this.previousFormValue[depKey as keyof TModel];
       });
 
       if (changed) {

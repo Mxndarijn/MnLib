@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MnDualHorizontalImage, MnDualHorizontalImageTypes } from 'mn-angular-lib';
+import {MnDualHorizontalImage} from 'mn-angular-lib';
 
 @Component({
   selector: 'app-dual-horizontal-image-demo',

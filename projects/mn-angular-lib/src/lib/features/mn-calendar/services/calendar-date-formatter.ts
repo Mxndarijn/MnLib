@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
  * Locale-independent settings (day names, view labels, "Today" label) have been
  * moved to {@link CalendarConfig} so they can be configured declaratively.
  */
-export interface CalendarDateFormatter {
+export type CalendarDateFormatter = {
   /** Formats an hour + minute pair (e.g. `9, 0` → `"09:00 AM"`). */
   formatTimeI(hour: number, minute: number): Promise<string>;
   /** Formats the time portion of a Date. Returns `''` for `undefined`. */

@@ -2,9 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { CrudService } from './crud.service';
 import { API_BASE_URL } from './crud.tokens';
-import { HttpClient, HttpErrorResponse, HttpStatusCode, provideHttpClient } from '@angular/common/http';
+import {HttpErrorResponse, HttpParams, HttpStatusCode, provideHttpClient} from '@angular/common/http';
+import {ApiError, QueryParams} from './crud.model';
 
-interface TestEntity {
+type TestEntity = {
   id: number;
   name: string;
 }
@@ -43,7 +44,7 @@ describe('CrudService', () => {
   });
 
   it('should construct the correct endpoint URL', () => {
-    expect((service as any).endpoint).toBe(`${baseUrl}/test`);
+    expect((service as unknown as { endpoint: string }).endpoint).toBe(`${baseUrl}/test`);
   });
 
   describe('getAll', () => {
@@ -168,7 +169,7 @@ describe('CrudService', () => {
         statusText: 'Bad Request'
       });
 
-      const mapped = (service as any).mapHttpError(errorResponse);
+      const mapped = (service as unknown as { mapHttpError: (e: unknown) => ApiError }).mapHttpError(errorResponse);
       expect(mapped.backendMessage).toBe('Backend Error Message');
     });
 
@@ -185,7 +186,7 @@ describe('CrudService', () => {
         statusText: 'Unprocessable Entity'
       });
 
-      const mapped = (service as any).mapHttpError(errorResponse);
+      const mapped = (service as unknown as { mapHttpError: (e: unknown) => ApiError }).mapHttpError(errorResponse);
       expect(mapped.validationErrors).toEqual(errorBody.errors);
     });
 
@@ -199,14 +200,15 @@ describe('CrudService', () => {
         HttpStatusCode.GatewayTimeout
       ];
 
+      const svcWithMapHttpError = service as unknown as { mapHttpError: (e: unknown) => ApiError };
       retryableStatuses.forEach(status => {
         const errorResponse = new HttpErrorResponse({ status });
-        const mapped = (service as any).mapHttpError(errorResponse);
+        const mapped = svcWithMapHttpError.mapHttpError(errorResponse);
         expect(mapped.retryable).toBeTrue();
       });
 
       const nonRetryable = new HttpErrorResponse({ status: 400 });
-      expect((service as any).mapHttpError(nonRetryable).retryable).toBeFalse();
+      expect(svcWithMapHttpError.mapHttpError(nonRetryable).retryable).toBeFalse();
     });
   });
 
@@ -220,7 +222,9 @@ describe('CrudService', () => {
         missing: undefined
       };
 
-      const params = (service as any).toHttpParams(query);
+      const params = (service as unknown as {
+        toHttpParams: (q?: QueryParams) => HttpParams | undefined
+      }).toHttpParams(query);
       expect(params.get('page')).toBe('1');
       expect(params.get('filter')).toBe('test');
       expect(params.getAll('tags')).toEqual(['a', 'b']);

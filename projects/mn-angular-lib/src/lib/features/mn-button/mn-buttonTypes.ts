@@ -1,6 +1,6 @@
 import {MnButtonVariants} from './mn-buttonVariants';
 
-export interface MnButtonTypes {
+export type MnButtonTypes = {
   size: MnButtonVariants['size'];
   variant: MnButtonVariants['variant'];
   borderRadius: MnButtonVariants['borderRadius'];

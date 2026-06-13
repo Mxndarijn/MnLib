@@ -1,4 +1,9 @@
-import { FormLayoutBuilder, FieldValidatorBuilder } from './form-layout.builder';
+import {
+  FormLayoutBuilder,
+  FieldValidatorBuilder,
+  FormContainerConfig,
+  ChainableGroupBuilder
+} from './form-layout.builder';
 import {
   BaseModalConfig,
   ModalSize,
@@ -16,16 +21,20 @@ import {
   FormFieldConfig,
   FormFieldGroup,
   AnimationOptions,
+  StepBodyConfig,
 } from '../mn-modal.types';
+import {ValidatorFn} from '@angular/forms';
 
-export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>, TResult = unknown> {
+export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>, TResult = unknown, TModel = unknown> {
   protected config: TConfig;
-  protected layoutBuilder: FormLayoutBuilder<any, this>;
+  protected layoutBuilder: FormLayoutBuilder<TModel, this>;
 
   protected constructor(initialConfig: TConfig) {
     this.config = initialConfig;
-    // Base layout builder, we pass this.config directly if it supports it
-    this.layoutBuilder = new FormLayoutBuilder(this.config as any, this);
+    this.layoutBuilder = new FormLayoutBuilder<TModel, this>(
+      this.config as unknown as FormContainerConfig<TModel>,
+      this
+    );
   }
 
   title(title: string): this {
@@ -80,12 +89,12 @@ export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>,
     return this;
   }
 
-  readOnly(readOnly: boolean = true): this {
+  readOnly(readOnly = true): this {
     this.config.readOnly = readOnly;
     return this;
   }
 
-  disabled(disabled: boolean = true): this {
+  disabled(disabled = true): this {
     this.config.disabled = disabled;
     return this;
   }
@@ -133,35 +142,35 @@ export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>,
   /**
    * Add a custom body/content to the modal.
    */
-  body(body: any): this {
+  body(body: StepBodyConfig): this {
     return this.layoutBuilder.body(body);
   }
 
   /**
    * Add a field.
    */
-  field(field: FormFieldConfig<any>): this {
+  field(field: FormFieldConfig<TModel>): this {
     return this.layoutBuilder.field(field);
   }
 
   /**
    * Add a field with a fluent validation builder.
    */
-  fieldWithValidators(field: FormFieldConfig<any>): FieldValidatorBuilder<any, this> {
+  fieldWithValidators(field: FormFieldConfig<TModel>): FieldValidatorBuilder<TModel, this> {
     return this.layoutBuilder.fieldWithValidators(field);
   }
 
   /**
    * Start a new row.
    */
-  row(columns: number = 2): this {
+  row(columns = 2): this {
     return this.layoutBuilder.row(columns);
   }
 
   /**
    * Add a field to the current row.
    */
-  addToRow(field: FormFieldConfig<any>, span: number = 1): this {
+  addToRow(field: FormFieldConfig<TModel>, span = 1): this {
     return this.layoutBuilder.addToRow(field, span);
   }
 
@@ -170,7 +179,7 @@ export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>,
    */
   addRow(
     columns: number,
-    buildFn: (row: { add: (field: FormFieldConfig<any>, span?: number) => void }) => void
+    buildFn: (row: { add: (field: FormFieldConfig<TModel>, span?: number) => void }) => void
   ): this {
     return this.layoutBuilder.addRow(columns, buildFn);
   }
@@ -178,22 +187,25 @@ export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>,
   /**
    * Add a field group.
    */
-  fieldGroup(group: FormFieldGroup<any>): this;
+  fieldGroup(group: FormFieldGroup<TModel>): this;
+  fieldGroup(title: string, buildFn: (group: ChainableGroupBuilder<TModel>) => void): this;
+  fieldGroup(title: string, description: string, buildFn: (group: ChainableGroupBuilder<TModel>) => void): this;
   fieldGroup(
-    title: string,
-    buildFn: (group: FormLayoutBuilder<any, any>) => void
-  ): this;
-  fieldGroup(
-    title: string,
-    description: string,
-    buildFn: (group: FormLayoutBuilder<any, any>) => void
-  ): this;
-  fieldGroup(
-    arg1: string | FormFieldGroup<any>,
-    arg2?: string | ((group: FormLayoutBuilder<any, any>) => void),
-    arg3?: (group: FormLayoutBuilder<any, any>) => void
+    arg1: string | FormFieldGroup<TModel>,
+    arg2?: string | ((group: ChainableGroupBuilder<TModel>) => void),
+    arg3?: (group: ChainableGroupBuilder<TModel>) => void
   ): this {
-    return this.layoutBuilder.fieldGroup(arg1 as any, arg2 as any, arg3 as any);
+    if (typeof arg1 !== 'string') {
+      return this.layoutBuilder.fieldGroup(arg1);
+    }
+    if (typeof arg2 === 'string') {
+      return this.layoutBuilder.fieldGroup(arg1, arg2, arg3!);
+    }
+    return this.layoutBuilder.fieldGroup(arg1, arg2!);
+  }
+
+  groupValidators(validators: ValidatorFn[]): this {
+    return this.layoutBuilder.groupValidators(validators);
   }
 
   build(): Readonly<TConfig> {

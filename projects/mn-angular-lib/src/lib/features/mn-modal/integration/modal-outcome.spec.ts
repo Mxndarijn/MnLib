@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentRef} from '@angular/core';
 import { Validators } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ModalBuilder } from '../builder/modal.builder';
@@ -7,28 +8,41 @@ import { MnConfirmationBodyComponent } from '../components/mn-confirmation-body/
 import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
 import {
   FieldKind,
-  ModalSize,
-  ModalKind,
   ModalCloseReason,
-  ConfirmationTone,
+  ModalKind,
   ActionStyle,
   ValidationStatus,
   WizardResult,
+  WizardModalConfig,
+  ConfirmationModalConfig,
+  WizardStepChangeEvent,
+  ModalCloseEvent,
+  BaseModalConfig,
 } from '../mn-modal.types';
 import { MnModalRef } from '../mn-modal-ref';
 
 // =============================================
 // Helper: mock MnModalRef that tracks events
 // =============================================
-function createTrackingModalRef(): { ref: any; closed: any[]; lastCloseResult: any; lastDismissReason: any } {
-  const tracker = {
-    ref: null as any,
-    closed: [] as any[],
-    lastCloseResult: undefined as any,
-    lastDismissReason: undefined as any,
+function createTrackingModalRef(): {
+  ref: MnModalRef<unknown>;
+  closed: { reason: ModalCloseReason; result?: unknown }[];
+  lastCloseResult: unknown;
+  lastDismissReason: ModalCloseReason | undefined
+} {
+  const tracker: {
+    ref: MnModalRef<unknown>;
+    closed: { reason: ModalCloseReason; result?: unknown }[];
+    lastCloseResult: unknown;
+    lastDismissReason: ModalCloseReason | undefined
+  } = {
+    ref: null as unknown as MnModalRef<unknown>,
+    closed: [],
+    lastCloseResult: undefined,
+    lastDismissReason: undefined,
   };
   tracker.ref = {
-    close: jasmine.createSpy('close').and.callFake((result?: any) => {
+    close: jasmine.createSpy('close').and.callFake((result?: unknown) => {
       tracker.lastCloseResult = result;
       tracker.closed.push({ reason: ModalCloseReason.COMPLETED, result });
     }),
@@ -37,7 +51,7 @@ function createTrackingModalRef(): { ref: any; closed: any[]; lastCloseResult: a
       tracker.closed.push({ reason });
     }),
     afterClosed$: { subscribe: () => {} },
-  };
+  } as unknown as MnModalRef<unknown>;
   return tracker;
 }
 
@@ -54,7 +68,7 @@ describe('Outcome: Form Modal', () => {
     }).compileComponents();
   });
 
-  interface ContactForm {
+  type ContactForm = {
     name: string;
     email: string;
   }
@@ -201,8 +215,8 @@ describe('Outcome: Form Modal', () => {
 // Outcome Tests: Confirmation Modal
 // =============================================
 describe('Outcome: Confirmation Modal', () => {
-  let component: MnConfirmationBodyComponent<any>;
-  let fixture: ComponentFixture<MnConfirmationBodyComponent<any>>;
+  let component: MnConfirmationBodyComponent<boolean>;
+  let fixture: ComponentFixture<MnConfirmationBodyComponent<boolean>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -217,10 +231,10 @@ describe('Outcome: Confirmation Modal', () => {
       .confirmAction({ label: 'Delete', style: ActionStyle.DANGER })
       .build();
 
-    fixture = TestBed.createComponent(MnConfirmationBodyComponent);
+    fixture = TestBed.createComponent(MnConfirmationBodyComponent) as ComponentFixture<MnConfirmationBodyComponent<boolean>>;
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as ConfirmationModalConfig<boolean>;
+    component.modalRef = tracker.ref as unknown as MnModalRef<boolean>;
     fixture.detectChanges();
 
     await component.confirm();
@@ -237,10 +251,10 @@ describe('Outcome: Confirmation Modal', () => {
       .cancelAction({ label: 'No' })
       .build();
 
-    fixture = TestBed.createComponent(MnConfirmationBodyComponent);
+    fixture = TestBed.createComponent(MnConfirmationBodyComponent) as ComponentFixture<MnConfirmationBodyComponent<boolean>>;
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as ConfirmationModalConfig<boolean>;
+    component.modalRef = tracker.ref as unknown as MnModalRef<boolean>;
     fixture.detectChanges();
 
     component.cancel();
@@ -257,10 +271,10 @@ describe('Outcome: Confirmation Modal', () => {
       .cancelAction({ label: 'Dismiss', reason: ModalCloseReason.DISMISSED })
       .build();
 
-    fixture = TestBed.createComponent(MnConfirmationBodyComponent);
+    fixture = TestBed.createComponent(MnConfirmationBodyComponent) as ComponentFixture<MnConfirmationBodyComponent<boolean>>;
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as ConfirmationModalConfig<boolean>;
+    component.modalRef = tracker.ref as unknown as MnModalRef<boolean>;
     fixture.detectChanges();
 
     component.cancel();
@@ -281,10 +295,10 @@ describe('Outcome: Confirmation Modal', () => {
       .confirmAction({ label: 'Yes', handler })
       .build();
 
-    fixture = TestBed.createComponent(MnConfirmationBodyComponent);
+    fixture = TestBed.createComponent(MnConfirmationBodyComponent) as ComponentFixture<MnConfirmationBodyComponent<boolean>>;
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as ConfirmationModalConfig<boolean>;
+    component.modalRef = tracker.ref as unknown as MnModalRef<boolean>;
     fixture.detectChanges();
 
     await component.confirm();
@@ -318,8 +332,8 @@ describe('Outcome: Wizard Modal', () => {
 
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as WizardModalConfig;
+    component.modalRef = tracker.ref as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
 
     await component.next();
@@ -343,8 +357,8 @@ describe('Outcome: Wizard Modal', () => {
 
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as WizardModalConfig;
+    component.modalRef = tracker.ref as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
 
     await component.back(); // On first step, back = close
@@ -366,8 +380,8 @@ describe('Outcome: Wizard Modal', () => {
 
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as WizardModalConfig;
+    component.modalRef = tracker.ref as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
 
     await component.complete();
@@ -392,8 +406,8 @@ describe('Outcome: Wizard Modal', () => {
 
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as WizardModalConfig;
+    component.modalRef = tracker.ref as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
 
     // Wait for form bodies to initialize
@@ -428,9 +442,9 @@ describe('Outcome: Wizard Modal', () => {
 
   it('should call onStepChange with correct direction on forward navigation', async () => {
     const tracker = createTrackingModalRef();
-    const events: any[] = [];
+    const events: WizardStepChangeEvent[] = [];
     const handler = {
-      handle: jasmine.createSpy('handle').and.callFake(async (event: any) => {
+      handle: jasmine.createSpy('handle').and.callFake(async (event: WizardStepChangeEvent) => {
         events.push(event);
       }),
     };
@@ -443,8 +457,8 @@ describe('Outcome: Wizard Modal', () => {
 
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as WizardModalConfig;
+    component.modalRef = tracker.ref as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
 
     await component.next();
@@ -465,9 +479,9 @@ describe('Outcome: Wizard Modal', () => {
 
   it('should call onStepChange with backward direction on back navigation', async () => {
     const tracker = createTrackingModalRef();
-    const events: any[] = [];
+    const events: WizardStepChangeEvent[] = [];
     const handler = {
-      handle: jasmine.createSpy('handle').and.callFake(async (event: any) => {
+      handle: jasmine.createSpy('handle').and.callFake(async (event: WizardStepChangeEvent) => {
         events.push(event);
       }),
     };
@@ -479,8 +493,8 @@ describe('Outcome: Wizard Modal', () => {
 
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as WizardModalConfig;
+    component.modalRef = tracker.ref as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
 
     await component.next();
@@ -510,8 +524,8 @@ describe('Outcome: Wizard Modal', () => {
 
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
-    component.modalRef = tracker.ref;
+    component.config = config as WizardModalConfig;
+    component.modalRef = tracker.ref as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
 
     // First attempt fails
@@ -542,12 +556,12 @@ describe('Outcome: MnModalRef afterClosed$ events', () => {
         detectChanges: jasmine.createSpy('detectChanges'),
       },
       destroy: jasmine.createSpy('destroy'),
-    } as any;
+    } as unknown as ComponentRef<unknown>;
   }
 
   it('close() should emit COMPLETED with typed result via afterClosed$', (done) => {
     const mockRef = createMockComponentRef();
-    const ref = new MnModalRef<{ name: string }>(mockRef, { kind: 'form' } as any);
+    const ref = new MnModalRef<{ name: string }>(mockRef, {kind: ModalKind.FORM} as BaseModalConfig<{ name: string }>);
 
     ref.afterClosed$.subscribe((event) => {
       expect(event.reason).toBe(ModalCloseReason.COMPLETED);
@@ -560,7 +574,7 @@ describe('Outcome: MnModalRef afterClosed$ events', () => {
 
   it('dismiss(ESCAPE) should emit ESCAPE reason via afterClosed$', (done) => {
     const mockRef = createMockComponentRef();
-    const ref = new MnModalRef(mockRef, { kind: 'confirmation' } as any);
+    const ref = new MnModalRef(mockRef, {kind: ModalKind.CONFIRMATION} as BaseModalConfig);
 
     ref.afterClosed$.subscribe((event) => {
       expect(event.reason).toBe(ModalCloseReason.ESCAPE);
@@ -573,7 +587,7 @@ describe('Outcome: MnModalRef afterClosed$ events', () => {
 
   it('dismiss(BACKDROP) should emit BACKDROP reason via afterClosed$', (done) => {
     const mockRef = createMockComponentRef();
-    const ref = new MnModalRef(mockRef, { kind: 'confirmation' } as any);
+    const ref = new MnModalRef(mockRef, {kind: ModalKind.CONFIRMATION} as BaseModalConfig);
 
     ref.afterClosed$.subscribe((event) => {
       expect(event.reason).toBe(ModalCloseReason.BACKDROP);
@@ -585,8 +599,8 @@ describe('Outcome: MnModalRef afterClosed$ events', () => {
 
   it('afterClosed$ should complete after emission (no further events)', (done) => {
     const mockRef = createMockComponentRef();
-    const ref = new MnModalRef<string>(mockRef, { kind: 'form' } as any);
-    const emissions: any[] = [];
+    const ref = new MnModalRef<string>(mockRef, {kind: ModalKind.FORM} as BaseModalConfig<string>);
+    const emissions: ModalCloseEvent<string>[] = [];
 
     ref.afterClosed$.subscribe({
       next: (event) => emissions.push(event),

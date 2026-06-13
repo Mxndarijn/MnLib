@@ -2,10 +2,10 @@ import { ModalBuilder } from './modal.builder';
 import {
   FieldKind,
   ModalKind,
-  ModalSize,
   StepState,
   ValidationStatus,
   WizardFlowMode,
+  WizardModalConfig,
 } from '../mn-modal.types';
 
 describe('WizardModalBuilder', () => {
@@ -124,7 +124,7 @@ describe('WizardModalBuilder', () => {
     const config = ModalBuilder.wizard()
       .addStep('S', (s) => s.body(''))
       .build();
-    expect(() => (config as any).title = 'x').toThrow();
+    expect(() => (config as WizardModalConfig).title = 'x').toThrow();
   });
 
   it('should default step state to PENDING', () => {
@@ -157,12 +157,12 @@ describe('WizardModalBuilder', () => {
   });
 
   it('should support generic TResult', () => {
-    interface MyResult {
+    type MyResult = {
       id: string;
       value: number;
     }
     const config = ModalBuilder.wizard<MyResult>()
-      .onBeforeComplete([(payload) => {
+      .onBeforeComplete([(_payload) => {
         // payload: Record<ModalStepId, Record<string, any>>
         return null; // Should compile
       }])
@@ -173,7 +173,7 @@ describe('WizardModalBuilder', () => {
   });
 
   it('should allow structured payload mapping (concept)', () => {
-    interface WizardData {
+    type WizardData = {
       account: { email: string };
       profile: { age: number };
     }
@@ -194,7 +194,7 @@ describe('WizardModalBuilder', () => {
   });
 
   it('should support top-level initialValue', () => {
-    interface MyModel { name: string; age: number; }
+    type MyModel = { name: string; age: number; }
     const config = ModalBuilder.wizard<MyModel>()
       .initialValue({ name: 'Global' })
       .addStep('S1', (s) => s.body(''))

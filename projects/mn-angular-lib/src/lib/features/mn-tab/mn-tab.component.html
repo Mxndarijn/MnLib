@@ -12,7 +12,7 @@
       @for (item of dataSource.items; track item.label) {
         <div
           role="tab"
-          class="tab px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center"
+          (keyup.enter)="setActive(item)"
           [class.flex-1]="justified"
           [class.text-primary]="currentActive === item"
           [class.font-bold]="currentActive === item"
@@ -20,7 +20,10 @@
           [class.border-transparent]="currentActive !== item"
           [class.text-base-content]="currentActive !== item"
           [attr.aria-selected]="currentActive === item"
+          (keyup.space)="setActive(item)"
           (click)="setActive(item)"
+          class="tab px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2"
+          tabindex="0"
         >
           {{ item.label | mnTranslate }}
           @let badge = getBadge(item);

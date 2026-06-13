@@ -7,7 +7,8 @@ import {
   DefaultCalendarDateFormatter,
   CALENDAR_CONFIG,
   MnTabComponent,
-  MnTabDataSource
+  MnTabDataSource,
+  MnTabItem
 } from 'mn-angular-lib';
 
 @Component({
@@ -98,7 +99,7 @@ export class CalendarDemo {
     this.clickedEvent = event;
   }
 
-  onTabChange(tab: any) {
+  onTabChange(tab: MnTabItem) {
     this.activeTabIndex = this.tabDataSource.items.indexOf(tab);
   }
 

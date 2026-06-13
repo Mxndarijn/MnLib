@@ -1,11 +1,11 @@
 import { MnMultiSelectVariants } from './mn-multi-selectVariants';
 import { ValidationErrors } from '@angular/forms';
 
-export type MnMultiSelectErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
+export type MnMultiSelectErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
 
 export type MnMultiSelectErrorMessagesData = Partial<Record<string, MnMultiSelectErrorMessageData>>;
 
-export interface MnMultiSelectOption<TValue = unknown> {
+export type MnMultiSelectOption<TValue = unknown> = {
   /** Display label for the option */
   label: string;
 
@@ -16,7 +16,7 @@ export interface MnMultiSelectOption<TValue = unknown> {
   disabled?: boolean;
 }
 
-export interface MnMultiSelectProps<TValue = unknown> {
+export type MnMultiSelectProps<TValue = unknown> = {
   /** Unique identifier for the multi-select element (required for accessibility) */
   id: string;
 
@@ -73,7 +73,7 @@ export interface MnMultiSelectProps<TValue = unknown> {
   showAllErrors?: boolean;
 }
 
-export interface MnMultiSelectUIConfig {
+export type MnMultiSelectUIConfig = {
   /** Label text displayed above the multi-select */
   label?: string;
 

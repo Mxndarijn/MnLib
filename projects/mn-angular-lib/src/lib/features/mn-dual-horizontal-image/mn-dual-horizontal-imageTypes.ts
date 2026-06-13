@@ -1,4 +1,4 @@
-export interface MnDualHorizontalImageTypes {
+export type MnDualHorizontalImageTypes = {
   id: string;
   url: string;
   alt?: string;

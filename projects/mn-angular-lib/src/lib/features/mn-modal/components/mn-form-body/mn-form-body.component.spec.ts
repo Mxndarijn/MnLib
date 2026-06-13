@@ -1,30 +1,33 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Validators } from '@angular/forms';
 import { MnFormBodyComponent } from './mn-form-body.component';
+import {FieldKind, FormFieldConfig, FormFieldGroup, FormModalConfig, ModalKind} from '../../mn-modal.types';
 import { MnModalRef } from '../../mn-modal-ref';
-import { FieldKind, FormModalConfig, ModalKind, ModalCloseReason } from '../../mn-modal.types';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-function createMockModalRef(): any {
+function createMockModalRef(): MnModalRef<unknown> {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
     afterClosed$: { subscribe: () => {} },
-  };
+  } as unknown as MnModalRef<unknown>;
 }
 
-function createFormConfig(fields: any[], initialValue?: any): FormModalConfig<any, any> {
+function createFormConfig(
+  fields: FormFieldConfig<Record<string, unknown>>[],
+  initialValue?: Partial<Record<string, unknown>>,
+): FormModalConfig<Record<string, unknown>, Record<string, unknown>> {
   return {
     kind: ModalKind.FORM,
     fields,
     initialValue,
-  } as FormModalConfig<any, any>;
+  } as FormModalConfig<Record<string, unknown>, Record<string, unknown>>;
 }
 
 describe('MnFormBodyComponent', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef<unknown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -32,7 +35,7 @@ describe('MnFormBodyComponent', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig<any, any>) {
+  function setup(config: FormModalConfig<Record<string, unknown>, Record<string, unknown>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
@@ -123,7 +126,7 @@ describe('MnFormBodyComponent', () => {
   });
 
   it('should build rows from config.rows when provided', () => {
-    const config: FormModalConfig<any, any> = {
+    const config: FormModalConfig<Record<string, unknown>, Record<string, unknown>> = {
       kind: ModalKind.FORM,
       fields: [
         { kind: FieldKind.TEXT, key: 'a', label: 'A' },
@@ -150,7 +153,7 @@ describe('MnFormBodyComponent', () => {
   });
 
   it('should include top-level fields even when fieldGroups are present', () => {
-    const config: FormModalConfig<any, any> = {
+    const config: FormModalConfig<Record<string, unknown>, Record<string, unknown>> = {
       kind: ModalKind.FORM,
       fields: [
         { kind: FieldKind.TEXT, key: 'topField', label: 'Top' },
@@ -163,7 +166,7 @@ describe('MnFormBodyComponent', () => {
             { columns: 1, fields: [{ field: { kind: FieldKind.TEXT, key: 'groupField', label: 'In Group' }, span: 1 }] }
           ],
           fields: []
-        } as any
+        } as FormFieldGroup<Record<string, unknown>>
       ]
     };
     setup(config);
@@ -193,7 +196,7 @@ describe('MnFormBodyComponent', () => {
           validators: [Validators.required]
         }
       ]
-    } as any);
+    } as FormModalConfig<Record<string, unknown>, Record<string, unknown>>);
 
     const control = component.form.get('name');
     expect(control?.updateOn).toBe('blur');
@@ -206,7 +209,7 @@ describe('MnFormBodyComponent', () => {
         { kind: FieldKind.TEXT, key: 'field1', label: 'Field 1' },
         { kind: FieldKind.TEXT, key: 'field2', label: 'Field 2', autoFocus: true }
       ]
-    } as any);
+    } as FormModalConfig<Record<string, unknown>, Record<string, unknown>>);
 
     tick(150); // increased tick to ensure AfterViewInit setTimeout and internal applyAutoFocus setTimeout finish
     fixture.detectChanges();
@@ -217,7 +220,7 @@ describe('MnFormBodyComponent', () => {
     const spy = spyOn(inputFields![1], 'focus');
 
     // Re-trigger autoFocus logic
-    (component as any).applyAutoFocus();
+    component.applyAutoFocus();
     tick(100);
 
     expect(spy).toHaveBeenCalled();
@@ -230,7 +233,7 @@ describe('MnFormBodyComponent', () => {
       fields: [
         { kind: FieldKind.TEXT, key: 'name', label: 'Name' }
       ]
-    } as any);
+    } as FormModalConfig<Record<string, unknown>, Record<string, unknown>>);
 
     expect(component.form.disabled).toBeTrue();
     expect(component.form.get('name')?.disabled).toBeTrue();
@@ -243,7 +246,7 @@ describe('MnFormBodyComponent', () => {
       fields: [
         { kind: FieldKind.TEXT, key: 'name', label: 'Name' }
       ]
-    } as any);
+    } as FormModalConfig<Record<string, unknown>, Record<string, unknown>>);
 
     expect(component.isFieldReadOnly(component.config.fields[0])).toBeTrue();
     // form should also be disabled by default if readOnly is true in ngOnInit

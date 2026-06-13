@@ -1,14 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  inject,
-  InjectionToken,
-  Input,
-  OnInit,
-  Optional,
-  Self
-} from '@angular/core';
+import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnTextareaProps, MnTextareaErrorMessageData, MnTextareaUIConfig} from './mn-textareaTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -59,6 +49,8 @@ export const MN_TEXTAREA_CONFIG = new InjectionToken<MnTextareaUIConfig>('MN_TEX
   templateUrl: './mn-textarea.html',
 })
 export class MnTextarea implements OnInit {
+  ngControl = inject(NgControl, {optional: true, self: true});
+
   /** Resolved UI configuration for the textarea */
   protected uiConfig: MnTextareaUIConfig = {};
 
@@ -80,7 +72,8 @@ export class MnTextarea implements OnInit {
   isDisabled = false;
 
   /** Callback function to notify Angular forms of value changes */
-  private onChange: (val: any) => void = () => {};
+  private onChange: (val: unknown) => void = () => {
+  };
 
   /** Callback function to notify Angular forms when textarea is touched/blurred */
   private onTouched: () => void = () => {};
@@ -92,8 +85,8 @@ export class MnTextarea implements OnInit {
    */
   private readonly builtInErrorMessages: Record<string, MnTextareaErrorMessageData> = {
     required: 'This field is required',
-    minlength: (args: any) => `Minimum ${args.requiredLength} characters required`,
-    maxlength: (args: any) => `Maximum ${args.requiredLength} characters allowed`,
+    minlength: (args: unknown) => `Minimum ${(args as { requiredLength: number }).requiredLength} characters required`,
+    maxlength: (args: unknown) => `Maximum ${(args as { requiredLength: number }).requiredLength} characters allowed`,
   };
 
   /**
@@ -102,7 +95,7 @@ export class MnTextarea implements OnInit {
    *
    * @param ngControl - Angular's NgControl (injected via Dependency Injection)
    */
-  constructor(@Optional() @Self() public ngControl: NgControl) {
+  constructor() {
     if (this.ngControl) this.ngControl.valueAccessor = this;
   }
 
@@ -160,7 +153,7 @@ export class MnTextarea implements OnInit {
    *
    * @param fn - Callback function to notify Angular Forms of changes
    */
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (val: unknown) => void): void {
     this.onChange = fn;
   }
 
@@ -169,7 +162,7 @@ export class MnTextarea implements OnInit {
    *
    * @param fn - Callback function to notify Angular Forms of touch events
    */
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 

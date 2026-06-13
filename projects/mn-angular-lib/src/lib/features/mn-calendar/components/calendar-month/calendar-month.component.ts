@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
+﻿import { Component, Input, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CalendarEvent } from '../../models/calendar-event.model';
@@ -7,13 +7,13 @@ import { CalendarDateFormatter } from '../../services/calendar-date-formatter';
 import { DefaultCalendarDateFormatter } from '../../services/default-calendar-date-formatter';
 
 /**
- * Month grid view showing a 7×6 grid of day cells.
+ * Month grid view showing a 7Ã—6 grid of day cells.
  *
  * Each cell displays the day number and up to 3 coloured dots representing
  * events on that day. Clicking a cell emits `dayClicked`.
  */
 @Component({
-  selector: 'app-calendar-month',
+  selector: 'mn-calendar-month',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-month.component.html',
@@ -133,7 +133,7 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
     return event.id;
   }
 
-  /** Builds the 42-cell month grid (6 rows × 7 columns). */
+  /** Builds the 42-cell month grid (6 rows Ã— 7 columns). */
   private buildMonth() {
     if (!this.focusDay) return;
 

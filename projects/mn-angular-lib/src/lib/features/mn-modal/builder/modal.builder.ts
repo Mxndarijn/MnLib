@@ -2,9 +2,10 @@ import { WizardModalBuilder } from './wizard-modal.builder';
 import { FormModalBuilder } from './form-modal.builder';
 import { ConfirmationModalBuilder } from './confirmation-modal.builder';
 import { CustomModalBuilder } from './custom-modal.builder';
+import {WizardResult} from '../mn-modal.types';
 
 export class ModalBuilder {
-  static wizard<TResult = any>(): WizardModalBuilder<TResult> {
+  static wizard<TResult = WizardResult>(): WizardModalBuilder<TResult> {
     return new WizardModalBuilder<TResult>();
   }
 

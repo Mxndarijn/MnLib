@@ -2,7 +2,7 @@ import { MnInformationCardVariants } from './mn-information-cardVariants';
 
 export type { MnImageType } from '../../shared/types';
 
-export interface MnInformationCardBaseData {
+export type MnInformationCardBaseData = {
   id: number;
   bottomBorder?: MnInformationCardVariants['bottomBorder'];
   shadow?: MnInformationCardVariants['shadow'];

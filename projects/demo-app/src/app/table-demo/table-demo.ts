@@ -2,7 +2,7 @@ import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ColumnSortType, MnButton, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
 
-interface User {
+type User = {
   id: string;
   name: string;
   email: string;
@@ -49,8 +49,8 @@ const ALL_USERS: User[] = [
 export class TableDemo implements OnInit {
   selectedNames = 'none';
 
-  readonly actionsTpl = viewChild.required<TemplateRef<any>>('actionsTpl');
-  readonly toolbarRightTpl = viewChild.required<TemplateRef<any>>('toolbarRightTpl');
+  readonly actionsTpl = viewChild.required<TemplateRef<unknown>>('actionsTpl');
+  readonly toolbarRightTpl = viewChild.required<TemplateRef<unknown>>('toolbarRightTpl');
 
   // ── Basic table ──
   basicDataSource: TableDataSource<User> = {

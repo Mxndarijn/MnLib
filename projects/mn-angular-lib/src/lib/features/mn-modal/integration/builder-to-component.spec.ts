@@ -5,6 +5,7 @@ import { ModalBuilder } from '../builder/modal.builder';
 import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
 import { MnConfirmationBodyComponent } from '../components/mn-confirmation-body/mn-confirmation-body.component';
 import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
+import {MnModalRef} from '../mn-modal-ref';
 import {
   FieldKind,
   ModalSize,
@@ -12,20 +13,24 @@ import {
   ConfirmationTone,
   ActionStyle,
   ModalCloseReason,
-  WizardFlowMode,
-  FormLayoutMode,
   ValidationStatus,
+  ModalRef,
+  WizardResult,
+  FormModalConfig,
+  ConfirmationModalConfig,
+  WizardModalConfig,
 } from '../mn-modal.types';
 
-function createMockModalRef(): any {
+function createMockModalRef<T = unknown>(): ModalRef<T> {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
+    update: jasmine.createSpy('update'),
     afterClosed$: { subscribe: () => {} },
-  };
+  } as unknown as ModalRef<T>;
 }
 
-interface TestUser {
+type TestUser = {
   firstName: string;
   lastName: string;
   email: string;
@@ -38,7 +43,7 @@ interface TestUser {
 describe('Integration: FormModalBuilder → MnFormBodyComponent', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: ModalRef<unknown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -46,12 +51,12 @@ describe('Integration: FormModalBuilder → MnFormBodyComponent', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup<TModel>(config: Readonly<FormModalConfig<TModel>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
-    component.modalRef = mockModalRef;
+    component.config = config as unknown as FormModalConfig<unknown>;
+    component.modalRef = mockModalRef as unknown as MnModalRef;
     fixture.detectChanges();
   }
 
@@ -198,7 +203,7 @@ describe('Integration: FormModalBuilder → MnFormBodyComponent', () => {
   });
 
   it('should handle select fields from builder config', () => {
-    interface SelectModel { role: string; }
+    type SelectModel = { role: string; }
     const config = ModalBuilder.form<SelectModel>()
       .field({
         kind: FieldKind.SELECT,
@@ -220,7 +225,7 @@ describe('Integration: FormModalBuilder → MnFormBodyComponent', () => {
   });
 
   it('should handle mixed row layouts from builder', () => {
-    interface LayoutModel { a: string; b: string; c: string; d: string; }
+    type LayoutModel = { a: string; b: string; c: string; d: string; }
     const config = ModalBuilder.form<LayoutModel>()
       .row(3)
         .addToRow({ kind: FieldKind.TEXT, key: 'a', label: 'A' })
@@ -243,9 +248,9 @@ describe('Integration: FormModalBuilder → MnFormBodyComponent', () => {
 // Integration: ConfirmationModalBuilder → MnConfirmationBodyComponent
 // =============================================================
 describe('Integration: ConfirmationModalBuilder → MnConfirmationBodyComponent', () => {
-  let component: MnConfirmationBodyComponent<any>;
-  let fixture: ComponentFixture<MnConfirmationBodyComponent<any>>;
-  let mockModalRef: any;
+  let component: MnConfirmationBodyComponent<boolean>;
+  let fixture: ComponentFixture<MnConfirmationBodyComponent<boolean>>;
+  let mockModalRef: ModalRef<boolean>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -253,12 +258,12 @@ describe('Integration: ConfirmationModalBuilder → MnConfirmationBodyComponent'
     }).compileComponents();
   });
 
-  function setup(config: any) {
-    fixture = TestBed.createComponent(MnConfirmationBodyComponent);
+  function setup(config: Readonly<ConfirmationModalConfig<boolean>>) {
+    fixture = TestBed.createComponent<MnConfirmationBodyComponent<boolean>>(MnConfirmationBodyComponent);
     component = fixture.componentInstance;
-    mockModalRef = createMockModalRef();
-    component.config = config;
-    component.modalRef = mockModalRef;
+    mockModalRef = createMockModalRef<boolean>();
+    component.config = config as ConfirmationModalConfig<boolean>;
+    component.modalRef = mockModalRef as unknown as MnModalRef<boolean>;
     fixture.detectChanges();
   }
 
@@ -369,7 +374,7 @@ describe('Integration: ConfirmationModalBuilder → MnConfirmationBodyComponent'
 describe('Integration: WizardModalBuilder → MnWizardBodyComponent', () => {
   let component: MnWizardBodyComponent;
   let fixture: ComponentFixture<MnWizardBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: ModalRef<WizardResult>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -377,12 +382,12 @@ describe('Integration: WizardModalBuilder → MnWizardBodyComponent', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup(config: Readonly<WizardModalConfig<unknown>>) {
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
-    mockModalRef = createMockModalRef();
-    component.config = config;
-    component.modalRef = mockModalRef;
+    mockModalRef = createMockModalRef<WizardResult>();
+    component.config = config as unknown as WizardModalConfig;
+    component.modalRef = mockModalRef as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
   }
 
@@ -587,7 +592,7 @@ describe('Integration: WizardModalBuilder → MnWizardBodyComponent', () => {
 
   it('should pre-build form configs for steps with fields', () => {
     const config = ModalBuilder.wizard()
-      .addStep('Form Step', (s) => {
+        .addStep<{ name: string }>('Form Step', (s) => {
         s.field({ kind: FieldKind.TEXT, key: 'name', label: 'Name', validators: [Validators.required] });
       }, 'form-step')
       .addStep('Text Step', (s) => s.body('Just text'), 'text-step')

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'theme-toggle',
+  selector: 'app-theme-toggle',
   standalone: true,
   template: `
     <button

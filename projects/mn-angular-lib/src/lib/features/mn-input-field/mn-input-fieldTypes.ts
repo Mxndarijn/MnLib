@@ -26,7 +26,7 @@ export type MnInputType =
  * @param errors - All validation errors present on the control
  * @returns The error message string to display
  */
-export type MnErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
+export type MnErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
 
 /**
  * Map of error keys to error message definitions.
@@ -39,7 +39,7 @@ export type MnErrorMessagesData = Partial<Record<string, MnErrorMessageData>>;
  * Base properties for all MnInputField variants.
  * Contains common UI, styling, and error handling configuration.
  */
-export interface MnInputBaseProps {
+export type MnInputBaseProps = {
   /** Unique identifier for the input element (required for accessibility) */
   id: string;
 
@@ -123,7 +123,7 @@ export interface MnInputBaseProps {
  * Configuration for MnInputField resolved from MnConfigService.
  * Contains UI properties that can ONLY be set via configuration.
  */
-export interface MnInputFieldUIConfig {
+export type MnInputFieldUIConfig = {
   /** Label text displayed above the input field */
   label?: string;
 
@@ -144,15 +144,15 @@ export interface MnInputFieldUIConfig {
  * Properties for standard input fields (text, email, password, tel, url, number, search).
  * Excludes date/time input types which have additional properties.
  */
-export interface MnInputFieldProps extends MnInputBaseProps {
+export type MnInputFieldProps = {
   type: Exclude<MnInputType, 'date' | 'time' | 'datetime-local'>;
-}
+} & MnInputBaseProps
 
 /**
  * Properties for date/time input fields.
  * Includes additional date range validation properties.
  */
-export interface MnInputDateTimeProps extends MnInputBaseProps {
+export type MnInputDateTimeProps = {
   type: Extract<MnInputType, 'date' | 'time' | 'datetime-local'>;
 
   /** Minimum allowed date/time value (ISO 8601 format) */
@@ -160,7 +160,7 @@ export interface MnInputDateTimeProps extends MnInputBaseProps {
 
   /** Maximum allowed date/time value (ISO 8601 format) */
   endDate?: string;
-}
+} & MnInputBaseProps
 
 /**
  * Union type of all possible input field property configurations.

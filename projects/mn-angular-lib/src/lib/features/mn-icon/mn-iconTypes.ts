@@ -1,6 +1,6 @@
 import { MnIconVariants } from './mn-iconVariants';
 
-export interface MnIconTypes {
+export type MnIconTypes = {
   name: string;
   size: number;
   color: MnIconVariants['color'];
