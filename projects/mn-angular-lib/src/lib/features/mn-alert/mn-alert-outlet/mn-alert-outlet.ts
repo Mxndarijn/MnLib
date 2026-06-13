@@ -7,7 +7,7 @@ import {MnAlert} from '../mn-alert.types';
 import {mnAlertVariants} from '../mn-alertVariants';
 import {MnButton} from '../../mn-button/mn-button';
 
-export interface MnAlertTemplateContext {
+export type MnAlertTemplateContext = {
   $implicit: MnAlert;
   alert: MnAlert;
   dismiss: () => void;

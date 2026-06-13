@@ -1,5 +1,6 @@
 import {TemplateRef, Type} from '@angular/core';
 import {Observable} from 'rxjs';
+import {ValidatorFn, AsyncValidatorFn} from '@angular/forms';
 import {TableDataSource} from '../mn-table/mn-table.types';
 
 export { Type, TemplateRef };
@@ -165,13 +166,13 @@ export type ModalInputMap = Record<string, unknown>;
  * A condition function that receives the current form values and returns
  * whether the field should be visible.
  */
-export type FieldVisibilityCondition<TModel = any> = (formValue: Partial<TModel>) => boolean;
+export type FieldVisibilityCondition<TModel = unknown> = (formValue: Partial<TModel>) => boolean;
 
 /**
  * A condition function that receives the current form values and returns
  * whether the field should be required.
  */
-export type FieldRequiredCondition<TModel = any> = (formValue: Partial<TModel>) => boolean;
+export type FieldRequiredCondition<TModel = unknown> = (formValue: Partial<TModel>) => boolean;
 
 // =========================
 // Cross-Field Validation
@@ -181,7 +182,7 @@ export type FieldRequiredCondition<TModel = any> = (formValue: Partial<TModel>) 
  * A form-level validator that receives the entire form value
  * and returns an error map or null.
  */
-export type FormValidator<TModel = any> = (formValue: Partial<TModel>) => Record<string, string> | null;
+export type FormValidator<TModel = unknown> = (formValue: Partial<TModel>) => Record<string, string> | null;
 
 // =========================
 // Async DataSource Types
@@ -191,7 +192,7 @@ export type FormValidator<TModel = any> = (formValue: Partial<TModel>) => Record
  * A data source that asynchronously loads options for select/multi-select fields.
  * Can optionally depend on other field values to reload.
  */
-export interface FieldDataSource<TValue = unknown, TModel = any> {
+export type FieldDataSource<TValue = unknown, TModel = unknown> = {
   /** Load options, optionally based on current form values */
   load(formValue?: Partial<TModel>): Promise<SelectOption<TValue>[]> | SelectOption<TValue>[];
   /** Keys of other fields that trigger a reload when their value changes */
@@ -202,21 +203,21 @@ export interface FieldDataSource<TValue = unknown, TModel = any> {
 // Validation Types
 // =========================
 
-export interface ValidationResult {
+export type ValidationResult = {
   status: ValidationStatus;
   code?: ValidationCode;
   message?: string;
 }
 
-export interface StepValidator {
+export type StepValidator = {
   validate(): Promise<ValidationResult> | ValidationResult;
 }
 
-export interface FieldValidator {
+export type FieldValidator = {
   validate(value: unknown): Promise<ValidationResult> | ValidationResult;
 }
 
-export interface StepGuard {
+export type StepGuard = {
   canEnter(): Promise<boolean> | boolean;
   canExit(): Promise<boolean> | boolean;
 }
@@ -225,12 +226,12 @@ export interface StepGuard {
 // Modal Result & Events
 // =========================
 
-export interface ModalCloseEvent<TResult = unknown> {
+export type ModalCloseEvent<TResult = unknown> = {
   reason: ModalCloseReason;
   result?: TResult;
 }
 
-export interface ModalRef<TResult = unknown> {
+export type ModalRef<TResult = unknown> = {
   afterClosed$: Observable<ModalCloseEvent<TResult>>;
   close(result?: TResult): void;
   dismiss(reason: ModalCloseReason): void;
@@ -241,17 +242,17 @@ export interface ModalRef<TResult = unknown> {
 // Handlers
 // =========================
 
-export interface ModalResultHandler<TResult = unknown> {
+export type ModalResultHandler<TResult = unknown> = {
   handle(result: TResult): Promise<void> | void;
 }
 
-export interface WizardStepChangeEvent {
+export type WizardStepChangeEvent = {
   previousStepId?: ModalStepId;
   currentStepId: ModalStepId;
   direction: NavigationDirection;
 }
 
-export interface WizardStepChangeHandler {
+export type WizardStepChangeHandler = {
   handle(event: WizardStepChangeEvent): Promise<void> | void;
 }
 
@@ -261,7 +262,7 @@ export interface WizardStepChangeHandler {
 
 export type StepBodyConfig = Type<unknown> | TemplateRef<unknown> | string;
 
-export interface WizardStepConfig<TModel = any> {
+export type WizardStepConfig<TModel = unknown> = {
   id: ModalStepId;
   title: string;
   state?: StepState;
@@ -270,7 +271,7 @@ export interface WizardStepConfig<TModel = any> {
   rows?: FormRow<TModel>[];
   fieldGroups?: FormFieldGroup<TModel>[];
   formValidators?: FormValidator<TModel>[];
-  groupValidators?: any[];
+  groupValidators?: ValidatorFn[];
   initialValue?: Partial<TModel>;
   guard?: StepGuard;
   validators?: StepValidator[];
@@ -281,32 +282,34 @@ export interface WizardStepConfig<TModel = any> {
   /** Whether to hide the 'Back' button on this step */
   hideBack?: boolean;
   /** Condition to show/hide this entire step based on aggregated wizard data */
-  visible?: (aggregatedData: Record<ModalStepId, Record<string, any>>) => boolean;
+  visible?: (aggregatedData: Record<ModalStepId, Record<string, unknown>>) => boolean;
 }
 
-export interface WizardResult {
+export type WizardResult = {
   status: ModalCloseReason;
   visitedStepIds: ModalStepId[];
-  payload?: Record<ModalStepId, Record<string, any>>;
+  payload?: Record<ModalStepId, Record<string, unknown>>;
 }
 
 // =========================
 // Form Types
 // =========================
 
-export interface SelectOption<TValue = unknown> {
+type KeyOf<T> = unknown extends T ? string : keyof T & string;
+
+export type SelectOption<TValue = unknown> = {
   label: string;
   value: TValue;
   state?: OptionState;
 }
 
-export interface TextFieldConfig<TModel = unknown> {
+export type TextFieldConfig<TModel = unknown> = {
   kind: FieldKind.TEXT;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   appearance?: FieldAppearance;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   placeholder?: string;
   /** Whether this field is read-only (display only) */
   readOnly?: boolean;
@@ -326,12 +329,12 @@ export interface TextFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface NumberFieldConfig<TModel = unknown> {
+export type NumberFieldConfig<TModel = unknown> = {
   kind: FieldKind.NUMBER;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   placeholder?: string;
   min?: number;
   max?: number;
@@ -345,14 +348,14 @@ export interface NumberFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface SelectFieldConfig<TModel = unknown, TValue = unknown> {
+export type SelectFieldConfig<TModel = unknown, TValue = unknown> = {
   kind: FieldKind.SELECT;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   options: SelectOption<TValue>[];
   selectionMode?: SelectionMode;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -364,13 +367,13 @@ export interface SelectFieldConfig<TModel = unknown, TValue = unknown> {
   dataSource?: FieldDataSource<TValue, TModel>;
 }
 
-export interface CheckboxFieldConfig<TModel = unknown> {
+export type CheckboxFieldConfig<TModel = unknown> = {
   kind: FieldKind.CHECKBOX;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   defaultValue?: boolean;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -380,13 +383,13 @@ export interface CheckboxFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface DateFieldConfig<TModel = unknown> {
+export type DateFieldConfig<TModel = unknown> = {
   kind: FieldKind.DATE;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   placeholder?: string;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   minDate?: string;
   maxDate?: string;
   readOnly?: boolean;
@@ -398,13 +401,13 @@ export interface DateFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface TextareaFieldConfig<TModel = unknown> {
+export type TextareaFieldConfig<TModel = unknown> = {
   kind: FieldKind.TEXTAREA;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   placeholder?: string;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   rows?: number;
   readOnly?: boolean;
   disabled?: boolean;
@@ -415,13 +418,13 @@ export interface TextareaFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface DatetimeFieldConfig<TModel = unknown> {
+export type DatetimeFieldConfig<TModel = unknown> = {
   kind: FieldKind.DATETIME;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   placeholder?: string;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   mode?: 'date' | 'time' | 'datetime-local';
   min?: string;
   max?: string;
@@ -435,13 +438,13 @@ export interface DatetimeFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface MultiSelectFieldConfig<TModel = unknown, TValue = unknown> {
+export type MultiSelectFieldConfig<TModel = unknown, TValue = unknown> = {
   kind: FieldKind.MULTI_SELECT;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   options: SelectOption<TValue>[];
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   searchable?: boolean;
   searchPlaceholder?: string;
   maxSelections?: number;
@@ -456,13 +459,13 @@ export interface MultiSelectFieldConfig<TModel = unknown, TValue = unknown> {
   dataSource?: FieldDataSource<TValue, TModel>;
 }
 
-export interface PasswordFieldConfig<TModel = unknown> {
+export type PasswordFieldConfig<TModel = unknown> = {
   kind: FieldKind.PASSWORD;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   placeholder?: string;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -472,16 +475,16 @@ export interface PasswordFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface MultiSelectTableFieldConfig<TModel = unknown, TRow = any> {
+export type MultiSelectTableFieldConfig<TModel = unknown, TRow = unknown> = {
   kind: FieldKind.MULTI_SELECT_TABLE;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   /** The TableDataSource that powers the mn-table. selectionMode will be forced to 'multi'. */
   tableDataSource: TableDataSource<TRow>;
   /** Function to extract the value stored in the form from a selected row (default: getID) */
   getRowValue?: (row: TRow) => unknown;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -491,16 +494,16 @@ export interface MultiSelectTableFieldConfig<TModel = unknown, TRow = any> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface SingleSelectTableFieldConfig<TModel = unknown, TRow = any> {
+export type SingleSelectTableFieldConfig<TModel = unknown, TRow = unknown> = {
   kind: FieldKind.SINGLE_SELECT_TABLE;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   /** The TableDataSource that powers the mn-table. selectionMode will be forced to 'single'. */
   tableDataSource: TableDataSource<TRow>;
   /** Function to extract the value stored in the form from a selected row (default: getID) */
   getRowValue?: (row: TRow) => unknown;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -510,16 +513,16 @@ export interface SingleSelectTableFieldConfig<TModel = unknown, TRow = any> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface ColorFieldConfig<TModel = unknown> {
+export type ColorFieldConfig<TModel = unknown> = {
   kind: FieldKind.COLOR;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   /** Default color value (hex string, e.g., '#ff0000') */
   defaultValue?: string;
   /** Predefined color swatches to show */
   swatches?: string[];
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -529,9 +532,9 @@ export interface ColorFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface RatingFieldConfig<TModel = unknown> {
+export type RatingFieldConfig<TModel = unknown> = {
   kind: FieldKind.RATING;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   /** Maximum rating value (default: 5) */
   max?: number;
@@ -539,8 +542,8 @@ export interface RatingFieldConfig<TModel = unknown> {
   icon?: 'star' | 'heart' | 'circle';
   /** Allow half-star ratings (default: false) */
   allowHalf?: boolean;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -550,9 +553,9 @@ export interface RatingFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface SliderFieldConfig<TModel = unknown> {
+export type SliderFieldConfig<TModel = unknown> = {
   kind: FieldKind.SLIDER;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   /** Minimum value (default: 0) */
   min?: number;
@@ -564,8 +567,8 @@ export interface SliderFieldConfig<TModel = unknown> {
   showValue?: boolean;
   /** Unit label displayed after the value (e.g., '%', 'px') */
   unit?: string;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -575,9 +578,9 @@ export interface SliderFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface FileFieldConfig<TModel = unknown> {
+export type FileFieldConfig<TModel = unknown> = {
   kind: FieldKind.FILE;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   label: string;
   /** Accepted file types (e.g., '.pdf,.jpg,image/*') */
   accept?: string;
@@ -587,8 +590,8 @@ export interface FileFieldConfig<TModel = unknown> {
   maxSize?: number;
   /** Maximum number of files (when multiple is true) */
   maxFiles?: number;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
@@ -598,14 +601,14 @@ export interface FileFieldConfig<TModel = unknown> {
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
-export interface CustomFieldConfig<TModel = unknown> {
+export type CustomFieldConfig<TModel = unknown> = {
   kind: FieldKind.CUSTOM;
-  key: keyof TModel;
+  key: KeyOf<TModel>;
   component: Type<unknown>;
   inputs?: ModalInputMap;
   label?: string;
-  validators?: any[];
-  asyncValidators?: any[];
+  validators?: ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn[];
   visible?: FieldVisibilityCondition<TModel>;
   /** Condition to dynamically mark this field as required based on other field values */
   conditionallyRequired?: FieldRequiredCondition<TModel>;
@@ -622,8 +625,8 @@ export type FormFieldConfig<TModel = unknown> =
   | TextareaFieldConfig<TModel>
   | DatetimeFieldConfig<TModel>
   | MultiSelectFieldConfig<TModel>
-  | MultiSelectTableFieldConfig<TModel>
-  | SingleSelectTableFieldConfig<TModel>
+  | MultiSelectTableFieldConfig<TModel, unknown>
+  | SingleSelectTableFieldConfig<TModel, unknown>
   | PasswordFieldConfig<TModel>
   | FileFieldConfig<TModel>
   | ColorFieldConfig<TModel>
@@ -631,7 +634,7 @@ export type FormFieldConfig<TModel = unknown> =
   | SliderFieldConfig<TModel>
   | CustomFieldConfig<TModel>;
 
-export interface AnimationOptions {
+export type AnimationOptions = {
   type: 'slide' | 'fade' | 'zoom';
   duration?: number; // ms
 }
@@ -640,12 +643,12 @@ export interface AnimationOptions {
 // Form Layout Types
 // =========================
 
-export interface FormRowField<TModel = unknown> {
+export type FormRowField<TModel = unknown> = {
   field: FormFieldConfig<TModel>;
   span?: number; // Number of columns this field spans (default: 1)
 }
 
-export interface FormRow<TModel = unknown> {
+export type FormRow<TModel = unknown> = {
   columns?: number; // Number of columns in this row (default: 1 = full width)
   fields: FormRowField<TModel>[];
 }
@@ -654,7 +657,7 @@ export interface FormRow<TModel = unknown> {
 // Field Group / Section Types
 // =========================
 
-export interface FormFieldGroup<TModel = unknown> {
+export type FormFieldGroup<TModel = unknown> = {
   /** Section header title */
   title: string;
   /** Optional description below the section header */
@@ -671,13 +674,13 @@ export interface FormFieldGroup<TModel = unknown> {
 // Action Types
 // =========================
 
-export interface ConfirmationActionConfig<TResult = unknown> {
+export type ConfirmationActionConfig<TResult = unknown> = {
   label: string;
   style?: ActionStyle;
   handler?: ModalResultHandler<TResult>;
 }
 
-export interface CancellationActionConfig {
+export type CancellationActionConfig = {
   label: string;
   style?: ActionStyle;
   reason?: ModalCloseReason;
@@ -687,7 +690,7 @@ export interface CancellationActionConfig {
 // Footer Action Types
 // =========================
 
-export interface ModalFooterAction<TResult = unknown> {
+export type ModalFooterAction<TResult = unknown> = {
   label: string;
   style?: ActionStyle;
   /** Position in the footer: 'left' or 'right' (default: 'right') */
@@ -706,7 +709,7 @@ export interface ModalFooterAction<TResult = unknown> {
 // Polling / Async Types
 // =========================
 
-export interface ModalPollingConfig<TResult = unknown> {
+export type ModalPollingConfig<TResult = unknown> = {
   /** Polling interval in milliseconds */
   interval: number;
   /** Function called on each poll tick */
@@ -725,7 +728,7 @@ export interface ModalPollingConfig<TResult = unknown> {
 // i18n / Localization
 // =========================
 
-export interface ModalI18nLabels {
+export type ModalI18nLabels = {
   /** Submit button label (default: 'Submit') */
   submit?: string;
   /** Cancel button label (default: 'Cancel') */
@@ -756,9 +759,9 @@ export interface ModalI18nLabels {
 // Cancel / Dismiss Handler
 // =========================
 
-export type ModalCancelHandler<TResult = unknown> = (reason: ModalCloseReason) => Promise<void> | void;
+export type ModalCancelHandler<_TResult = unknown> = (reason: ModalCloseReason) => Promise<void> | void;
 
-export interface BaseModalConfig<TResult = unknown> {
+export type BaseModalConfig<TResult = unknown> = {
   kind: ModalKind;
   title?: string;
   subtitle?: string;
@@ -798,11 +801,11 @@ export interface BaseModalConfig<TResult = unknown> {
 // Specialized Configs
 // =========================
 
-export type WizardBeforeCompleteValidator<TResult = any> = (
-  payload: Record<ModalStepId, Record<string, any>>
-) => Promise<Partial<Record<keyof TResult, string>> | null> | Partial<Record<keyof TResult, string>> | null;
+export type WizardBeforeCompleteValidator<TResult = unknown> = (
+  payload: Record<ModalStepId, Record<string, unknown>>
+) => Promise<Partial<Record<keyof TResult & string, string>> | null> | Partial<Record<keyof TResult & string, string>> | null;
 
-export interface WizardModalConfig<TResult = WizardResult> extends BaseModalConfig<TResult> {
+export type WizardModalConfig<TResult = WizardResult> = {
   kind: ModalKind.WIZARD;
   steps: WizardStepConfig[];
   startStepId?: ModalStepId;
@@ -813,11 +816,11 @@ export interface WizardModalConfig<TResult = WizardResult> extends BaseModalConf
   onBeforeComplete?: WizardBeforeCompleteValidator<TResult>[];
   /** Global initial values for all steps */
   initialValue?: Partial<TResult>;
-}
+} & BaseModalConfig<TResult>
 
-export interface FormModalConfig<TModel = unknown, TResult = TModel> extends BaseModalConfig<TResult> {
+export type FormModalConfig<TModel = unknown, TResult = TModel> = {
   kind: ModalKind.FORM;
-  body?: any;
+  body?: StepBodyConfig;
   fields: FormFieldConfig<TModel>[];
   rows?: FormRow<TModel>[];
   layout?: FormLayoutMode;
@@ -827,12 +830,12 @@ export interface FormModalConfig<TModel = unknown, TResult = TModel> extends Bas
   /** Form-level validators for cross-field validation */
   formValidators?: FormValidator<TModel>[];
   /** Angular FormGroup-level validators (e.g., Validators.required on the group) */
-  groupValidators?: any[];
+  groupValidators?: ValidatorFn[];
   /** Field groups with section headers */
   fieldGroups?: FormFieldGroup<TModel>[];
-}
+} & BaseModalConfig<TResult>
 
-export interface ConfirmationModalConfig<TResult = boolean> extends BaseModalConfig<TResult> {
+export type ConfirmationModalConfig<TResult = boolean> = {
   kind: ModalKind.CONFIRMATION;
   message: string;
   tone?: ConfirmationTone;
@@ -840,26 +843,26 @@ export interface ConfirmationModalConfig<TResult = boolean> extends BaseModalCon
   cancel?: CancellationActionConfig;
 
   // Form-like capabilities for hybrid confirmation modals
-  body?: any;
-  fields?: FormFieldConfig<any>[];
-  rows?: FormRow<any>[];
-  fieldGroups?: FormFieldGroup<any>[];
-  formValidators?: FormValidator<any>[];
-  groupValidators?: any[];
-  initialValue?: Partial<any>;
-}
+  body?: StepBodyConfig;
+  fields?: FormFieldConfig<unknown>[];
+  rows?: FormRow<unknown>[];
+  fieldGroups?: FormFieldGroup<unknown>[];
+  formValidators?: FormValidator<unknown>[];
+  groupValidators?: ValidatorFn[];
+  initialValue?: Partial<unknown>;
+} & BaseModalConfig<TResult>
 
-export interface CustomModalConfig<TResult = unknown> extends BaseModalConfig<TResult> {
+export type CustomModalConfig<TResult = unknown> = {
   kind: ModalKind.CUSTOM;
   onComplete?: ModalResultHandler<TResult>;
-}
+} & BaseModalConfig<TResult>
 
 // =========================
 // Union Root Config
 // =========================
 
-export type ModalConfig<TResult = any> =
+export type ModalConfig<TResult = unknown, TModel = unknown> =
   | WizardModalConfig<TResult>
-  | FormModalConfig<any, TResult>
+  | FormModalConfig<TModel, TResult>
   | ConfirmationModalConfig<TResult>
   | CustomModalConfig<TResult>;

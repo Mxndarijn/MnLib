@@ -24,7 +24,7 @@ class HostComponent {
 
 describe('MnAlertOutletComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
-  let host: HostComponent;
+  let _host: HostComponent;
   let store: MnAlertStore;
 
   beforeEach(async () => {
@@ -35,7 +35,7 @@ describe('MnAlertOutletComponent', () => {
 
     store = TestBed.inject(MnAlertStore);
     fixture = TestBed.createComponent(HostComponent);
-    host = fixture.componentInstance;
+    _host = fixture.componentInstance;
   });
 
   function queryAllAlerts() {
@@ -55,7 +55,7 @@ describe('MnAlertOutletComponent', () => {
   });
 
   it('dismiss in context removes the alert', () => {
-    const id1 = store.show({ title: 'A', kind: 'info' });
+    const _id1 = store.show({title: 'A', kind: 'info'});
     store.show({ title: 'B', kind: 'success' });
 
     fixture.detectChanges();

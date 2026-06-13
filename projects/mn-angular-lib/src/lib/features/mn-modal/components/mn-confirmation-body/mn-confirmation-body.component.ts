@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnInit, ViewChild, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MnModalRef } from '../../mn-modal-ref';
@@ -21,6 +21,8 @@ import { MnLanguageService } from '../../../../language/mn-language.service';
   styleUrls: ['./mn-confirmation-body.component.css'],
 })
 export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() config!: ConfirmationModalConfig<TResult>;
   @Input() modalRef!: MnModalRef<TResult>;
 
@@ -30,8 +32,6 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
   hasFormFields = false;
 
   private languageService = inject(MnLanguageService);
-
-  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.hasFormFields = !!(
@@ -124,18 +124,10 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
         return 'outline';
     }
   }
-  asAny(val: any): any {
-    return val;
-  }
-
   get isConfirmDisabled(): boolean {
     if (this.hasFormFields) {
       return this.confirmButtonStatus !== 'VALID';
     }
     return false;
-  }
-
-  asField(field: any): any {
-    return field;
   }
 }

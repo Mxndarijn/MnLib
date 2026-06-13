@@ -239,12 +239,14 @@
     </div>
 
     <!-- Result Display -->
-    <div class="flex flex-col gap-y-4" *ngIf="lastResult">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Last Modal Result</h2>
-      <div class="p-4 bg-base-200 rounded-lg border border-base-300 font-mono text-sm text-base-content/70">
-        {{ lastResult }}
+    @if (lastResult) {
+      <div class="flex flex-col gap-y-4">
+        <h2 class="text-2xl font-semibold text-base-content mb-4">Last Modal Result</h2>
+        <div class="p-4 bg-base-200 rounded-lg border border-base-300 font-mono text-sm text-base-content/70">
+          {{ lastResult }}
+        </div>
       </div>
-    </div>
+    }
   </section>
 </div>
 
@@ -264,7 +266,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of sampleUsers; let i = index" class="hover:bg-base-200">
+        @for (user of sampleUsers; track user; let i = $index) {
+          <tr class="hover:bg-base-200">
           <td class="px-4 py-3 border-b border-base-300">{{ i + 1 }}</td>
           <td class="px-4 py-3 border-b border-base-300">{{ user.name }}</td>
           <td class="px-4 py-3 border-b border-base-300">{{ user.email }}</td>
@@ -279,6 +282,7 @@
             >{{ user.status }}</span>
           </td>
         </tr>
+        }
       </tbody>
     </table>
 

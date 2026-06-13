@@ -5,7 +5,7 @@
  * Example in mn-config.json5:
  *   label: { $translate: "form.email.label" }
  */
-export interface MnTranslatable {
+export type MnTranslatable = {
   $translate: string;
   params?: Record<string, string | number>;
 }
@@ -29,7 +29,7 @@ export type MnTranslations = Record<string, MnTranslationMap>;
 /**
  * Configuration for the language provider.
  */
-export interface MnLanguageConfig {
+export type MnLanguageConfig = {
   /** URL pattern for loading translation files. Use `{locale}` as placeholder. e.g. "assets/i18n/{locale}.json" */
   urlPattern: string;
   /** The default/fallback locale. */
@@ -53,6 +53,6 @@ export function isTranslatable(value: unknown): value is MnTranslatable {
   return (
     typeof value === 'object' &&
     value !== null &&
-    typeof (value as any).$translate === 'string'
+    typeof (value as Record<string, unknown>)['$translate'] === 'string'
   );
 }

@@ -4,8 +4,9 @@ import {
   CloseMode,
   KeyboardMode,
   ModalIntent,
-  ModalKind,
   ModalSize,
+  TemplateRef,
+  Type,
 } from '../mn-modal.types';
 
 describe('BaseModalBuilder (via FormModalBuilder)', () => {
@@ -78,8 +79,8 @@ describe('BaseModalBuilder (via FormModalBuilder)', () => {
   });
 
   it('should set custom component, template, and inputs', () => {
-    const mockComponent = {} as any;
-    const mockTemplate = {} as any;
+    const mockComponent = {} as Type<unknown>;
+    const mockTemplate = {} as TemplateRef<unknown>;
     const mockInputs = { key: 'value' };
 
     const config = ModalBuilder.form()

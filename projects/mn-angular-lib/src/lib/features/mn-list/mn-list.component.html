@@ -76,10 +76,13 @@
         [class.py-3]="!dataSource.appearance?.compact"
         [class.py-2]="dataSource.appearance?.compact"
         role="listitem"
+        (keyup.enter)="onItemClick(item)"
         (click)="onItemClick(item)"
+        [attr.tabindex]="dataSource.onItemClick ? 0 : null"
       >
         <!-- Selection checkbox -->
         @if (hasSelection) {
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
           <div (click)="$event.stopPropagation()" class="shrink-0">
             <mn-lib-checkbox
               (checkedChange)="toggleItem(item)"

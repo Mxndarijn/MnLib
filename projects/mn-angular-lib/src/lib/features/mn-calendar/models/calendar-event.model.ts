@@ -9,7 +9,7 @@ import { MnButtonTypes } from '../../mn-button/mn-buttonTypes';
  * Layout properties (`column`, `width`, `continued`, `continuedEnd`) are
  * computed by {@link CalendarEventLayoutService} and should not be set manually.
  */
-export interface CalendarEvent {
+export type CalendarEvent = {
   /** Unique identifier for the event. */
   id: string;
   /** Display title. */
@@ -23,9 +23,9 @@ export interface CalendarEvent {
   /** Colour scheme used for rendering. */
   color: ColorPreset;
   /** Optional custom component type to render this event (overrides the default renderer). */
-  component?: Type<any>;
+  component?: Type<unknown>;
   /** Arbitrary payload attached to the event (passed through to custom renderers). */
-  data?: any;
+  data?: unknown;
 
   // ── Layout properties (set by CalendarEventLayoutService) ──
 
@@ -42,7 +42,7 @@ export interface CalendarEvent {
 /**
  * Represents a button displayed in the calendar toolbar's top-right area.
  */
-export interface CalendarButton {
+export type CalendarButton = {
   /** Display label for the button. */
   label: string;
   /** Button styling configuration passed to the mnButton directive. */
@@ -54,7 +54,7 @@ export interface CalendarButton {
 /**
  * Represents the "current time" indicator rendered as a line in week/day views.
  */
-export interface CurrentTimeCalendarEvent {
+export type CurrentTimeCalendarEvent = {
   id: 'current-time';
   title: string;
   startTime: Date;

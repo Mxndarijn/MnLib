@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit, Optional, Output, EventEmitter } from '@angular/core';
+﻿import {Component, Input, OnInit, Output, EventEmitter, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarEvent } from '../../models/calendar-event.model';
 import { CALENDAR_DATE_FORMATTER, CalendarDateFormatter } from '../../services/calendar-date-formatter';
@@ -9,7 +9,7 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
  * Shows the event title, formatted date/time, and optional description.
  */
 @Component({
-  selector: 'app-upcoming-event-row',
+  selector: 'mn-upcoming-event-row',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './upcoming-event-row.component.html',
@@ -38,9 +38,9 @@ export class UpcomingEventRowComponent implements OnInit {
 
   private formatter: CalendarDateFormatter;
 
-  constructor(
-    @Optional() @Inject(CALENDAR_DATE_FORMATTER) formatter: CalendarDateFormatter | null
-  ) {
+  constructor() {
+    const formatter = inject<CalendarDateFormatter | null>(CALENDAR_DATE_FORMATTER, {optional: true});
+
     this.formatter = formatter ?? new DefaultCalendarDateFormatter();
   }
 

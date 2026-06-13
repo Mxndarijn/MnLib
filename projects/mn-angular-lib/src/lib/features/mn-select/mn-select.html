@@ -1,4 +1,4 @@
-<div [class.is-fullwidth]="props.fullWidth" class="flex flex-col h-full">
+﻿<div [class.is-fullwidth]="props.fullWidth" class="flex flex-col h-full">
   @if (uiConfig.label || props.label) {
     <label [attr.for]="resolvedId" class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!">
       <p>{{ uiConfig.label || props.label }}</p>
@@ -20,7 +20,7 @@
     [ngClass]="selectClasses"
   >
     @if (props.placeholder || uiConfig.placeholder) {
-      <option [selected]="selectedValue == null" [value]="''" disabled>
+      <option [selected]="selectedValue === null" [value]="''" disabled>
         {{ uiConfig.placeholder || props.placeholder }}
       </option>
     }
@@ -38,12 +38,12 @@
     @if (props.showAllErrors) {
       <div class="flex flex-col gap-y-1 mt-1">
         @for (error of errorMessages; track $index) {
-          <lib-mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></lib-mn-error-message>
+          <mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></mn-error-message>
         }
       </div>
     } @else {
-      @if (errorMessage != null) {
-        <lib-mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></lib-mn-error-message>
+      @if (errorMessage !== null) {
+        <mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></mn-error-message>
       }
     }
   }

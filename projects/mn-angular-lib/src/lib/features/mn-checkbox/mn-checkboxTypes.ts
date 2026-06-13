@@ -1,11 +1,11 @@
 import {MnCheckboxVariants, MnCheckboxWrapperVariants} from './mn-checkboxVariants';
 import {ValidationErrors} from '@angular/forms';
 
-export type MnCheckboxErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
+export type MnCheckboxErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
 
 export type MnCheckboxErrorMessagesData = Partial<Record<string, MnCheckboxErrorMessageData>>;
 
-export interface MnCheckboxProps {
+export type MnCheckboxProps = {
   /** Unique identifier for the checkbox element (required for accessibility) */
   id: string;
 
@@ -47,7 +47,7 @@ export interface MnCheckboxProps {
   showAllErrors?: boolean;
 }
 
-export interface MnCheckboxUIConfig {
+export type MnCheckboxUIConfig = {
   /** Label text displayed next to the checkbox */
   label?: string;
 

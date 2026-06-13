@@ -3,7 +3,7 @@ import {Signal} from '@angular/core';
 /**
  * Configuration for a single tab item.
  */
-export interface MnTabItem {
+export type MnTabItem = {
   /** Translation key or label text for the tab. */
   label: string;
   /** Callback invoked when this tab becomes active. */
@@ -17,7 +17,7 @@ export interface MnTabItem {
 /**
  * Data source configuration for the mn-tab component.
  */
-export interface MnTabDataSource {
+export type MnTabDataSource = {
   /** List of tab items to display. */
   items: MnTabItem[];
   /** Index of the tab that should be active by default. */

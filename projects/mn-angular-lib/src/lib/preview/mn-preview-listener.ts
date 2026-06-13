@@ -1,9 +1,9 @@
 import { MnConfigService } from '../config/mn-config.service';
 import { MnLanguageService } from '../language/mn-language.service';
 
-export interface MnPreviewMessage {
+export type MnPreviewMessage = {
   type: 'mn-config-update' | 'mn-translations-update';
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
   translations?: Record<string, Record<string, string>>;
 }
 

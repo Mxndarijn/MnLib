@@ -181,7 +181,8 @@
 
       @case (FieldKind.COLOR) {
         <div class="flex flex-col gap-1">
-          <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
+          <label [for]="'field-' + asKey(rowField.field.key)"
+                 class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
             {{ asField(rowField.field).label }}
             @if (hasRequiredValidator(rowField.field)) {
               <span class="text-red-500">*</span>
@@ -190,6 +191,7 @@
           <div class="flex items-center gap-3">
             <input
               type="color"
+              [id]="'field-' + asKey(rowField.field.key)"
               class="w-10 h-10 rounded-lg border border-base-300 cursor-pointer p-0.5"
               [value]="getColorValue(rowField.field)"
               [disabled]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
@@ -209,6 +211,7 @@
                   [class.ring-2]="getColorValue(rowField.field) === swatch"
                   [class.ring-blue-500]="getColorValue(rowField.field) === swatch"
                   (click)="setColorFromSwatch(rowField.field, swatch)"
+                  [attr.aria-label]="'Select color ' + swatch"
                 ></button>
               }
             </div>
@@ -223,13 +226,15 @@
 
       @case (FieldKind.RATING) {
         <div class="flex flex-col gap-1">
-          <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
+          <span [id]="'rating-label-' + asKey(rowField.field.key)"
+                class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
             {{ asField(rowField.field).label }}
             @if (hasRequiredValidator(rowField.field)) {
               <span class="text-red-500">*</span>
             }
-          </label>
-          <div class="flex items-center gap-1">
+          </span>
+          <div [attr.aria-labelledby]="'rating-label-' + asKey(rowField.field.key)" class="flex items-center gap-1"
+               role="group">
             @for (star of getRatingRange(rowField.field); track star) {
               <button
                 mnButton
@@ -256,7 +261,8 @@
 
       @case (FieldKind.SLIDER) {
         <div class="flex flex-col gap-1">
-          <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
+          <label [for]="'field-' + asKey(rowField.field.key)"
+                 class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
             {{ asField(rowField.field).label }}
             @if (hasRequiredValidator(rowField.field)) {
               <span class="text-red-500">*</span>
@@ -265,6 +271,7 @@
           <div class="flex items-center gap-3">
             <input
               type="range"
+              [id]="'field-' + asKey(rowField.field.key)"
               class="flex-1 h-2 bg-base-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
               [attr.min]="asField(rowField.field).min ?? 0"
               [attr.max]="asField(rowField.field).max ?? 100"
@@ -293,7 +300,8 @@
 
       @case (FieldKind.FILE) {
         <div class="flex flex-col gap-1">
-          <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
+          <label [for]="'field-' + asKey(rowField.field.key)"
+                 class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
             {{ asField(rowField.field).label }}
             @if (hasRequiredValidator(rowField.field)) {
               <span class="text-red-500">*</span>
@@ -306,6 +314,7 @@
           >
             <input
               type="file"
+              [id]="'field-' + asKey(rowField.field.key)"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               [attr.accept]="asField(rowField.field).accept || null"
               [attr.multiple]="asField(rowField.field).multiple || null"
@@ -372,15 +381,16 @@
   <ng-template #selectTableTemplate let-rowField>
     <div class="flex flex-col gap-1">
       @if (asField(rowField.field).label) {
-        <label class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
+        <span class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
           {{ asField(rowField.field).label }}
           @if (hasRequiredValidator(rowField.field)) {
             <span class="text-red-500">*</span>
           }
-        </label>
+        </span>
       }
       <mn-table
         [dataSource]="tableDataSources[asKey(rowField.field.key)]"
+        [attr.aria-label]="asField(rowField.field).label || null"
         (selectionChange)="onTableSelectionChange(rowField.field, $event)"
       ></mn-table>
       @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {

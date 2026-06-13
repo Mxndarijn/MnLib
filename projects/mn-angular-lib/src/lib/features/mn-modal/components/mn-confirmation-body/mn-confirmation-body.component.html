@@ -2,8 +2,8 @@
   <!-- Custom Content (Component or Template) -->
   @if (config.component || config.template) {
     <mn-custom-body-host
-      [config]="asAny(config)"
-      [modalRef]="asAny(modalRef)"
+      [config]="$any(config)"
+      [modalRef]="$any(modalRef)"
     ></mn-custom-body-host>
   }
 
@@ -61,8 +61,8 @@
   <!-- Form Fields / Rows -->
   @if (hasFormFields) {
     <mn-form-body
-      [config]="asAny(config)"
-      [modalRef]="asAny(modalRef)"
+      [config]="$any(config)"
+      [modalRef]="$any(modalRef)"
       [hideFooter]="true"
       [hideCustomBody]="true"
       (formStatusChange)="onFormStatusChange($event)"

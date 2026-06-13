@@ -27,7 +27,7 @@ import {FormsModule} from '@angular/forms';
   styleUrl: './mn-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MnList<T = any> implements OnInit, OnDestroy, DoCheck {
+export class MnList<T = unknown> implements OnInit, OnDestroy, DoCheck {
   @Input() dataSource!: ListDataSource<T>;
 
   @Output() selectionChange = new EventEmitter<T[]>();
@@ -48,7 +48,7 @@ export class MnList<T = any> implements OnInit, OnDestroy, DoCheck {
   private searchSubscription?: Subscription;
 
   /** Tracks the previous toolbar template reference for change detection. */
-  private previousToolbarTemplate?: TemplateRef<any>;
+  private previousToolbarTemplate?: TemplateRef<unknown>;
 
   ngDoCheck(): void {
     const currentTemplate = this.dataSource?.toolbarTemplate;

@@ -1,7 +1,7 @@
-import {Component, Input} from '@angular/core';
+﻿import {Component, Input} from '@angular/core';
 
 @Component({
-  selector: 'lib-mn-error-message',
+  selector: 'mn-error-message',
   imports: [],
   templateUrl: './mn-error-message.html',
 })

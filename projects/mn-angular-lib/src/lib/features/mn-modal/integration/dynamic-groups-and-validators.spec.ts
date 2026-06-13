@@ -3,21 +3,21 @@ import { Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ModalBuilder } from '../builder/modal.builder';
 import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
+import {MnModalRef} from '../mn-modal-ref';
 import {
   FieldKind,
-  ModalKind,
   FormModalConfig,
 } from '../mn-modal.types';
 
-function createMockModalRef(): any {
+function createMockModalRef(): MnModalRef<unknown> {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
     afterClosed$: { subscribe: () => {} },
-  };
+  } as unknown as MnModalRef<unknown>;
 }
 
-interface TestModel {
+type TestModel = {
   type: string;
   name: string;
   address: string;
@@ -34,7 +34,7 @@ interface TestModel {
 describe('Feature: Dynamic Field Groups', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef<unknown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -42,7 +42,7 @@ describe('Feature: Dynamic Field Groups', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig<any, any>) {
+  function setup(config: FormModalConfig<TestModel, TestModel>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
@@ -162,7 +162,7 @@ describe('Feature: Dynamic Field Groups', () => {
   });
 
   it('should preserve visible condition in builder output', () => {
-    const visibleFn = (form: any) => form.type === 'business';
+    const visibleFn = (form: Partial<TestModel>) => form.type === 'business';
     const config = ModalBuilder.form<TestModel>()
       .fieldGroup({
         title: 'Business',
@@ -181,7 +181,7 @@ describe('Feature: Dynamic Field Groups', () => {
 describe('Feature: FormGroup-Level Validators', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: MnModalRef<unknown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -189,7 +189,7 @@ describe('Feature: FormGroup-Level Validators', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig<any, any>) {
+  function setup(config: FormModalConfig<TestModel, TestModel>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();

@@ -1,9 +1,7 @@
 import { ModalBuilder } from './modal.builder';
 import { FieldKind, FormLayoutMode, ModalKind, ModalSize, SubmitMode } from '../mn-modal.types';
 
-interface TestModel {
-  [key: string]: any;
-}
+type TestModel = Record<string, unknown>
 
 describe('FormModalBuilder', () => {
   it('should create a config with correct kind', () => {
@@ -122,7 +120,7 @@ describe('FormModalBuilder', () => {
 
   it('should freeze the config', () => {
     const config = ModalBuilder.form().build();
-    expect(() => (config as any).title = 'x').toThrow();
+    expect(() => (config as Record<string, unknown>)['title'] = 'x').toThrow();
   });
 
   it('should add fields to the flat fields array via addToRow', () => {

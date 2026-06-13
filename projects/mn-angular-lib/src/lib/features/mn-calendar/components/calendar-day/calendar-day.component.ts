@@ -1,4 +1,14 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, Output, EventEmitter, Type } from '@angular/core';
+﻿import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  EventEmitter,
+  Type,
+  inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CalendarEvent } from '../../models/calendar-event.model';
@@ -11,9 +21,9 @@ import { CalendarUtility } from '../../utils/calendar-utils';
 import { CalendarEventComponent } from '../calendar-event/calendar-event.component';
 
 /** Extended hour row with a pre-resolved display label. */
-interface DisplayHourRow extends HourRow {
+type DisplayHourRow = {
   hourLabel: string;
-}
+} & HourRow
 
 /**
  * Day grid view showing a single day with half-hour time slots.
@@ -22,7 +32,7 @@ interface DisplayHourRow extends HourRow {
  * {@link CalendarEventLayoutService}.
  */
 @Component({
-  selector: 'app-calendar-day',
+  selector: 'mn-calendar-day',
   standalone: true,
   imports: [CommonModule, CalendarEventComponent],
   templateUrl: './calendar-day.component.html',
@@ -73,6 +83,9 @@ interface DisplayHourRow extends HourRow {
   `]
 })
 export class CalendarDayComponent implements OnInit, OnDestroy {
+  private layoutService = inject(CalendarEventLayoutService);
+  private cdr = inject(ChangeDetectorRef);
+
   /** The date to display. */
   @Input() focusDay!: Date;
   /** Observable that emits the full event list whenever it changes. */
@@ -100,10 +113,7 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
   private resolvedConfig!: CalendarConfig;
   private currentTimeInterval?: ReturnType<typeof setInterval>;
 
-  constructor(
-    private layoutService: CalendarEventLayoutService,
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.formatter = new DefaultCalendarDateFormatter();
   }
 

@@ -1,10 +1,13 @@
-import { Injectable } from '@angular/core';
+import {Injectable, inject, ApplicationRef} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { MnTranslationMap, MnTranslations } from './mn-language.types';
 
 @Injectable({ providedIn: 'root' })
 export class MnLanguageService {
+  private readonly http = inject(HttpClient);
+  private readonly appRef = inject(ApplicationRef);
+
   private _translations: MnTranslations = {};
   private _locale$ = new BehaviorSubject<string>('en');
   private _urlPattern: string | null = null;
@@ -12,8 +15,6 @@ export class MnLanguageService {
 
   /** Observable of the current active locale. */
   readonly locale$: Observable<string> = this._locale$.asObservable();
-
-  constructor(private readonly http: HttpClient) {}
 
   /** Current active locale. */
   get locale(): string {
@@ -81,6 +82,7 @@ export class MnLanguageService {
     }
     await this.loadLocale(locale);
     this._locale$.next(locale);
+    this.appRef.tick();
   }
 
   /**
@@ -122,15 +124,15 @@ export class MnLanguageService {
   /**
    * Helper to retrieve a value from a potentially nested translation map using a dot-notated key.
    */
-  private getValueFromMap(map: any, key: string): string | undefined {
+  private getValueFromMap(map: MnTranslationMap, key: string): string | undefined {
     if (map[key] !== undefined) return map[key];
 
     const parts = key.split('.');
-    let current = map;
+    let current: MnTranslationMap | string | undefined = map;
 
     for (const part of parts) {
       if (current === null || typeof current !== 'object') return undefined;
-      current = current[part];
+      current = (current as MnTranslationMap)[part];
     }
 
     return typeof current === 'string' ? current : undefined;

@@ -3,7 +3,7 @@ import {Component} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {MnButton} from 'mn-angular-lib';
 
-interface DemoItem {
+type DemoItem = {
   title: string;
   path: string;
   description?: string;

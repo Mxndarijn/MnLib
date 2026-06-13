@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform, inject} from '@angular/core';
 import { MnLanguageService } from './mn-language.service';
 
 /**
@@ -16,7 +16,8 @@ import { MnLanguageService } from './mn-language.service';
   pure: false,
 })
 export class MnTranslatePipe implements PipeTransform {
-  constructor(private readonly lang: MnLanguageService) {}
+  private readonly lang = inject(MnLanguageService);
+
 
   transform(key: string, params?: Record<string, string | number>): string {
     return this.lang.translate(key, params);

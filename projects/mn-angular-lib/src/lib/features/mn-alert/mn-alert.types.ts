@@ -3,7 +3,7 @@ import {MnAlertVariants} from './mn-alertVariants';
 
 export type MnAlertId = string;
 
-export interface MnAlert {
+export type MnAlert = {
   id: MnAlertId;
   title: string;
   subTitle?: string;

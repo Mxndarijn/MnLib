@@ -1,4 +1,5 @@
-<div class="upcoming-event-row" (click)="eventClicked.emit(event)" [style.border-left-color]="event.color.primaryColor">
+<div (click)="eventClicked.emit(event)" (keyup.enter)="eventClicked.emit(event)" [style.border-left-color]="event.color.primaryColor" class="upcoming-event-row"
+     tabindex="0">
   <div class="event-title">{{ event.title }}</div>
   <div class="event-time">{{ formattedDate }}</div>
   @if (event.description) {

@@ -1,4 +1,4 @@
-import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {CommonModule, NgClass} from '@angular/common';
 import {MnErrorMessageData, MnInputFieldUIConfig, MnInputProps} from './mn-input-fieldTypes';
 import {AbstractControl, FormsModule, NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -50,6 +50,8 @@ export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('M
   templateUrl: './mn-input-field.html',
 })
 export class MnInputField implements OnInit {
+  ngControl = inject(NgControl, {optional: true, self: true});
+
   /** Resolved UI configuration for the input field */
   protected uiConfig: MnInputFieldUIConfig = {};
 
@@ -71,7 +73,8 @@ export class MnInputField implements OnInit {
   isDisabled = false;
 
   /** Callback function to notify Angular forms of value changes */
-  private onChange: (val: any) => void = () => {};
+  private onChange: (val: unknown) => void = () => {
+  };
 
   /** Callback function to notify Angular forms when input is touched/blurred */
   private onTouched: () => void = () => {};
@@ -84,10 +87,10 @@ export class MnInputField implements OnInit {
   private readonly builtInErrorMessages: Record<string, MnErrorMessageData> = {
     required: 'This field is required',
     email: 'Please enter a valid email address',
-    minlength: (args: any) => `Minimum ${args.requiredLength} characters required`,
-    maxlength: (args: any) => `Maximum ${args.requiredLength} characters allowed`,
-    mnMin: (args: any) => `Date/time must be from ${args.min} onwards`,
-    mnMax: (args: any) => `Date/time must be up to ${args.max}`,
+    minlength: (args: unknown) => `Minimum ${(args as { requiredLength: number }).requiredLength} characters required`,
+    maxlength: (args: unknown) => `Maximum ${(args as { requiredLength: number }).requiredLength} characters allowed`,
+    mnMin: (args: unknown) => `Date/time must be from ${(args as { min: string }).min} onwards`,
+    mnMax: (args: unknown) => `Date/time must be up to ${(args as { max: string }).max}`,
   };
 
   /**
@@ -96,7 +99,7 @@ export class MnInputField implements OnInit {
    *
    * @param ngControl - Angular's NgControl (injected via Dependency Injection)
    */
-  constructor(@Optional() @Self() public ngControl: NgControl) {
+  constructor() {
     if (this.ngControl) this.ngControl.valueAccessor = this;
   }
 
@@ -161,7 +164,7 @@ export class MnInputField implements OnInit {
    *
    * @param fn - Callback function to notify Angular Forms of changes
    */
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (val: unknown) => void): void {
     this.onChange = fn;
   }
 
@@ -170,7 +173,7 @@ export class MnInputField implements OnInit {
    *
    * @param fn - Callback function to notify Angular Forms of touch events
    */
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 

@@ -32,8 +32,8 @@ export class MnIcon implements OnChanges, OnInit {
 
   ngOnInit(): void {
     const attrs = this.el.nativeElement.attributes;
-    for (let i = 0; i < attrs.length; i++) {
-      const attr = attrs[i].name.toLowerCase();
+    for (const item of Array.from<Attr>(attrs)) {
+      const attr = item.name.toLowerCase();
       if (attr.startsWith('mnicon')) {
         const iconKey = attr.slice('mnicon'.length);
         for (const key of Object.keys(MN_ICON_MAP)) {

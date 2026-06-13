@@ -1,4 +1,14 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, Output, EventEmitter, Type } from '@angular/core';
+﻿import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  EventEmitter,
+  Type,
+  inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CalendarEvent } from '../../models/calendar-event.model';
@@ -11,9 +21,9 @@ import { CalendarUtility } from '../../utils/calendar-utils';
 import { CalendarEventComponent } from '../calendar-event/calendar-event.component';
 
 /** Extended hour row with a pre-resolved display label. */
-interface DisplayHourRow extends HourRow {
+type DisplayHourRow = {
   hourLabel: string;
-}
+} & HourRow
 
 /**
  * Week grid view showing 7 day columns with half-hour time slots.
@@ -22,7 +32,7 @@ interface DisplayHourRow extends HourRow {
  * so they appear side-by-side rather than stacked.
  */
 @Component({
-  selector: 'app-calendar-week',
+  selector: 'mn-calendar-week',
   standalone: true,
   imports: [CommonModule, CalendarEventComponent],
   templateUrl: './calendar-week.component.html',
@@ -98,6 +108,9 @@ interface DisplayHourRow extends HourRow {
   `]
 })
 export class CalendarWeekComponent implements OnInit, OnDestroy {
+  private layoutService = inject(CalendarEventLayoutService);
+  private cdr = inject(ChangeDetectorRef);
+
   /** The date around which the week is centred. */
   @Input() focusDay!: Date;
   /** Observable that emits the full event list whenever it changes. */
@@ -126,10 +139,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
   private resolvedConfig!: CalendarConfig;
   private currentTimeInterval?: ReturnType<typeof setInterval>;
 
-  constructor(
-    private layoutService: CalendarEventLayoutService,
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.formatter = new DefaultCalendarDateFormatter();
   }
 
@@ -233,7 +243,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
     this.hourRows = rows;
   }
 
-  /** Builds the 7 day columns for the current week (Monday–Sunday). */
+  /** Builds the 7 day columns for the current week (Mondayâ€“Sunday). */
   private buildColumns() {
     if (!this.focusDay) return;
 

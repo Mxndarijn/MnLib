@@ -1,23 +1,27 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import { Validators } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ModalBuilder } from '../builder/modal.builder';
 import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
+import {MnModalRef} from '../mn-modal-ref';
 import {
   FieldKind,
-  ModalKind,
-  FormModalConfig,
   SelectOption,
   FieldDataSource,
+  FormModalConfig,
   FormValidator,
+  ModalRef,
+  SelectFieldConfig,
+  TextFieldConfig,
 } from '../mn-modal.types';
 
-function createMockModalRef(): any {
+function createMockModalRef(): ModalRef<unknown> {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
+    update: jasmine.createSpy('update'),
     afterClosed$: { subscribe: () => {} },
-  };
+  } as unknown as ModalRef<unknown>;
 }
 
 // =============================================================
@@ -26,7 +30,7 @@ function createMockModalRef(): any {
 describe('Feature: Conditional/Dynamic Fields', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: ModalRef<unknown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -34,17 +38,17 @@ describe('Feature: Conditional/Dynamic Fields', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup<TModel>(config: Readonly<FormModalConfig<TModel>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
-    component.modalRef = mockModalRef;
+    component.config = config as unknown as FormModalConfig;
+    component.modalRef = mockModalRef as unknown as MnModalRef;
     fixture.detectChanges();
   }
 
   it('should hide a field when visible condition returns false', () => {
-    interface Model { role: string; permissions: string[]; }
+    type Model = { role: string; permissions: string[]; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [
         { label: 'User', value: 'user' }, { label: 'Admin', value: 'admin' },
@@ -62,7 +66,7 @@ describe('Feature: Conditional/Dynamic Fields', () => {
   });
 
   it('should show a field when visible condition returns true', () => {
-    interface Model { role: string; permissions: string; }
+    type Model = { role: string; permissions: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [
         { label: 'User', value: 'user' }, { label: 'Admin', value: 'admin' },
@@ -80,7 +84,7 @@ describe('Feature: Conditional/Dynamic Fields', () => {
   });
 
   it('should toggle visibility when dependent field changes', () => {
-    interface Model { role: string; extra: string; }
+    type Model = { role: string; extra: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [
         { label: 'User', value: 'user' }, { label: 'Admin', value: 'admin' },
@@ -105,7 +109,7 @@ describe('Feature: Conditional/Dynamic Fields', () => {
   });
 
   it('should clear validators on hidden fields so they do not block submit', () => {
-    interface Model { role: string; extra: string; }
+    type Model = { role: string; extra: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [
         { label: 'User', value: 'user' }, { label: 'Admin', value: 'admin' },
@@ -125,7 +129,7 @@ describe('Feature: Conditional/Dynamic Fields', () => {
   });
 
   it('should restore validators when field becomes visible again', () => {
-    interface Model { role: string; extra: string; }
+    type Model = { role: string; extra: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [
         { label: 'User', value: 'user' }, { label: 'Admin', value: 'admin' },
@@ -146,7 +150,7 @@ describe('Feature: Conditional/Dynamic Fields', () => {
   });
 
   it('should always show fields without a visible condition', () => {
-    interface Model { name: string; }
+    type Model = { name: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
       .build();
@@ -163,7 +167,7 @@ describe('Feature: Conditional/Dynamic Fields', () => {
 describe('Feature: Cross-Field Validation', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: ModalRef<unknown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -171,17 +175,17 @@ describe('Feature: Cross-Field Validation', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup<TModel>(config: Readonly<FormModalConfig<TModel>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
-    component.modalRef = mockModalRef;
+    component.config = config as unknown as FormModalConfig;
+    component.modalRef = mockModalRef as unknown as MnModalRef;
     fixture.detectChanges();
   }
 
   it('should detect cross-field errors when passwords do not match', () => {
-    interface Model { password: string; confirmPassword: string; }
+    type Model = { password: string; confirmPassword: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'password', label: 'Password' })
       .field({ kind: FieldKind.TEXT, key: 'confirmPassword', label: 'Confirm' })
@@ -205,7 +209,7 @@ describe('Feature: Cross-Field Validation', () => {
   });
 
   it('should clear cross-field errors when values match', () => {
-    interface Model { password: string; confirmPassword: string; }
+    type Model = { password: string; confirmPassword: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'password', label: 'Password' })
       .field({ kind: FieldKind.TEXT, key: 'confirmPassword', label: 'Confirm' })
@@ -229,7 +233,7 @@ describe('Feature: Cross-Field Validation', () => {
   });
 
   it('should block submit when cross-field errors exist', async () => {
-    interface Model { start: string; end: string; }
+    type Model = { start: string; end: string; }
     const handler = { handle: jasmine.createSpy('handle') };
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'start', label: 'Start' })
@@ -257,7 +261,7 @@ describe('Feature: Cross-Field Validation', () => {
   });
 
   it('should allow submit when no cross-field errors', async () => {
-    interface Model { a: string; b: string; }
+    type Model = { a: string; b: string; }
     const handler = { handle: jasmine.createSpy('handle').and.returnValue(Promise.resolve()) };
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'a', label: 'A', validators: [Validators.required] })
@@ -283,7 +287,7 @@ describe('Feature: Cross-Field Validation', () => {
   });
 
   it('should support form-level errors via _form key', () => {
-    interface Model { a: string; }
+    type Model = { a: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'a', label: 'A' })
       .formValidators([
@@ -299,7 +303,7 @@ describe('Feature: Cross-Field Validation', () => {
   });
 
   it('should support multiple form validators', () => {
-    interface Model { a: string; b: string; }
+    type Model = { a: string; b: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'a', label: 'A' })
       .field({ kind: FieldKind.TEXT, key: 'b', label: 'B' })
@@ -325,7 +329,7 @@ describe('Feature: Cross-Field Validation', () => {
 describe('Feature: Async Data Sources', () => {
   let component: MnFormBodyComponent;
   let fixture: ComponentFixture<MnFormBodyComponent>;
-  let mockModalRef: any;
+  let mockModalRef: ModalRef<unknown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -333,17 +337,17 @@ describe('Feature: Async Data Sources', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup<TModel>(config: Readonly<FormModalConfig<TModel>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
-    component.modalRef = mockModalRef;
+    component.config = config as unknown as FormModalConfig;
+    component.modalRef = mockModalRef as unknown as MnModalRef;
     fixture.detectChanges();
   }
 
   it('should load options from a data source on init', async () => {
-    interface Model { country: string; }
+    type Model = { country: string; }
     const options: SelectOption<string>[] = [
       { label: 'NL', value: 'nl' },
       { label: 'DE', value: 'de' },
@@ -366,7 +370,7 @@ describe('Feature: Async Data Sources', () => {
   });
 
   it('should show loading state while data source is loading', () => {
-    interface Model { country: string; }
+    type Model = { country: string; }
     let resolveLoad!: (val: SelectOption<string>[]) => void;
     const config = ModalBuilder.form<Model>()
       .field({
@@ -387,8 +391,8 @@ describe('Feature: Async Data Sources', () => {
   });
 
   it('should reload dependent data source when dependency changes', async () => {
-    interface Model { country: string; city: string; }
-    const loadSpy = jasmine.createSpy('load').and.callFake(async (formValue: any) => {
+    type Model = { country: string; city: string; }
+    const loadSpy = jasmine.createSpy('load').and.callFake(async (formValue: Partial<Model>) => {
       if (formValue?.country === 'nl') return [{ label: 'Amsterdam', value: 'ams' }];
       return [];
     });
@@ -420,7 +424,7 @@ describe('Feature: Async Data Sources', () => {
   });
 
   it('should not reload when non-dependent field changes', async () => {
-    interface Model { name: string; country: string; city: string; }
+    type Model = { name: string; country: string; city: string; }
     const loadSpy = jasmine.createSpy('load').and.returnValue(Promise.resolve([]));
 
     const config = ModalBuilder.form<Model>()
@@ -449,7 +453,7 @@ describe('Feature: Async Data Sources', () => {
   });
 
   it('should handle data source errors gracefully', async () => {
-    interface Model { country: string; }
+    type Model = { country: string; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.SELECT, key: 'country', label: 'Country',
@@ -466,7 +470,7 @@ describe('Feature: Async Data Sources', () => {
   });
 
   it('should use static options when no data source is configured', () => {
-    interface Model { role: string; }
+    type Model = { role: string; }
     const staticOptions = [{ label: 'Admin', value: 'admin' }, { label: 'User', value: 'user' }];
     const config = ModalBuilder.form<Model>()
       .field({
@@ -481,7 +485,7 @@ describe('Feature: Async Data Sources', () => {
   });
 
   it('should support synchronous data source load', async () => {
-    interface Model { status: string; }
+    type Model = { status: string; }
     const syncOptions: SelectOption<string>[] = [
       { label: 'Active', value: 'active' },
       { label: 'Inactive', value: 'inactive' },
@@ -506,7 +510,7 @@ describe('Feature: Async Data Sources', () => {
 // =============================================================
 describe('FormModalBuilder: formValidators', () => {
   it('should include formValidators in built config', () => {
-    interface Model { a: string; }
+    type Model = { a: string; }
     const validator: FormValidator<Model> = (form) => form.a === 'x' ? { a: 'err' } : null;
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'a', label: 'A' })
@@ -520,7 +524,7 @@ describe('FormModalBuilder: formValidators', () => {
   });
 
   it('should not have formValidators when not set', () => {
-    interface Model { a: string; }
+    type Model = { a: string; }
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'a', label: 'A' })
       .build();
@@ -534,18 +538,18 @@ describe('FormModalBuilder: formValidators', () => {
 // =============================================================
 describe('FormModalBuilder: visible and dataSource in config', () => {
   it('should preserve visible condition in built config', () => {
-    interface Model { role: string; extra: string; }
+    type Model = { role: string; extra: string; }
     const visibleFn = (form: Partial<Model>) => form.role === 'admin';
     const config = ModalBuilder.form<Model>()
       .field({ kind: FieldKind.TEXT, key: 'role', label: 'Role' })
       .field({ kind: FieldKind.TEXT, key: 'extra', label: 'Extra', visible: visibleFn })
       .build();
 
-    expect((config.fields[1] as any).visible).toBe(visibleFn);
+    expect((config.fields[1] as TextFieldConfig<Model>).visible).toBe(visibleFn);
   });
 
   it('should preserve dataSource in built config', () => {
-    interface Model { country: string; }
+    type Model = { country: string; }
     const ds: FieldDataSource<string, Model> = {
       load: async () => [{ label: 'NL', value: 'nl' }],
       dependsOn: ['country'],
@@ -557,6 +561,6 @@ describe('FormModalBuilder: visible and dataSource in config', () => {
       })
       .build();
 
-    expect((config.fields[0] as any).dataSource).toBe(ds);
+    expect((config.fields[0] as SelectFieldConfig<Model>).dataSource).toBe(ds);
   });
 });

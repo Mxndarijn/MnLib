@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+﻿import { InjectionToken } from '@angular/core';
 import { CalendarEvent } from './calendar-event.model';
 import { provideMnComponentConfig } from '../../../config/mn-component-config.providers';
 
@@ -13,14 +13,14 @@ export enum CalendarView {
 
 /**
  * Configuration for the calendar component.
- * All properties are optional — sensible defaults are provided.
+ * All properties are optional â€” sensible defaults are provided.
  * Can be supplied via the `CALENDAR_CONFIG` injection token or through
  * the `provideMnComponentConfig` helper using component name `'mn-calendar'`.
  */
-export interface CalendarConfig {
-  /** First visible hour in week/day views (0–23). Default: `7`. */
+export type CalendarConfig = {
+  /** First visible hour in week/day views (0â€“23). Default: `7`. */
   startHour: number;
-  /** Last visible hour in week/day views (1–24, exclusive). Default: `22`. */
+  /** Last visible hour in week/day views (1â€“24, exclusive). Default: `22`. */
   endHour: number;
   /** BCP 47 locale tag used for date/time formatting (e.g. `'en-US'`, `'nl-NL'`). Default: `'en-US'`. */
   locale: string;
@@ -127,10 +127,10 @@ export const MN_CALENDAR_COMPONENT_NAME = 'mn-calendar';
  * Provider helper that wires the calendar into the `mn-config` system.
  *
  * Add this to the `providers` array of the component (or module) that hosts
- * `<app-calendar-view>`. It reads defaults and overrides from `mn-config.json5`
+ * `<mn-calendar-view>`. It reads defaults and overrides from `mn-config.json5`
  * under the key `"mn-calendar"` and provides them via {@link MN_CALENDAR_CONFIG}.
  *
- * @param initial — optional partial defaults merged before config-file values.
+ * @param initial â€” optional partial defaults merged before config-file values.
  */
 export function provideMnCalendarConfig(initial?: Partial<CalendarConfig>) {
   return provideMnComponentConfig<CalendarConfig>(MN_CALENDAR_CONFIG, MN_CALENDAR_COMPONENT_NAME, initial);
@@ -155,8 +155,8 @@ export function resolveCalendarConfig(partial?: Partial<CalendarConfig>): Calend
 /**
  * Represents a half-hour row in the week/day time grid.
  */
-export interface HourRow {
-  /** The hour value (e.g. 7, 8, …). */
+export type HourRow = {
+  /** The hour value (e.g. 7, 8, â€¦). */
   hour: number;
   /** CSS grid row start (1-based). */
   topRow: number;
@@ -167,12 +167,12 @@ export interface HourRow {
 /**
  * Represents a single day column in the week view header.
  */
-export interface ColumnDay {
+export type ColumnDay = {
   /** The date this column represents. */
   date: Date;
   /** Abbreviated day name (e.g. "Mon"). */
   dayName: string;
-  /** Day-of-month number (1–31). */
+  /** Day-of-month number (1â€“31). */
   dayNumber: number;
   /** Whether this column is today. */
   isToday: boolean;
@@ -181,10 +181,10 @@ export interface ColumnDay {
 /**
  * Represents a single cell in the month grid.
  */
-export interface MonthItem {
+export type MonthItem = {
   /** The date this cell represents. */
   date: Date;
-  /** Day-of-month number (1–31). */
+  /** Day-of-month number (1â€“31). */
   dayNumber: number;
   /** Whether this date belongs to the currently focused month. */
   isCurrentMonth: boolean;

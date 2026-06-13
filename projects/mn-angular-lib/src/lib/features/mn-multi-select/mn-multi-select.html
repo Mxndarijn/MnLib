@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full" [class.is-fullwidth]="props.fullWidth">
+﻿<div class="flex flex-col h-full" [class.is-fullwidth]="props.fullWidth">
   @if (uiConfig.label || props.label) {
     <label class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!" [attr.for]="resolvedId">
       <p>{{ uiConfig.label || props.label }}</p>
@@ -18,6 +18,7 @@
     [attr.aria-invalid]="showError || null"
     [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
     [attr.aria-expanded]="isOpen"
+    [attr.aria-controls]="isOpen ? resolvedId + '-listbox' : null"
     role="combobox"
     tabindex="0"
     (click)="toggle()"
@@ -30,6 +31,7 @@
         <span class="text-base-content/50">{{ uiConfig.placeholder || props.placeholder || 'Select...' }}</span>
       } @else {
         @for (opt of selectedOptions; track opt.value) {
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
           <span class="inline-flex items-center gap-x-1 bg-base-200 border border-accent text-base-content text-xs pl-2 py-0.5 rounded-md cursor-pointer"
             (click)="removeOption(opt, $event)">
             {{ opt.label }}
@@ -40,7 +42,7 @@
               class="text-base-content/50 hover:text-base-content cursor-pointer"
               (click)="removeOption(opt, $event)"
               [attr.aria-label]="'Remove ' + opt.label"
-            >×</button>
+            >Ã—</button>
           </span>
         }
       }
@@ -54,7 +56,11 @@
 
   <!-- Dropdown -->
   @if (isOpen) {
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
     <div
+      [id]="resolvedId + '-listbox'"
+      aria-multiselectable="true"
+      role="listbox"
       class="fixed z-[9999] bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto"
       [style.top]="dropdownStyle.top"
       [style.left]="dropdownStyle.left"
@@ -75,10 +81,15 @@
         }
         @for (opt of filteredOptions; track opt.value) {
           <div
+            (keyup.enter)="toggleOption(opt)"
+            (keyup.space)="toggleOption(opt)"
+            [attr.aria-selected]="isSelected(opt)"
             class="flex items-center gap-x-2 px-3 py-2 text-sm cursor-pointer text-base-content hover:bg-base-200"
             [class.opacity-50]="opt.disabled || isMaxReached(opt)"
             [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
             (click)="toggleOption(opt); $event.stopPropagation()"
+            role="option"
+            tabindex="0"
           >
             <input
               type="checkbox"
@@ -100,12 +111,12 @@
     @if (props.showAllErrors) {
       <div class="flex flex-col gap-y-1 mt-1">
         @for (error of errorMessages; track $index) {
-          <lib-mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></lib-mn-error-message>
+          <mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></mn-error-message>
         }
       </div>
     } @else {
-      @if (errorMessage != null) {
-        <lib-mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></lib-mn-error-message>
+      @if (errorMessage !== null) {
+        <mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></mn-error-message>
       }
     }
   }

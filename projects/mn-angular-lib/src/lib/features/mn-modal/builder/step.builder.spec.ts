@@ -3,6 +3,8 @@ import { StepBuilder } from './step.builder';
 import { ModalBuilder } from './modal.builder';
 import {
   FieldKind,
+  FieldVisibilityCondition,
+  FormValidator,
   StepState,
   ValidationStatus,
 } from '../mn-modal.types';
@@ -178,7 +180,7 @@ describe('StepBuilder', () => {
   });
 
   it('should support visible condition on field groups', () => {
-    const visibleFn = (form: any) => form.showGroup === true;
+    const visibleFn: FieldVisibilityCondition<{ showGroup: boolean }> = (form) => form.showGroup === true;
     const step = new StepBuilder('s1', 'S')
       .fieldGroup({
         title: 'Conditional',
@@ -192,7 +194,7 @@ describe('StepBuilder', () => {
   // ---- .formValidators() ----
 
   it('should set form validators', () => {
-    const validator = (form: any) => form.a !== form.b ? { b: 'Mismatch' } : null;
+    const validator: FormValidator<{ a: unknown; b: unknown }> = (form) => form.a !== form.b ? {b: 'Mismatch'} : null;
     const step = new StepBuilder('s1', 'S')
       .field({ kind: FieldKind.TEXT, key: 'a', label: 'A' })
       .field({ kind: FieldKind.TEXT, key: 'b', label: 'B' })
@@ -282,7 +284,7 @@ describe('StepBuilder', () => {
   });
 
   it('should pass formValidators through WizardModalBuilder', () => {
-    const v = (form: any) => null;
+    const v: FormValidator = () => null;
     const config = ModalBuilder.wizard()
       .addStep('V', (s) => {
         s.field({ kind: FieldKind.TEXT, key: 'a', label: 'A' })

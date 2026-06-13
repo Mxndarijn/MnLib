@@ -26,7 +26,20 @@
           "options": {
             "tsConfig": "projects/mn-angular-lib/tsconfig.spec.json",
             "karmaConfig": "projects/mn-angular-lib/karma.conf.js",
-            "polyfills": ["zone.js", "zone.js/testing"]
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/mn-angular-lib/**/*.ts",
+              "projects/mn-angular-lib/**/*.html"
+            ],
+            "eslintConfig": "projects/mn-angular-lib/eslint.config.js"
           }
         }
       }
@@ -118,6 +131,16 @@
               "projects/demo-app/src/styles.css"
             ],
             "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/demo-app/**/*.ts",
+              "projects/demo-app/**/*.html"
+            ],
+            "eslintConfig": "projects/demo-app/eslint.config.js"
           }
         }
       }

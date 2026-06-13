@@ -1,4 +1,4 @@
-<demo-page [title]="'Alerts Demo'">
+<app-demo-page [title]="'Alerts Demo'">
   <div class="controls mb-6" demo-actions>
     <div class="flex flex-wrap gap-2 items-center">
       <button mnButton [data]="{ variant: 'outline', color: 'primary' }" (click)="show('info')">Info</button>
@@ -14,16 +14,19 @@
 
   <section class="inputs">
     <div class="field">
-      <label class="text-sm font-medium text-gray-700">Title</label>
-      <input type="text" [(ngModel)]="titleInput" placeholder="Title (optional)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+      <label class="text-sm font-medium text-gray-700" for="titleInput">Title</label>
+      <input [(ngModel)]="titleInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="titleInput" placeholder="Title (optional)"
+             type="text"/>
     </div>
     <div class="field">
-      <label class="text-sm font-medium text-gray-700">Subtitle</label>
-      <input type="text" [(ngModel)]="subTitleInput" placeholder="Subtitle (optional)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+      <label class="text-sm font-medium text-gray-700" for="subTitleInput">Subtitle</label>
+      <input [(ngModel)]="subTitleInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="subTitleInput" placeholder="Subtitle (optional)"
+             type="text"/>
     </div>
     <div class="field">
-      <label class="text-sm font-medium text-gray-700">Custom duration (ms)</label>
-      <input type="number" min="0" [(ngModel)]="durationInputMs" placeholder="e.g. 2000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+      <label class="text-sm font-medium text-gray-700" for="durationInputMs">Custom duration (ms)</label>
+      <input [(ngModel)]="durationInputMs" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" id="durationInputMs" min="0" placeholder="e.g. 2000"
+             type="number"/>
     </div>
   </section>
 
@@ -46,4 +49,4 @@
   </div>
 
   <mn-alert-outlet />
-</demo-page>
+</app-demo-page>

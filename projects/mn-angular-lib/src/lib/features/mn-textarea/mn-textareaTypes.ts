@@ -9,7 +9,7 @@ import { ValidationErrors } from '@angular/forms';
  * @param errors - All validation errors present on the control
  * @returns The error message string to display
  */
-export type MnTextareaErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
+export type MnTextareaErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
 
 /**
  * Map of error keys to error message definitions.
@@ -22,7 +22,7 @@ export type MnTextareaErrorMessagesData = Partial<Record<string, MnTextareaError
  * Properties for the MnTextarea component.
  * Contains UI, styling, and error handling configuration.
  */
-export interface MnTextareaProps {
+export type MnTextareaProps = {
   /** Unique identifier for the textarea element (required for accessibility) */
   id: string;
 
@@ -107,7 +107,7 @@ export interface MnTextareaProps {
  * Configuration for MnTextarea resolved from MnConfigService.
  * Contains UI properties that can ONLY be set via configuration.
  */
-export interface MnTextareaUIConfig {
+export type MnTextareaUIConfig = {
   /** Label text displayed above the textarea */
   label?: string;
 

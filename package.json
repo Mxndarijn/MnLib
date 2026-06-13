@@ -8,7 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint:i18n": "node tools/lint-hardcoded-strings.js",
-    "generate:icons": "node tools/generate-icon-directive.js"
+    "generate:icons": "node tools/generate-icon-directive.js",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix"
   },
   "prettier": {
     "printWidth": 100,
@@ -42,9 +44,13 @@
     "@angular/build": "^21.1.3",
     "@angular/cli": "^21.1.3",
     "@angular/compiler-cli": "^21.1.3",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/jasmine": "~5.1.0",
+    "angular-eslint": "21.4.0",
     "autoprefixer": "^10.4.23",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
@@ -53,8 +59,10 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^21.1.0",
     "postcss": "^8.5.3",
+    "prettier": "^3.8.4",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
+    "typescript-eslint": "8.59.2",
     "zone.js": "^0.15.1"
   }
 }

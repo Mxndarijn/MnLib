@@ -1,0 +1,551 @@
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\config\mn-component-config.providers.ts
+  54:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  54:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\config\mn-config.service.ts
+   64:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  210:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  210:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  211:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  214:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-alert\mn-alert.service.spec.ts
+  19:80  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-alert\mn-alert.store.ts
+  16:42   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:97   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:114  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-calendar\models\calendar-event.model.ts
+  26:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-checkbox\mn-checkbox.ts
+  42:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  88:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  92:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-checkbox\mn-checkboxTypes.ts
+  4:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-datetime\mn-datetime.ts
+  36:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  93:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  97:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-datetime\mn-datetimeTypes.ts
+  4:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-input-field\mn-input-field-adapters.ts
+  288:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-input-field\mn-input-field.ts
+   76:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   89:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  166:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  175:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-input-field\mn-input-fieldTypes.ts
+  29:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-list\mn-list.component.ts
+  30:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  51:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-list\mn-list.types.ts
+  23:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\base-modal.builder.spec.ts
+  80:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  81:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\base-modal.builder.ts
+   23:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:75  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  189:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  189:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  192:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  194:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  194:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  196:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  196:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  196:76  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\confirmation-modal.builder.spec.ts
+  86:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\confirmation-modal.builder.ts
+   47:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   51:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   65:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   67:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   83:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   83:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   88:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   96:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\form-layout.builder.ts
+   13:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   18:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   42:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  125:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:80  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  212:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  231:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  235:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  241:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  250:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  274:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  274:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  320:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\form-modal.builder.spec.ts
+    4:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\form-modal.builder.ts
+   26:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   46:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   86:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\modal.builder.ts
+  7:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\step.builder.spec.ts
+  181:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  285:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\step.builder.ts
+   13:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:76  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:68  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\wizard-modal.builder.spec.ts
+  126:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\builder\wizard-modal.builder.ts
+   26:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   46:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   50:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   69:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   77:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   77:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   80:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   84:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   84:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   84:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-confirmation-body\mn-confirmation-body.component.spec.ts
+  15:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-confirmation-body\mn-confirmation-body.component.ts
+  127:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-custom-body-host\mn-custom-body-host.component.ts
+  44:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  50:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  55:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-footer-actions\mn-footer-actions.component.ts
+  37:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-form-body\mn-custom-field-host.directive.ts
+  23:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  54:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  60:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-form-body\mn-form-body.component.spec.ts
+    7:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:79  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:84  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   26:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   34:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   34:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  125:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  125:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  219:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  232:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  245:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-form-body\mn-form-body.component.ts
+   53:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   89:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   89:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   93:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  141:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  183:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  198:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  199:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  200:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  215:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  218:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  223:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  250:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  259:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  263:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  278:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  279:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  279:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  339:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  364:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  395:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  425:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  425:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  425:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  440:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  440:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  492:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  509:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  521:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  530:87  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  557:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  580:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  693:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  695:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  697:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  702:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-modal-shell\mn-modal-shell.component.ts
+   35:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   47:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  108:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  108:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  147:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\components\mn-wizard-body\mn-wizard-body.component.ts
+   74:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  373:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  374:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  394:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  394:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  413:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  415:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  418:84  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\integration\advanced-features.spec.ts
+   13:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   35:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  326:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  334:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  389:78  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  542:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  558:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\integration\builder-to-component.spec.ts
+   18:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   39:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   47:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  244:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  245:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  246:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  370:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  378:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\integration\dynamic-groups-and-validators.spec.ts
+   11:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   36:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   44:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   44:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  183:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  191:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  191:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\integration\five-features.spec.ts
+   14:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   36:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  214:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  222:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  323:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  331:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  426:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  434:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  587:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  595:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  637:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  659:77  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  685:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  705:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  728:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  806:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  829:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  830:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  846:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  865:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  891:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\integration\modal-outcome.spec.ts
+   20:43   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:56   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:80   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:104  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   22:18   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   23:19   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:35   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   25:37   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:62   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  201:46   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:61   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  428:19   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  430:70   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  465:19   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  467:70   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  542:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  547:79   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  560:69   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  573:69   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  585:69   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  586:22   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\integration\multi-select-table.spec.ts
+   21:32   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:42   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:47   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   86:33   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  159:18   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  168:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:18   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  191:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  203:18   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  212:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  226:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  240:19   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  259:18   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  265:19   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  291:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  304:111  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  306:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\integration\new-features.spec.ts
+   38:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   52:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  183:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  201:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  207:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  220:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  234:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  247:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  302:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  322:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  350:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  381:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  402:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  418:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  423:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  445:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  462:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  468:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  491:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  530:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  684:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  752:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  772:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\mn-modal-ref.spec.ts
+   15:8   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\mn-modal-ref.ts
+  10:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  50:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\mn-modal.service.ts
+  19:43   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:18   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:113  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-modal\mn-modal.types.ts
+  168:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  174:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  194:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  264:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  273:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  284:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  290:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  308:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  309:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  333:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  334:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  354:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  355:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  372:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  373:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  388:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  389:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  406:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  407:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  423:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  424:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  443:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  444:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  464:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  465:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  475:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  483:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  484:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  494:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  502:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  503:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  521:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  522:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  542:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  543:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  567:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  568:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  590:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  591:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  607:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  608:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  801:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  802:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  820:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  830:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  843:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  844:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  845:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  846:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  847:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  848:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  849:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  861:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  863:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-multi-select\mn-multi-select.ts
+  47:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  89:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  93:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-multi-select\mn-multi-selectTypes.ts
+  4:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-select\mn-select.ts
+  102:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-select\mn-selectTypes.ts
+  4:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-table\mn-table.component.ts
+   37:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   65:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  397:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  397:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-table\mn-table.types.ts
+   55:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   60:82  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   62:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-textarea\mn-textarea.ts
+   75:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   88:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\features\mn-textarea\mn-textareaTypes.ts
+  12:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\language\mn-language.service.ts
+  125:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\language\mn-language.types.ts
+  56:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\preview\mn-preview-listener.ts
+  6:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+C:\Users\Merij\WebstormProjects\MnLib\projects\mn-angular-lib\src\lib\shared\crud\crud.service.spec.ts
+   46:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  171:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  188:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  204:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  209:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  223:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any

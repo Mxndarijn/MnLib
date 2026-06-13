@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MnTabComponent, MnTabDataSource } from 'mn-angular-lib';
+import {MnTabComponent, MnTabDataSource, MnTabItem} from 'mn-angular-lib';
 
 @Component({
   selector: 'app-tab-demo',
@@ -64,7 +64,7 @@ export class TabDemo {
     ],
   };
 
-  onTabChange(item: any) {
+  onTabChange(item: MnTabItem) {
     console.log('Active tab changed to:', item);
   }
 }

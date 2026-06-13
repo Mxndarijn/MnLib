@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Validators } from '@angular/forms';
+
 import { BehaviorSubject } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ModalBuilder } from '../builder/modal.builder';
@@ -7,20 +7,18 @@ import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.com
 import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
 import {
   FieldKind,
-  ModalKind,
   ModalCloseReason,
-  ModalSize,
-  WizardFlowMode,
   ModalI18nLabels,
-  ModalCancelHandler,
-  SingleSelectTableFieldConfig,
   ColorFieldConfig,
   RatingFieldConfig,
   SliderFieldConfig,
+  FormModalConfig,
+  WizardModalConfig,
 } from '../mn-modal.types';
+import {MnModalRef} from '../mn-modal-ref';
 import { TableDataSource, ColumnSortType } from '../../mn-table/mn-table.types';
 
-interface TestRow { id: string; name: string; email: string; }
+type TestRow = { id: string; name: string; email: string; }
 
 function createTestDataSource(rows?: TestRow[]): TableDataSource<TestRow> {
   const data = rows || [
@@ -40,12 +38,12 @@ function createTestDataSource(rows?: TestRow[]): TableDataSource<TestRow> {
   };
 }
 
-function createMockModalRef(): any {
+function createMockModalRef(): MnModalRef<unknown> {
   return {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
     afterClosed$: { subscribe: () => {} },
-  };
+  } as unknown as MnModalRef<unknown>;
 }
 
 // =============================================================
@@ -54,7 +52,7 @@ function createMockModalRef(): any {
 describe('Feature 9: onCancel / onDismiss Callback', () => {
   it('should include onCancel in form builder config', () => {
     const handler = jasmine.createSpy('onCancel');
-    const config = ModalBuilder.form<any>()
+    const config = ModalBuilder.form()
       .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
       .onCancel(handler)
       .build();
@@ -92,7 +90,7 @@ describe('Feature 9: onCancel / onDismiss Callback', () => {
   });
 
   it('should not have onCancel when not set', () => {
-    const config = ModalBuilder.form<any>()
+    const config = ModalBuilder.form()
       .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
       .build();
 
@@ -102,7 +100,7 @@ describe('Feature 9: onCancel / onDismiss Callback', () => {
   describe('Wizard onCancel integration', () => {
     let component: MnWizardBodyComponent;
     let fixture: ComponentFixture<MnWizardBodyComponent>;
-    let mockModalRef: any;
+    let mockModalRef: MnModalRef<unknown>;
 
     beforeEach(async () => {
       await TestBed.configureTestingModule({
@@ -120,7 +118,7 @@ describe('Feature 9: onCancel / onDismiss Callback', () => {
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
       mockModalRef = createMockModalRef();
-      component.config = config as any;
+      component.config = config as WizardModalConfig;
       component.modalRef = mockModalRef;
       fixture.detectChanges();
 
@@ -141,7 +139,7 @@ describe('Feature 9: onCancel / onDismiss Callback', () => {
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
       mockModalRef = createMockModalRef();
-      component.config = config as any;
+      component.config = config as WizardModalConfig;
       component.modalRef = mockModalRef;
       fixture.detectChanges();
 
@@ -162,7 +160,7 @@ describe('Feature 10: i18n / Localization Support', () => {
       submit: 'Enviar',
       cancel: 'Cancelar',
     };
-    const config = ModalBuilder.form<any>()
+    const config = ModalBuilder.form()
       .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
       .i18n(labels)
       .build();
@@ -185,7 +183,7 @@ describe('Feature 10: i18n / Localization Support', () => {
   });
 
   it('should not have i18n when not set', () => {
-    const config = ModalBuilder.form<any>()
+    const config = ModalBuilder.form()
       .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
       .build();
 
@@ -203,13 +201,13 @@ describe('Feature 10: i18n / Localization Support', () => {
     });
 
     it('should use default labels when no i18n is set', () => {
-      const config = ModalBuilder.form<any>()
+      const config = ModalBuilder.form()
         .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
         .build();
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -222,7 +220,7 @@ describe('Feature 10: i18n / Localization Support', () => {
     });
 
     it('should use custom i18n labels when set', () => {
-      const config = ModalBuilder.form<any>()
+      const config = ModalBuilder.form()
         .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
         .i18n({
           submit: 'Enviar',
@@ -236,7 +234,7 @@ describe('Feature 10: i18n / Localization Support', () => {
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -249,14 +247,14 @@ describe('Feature 10: i18n / Localization Support', () => {
     });
 
     it('should render custom submit/cancel labels in DOM', () => {
-      const config = ModalBuilder.form<any>()
+      const config = ModalBuilder.form()
         .field({ kind: FieldKind.TEXT, key: 'name', label: 'Name' })
         .i18n({ submit: 'Senden', cancel: 'Abbrechen' })
         .build();
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -285,7 +283,7 @@ describe('Feature 10: i18n / Localization Support', () => {
 
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as WizardModalConfig;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -304,7 +302,7 @@ describe('Feature 10: i18n / Localization Support', () => {
 
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as WizardModalConfig;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -324,7 +322,7 @@ describe('Feature 10: i18n / Localization Support', () => {
 
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as WizardModalConfig;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -345,14 +343,14 @@ describe('Feature 12: Single-Select Table', () => {
   });
 
   it('should include SINGLE_SELECT_TABLE in form builder config', () => {
-    interface Model { selectedUser: string; }
+    type Model = { selectedUser: string; }
     const mockDs = createTestDataSource();
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.SINGLE_SELECT_TABLE,
         key: 'selectedUser',
         label: 'Select User',
-        tableDataSource: mockDs as any,
+        tableDataSource: mockDs as unknown as TableDataSource<unknown>,
       })
       .build();
 
@@ -370,7 +368,7 @@ describe('Feature 12: Single-Select Table', () => {
     });
 
     it('should create form control for SINGLE_SELECT_TABLE field', () => {
-      interface Model { selectedUser: string; }
+      type Model = { selectedUser: string; }
       const mockDs = createTestDataSource();
       const config = ModalBuilder.form<Model>()
         .field({
@@ -383,7 +381,7 @@ describe('Feature 12: Single-Select Table', () => {
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -391,7 +389,7 @@ describe('Feature 12: Single-Select Table', () => {
     });
 
     it('should force single selection mode on table data source', () => {
-      interface Model { selectedUser: string; }
+      type Model = { selectedUser: string; }
       const mockDs = createTestDataSource();
       const config = ModalBuilder.form<Model>()
         .field({
@@ -404,7 +402,7 @@ describe('Feature 12: Single-Select Table', () => {
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -412,7 +410,7 @@ describe('Feature 12: Single-Select Table', () => {
     });
 
     it('should set single value (not array) on selection change', () => {
-      interface Model { selectedUser: string; }
+      type Model = { selectedUser: string; }
       const mockDs = createTestDataSource();
       const config = ModalBuilder.form<Model>()
         .field({
@@ -420,12 +418,12 @@ describe('Feature 12: Single-Select Table', () => {
           key: 'selectedUser',
           label: 'Select User',
           tableDataSource: mockDs,
-        } as any)
+        })
         .build();
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -434,7 +432,7 @@ describe('Feature 12: Single-Select Table', () => {
     });
 
     it('should set null when no row is selected', () => {
-      interface Model { selectedUser: string; }
+      type Model = { selectedUser: string; }
       const mockDs = createTestDataSource();
       const config = ModalBuilder.form<Model>()
         .field({
@@ -447,7 +445,7 @@ describe('Feature 12: Single-Select Table', () => {
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -456,7 +454,7 @@ describe('Feature 12: Single-Select Table', () => {
     });
 
     it('should use custom getRowValue for single select table', () => {
-      interface Model { selectedEmail: string; }
+      type Model = { selectedEmail: string; }
       const mockDs = createTestDataSource();
       const config = ModalBuilder.form<Model>()
         .field({
@@ -464,13 +462,13 @@ describe('Feature 12: Single-Select Table', () => {
           key: 'selectedEmail',
           label: 'Select User',
           tableDataSource: mockDs,
-          getRowValue: (row: any) => row['email'],
+          getRowValue: (row: unknown) => (row as TestRow).email,
         })
         .build();
 
       fixture = TestBed.createComponent(MnFormBodyComponent);
       component = fixture.componentInstance;
-      component.config = config as any;
+      component.config = config as FormModalConfig<unknown, unknown>;
       component.modalRef = createMockModalRef();
       fixture.detectChanges();
 
@@ -493,7 +491,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     }).compileComponents();
   });
 
-  function setup(config: any) {
+  function setup(config: FormModalConfig<unknown, unknown>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     component.config = config;
@@ -508,7 +506,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should create form control for COLOR field', () => {
-      interface Model { color: string; }
+      type Model = { color: string; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.COLOR, key: 'color', label: 'Color' })
         .build();
@@ -517,7 +515,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should return default color value #000000', () => {
-      interface Model { color: string; }
+      type Model = { color: string; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.COLOR, key: 'color', label: 'Color' })
         .build();
@@ -526,19 +524,19 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should update color via onColorChange', () => {
-      interface Model { color: string; }
+      type Model = { color: string; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.COLOR, key: 'color', label: 'Color' })
         .build();
       setup(config);
 
-      const mockEvent = { target: { value: '#ff5500' } } as any;
+      const mockEvent = {target: {value: '#ff5500'}} as unknown as Event;
       component.onColorChange(config.fields[0], mockEvent);
       expect(component.form.get('color')!.value).toBe('#ff5500');
     });
 
     it('should set color from swatch', () => {
-      interface Model { color: string; }
+      type Model = { color: string; }
       const config = ModalBuilder.form<Model>()
         .field({
           kind: FieldKind.COLOR, key: 'color', label: 'Color',
@@ -552,7 +550,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should preserve swatches in config', () => {
-      interface Model { color: string; }
+      type Model = { color: string; }
       const swatches = ['#ff0000', '#00ff00', '#0000ff'];
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.COLOR, key: 'color', label: 'Color', swatches })
@@ -562,7 +560,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should render color input in DOM', () => {
-      interface Model { color: string; }
+      type Model = { color: string; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.COLOR, key: 'color', label: 'Pick Color' })
         .build();
@@ -581,7 +579,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should create form control for RATING field', () => {
-      interface Model { rating: number; }
+      type Model = { rating: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.RATING, key: 'rating', label: 'Rating' })
         .build();
@@ -590,7 +588,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should return default rating range of 5', () => {
-      interface Model { rating: number; }
+      type Model = { rating: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.RATING, key: 'rating', label: 'Rating' })
         .build();
@@ -599,7 +597,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should return custom rating range', () => {
-      interface Model { rating: number; }
+      type Model = { rating: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.RATING, key: 'rating', label: 'Rating', max: 10 })
         .build();
@@ -608,7 +606,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should set rating value', () => {
-      interface Model { rating: number; }
+      type Model = { rating: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.RATING, key: 'rating', label: 'Rating' })
         .build();
@@ -620,7 +618,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should render star buttons in DOM', () => {
-      interface Model { rating: number; }
+      type Model = { rating: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.RATING, key: 'rating', label: 'Rating', max: 5 })
         .build();
@@ -635,7 +633,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should preserve icon and allowHalf in config', () => {
-      interface Model { rating: number; }
+      type Model = { rating: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.RATING, key: 'rating', label: 'Rating', icon: 'heart', allowHalf: true })
         .build();
@@ -653,7 +651,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should create form control for SLIDER field', () => {
-      interface Model { volume: number; }
+      type Model = { volume: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.SLIDER, key: 'volume', label: 'Volume' })
         .build();
@@ -662,7 +660,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should return default slider value (min or 0)', () => {
-      interface Model { volume: number; }
+      type Model = { volume: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.SLIDER, key: 'volume', label: 'Volume' })
         .build();
@@ -671,7 +669,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should return custom min as default slider value', () => {
-      interface Model { volume: number; }
+      type Model = { volume: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.SLIDER, key: 'volume', label: 'Volume', min: 10 })
         .build();
@@ -680,19 +678,19 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should update slider value via onSliderChange', () => {
-      interface Model { volume: number; }
+      type Model = { volume: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.SLIDER, key: 'volume', label: 'Volume' })
         .build();
       setup(config);
 
-      const mockEvent = { target: { value: '75' } } as any;
+      const mockEvent = {target: {value: '75'}} as unknown as Event;
       component.onSliderChange(config.fields[0], mockEvent);
       expect(component.form.get('volume')!.value).toBe(75);
     });
 
     it('should render range input in DOM', () => {
-      interface Model { volume: number; }
+      type Model = { volume: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.SLIDER, key: 'volume', label: 'Volume' })
         .build();
@@ -704,7 +702,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should preserve unit and showValue in config', () => {
-      interface Model { volume: number; }
+      type Model = { volume: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.SLIDER, key: 'volume', label: 'Volume', unit: '%', showValue: true, min: 0, max: 100, step: 5 })
         .build();
@@ -718,7 +716,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     });
 
     it('should use initial value for slider', () => {
-      interface Model { volume: number; }
+      type Model = { volume: number; }
       const config = ModalBuilder.form<Model>()
         .field({ kind: FieldKind.SLIDER, key: 'volume', label: 'Volume' })
         .initialValue({ volume: 50 })
@@ -743,7 +741,7 @@ describe('Feature 11: Select Field i18n Integration', () => {
   });
 
   it('should use custom selectPlaceholder from i18n in select field', () => {
-    interface Model { role: string; }
+    type Model = { role: string; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.SELECT, key: 'role', label: 'Role',
@@ -754,7 +752,7 @@ describe('Feature 11: Select Field i18n Integration', () => {
 
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config as any;
+    component.config = config as FormModalConfig<unknown, unknown>;
     component.modalRef = createMockModalRef();
     fixture.detectChanges();
 
@@ -764,7 +762,7 @@ describe('Feature 11: Select Field i18n Integration', () => {
   });
 
   it('should use default Select... placeholder when no i18n', () => {
-    interface Model { role: string; }
+    type Model = { role: string; }
     const config = ModalBuilder.form<Model>()
       .field({
         kind: FieldKind.SELECT, key: 'role', label: 'Role',
@@ -774,7 +772,7 @@ describe('Feature 11: Select Field i18n Integration', () => {
 
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config as any;
+    component.config = config as FormModalConfig<unknown, unknown>;
     component.modalRef = createMockModalRef();
     fixture.detectChanges();
 

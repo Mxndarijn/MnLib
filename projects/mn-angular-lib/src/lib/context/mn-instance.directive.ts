@@ -2,6 +2,7 @@ import { Attribute, Directive, Input } from '@angular/core';
 import { MN_INSTANCE_ID } from './mn-context.tokens';
 
 @Directive({
+  // eslint-disable-next-line @angular-eslint/directive-selector -- kebab-case is intentional: matches the Attribute() token and is stable public API
   selector: '[mn-instance]',
   standalone: true,
   providers: [

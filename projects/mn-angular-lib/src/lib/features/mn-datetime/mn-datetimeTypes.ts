@@ -1,7 +1,7 @@
 import { MnDatetimeVariants } from './mn-datetimeVariants';
 import { ValidationErrors } from '@angular/forms';
 
-export type MnDatetimeErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
+export type MnDatetimeErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
 
 export type MnDatetimeErrorMessagesData = Partial<Record<string, MnDatetimeErrorMessageData>>;
 
@@ -13,7 +13,7 @@ export type MnDatetimeErrorMessagesData = Partial<Record<string, MnDatetimeError
  */
 export type MnDatetimeMode = 'date' | 'time' | 'datetime-local';
 
-export interface MnDatetimeProps {
+export type MnDatetimeProps = {
   /** Unique identifier for the datetime element (required for accessibility) */
   id: string;
 
@@ -73,7 +73,7 @@ export interface MnDatetimeProps {
   showAllErrors?: boolean;
 }
 
-export interface MnDatetimeUIConfig {
+export type MnDatetimeUIConfig = {
   /** Label text displayed above the datetime field */
   label?: string;
 

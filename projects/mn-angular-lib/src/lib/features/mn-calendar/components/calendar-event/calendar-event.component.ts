@@ -1,4 +1,4 @@
-import {
+﻿import {
   Component, Input, Output, EventEmitter, ViewChild, ViewContainerRef,
   AfterViewInit, Type, OnChanges, SimpleChanges
 } from '@angular/core';
@@ -17,7 +17,7 @@ import { CalendarEventDefaultComponent } from '../calendar-event-default/calenda
  * 3. {@link CalendarEventDefaultComponent} (library default)
  */
 @Component({
-  selector: 'app-calendar-event',
+  selector: 'mn-calendar-event',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-event.component.html',

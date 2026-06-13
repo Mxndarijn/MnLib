@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { ComponentRef, ChangeDetectorRef } from '@angular/core';
+import {ComponentRef} from '@angular/core';
 import {
   ModalRef,
   ModalCloseEvent,
@@ -7,19 +7,12 @@ import {
   BaseModalConfig,
 } from './mn-modal.types';
 
-// Forward declaration of MnModalShellComponent to avoid circular dependency
-// or just use Type<any> for the component ref if we want to be loose
-interface ShellComponent<T> {
-  config: any;
-  modalRef: any;
-}
-
-export class MnModalRef<TResult = any> implements ModalRef<TResult> {
+export class MnModalRef<TResult = unknown> implements ModalRef<TResult> {
   private readonly closeSubject = new Subject<ModalCloseEvent<TResult>>();
   public readonly afterClosed$: Observable<ModalCloseEvent<TResult>> = this.closeSubject.asObservable();
 
   constructor(
-    private componentRef: ComponentRef<any>,
+    private componentRef: ComponentRef<unknown>,
     private config: BaseModalConfig<TResult>
   ) {}
 
@@ -39,7 +32,7 @@ export class MnModalRef<TResult = any> implements ModalRef<TResult> {
   }
 
   private async animateAndDestroy(event: ModalCloseEvent<TResult>): Promise<void> {
-    const shell = this.componentRef.instance as any;
+    const shell = this.componentRef.instance as { startClosing?: () => Promise<void> };
     if (shell && typeof shell.startClosing === 'function') {
       await shell.startClosing();
     }
@@ -54,7 +47,7 @@ export class MnModalRef<TResult = any> implements ModalRef<TResult> {
     this.componentRef.changeDetectorRef.detectChanges();
   }
 
-  get component(): any {
+  get component(): unknown {
     return this.componentRef.instance;
   }
 

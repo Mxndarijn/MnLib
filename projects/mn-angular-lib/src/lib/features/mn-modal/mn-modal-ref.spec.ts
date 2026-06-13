@@ -1,5 +1,6 @@
 import { MnModalRef } from './mn-modal-ref';
-import { ModalCloseReason } from './mn-modal.types';
+import {BaseModalConfig, ModalCloseReason, ModalKind} from './mn-modal.types';
+import {ComponentRef} from '@angular/core';
 
 function createMockComponentRef() {
   return {
@@ -12,16 +13,16 @@ function createMockComponentRef() {
       detectChanges: jasmine.createSpy('detectChanges'),
     },
     destroy: jasmine.createSpy('destroy'),
-  } as any;
+  } as unknown as ComponentRef<unknown>;
 }
 
 describe('MnModalRef', () => {
   let ref: MnModalRef<string>;
-  let mockComponentRef: any;
+  let mockComponentRef: ReturnType<typeof createMockComponentRef>;
 
   beforeEach(() => {
     mockComponentRef = createMockComponentRef();
-    ref = new MnModalRef<string>(mockComponentRef, { kind: 'form' } as any);
+    ref = new MnModalRef<string>(mockComponentRef, {kind: ModalKind.FORM} as BaseModalConfig<string>);
   });
 
   it('close() should emit COMPLETED with result', (done) => {
@@ -68,10 +69,10 @@ describe('MnModalRef', () => {
   });
 
   it('afterClosed$ should complete after close', (done) => {
-    let completed = false;
+    let _completed = false;
     ref.afterClosed$.subscribe({
       complete: () => {
-        completed = true;
+        _completed = true;
         done();
       },
     });
@@ -99,7 +100,7 @@ describe('MnModalRef', () => {
   });
 
   it('update() should trigger change detection', () => {
-    ref.update({ title: 'New Title' } as any);
+    ref.update({title: 'New Title'} as Partial<BaseModalConfig<string>>);
     expect(mockComponentRef.changeDetectorRef.detectChanges).toHaveBeenCalled();
   });
 

@@ -2,21 +2,21 @@ import {TemplateRef} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 // ── Pagination Strategy ──
-export interface PaginationStrategy {
+export type PaginationStrategy = {
   hasMoreRows: boolean;
   loadMore: () => Promise<void>;
   reset?: () => void;
 }
 
-export interface CursorPaginationStrategy extends PaginationStrategy {
+export type CursorPaginationStrategy = {
   endCursor?: string;
-}
+} & PaginationStrategy
 
-export interface OffsetPaginationStrategy extends PaginationStrategy {
+export type OffsetPaginationStrategy = {
   currentPage: number;
   pageSize: number;
   totalItems?: number;
-}
+} & PaginationStrategy
 
 // ── Column Sort Type ──
 export enum ColumnSortType {
@@ -27,13 +27,13 @@ export enum ColumnSortType {
 }
 
 // ── Sort State ──
-export interface SortState {
+export type SortState = {
   columnKey: string;
   direction: 'asc' | 'desc';
 }
 
 // ── Appearance ──
-export interface TableAppearance {
+export type TableAppearance = {
   striped?: boolean;
   hover?: boolean;
   compact?: boolean;
@@ -44,22 +44,22 @@ export interface TableAppearance {
 export type ColumnFilterType = 'text' | 'select';
 
 // ── Column Filter Option ──
-export interface ColumnFilterOption {
+export type ColumnFilterOption = {
   label: string;
   value: string;
 }
 
 // ── Column Definition ──
-export interface ColumnDefinition<T> {
+export type ColumnDefinition<T> = {
   key: string;
-  header: string | TemplateRef<any>;
+  header: string | TemplateRef<unknown>;
   /** Translation key for the column header. When set, mn-table resolves it via MnLanguageService and keeps it updated on locale change. */
   headerKey?: string;
-  cell: ((row: T) => string) | TemplateRef<any>;
+  cell: ((row: T) => string) | TemplateRef<unknown>;
   /** Alternative cell renderer shown below the given breakpoint. When set, `cell` is hidden below this breakpoint and `cellSm` is shown instead. */
-  cellSm?: { below: 'sm' | 'md' | 'lg'; cell: ((row: T) => string) | TemplateRef<any> };
+  cellSm?: { below: 'sm' | 'md' | 'lg'; cell: ((row: T) => string) | TemplateRef<unknown> };
   sortType?: ColumnSortType;
-  getRawValueToSort?: (row: T) => any;
+  getRawValueToSort?: (row: T) => unknown;
   width?: string;
   align?: 'left' | 'center' | 'right';
   hiddenBelow?: 'sm' | 'md' | 'lg';
@@ -84,14 +84,14 @@ export interface ColumnDefinition<T> {
 }
 
 // ── Table Data Source ──
-export interface TableDataSource<T> {
+export type TableDataSource<T> = {
   dataRows: BehaviorSubject<T[]>;
   columns: ColumnDefinition<T>[];
   getID: (row: T) => string;
   emptyMessage: string;
   /** Translation key for the empty message. When set, mn-table resolves it via MnLanguageService. */
   emptyMessageKey?: string;
-  emptyTemplate?: TemplateRef<any>;
+  emptyTemplate?: TemplateRef<unknown>;
   isDataLoading: boolean;
 
   // Search
@@ -159,15 +159,15 @@ export interface TableDataSource<T> {
 
   // Toolbar
   /** Template rendered on the left side of the toolbar (before the search field). */
-  toolbarLeftTemplate?: TemplateRef<any>;
+  toolbarLeftTemplate?: TemplateRef<unknown>;
   /** Template rendered on the right side of the toolbar (after the search field). */
-  toolbarRightTemplate?: TemplateRef<any>;
+  toolbarRightTemplate?: TemplateRef<unknown>;
 
   // Labels / i18n
   labels?: TableLabels;
 }
 
-export interface TableLabels {
+export type TableLabels = {
   loadMore?: string;
   /** Translation key for the "Load more" button label. */
   loadMoreKey?: string;

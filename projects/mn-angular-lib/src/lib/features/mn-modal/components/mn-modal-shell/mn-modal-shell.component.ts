@@ -1,4 +1,15 @@
-import { Component, HostBinding, HostListener, Input, ElementRef, AfterViewInit, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  HostBinding,
+  HostListener,
+  Input,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+  OnInit,
+  ChangeDetectorRef,
+  inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MnModalRef } from '../../mn-modal-ref';
 import {
@@ -11,6 +22,10 @@ import {
   ModalCloseReason,
   ModalFooterAction,
   ActionStyle,
+  WizardModalConfig,
+  FormModalConfig,
+  ConfirmationModalConfig,
+  CustomModalConfig,
 } from '../../mn-modal.types';
 import { MnWizardBodyComponent } from '../mn-wizard-body/mn-wizard-body.component';
 import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
@@ -32,7 +47,10 @@ import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions
   templateUrl: './mn-modal-shell.component.html',
   styleUrls: ['./mn-modal-shell.component.css'],
 })
-export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewInit, OnDestroy {
+export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterViewInit, OnDestroy {
+  private el = inject<ElementRef<HTMLElement>>(ElementRef);
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() config!: ModalConfig<TResult>;
   @Input() modalRef!: MnModalRef<TResult>;
 
@@ -41,10 +59,8 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
   readonly ModalKind = ModalKind;
   private previouslyFocusedElement: HTMLElement | null = null;
   private focusTrapListener: ((e: KeyboardEvent) => void) | null = null;
-  private pollingTimer: any = null;
+  private pollingTimer: ReturnType<typeof setInterval> | null = null;
   private pollAttempts = 0;
-
-  constructor(private el: ElementRef<HTMLElement>, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.startPollingIfConfigured();
@@ -100,24 +116,20 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
     }
   }
 
-  asWizard(config: any): any {
-    return config;
+  asWizard(config: ModalConfig<TResult>): WizardModalConfig {
+    return config as unknown as WizardModalConfig;
   }
 
-  asForm(config: any): any {
-    return config;
+  asForm(config: ModalConfig<TResult>): FormModalConfig {
+    return config as unknown as FormModalConfig;
   }
 
-  asConfirmation(config: any): any {
-    return config;
+  asConfirmation(config: ModalConfig<TResult>): ConfirmationModalConfig {
+    return config as unknown as ConfirmationModalConfig;
   }
 
-  asCustom(config: any): any {
-    return config;
-  }
-
-  asAny(val: any): any {
-    return val;
+  asCustom(config: ModalConfig<TResult>): CustomModalConfig {
+    return config as unknown as CustomModalConfig;
   }
 
   @HostBinding('class') get hostClasses(): string {
@@ -143,7 +155,7 @@ export class MnModalShellComponent<TResult = any> implements OnInit, AfterViewIn
   }
 
   @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: any): void {
+  onEscapeKey(event: Event): void {
     if (this.config.keyboard === KeyboardMode.ENABLED) {
       this.handleClose(ModalCloseReason.ESCAPE);
       if (event && event.preventDefault) {

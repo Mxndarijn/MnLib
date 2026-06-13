@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, InjectionToken, Input, OnInit, Optional, Self} from '@angular/core';
+import {Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnDatetimeProps, MnDatetimeErrorMessageData, MnDatetimeUIConfig, MnDatetimeMode} from './mn-datetimeTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -18,6 +18,8 @@ export const MN_DATETIME_CONFIG = new InjectionToken<MnDatetimeUIConfig>('MN_DAT
   templateUrl: './mn-datetime.html',
 })
 export class MnDatetime implements OnInit {
+  ngControl = inject(NgControl, {optional: true, self: true});
+
   protected uiConfig: MnDatetimeUIConfig = {};
 
   @Input({ required: true }) props!: MnDatetimeProps;
@@ -31,16 +33,17 @@ export class MnDatetime implements OnInit {
   value: string | null = null;
   isDisabled = false;
 
-  private onChange: (val: any) => void = () => {};
+  private onChange: (val: unknown) => void = () => {
+  };
   private onTouched: () => void = () => {};
 
   private readonly builtInErrorMessages: Record<string, MnDatetimeErrorMessageData> = {
     required: 'This field is required',
-    mnMin: (args: any) => `Date/time must be from ${args.min} onwards`,
-    mnMax: (args: any) => `Date/time must be up to ${args.max}`,
+    mnMin: (args: unknown) => `Date/time must be from ${(args as { min: string }).min} onwards`,
+    mnMax: (args: unknown) => `Date/time must be up to ${(args as { max: string }).max}`,
   };
 
-  constructor(@Optional() @Self() public ngControl: NgControl) {
+  constructor() {
     if (this.ngControl) this.ngControl.valueAccessor = this;
   }
 
@@ -88,11 +91,11 @@ export class MnDatetime implements OnInit {
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (val: unknown) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 

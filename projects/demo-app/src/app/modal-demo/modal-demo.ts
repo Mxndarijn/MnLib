@@ -1,5 +1,5 @@
-import {Component, TemplateRef, ViewChild} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, inject, TemplateRef, ViewChild} from '@angular/core';
+import {NgClass} from '@angular/common';
 import {Validators} from '@angular/forms';
 import {
   ActionStyle,
@@ -17,10 +17,11 @@ import {
   TableDataSource,
   ValidationStatus,
   WizardFlowMode,
+  WizardResult,
 } from 'mn-angular-lib';
 import {BehaviorSubject} from 'rxjs';
 
-interface UserFormModel {
+type UserFormModel = {
   firstName: string;
   lastName: string;
   email: string;
@@ -41,14 +42,14 @@ interface UserFormModel {
 @Component({
   selector: 'app-modal-demo',
   standalone: true,
-  imports: [CommonModule, MnButton],
+  imports: [NgClass, MnButton],
   templateUrl: './modal-demo.html',
   styleUrls: ['./modal-demo.css'],
 })
 export class ModalDemo {
   @ViewChild('customTemplate') customTemplate!: TemplateRef<unknown>;
 
-  lastResult: string = '';
+  lastResult = '';
 
   sampleUsers = [
     { name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
@@ -58,7 +59,7 @@ export class ModalDemo {
     { name: 'Charlie Davis', email: 'charlie@example.com', role: 'Viewer', status: 'Inactive' },
   ];
 
-  constructor(private modalService: MnModalService) {}
+  private readonly modalService = inject(MnModalService);
 
   // Confirmation Modal Demo
   openConfirmationModal() {
@@ -426,7 +427,7 @@ export class ModalDemo {
 
   // Read-Only / Field Groups Demo
   openReadOnlyGroupedModal() {
-    interface WeaponInfo {
+    type WeaponInfo = {
       name: string;
       serialNumber: string;
       brand: string;
@@ -476,7 +477,7 @@ export class ModalDemo {
 
   // Multi-Select Table Modal Demo
   openMultiSelectTableModal() {
-    interface TeamMember {
+    type TeamMember = {
       id: string;
       name: string;
       email: string;
@@ -515,7 +516,7 @@ export class ModalDemo {
       appearance: { striped: true, hover: true },
     };
 
-    interface AssignModel {
+    type AssignModel = {
       teamName: string;
       members: string[];
     }
@@ -565,12 +566,12 @@ export class ModalDemo {
     this.modalService.open(config);
   }
 
-  @ViewChild('customHeader', { static: true }) customHeader!: TemplateRef<any>;
-  @ViewChild('confirmationDetail', { static: true }) confirmationDetail!: TemplateRef<any>;
-  @ViewChild('wizardHeader', { static: true }) wizardHeader!: TemplateRef<any>;
+  @ViewChild('customHeader', {static: true}) customHeader!: TemplateRef<unknown>;
+  @ViewChild('confirmationDetail', {static: true}) confirmationDetail!: TemplateRef<unknown>;
+  @ViewChild('wizardHeader', {static: true}) wizardHeader!: TemplateRef<unknown>;
 
   openHybridModal() {
-    interface HybridModel {
+    type HybridModel = {
       email: string;
     }
     const config = ModalBuilder.form<HybridModel>()
@@ -637,7 +638,7 @@ export class ModalDemo {
   }
 
   openWizardWithCustomHeader() {
-    interface WizardHeaderModel {
+    type WizardHeaderModel = {
       data1: string;
       data2: string;
     }
@@ -661,7 +662,7 @@ export class ModalDemo {
   }
 
   openAdvancedFormFeatures() {
-    interface AdvancedModel {
+    type AdvancedModel = {
       phone: string;
       taxId: string;
       deferred: string;
@@ -715,7 +716,7 @@ export class ModalDemo {
 
   openStackedModalDemo() {
     const openSecond = () => {
-      interface SecondModel {
+      type SecondModel = {
         note: string;
       }
       const config2 = ModalBuilder.form<SecondModel>()
@@ -736,7 +737,7 @@ export class ModalDemo {
       this.modalService.open(config2);
     };
 
-    interface FirstModel {
+    type FirstModel = {
       input1: string;
     }
     const config = ModalBuilder.form<FirstModel>()
@@ -800,7 +801,7 @@ export class ModalDemo {
           label: 'Save Draft',
           style: ActionStyle.SECONDARY,
           position: 'left',
-          handler: async (ref: ModalRef<unknown>) => {
+          handler: async (_ref: ModalRef<WizardResult>) => {
             this.lastResult = 'Wizard: Draft saved';
             console.log('Draft saved');
           },
@@ -809,7 +810,7 @@ export class ModalDemo {
           label: 'Reset',
           style: ActionStyle.DANGER,
           position: 'right',
-          handler: async (ref: ModalRef<unknown>) => {
+          handler: async (_ref: ModalRef<WizardResult>) => {
             this.lastResult = 'Wizard: Form reset';
             console.log('Form reset');
           },
@@ -828,7 +829,7 @@ export class ModalDemo {
 
   // Fixed Height Form Modal — demonstrates buttons pinned to bottom
   openFixedHeightFormModal() {
-    interface SimpleModel {
+    type SimpleModel = {
       name: string;
     }
 
@@ -879,7 +880,7 @@ export class ModalDemo {
   }
 
   openFluentValidationDemo() {
-    interface FluentModel {
+    type FluentModel = {
       email: string;
       password: string;
     }

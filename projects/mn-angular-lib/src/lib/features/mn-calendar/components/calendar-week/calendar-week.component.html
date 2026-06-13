@@ -1,4 +1,4 @@
-<div class="calendar-week" role="grid" aria-label="Week view">
+﻿<div class="calendar-week" role="grid" aria-label="Week view">
   <div class="week-header" [style.grid-template-columns]="'60px ' + gridTemplateColumns">
     <div class="time-gutter-header"></div>
     @for (col of columns; track col.dayName; let i = $index) {
@@ -41,8 +41,10 @@
         <div class="week-event"
           [style.grid-row]="getEventRow(event)"
           [style.grid-column]="getEventColumn(event)"
-          (click)="onEventClick(event)">
-          <app-calendar-event [event]="event" [customComponent]="calendarEventComponent"></app-calendar-event>
+             (click)="onEventClick(event)"
+             (keyup.enter)="onEventClick(event)"
+             tabindex="0">
+          <mn-calendar-event [customComponent]="calendarEventComponent" [event]="event"></mn-calendar-event>
         </div>
       }
     </div>

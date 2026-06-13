@@ -77,7 +77,9 @@ export class InputFieldDemo {
     size: 'md',
     borderRadius: 'md',
     errorMessages: {
-      noXAllowed: (args: any) => `Username cannot contain 'x' (you entered: ${args.actual})`,
+      noXAllowed: (args: unknown) => `Username cannot contain 'x' (you entered: ${(args as {
+        actual: string
+      }).actual})`,
       required: 'Username is required',
       minlength: 'Username must be at least 3 characters',
     },

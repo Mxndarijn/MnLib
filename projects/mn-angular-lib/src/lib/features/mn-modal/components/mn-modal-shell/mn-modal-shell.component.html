@@ -1,7 +1,10 @@
 @if (showBackdrop) {
+  <!-- The backdrop is a visual overlay — keyboard dismiss is handled at component level via Escape key -->
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
   <div class="modal-backdrop absolute inset-0 bg-black/50 animate-[fadeIn_0.2s_ease-in-out]" (click)="onBackdropClick()"></div>
 }
 
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
 <div
   class="modal-container relative bg-base-100 rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
   [ngClass]="[containerSizeClass, animationClass]"
@@ -42,7 +45,7 @@
     @if (config.kind === ModalKind.WIZARD) {
       <mn-wizard-body
         [config]="asWizard(config)"
-        [modalRef]="asAny(modalRef)"
+        [modalRef]="$any(modalRef)"
         class="block h-full"
       ></mn-wizard-body>
     }
@@ -50,7 +53,7 @@
     @if (config.kind === ModalKind.FORM) {
       <mn-form-body
         [config]="asForm(config)"
-        [modalRef]="asAny(modalRef)"
+        [modalRef]="$any(modalRef)"
         class="block h-full"
       ></mn-form-body>
     }
@@ -58,14 +61,14 @@
     @if (config.kind === ModalKind.CONFIRMATION) {
       <mn-confirmation-body
         [config]="asConfirmation(config)"
-        [modalRef]="asAny(modalRef)"
+        [modalRef]="$any(modalRef)"
       ></mn-confirmation-body>
     }
 
     @if (config.kind === ModalKind.CUSTOM) {
       <mn-custom-body-host
         [config]="asCustom(config)"
-        [modalRef]="asAny(modalRef)"
+        [modalRef]="$any(modalRef)"
       ></mn-custom-body-host>
     }
   </div>

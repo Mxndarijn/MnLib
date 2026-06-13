@@ -2,6 +2,7 @@ import { Attribute, Directive, Input, Optional, SkipSelf } from '@angular/core';
 import { MN_SECTION_PATH } from './mn-context.tokens';
 
 @Directive({
+  // eslint-disable-next-line @angular-eslint/directive-selector -- kebab-case is intentional: matches the Attribute() token and is stable public API
   selector: '[mn-section]',
   standalone: true,
   providers: [

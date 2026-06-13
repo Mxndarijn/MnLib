@@ -1,6 +1,6 @@
 import { MnBadgeVariants } from './mn-badgeVariants';
 
-export interface MnBadgeTypes {
+export type MnBadgeTypes = {
   size: MnBadgeVariants['size'];
   variant: MnBadgeVariants['variant'];
   color: MnBadgeVariants['color'];

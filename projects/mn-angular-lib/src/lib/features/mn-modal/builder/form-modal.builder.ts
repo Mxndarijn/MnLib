@@ -1,19 +1,21 @@
 import { BaseModalBuilder } from './base-modal.builder';
-import { FormLayoutBuilder, FieldValidatorBuilder } from './form-layout.builder';
 import {
   FormModalConfig,
   ModalKind,
   FormFieldConfig,
-  FormFieldGroup,
   FormLayoutMode,
   SubmitMode,
   ModalResultHandler,
   FormValidator,
+  MultiSelectTableFieldConfig,
+  SingleSelectTableFieldConfig,
 } from '../mn-modal.types';
+import {ValidatorFn} from '@angular/forms';
 
 export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseModalBuilder<
   FormModalConfig<TModel, TResult>,
-  TResult
+  TResult,
+  TModel
 > {
   constructor() {
     super({
@@ -23,27 +25,16 @@ export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseMo
     });
   }
 
-  override body(body: any): this {
-    return super.body(body);
-  }
-
-  override field(field: FormFieldConfig<TModel>): this {
-    return super.field(field);
-  }
-
-  override row(columns: number = 2): this {
-    return super.row(columns);
-  }
-
-  override addToRow(field: FormFieldConfig<TModel>, span: number = 1): this {
-    return super.addToRow(field, span);
-  }
-
-  override addRow(
-    columns: number,
-    buildFn: (row: { add: (field: FormFieldConfig<TModel>, span?: number) => void }) => void
+  /**
+   * Override to also accept table field configs with a concrete TRow (BehaviorSubject is invariant,
+   * so TableDataSource<TeamMember> is not assignable to TableDataSource<unknown>).
+   */
+  override field(field: FormFieldConfig<TModel>): this;
+  override field<TRow>(field: MultiSelectTableFieldConfig<TModel, TRow> | SingleSelectTableFieldConfig<TModel, TRow>): this;
+  override field<TRow = unknown>(
+    field: FormFieldConfig<TModel> | MultiSelectTableFieldConfig<TModel, TRow> | SingleSelectTableFieldConfig<TModel, TRow>
   ): this {
-    return super.addRow(columns, buildFn as any);
+    return super.field(field as FormFieldConfig<TModel>);
   }
 
   layout(mode: FormLayoutMode): this {
@@ -69,39 +60,11 @@ export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseMo
     return this.layoutBuilder.formValidators(validators);
   }
 
-  groupValidators(validators: any[]): this {
+  override groupValidators(validators: ValidatorFn[]): this {
     return this.layoutBuilder.groupValidators(validators);
   }
 
-  /**
-   * Add a field group with a section header.
-   * Groups visually separate fields with a title and optional description.
-   */
-  override fieldGroup(group: FormFieldGroup<TModel>): this;
-  /**
-   * Add a field group using a functional builder.
-   */
-  override fieldGroup(
-    title: string,
-    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
-  ): this;
-  /**
-   * Add a field group with title, description, and a functional builder.
-   */
-  override fieldGroup(
-    title: string,
-    description: string,
-    buildFn: (group: FormLayoutBuilder<TModel, any>) => void
-  ): this;
-  override fieldGroup(
-    arg1: string | FormFieldGroup<TModel>,
-    arg2?: string | ((group: FormLayoutBuilder<TModel, any>) => void),
-    arg3?: (group: FormLayoutBuilder<TModel, any>) => void
-  ): this {
-    return super.fieldGroup(arg1 as any, arg2 as any, arg3 as any);
-  }
-
   override build(): Readonly<FormModalConfig<TModel, TResult>> {
-    return super.build() as any;
+    return super.build();
   }
 }

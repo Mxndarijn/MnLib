@@ -34,7 +34,7 @@ export type ColumnFilterState = Record<string, string | undefined>;
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
+export class MnTable<T = object> implements OnInit, OnDestroy, DoCheck {
   @Input() dataSource!: TableDataSource<T>;
 
   @Output() sortChange = new EventEmitter<SortState | null>();
@@ -62,7 +62,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
   private langSubscription?: Subscription;
 
   /** Tracks the previous toolbar left template reference for change detection. */
-  private previousToolbarLeftTemplate?: TemplateRef<any>;
+  private previousToolbarLeftTemplate?: TemplateRef<unknown>;
 
   /**
    * Checks for changes to dataSource properties that are not covered
@@ -394,7 +394,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   // ── Template helpers ──
 
-  isTemplateRef(value: any): value is TemplateRef<any> {
+  isTemplateRef(value: unknown): value is TemplateRef<unknown> {
     return value instanceof TemplateRef;
   }
 
@@ -419,9 +419,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
 
   // ── Table CSS classes ──
 
-  get tableClasses(): string {
-    return 'w-full border-collapse overflow-y-hidden';
-  }
+  readonly tableClasses = 'w-full border-collapse overflow-y-hidden';
 
   get totalColumnCount(): number {
     let count = this.dataSource.columns.length;
@@ -498,7 +496,7 @@ export class MnTable<T = any> implements OnInit, OnDestroy, DoCheck {
         case ColumnSortType.NUMERICAL:
           return (Number(va) - Number(vb)) * dir;
         case ColumnSortType.DATE:
-          return (new Date(va).getTime() - new Date(vb).getTime()) * dir;
+          return (new Date(va as string | number).getTime() - new Date(vb as string | number).getTime()) * dir;
         default:
           return 0;
       }

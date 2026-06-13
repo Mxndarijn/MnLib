@@ -1,7 +1,7 @@
-<div class="w-full h-full flex flex-col" role="application" aria-label="Calendar">
+﻿<div class="w-full h-full flex flex-col" role="application" aria-label="Calendar">
 
   @if (isMobileView) {
-    <!-- Mobile (<375px): two rows — Today+action / date-nav -->
+    <!-- Mobile (<375px): two rows â€” Today+action / date-nav -->
     <div class="flex flex-col gap-2 py-3">
       <div class="flex items-center gap-2">
         <button mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
@@ -23,7 +23,7 @@
       </div>
     </div>
   } @else if (isTabletView) {
-    <!-- Tablet (375px–1023px): single row — Today / date-nav / action buttons -->
+    <!-- Tablet (375pxâ€“1023px): single row â€” Today / date-nav / action buttons -->
     <div class="flex items-center gap-3 py-3">
       <div class="flex items-center gap-3 min-w-0 flex-1">
         <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
@@ -47,7 +47,7 @@
       </div>
     </div>
   } @else {
-    <!-- Desktop (≥1024px): full row — Today / date-nav / view-switcher / action buttons -->
+    <!-- Desktop (â‰¥1024px): full row â€” Today / date-nav / view-switcher / action buttons -->
     <div class="flex items-center justify-between gap-3 py-3">
       <div class="flex items-center gap-3">
         <button mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
@@ -85,41 +85,41 @@
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-3 flex-1 min-h-0">
     <div class="min-w-0 min-h-0 overflow-hidden overflow-y-auto">
       @if (currentView === CalendarView.MONTH) {
-        <app-calendar-month
+        <mn-calendar-month
           [focusDay]="focusDay"
           [eventsChanged]="internalEventsChanged"
           [focusDayChanged]="internalFocusDayChanged"
           [config]="config"
           (dayClicked)="onMonthDayClick($event)">
-        </app-calendar-month>
+        </mn-calendar-month>
       }
       @if (currentView === CalendarView.WEEK) {
-        <app-calendar-week
+        <mn-calendar-week
           [focusDay]="focusDay"
           [eventsChanged]="internalEventsChanged"
           [focusDayChanged]="internalFocusDayChanged"
           [config]="config"
           [calendarEventComponent]="CalendarEventComponent"
           (eventClicked)="onEventClick($event)">
-        </app-calendar-week>
+        </mn-calendar-week>
       }
       @if (currentView === CalendarView.DAY) {
-        <app-calendar-day
+        <mn-calendar-day
           [focusDay]="focusDay"
           [eventsChanged]="internalEventsChanged"
           [focusDayChanged]="internalFocusDayChanged"
           [config]="config"
           [calendarEventComponent]="CalendarEventComponent"
           (eventClicked)="onEventClick($event)">
-        </app-calendar-day>
+        </mn-calendar-day>
       }
     </div>
     <div class="hidden lg:block border-l border-base-300 overflow-auto">
-      <app-upcoming-events
+      <mn-upcoming-events
         [eventsChanged]="internalEventsChanged"
         [config]="config"
         (eventClicked)="onEventClick($event)">
-      </app-upcoming-events>
+      </mn-upcoming-events>
     </div>
   </div>
 

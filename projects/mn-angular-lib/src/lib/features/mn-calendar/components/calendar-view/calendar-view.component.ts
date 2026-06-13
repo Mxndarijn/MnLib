@@ -1,14 +1,12 @@
-import {
+﻿import {
   Component,
   DestroyRef,
   EventEmitter,
   HostListener,
-  Inject,
   inject,
   Input,
   OnDestroy,
   OnInit,
-  Optional,
   Output,
   Type
 } from '@angular/core';
@@ -50,18 +48,18 @@ import {FormsModule} from '@angular/forms';
  *
  * @example
  * ```html
- * <app-calendar-view
+ * <mn-calendar-view
  *   [showButton]="true"
  *   [buttonTitle]="'New Event'"
  *   [NewCalendarItemsEvent]="eventsEmitter"
  *   (RequestNewCalendarItemsEvent)="loadEvents($event)"
  *   (CalendarItemClickedEvent)="onEventClick($event)"
  *   (ButtonClickedEvent)="openModal()">
- * </app-calendar-view>
+ * </mn-calendar-view>
  * ```
  */
 @Component({
-  selector: 'app-calendar-view',
+  selector: 'mn-calendar-view',
   standalone: true,
   imports: [
     CommonModule,
@@ -119,11 +117,11 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly lang = inject(MnLanguageService);
 
-  constructor(
-    @Optional() @Inject(CALENDAR_DATE_FORMATTER) formatter: CalendarDateFormatter | null,
-    @Optional() @Inject(MN_CALENDAR_CONFIG) mnConfig: CalendarConfig | null,
-    @Optional() @Inject(CALENDAR_CONFIG) legacyConfig: CalendarConfig | null
-  ) {
+  constructor() {
+    const formatter = inject<CalendarDateFormatter | null>(CALENDAR_DATE_FORMATTER, {optional: true});
+    const mnConfig = inject<CalendarConfig | null>(MN_CALENDAR_CONFIG, {optional: true});
+    const legacyConfig = inject<CalendarConfig | null>(CALENDAR_CONFIG, {optional: true});
+
     this.formatter = formatter ?? new DefaultCalendarDateFormatter();
     // Keep a reference to the injected config so we can re-read it after locale changes.
     this.mnConfigRef = mnConfig;
@@ -213,7 +211,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Handles a day click from the month view — switches to day view. */
+  /** Handles a day click from the month view â€” switches to day view. */
   onMonthDayClick(date: Date) {
     this.currentView = CalendarView.DAY;
     this.setFocusDay(date);

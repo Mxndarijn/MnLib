@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MnAlertService, MnShowInput } from './mn-alert.service';
+import {MnAlertService} from './mn-alert.service';
 import { MnAlertStore } from './mn-alert.store';
 import { DEFAULT_MN_ALERT_CONFIG, MN_ALERT_CONFIG, MnAlertConfig } from './mn-alert.tokens';
 
@@ -16,7 +16,7 @@ describe('MnAlertService', () => {
   function setup(cfg?: MnAlertConfig) {
     TestBed.configureTestingModule({
       providers: [
-        { provide: MnAlertStore, useFactory: () => (store = new StoreMock() as any) },
+        {provide: MnAlertStore, useFactory: () => (store = new StoreMock() as unknown as MnAlertStore)},
         ...(cfg ? [{ provide: MN_ALERT_CONFIG, useValue: cfg }] : [])
       ]
     });

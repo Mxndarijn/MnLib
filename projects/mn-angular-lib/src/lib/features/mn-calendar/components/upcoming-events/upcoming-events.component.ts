@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
+﻿import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Observable, Subject, takeUntil} from 'rxjs';
 import {CalendarEvent} from '../../models/calendar-event.model';
@@ -10,7 +10,7 @@ import {UpcomingEventRowComponent} from '../upcoming-event-row/upcoming-event-ro
  * (events whose end time is in the future), sorted by start time.
  */
 @Component({
-  selector: 'app-upcoming-events',
+  selector: 'mn-upcoming-events',
   standalone: true,
   imports: [CommonModule, UpcomingEventRowComponent],
   templateUrl: './upcoming-events.component.html',

@@ -16,6 +16,8 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 @Injectable({ providedIn: 'root' })
 export class MnConfigService {
+  private readonly http = inject(HttpClient);
+
   private _config: MnConfigFile | null = null;
   private _settings: MnConfigSettings = {};
   private _debugMode = false;
@@ -25,8 +27,6 @@ export class MnConfigService {
   readonly configVersion = this._configVersion.asReadonly();
 
   private readonly lang = inject(MnLanguageService);
-
-  constructor(private readonly http: HttpClient) {}
 
   /** General settings from the config file (version, name, etc.). */
   get settings(): Readonly<MnConfigSettings> {
@@ -61,11 +61,11 @@ export class MnConfigService {
       json = {};
     }
 
-    const cfg = (isPlainObject(json) ? json : {}) as any;
-    const defaults = isPlainObject(cfg.defaults) ? cfg.defaults : {};
-    const overrides = isPlainObject(cfg.overrides) ? cfg.overrides : cfg.overrides ?? {};
+    const cfg = (isPlainObject(json) ? json : {}) as Record<string, unknown>;
+    const defaults = isPlainObject(cfg['defaults']) ? cfg['defaults'] : {};
+    const overrides = isPlainObject(cfg['overrides']) ? cfg['overrides'] : cfg['overrides'] ?? {};
 
-    const settings: MnConfigSettings = isPlainObject(cfg.settings) ? cfg.settings as MnConfigSettings : {};
+    const settings: MnConfigSettings = isPlainObject(cfg['settings']) ? cfg['settings'] as MnConfigSettings : {};
 
     this._config = { settings, defaults, overrides };
     this._settings = settings;
@@ -73,7 +73,7 @@ export class MnConfigService {
     // Bootstrap language service from config if a "language" section is present.
     // This avoids circular dependency: config reads raw language settings and
     // pushes them into the language service (language service never imports config).
-    const langCfg = cfg.language;
+    const langCfg = cfg['language'];
     if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
       const lc = langCfg as unknown as MnLanguageConfig;
       if (this._debugMode) {
@@ -94,7 +94,7 @@ export class MnConfigService {
    * Used for live preview scenarios where config is pushed via postMessage.
    * Optionally re-bootstraps the language service if a `language` section is present.
    */
-  async loadFromObject(config: Record<string, any>, bootstrapLanguage = false): Promise<void> {
+  async loadFromObject(config: Record<string, unknown>, bootstrapLanguage = false): Promise<void> {
     const defaults = isPlainObject(config['defaults']) ? config['defaults'] : {};
     const overrides = isPlainObject(config['overrides']) ? config['overrides'] : {};
     const settings: MnConfigSettings = isPlainObject(config['settings']) ? config['settings'] as MnConfigSettings : {};
@@ -125,7 +125,7 @@ export class MnConfigService {
    * Resolve a configuration object for a component, optionally scoped to a section path
    * and optionally overridden by an instance id.
    */
-  resolve<T extends object = any>(
+  resolve<T extends object = Record<string, unknown>>(
     componentName: string,
     sectionPath: string[] = [],
     instanceId?: string,
@@ -140,14 +140,14 @@ export class MnConfigService {
 
     let resolved: Record<string, unknown> = baseConfig;
 
-    if (leaf && isPlainObject((leaf as any)[componentName])) {
-      resolved = this.deepMerge(resolved, (leaf as any)[componentName] as Record<string, unknown>);
+    if (leaf && isPlainObject((leaf as Record<string, unknown>)[componentName])) {
+      resolved = this.deepMerge(resolved, (leaf as Record<string, unknown>)[componentName] as Record<string, unknown>);
     }
 
     if (instanceId) {
       const instKey = `#${instanceId}`;
-      if (leaf && isPlainObject((leaf as any)[instKey])) {
-        resolved = this.deepMerge(resolved, (leaf as any)[instKey] as Record<string, unknown>);
+      if (leaf && isPlainObject((leaf as Record<string, unknown>)[instKey])) {
+        resolved = this.deepMerge(resolved, (leaf as Record<string, unknown>)[instKey] as Record<string, unknown>);
       }
     }
 
@@ -207,11 +207,11 @@ export class MnConfigService {
    * Deep merge two plain-object trees. Arrays and non-plain values are replaced by the patch.
    * Does not mutate inputs; returns a new object.
    */
-  deepMerge<A extends Record<string, any>, B extends Record<string, any>>(base: A, patch: B): A & B {
-    const out: Record<string, any> = { ...base };
+  deepMerge<A extends Record<string, unknown>, B extends Record<string, unknown>>(base: A, patch: B): A & B {
+    const out: Record<string, unknown> = {...base};
     for (const key of Object.keys(patch)) {
-      const bVal = (base as any)[key];
-      const pVal = (patch as any)[key];
+      const bVal = base[key];
+      const pVal = patch[key];
 
       if (isPlainObject(bVal) && isPlainObject(pVal)) {
         out[key] = this.deepMerge(bVal, pVal);

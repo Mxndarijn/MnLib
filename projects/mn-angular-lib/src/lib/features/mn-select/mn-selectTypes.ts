@@ -1,11 +1,11 @@
 import {MnSelectVariants} from './mn-selectVariants';
 import {ValidationErrors} from '@angular/forms';
 
-export type MnSelectErrorMessageData = string | ((args: any, errors: ValidationErrors) => string);
+export type MnSelectErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
 
 export type MnSelectErrorMessagesData = Partial<Record<string, MnSelectErrorMessageData>>;
 
-export interface MnSelectOption<TValue = unknown> {
+export type MnSelectOption<TValue = unknown> = {
   /** Display label for the option */
   label: string;
 
@@ -16,7 +16,7 @@ export interface MnSelectOption<TValue = unknown> {
   disabled?: boolean;
 }
 
-export interface MnSelectProps<TValue = unknown> {
+export type MnSelectProps<TValue = unknown> = {
   /** Unique identifier for the select element (required for accessibility) */
   id: string;
 
@@ -64,7 +64,7 @@ export interface MnSelectProps<TValue = unknown> {
   showAllErrors?: boolean;
 }
 
-export interface MnSelectUIConfig {
+export type MnSelectUIConfig = {
   /** Label text displayed above the select */
   label?: string;
 

@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MnButton } from '../../../mn-button/mn-button';
+import {MnButtonTypes} from '../../../mn-button/mn-buttonTypes';
 import { ModalFooterAction, ActionStyle } from '../../mn-modal.types';
 
 @Component({
@@ -34,7 +35,7 @@ import { ModalFooterAction, ActionStyle } from '../../mn-modal.types';
     }
   `,
 })
-export class MnFooterActionsComponent<TResult = any> {
+export class MnFooterActionsComponent<TResult = unknown> {
   @Input() actions: ModalFooterAction<TResult>[] = [];
   @Output() actionClick = new EventEmitter<ModalFooterAction<TResult>>();
 
@@ -46,7 +47,7 @@ export class MnFooterActionsComponent<TResult = any> {
     return this.actions.filter(a => a.position !== 'left');
   }
 
-  getButtonData(action: ModalFooterAction<TResult>): any {
+  getButtonData(action: ModalFooterAction<TResult>): Partial<MnButtonTypes> {
     switch (action.style) {
       case ActionStyle.PRIMARY:
         return { variant: 'fill', color: 'primary', disabled: action.disabled };

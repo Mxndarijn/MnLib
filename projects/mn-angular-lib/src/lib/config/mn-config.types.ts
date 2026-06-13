@@ -2,14 +2,14 @@
  * Types for mn-lib configuration.
  */
 
-export interface MnConfigSettings {
+export type MnConfigSettings = {
   /** Application or library version. */
   version?: string;
   /** Application or library name. */
   name?: string;
 }
 
-export interface MnConfigFile {
+export type MnConfigFile = {
   /**
    * General settings such as version and name.
    */

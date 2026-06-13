@@ -7,9 +7,7 @@ import {
   Input,
   OnChanges,
   OnInit,
-  Optional,
-  Output,
-  Self
+  Output
 } from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnCheckboxErrorMessageData, MnCheckboxProps, MnCheckboxUIConfig} from './mn-checkboxTypes';
@@ -30,6 +28,8 @@ export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHE
   templateUrl: './mn-checkbox.html',
 })
 export class MnCheckbox implements OnInit, OnChanges {
+  ngControl = inject(NgControl, {optional: true, self: true});
+
   protected uiConfig: MnCheckboxUIConfig = {};
 
   @Input({ required: true }) props!: MnCheckboxProps;
@@ -49,14 +49,15 @@ export class MnCheckbox implements OnInit, OnChanges {
   value = false;
   isDisabled = false;
 
-  private onChange: (val: any) => void = () => {};
+  private onChange: (val: unknown) => void = () => {
+  };
   private onTouched: () => void = () => {};
 
   private readonly builtInErrorMessages: Record<string, MnCheckboxErrorMessageData> = {
     required: 'This field is required',
   };
 
-  constructor(@Optional() @Self() public ngControl: NgControl) {
+  constructor() {
     if (this.ngControl) this.ngControl.valueAccessor = this;
   }
 
@@ -95,11 +96,11 @@ export class MnCheckbox implements OnInit, OnChanges {
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (val: unknown) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 

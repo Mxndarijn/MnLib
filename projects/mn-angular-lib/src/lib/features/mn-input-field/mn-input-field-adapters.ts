@@ -42,7 +42,7 @@ export type MnDomAttrs = {
  *
  * @template TOut - The output type after parsing (e.g., string | null, number | null)
  */
-export interface MnInputAdapter<TOut = string | null> {
+export type MnInputAdapter<TOut = string | null> = {
   /**
    * Parses the raw string value from the input element into the typed value
    * that will be sent to the FormControl.
@@ -285,7 +285,7 @@ export const numberAdapter: MnInputAdapter<number | null> = {
  * pickAdapter('date') // => dateTimeAdapter
  * pickAdapter('number') // => numberAdapter
  */
-export function pickAdapter(type: MnInputType): MnInputAdapter<any> {
+export function pickAdapter(type: MnInputType): MnInputAdapter<string | null | number> {
   // Date/time inputs use the dateTimeAdapter for range validation
   if (type === 'date' || type === 'time' || type === 'datetime-local') {
     return dateTimeAdapter;
