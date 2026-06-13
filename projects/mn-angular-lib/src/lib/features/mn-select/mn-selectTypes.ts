@@ -1,7 +1,7 @@
 import {MnSelectVariants} from './mn-selectVariants';
-import {ValidationErrors} from '@angular/forms';
+import {MnErrorMessageFn} from '../../shared/types';
 
-export type MnSelectErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
+export type MnSelectErrorMessageData = string | MnErrorMessageFn;
 
 export type MnSelectErrorMessagesData = Partial<Record<string, MnSelectErrorMessageData>>;
 

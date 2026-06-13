@@ -1,13 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ModalBuilder } from '../builder/modal.builder';
-import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
-import {MnModalRef} from '../mn-modal-ref';
-import {
-  FieldKind,
-  FormModalConfig,
-} from '../mn-modal.types';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {AbstractControl, ValidationErrors, Validators} from '@angular/forms';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {ModalBuilder} from '../builder';
+import {FieldKind, FormModalConfig, MnFormBodyComponent, MnModalRef} from '..';
 
 function createMockModalRef(): MnModalRef<unknown> {
   return {
@@ -46,7 +41,7 @@ describe('Feature: Dynamic Field Groups', () => {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = mockModalRef;
     fixture.detectChanges();
   }
@@ -193,7 +188,7 @@ describe('Feature: FormGroup-Level Validators', () => {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = mockModalRef;
     fixture.detectChanges();
   }

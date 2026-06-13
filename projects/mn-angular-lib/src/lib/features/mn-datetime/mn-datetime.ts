@@ -1,6 +1,6 @@
 import {Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass} from '@angular/common';
-import {MnDatetimeProps, MnDatetimeErrorMessageData, MnDatetimeUIConfig, MnDatetimeMode} from './mn-datetimeTypes';
+import {MnDatetimeErrorMessageData, MnDatetimeMode, MnDatetimeProps, MnDatetimeUIConfig} from './mn-datetimeTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnDatetimeVariants} from './mn-datetimeVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
@@ -39,8 +39,8 @@ export class MnDatetime implements OnInit {
 
   private readonly builtInErrorMessages: Record<string, MnDatetimeErrorMessageData> = {
     required: 'This field is required',
-    mnMin: (args: unknown) => `Date/time must be from ${(args as { min: string }).min} onwards`,
-    mnMax: (args: unknown) => `Date/time must be up to ${(args as { max: string }).max}`,
+    mnMin: (args) => `Date/time must be from ${args.min} onwards`,
+    mnMax: (args) => `Date/time must be up to ${args.max}`,
   };
 
   constructor() {

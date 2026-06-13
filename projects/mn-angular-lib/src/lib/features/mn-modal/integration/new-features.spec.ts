@@ -1,22 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { BehaviorSubject } from 'rxjs';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ModalBuilder } from '../builder/modal.builder';
-import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
-import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
+import {BehaviorSubject} from 'rxjs';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {ModalBuilder} from '../builder';
 import {
+  ColorFieldConfig,
   FieldKind,
+  FormModalConfig,
+  MnFormBodyComponent,
+  MnModalRef,
+  MnWizardBodyComponent,
   ModalCloseReason,
   ModalI18nLabels,
-  ColorFieldConfig,
   RatingFieldConfig,
   SliderFieldConfig,
-  FormModalConfig,
   WizardModalConfig,
-} from '../mn-modal.types';
-import {MnModalRef} from '../mn-modal-ref';
-import { TableDataSource, ColumnSortType } from '../../mn-table/mn-table.types';
+  WizardResult,
+} from '..';
+import {ColumnSortType, TableDataSource} from '../../mn-table';
 
 type TestRow = { id: string; name: string; email: string; }
 
@@ -119,7 +120,7 @@ describe('Feature 9: onCancel / onDismiss Callback', () => {
       component = fixture.componentInstance;
       mockModalRef = createMockModalRef();
       component.config = config as WizardModalConfig;
-      component.modalRef = mockModalRef;
+      component.modalRef = mockModalRef as unknown as MnModalRef<WizardResult>;
       fixture.detectChanges();
 
       await component.back();
@@ -140,7 +141,7 @@ describe('Feature 9: onCancel / onDismiss Callback', () => {
       component = fixture.componentInstance;
       mockModalRef = createMockModalRef();
       component.config = config as WizardModalConfig;
-      component.modalRef = mockModalRef;
+      component.modalRef = mockModalRef as unknown as MnModalRef<WizardResult>;
       fixture.detectChanges();
 
       await component.next();
@@ -284,7 +285,7 @@ describe('Feature 10: i18n / Localization Support', () => {
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
       component.config = config as WizardModalConfig;
-      component.modalRef = createMockModalRef();
+      component.modalRef = createMockModalRef() as unknown as MnModalRef<WizardResult>;
       fixture.detectChanges();
 
       expect(component.labels.next).toBe('Next');
@@ -303,7 +304,7 @@ describe('Feature 10: i18n / Localization Support', () => {
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
       component.config = config as WizardModalConfig;
-      component.modalRef = createMockModalRef();
+      component.modalRef = createMockModalRef() as unknown as MnModalRef<WizardResult>;
       fixture.detectChanges();
 
       expect(component.labels.next).toBe('Volgende');
@@ -323,7 +324,7 @@ describe('Feature 10: i18n / Localization Support', () => {
       fixture = TestBed.createComponent(MnWizardBodyComponent);
       component = fixture.componentInstance;
       component.config = config as WizardModalConfig;
-      component.modalRef = createMockModalRef();
+      component.modalRef = createMockModalRef() as unknown as MnModalRef<WizardResult>;
       fixture.detectChanges();
 
       const el = fixture.nativeElement as HTMLElement;
@@ -491,10 +492,10 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig<unknown, unknown>) {
+  function setup<TModel, TResult = TModel>(config: Readonly<FormModalConfig<TModel, TResult>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = createMockModalRef();
     fixture.detectChanges();
   }

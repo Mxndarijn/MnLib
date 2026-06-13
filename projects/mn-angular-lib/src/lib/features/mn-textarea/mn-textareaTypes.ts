@@ -1,15 +1,7 @@
-import { MnTextareaVariants } from './mn-textareaVariants';
-import { ValidationErrors } from '@angular/forms';
+import {MnTextareaVariants} from './mn-textareaVariants';
+import {MnErrorMessageFn} from '../../shared/types';
 
-/**
- * Error message definition: either a static string or a function that generates
- * a dynamic message based on validation error arguments.
- *
- * @param args - The error-specific arguments (e.g., { requiredLength: 5 } for minlength)
- * @param errors - All validation errors present on the control
- * @returns The error message string to display
- */
-export type MnTextareaErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
+export type MnTextareaErrorMessageData = string | MnErrorMessageFn;
 
 /**
  * Map of error keys to error message definitions.

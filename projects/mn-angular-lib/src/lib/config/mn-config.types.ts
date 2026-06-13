@@ -23,5 +23,5 @@ export type MnConfigFile = {
    * component-name keys (component override objects) and keys starting with '#'
    * representing instance-id overrides.
    */
-  overrides: unknown;
+  overrides: Record<string, unknown>;
 }

@@ -1,7 +1,5 @@
-import { TestBed } from '@angular/core/testing';
-import {MnAlertService} from './mn-alert.service';
-import { MnAlertStore } from './mn-alert.store';
-import { DEFAULT_MN_ALERT_CONFIG, MN_ALERT_CONFIG, MnAlertConfig } from './mn-alert.tokens';
+import {TestBed} from '@angular/core/testing';
+import {DEFAULT_MN_ALERT_CONFIG, MN_ALERT_CONFIG, MnAlertConfig, MnAlertService, MnAlertStore} from '.';
 
 class StoreMock {
   show = jasmine.createSpy('show').and.returnValue('id_1');
@@ -16,7 +14,12 @@ describe('MnAlertService', () => {
   function setup(cfg?: MnAlertConfig) {
     TestBed.configureTestingModule({
       providers: [
-        {provide: MnAlertStore, useFactory: () => (store = new StoreMock() as unknown as MnAlertStore)},
+        {
+          provide: MnAlertStore, useFactory: () => {
+            store = new StoreMock();
+            return store as unknown as MnAlertStore;
+          }
+        },
         ...(cfg ? [{ provide: MN_ALERT_CONFIG, useValue: cfg }] : [])
       ]
     });

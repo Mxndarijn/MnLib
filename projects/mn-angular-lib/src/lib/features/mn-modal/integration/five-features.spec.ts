@@ -1,21 +1,22 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import { Validators, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import {Observable, of, timer, map} from 'rxjs';
-import { ModalBuilder } from '../builder/modal.builder';
-import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
-import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {AbstractControl, AsyncValidatorFn, ValidationErrors, Validators} from '@angular/forms';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {map, Observable, of, timer} from 'rxjs';
+import {ModalBuilder} from '../builder';
 import {
   FieldKind,
-  WizardFlowMode,
-  WizardBeforeCompleteValidator,
-  FormModalConfig,
-  WizardModalConfig,
-  TextFieldConfig,
   FileFieldConfig,
+  FormModalConfig,
+  MnFormBodyComponent,
+  MnModalRef,
+  MnWizardBodyComponent,
   ModalStepId,
-} from '../mn-modal.types';
-import {MnModalRef} from '../mn-modal-ref';
+  TextFieldConfig,
+  WizardBeforeCompleteValidator,
+  WizardFlowMode,
+  WizardModalConfig,
+  WizardResult,
+} from '..';
 
 function createMockModalRef(): MnModalRef {
   return {
@@ -43,11 +44,11 @@ describe('Feature 1: Field-Level Async Validators', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig) {
+  function setup<TModel, TResult = TModel>(config: Readonly<FormModalConfig<TModel, TResult>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = mockModalRef;
     fixture.detectChanges();
   }
@@ -234,7 +235,7 @@ describe('Feature 2: Cross-Step Validation (onBeforeComplete)', () => {
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
     component.config = config;
-    component.modalRef = mockModalRef;
+    component.modalRef = mockModalRef as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
   }
 
@@ -343,7 +344,7 @@ describe('Feature 3: Dynamic Step Visibility in Wizard', () => {
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
     component.config = config;
-    component.modalRef = mockModalRef;
+    component.modalRef = mockModalRef as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
   }
 
@@ -446,7 +447,7 @@ describe('Feature 4: WizardFlowMode.FREE', () => {
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
     component.config = config;
-    component.modalRef = mockModalRef;
+    component.modalRef = mockModalRef as unknown as MnModalRef<WizardResult>;
     fixture.detectChanges();
   }
 
@@ -602,11 +603,11 @@ describe('Feature 5: File Upload Fields', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig) {
+  function setup<TModel, TResult = TModel>(config: Readonly<FormModalConfig<TModel, TResult>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = mockModalRef;
     fixture.detectChanges();
   }

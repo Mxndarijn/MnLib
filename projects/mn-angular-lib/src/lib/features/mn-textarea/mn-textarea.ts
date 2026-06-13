@@ -1,12 +1,12 @@
 import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass} from '@angular/common';
-import {MnTextareaProps, MnTextareaErrorMessageData, MnTextareaUIConfig} from './mn-textareaTypes';
+import {MnTextareaErrorMessageData, MnTextareaProps, MnTextareaUIConfig} from './mn-textareaTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnTextareaVariants} from './mn-textareaVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnConfigService} from "../../config/mn-config.service";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
-import {MnLanguageService} from "../../language/mn-language.service";
+import {MnConfigService} from "../../config";
+import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
+import {MnLanguageService} from "../../language";
 import {skip} from "rxjs";
 
 export const MN_TEXTAREA_CONFIG = new InjectionToken<MnTextareaUIConfig>('MN_TEXTAREA_CONFIG');
@@ -85,15 +85,14 @@ export class MnTextarea implements OnInit {
    */
   private readonly builtInErrorMessages: Record<string, MnTextareaErrorMessageData> = {
     required: 'This field is required',
-    minlength: (args: unknown) => `Minimum ${(args as { requiredLength: number }).requiredLength} characters required`,
-    maxlength: (args: unknown) => `Maximum ${(args as { requiredLength: number }).requiredLength} characters allowed`,
+    minlength: (args) => `Minimum ${args.requiredLength} characters required`,
+    maxlength: (args) => `Maximum ${args.requiredLength} characters allowed`,
   };
 
   /**
    * Constructor - Registers this component as the ControlValueAccessor
    * for the injected NgControl (FormControl).
    *
-   * @param ngControl - Angular's NgControl (injected via Dependency Injection)
    */
   constructor() {
     if (this.ngControl) this.ngControl.valueAccessor = this;
@@ -260,8 +259,8 @@ export class MnTextarea implements OnInit {
       return msgDef(errorArgs, errors);
     }
     // Interpolate {{placeholder}} tokens with validation error args
-    if (typeof msgDef === 'string' && errorArgs && typeof errorArgs === 'object') {
-      return msgDef.replace(/\{\{(\w+)\}\}/g, (_, key) => errorArgs[key] ?? _);
+    if (errorArgs && typeof errorArgs === 'object') {
+      return msgDef.replace(/\{\{(\w+)}}/g, (_, key) => errorArgs[key] ?? _);
     }
     return msgDef;
   }

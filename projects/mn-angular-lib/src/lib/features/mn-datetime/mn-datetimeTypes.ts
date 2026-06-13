@@ -1,7 +1,7 @@
-import { MnDatetimeVariants } from './mn-datetimeVariants';
-import { ValidationErrors } from '@angular/forms';
+import {MnDatetimeVariants} from './mn-datetimeVariants';
+import {MnErrorMessageFn} from '../../shared/types';
 
-export type MnDatetimeErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
+export type MnDatetimeErrorMessageData = string | MnErrorMessageFn;
 
 export type MnDatetimeErrorMessagesData = Partial<Record<string, MnDatetimeErrorMessageData>>;
 

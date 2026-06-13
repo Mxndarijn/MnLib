@@ -1,7 +1,7 @@
 import {TemplateRef, Type} from '@angular/core';
 import {Observable} from 'rxjs';
-import {ValidatorFn, AsyncValidatorFn} from '@angular/forms';
-import {TableDataSource} from '../mn-table/mn-table.types';
+import {AsyncValidatorFn, ValidatorFn} from '@angular/forms';
+import {TableDataSource} from '../mn-table';
 
 export { Type, TemplateRef };
 
@@ -196,7 +196,7 @@ export type FieldDataSource<TValue = unknown, TModel = unknown> = {
   /** Load options, optionally based on current form values */
   load(formValue?: Partial<TModel>): Promise<SelectOption<TValue>[]> | SelectOption<TValue>[];
   /** Keys of other fields that trigger a reload when their value changes */
-  dependsOn?: (keyof TModel)[];
+  dependsOn?: KeyOf<TModel>[];
 }
 
 // =========================

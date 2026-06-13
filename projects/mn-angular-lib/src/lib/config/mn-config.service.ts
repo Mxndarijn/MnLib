@@ -1,9 +1,8 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { MnConfigFile, MnConfigSettings } from './mn-config.types';
-import { MnLanguageService } from '../language/mn-language.service';
-import { isTranslatable, MnLanguageConfig } from '../language/mn-language.types';
+import {inject, Injectable, signal} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {firstValueFrom} from 'rxjs';
+import {MnConfigFile, MnConfigSettings} from './mn-config.types';
+import {isTranslatable, MnLanguageConfig, MnLanguageService} from '../language';
 import JSON5 from 'json5';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -63,7 +62,7 @@ export class MnConfigService {
 
     const cfg = (isPlainObject(json) ? json : {}) as Record<string, unknown>;
     const defaults = isPlainObject(cfg['defaults']) ? cfg['defaults'] : {};
-    const overrides = isPlainObject(cfg['overrides']) ? cfg['overrides'] : cfg['overrides'] ?? {};
+    const overrides: Record<string, unknown> = isPlainObject(cfg['overrides']) ? cfg['overrides'] : {};
 
     const settings: MnConfigSettings = isPlainObject(cfg['settings']) ? cfg['settings'] as MnConfigSettings : {};
 
@@ -75,7 +74,7 @@ export class MnConfigService {
     // pushes them into the language service (language service never imports config).
     const langCfg = cfg['language'];
     if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
-      const lc = langCfg as unknown as MnLanguageConfig;
+      const lc = langCfg as MnLanguageConfig;
       if (this._debugMode) {
         console.log(`[MnConfig] Applying language config from file`, lc);
       }
@@ -105,7 +104,7 @@ export class MnConfigService {
     if (bootstrapLanguage) {
       const langCfg = config['language'];
       if (isPlainObject(langCfg) && typeof langCfg['urlPattern'] === 'string') {
-        const lc = langCfg as unknown as MnLanguageConfig;
+        const lc = langCfg as MnLanguageConfig;
         if (this._debugMode) {
           console.log(`[MnConfig] Applying language config from object`, lc);
         }

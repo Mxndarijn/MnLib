@@ -1,17 +1,18 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Validators } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ModalBuilder } from '../builder/modal.builder';
-import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Validators} from '@angular/forms';
+import {BehaviorSubject} from 'rxjs';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {ModalBuilder} from '../builder';
 import {
   FieldKind,
+  FormFieldConfig,
+  FormModalConfig,
+  MnFormBodyComponent,
   ModalKind,
   ModalRef,
-  FormModalConfig,
   MultiSelectTableFieldConfig,
-} from '../mn-modal.types';
-import {TableDataSource, ColumnSortType} from '../../mn-table/mn-table.types';
+} from '..';
+import {ColumnSortType, TableDataSource} from '../../mn-table';
 
 type TestRow = {
   id: string;
@@ -61,10 +62,10 @@ describe('Feature: Multi-Select Table Field', () => {
     }).compileComponents();
   });
 
-  function setup(config: FormModalConfig<unknown, unknown>) {
+  function setup<TModel, TResult = TModel>(config: Readonly<FormModalConfig<TModel, TResult>>) {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = createMockModalRef() as unknown as typeof component.modalRef;
     fixture.detectChanges();
   }
@@ -177,7 +178,7 @@ describe('Feature: Multi-Select Table Field', () => {
       { id: '1', name: 'Alice', email: 'alice@test.com' },
       { id: '3', name: 'Charlie', email: 'charlie@test.com' },
     ];
-    component.onTableSelectionChange(field, selectedRows);
+    component.onTableSelectionChange(field as unknown as FormFieldConfig<unknown>, selectedRows);
 
     expect(component.form.get('items')!.value).toEqual(['1', '3']);
   });
@@ -199,7 +200,7 @@ describe('Feature: Multi-Select Table Field', () => {
     const selectedRows = [
       { id: '1', name: 'Alice', email: 'alice@test.com' },
     ];
-    component.onTableSelectionChange(field, selectedRows);
+    component.onTableSelectionChange(field as unknown as FormFieldConfig<unknown>, selectedRows);
 
     expect(component.form.get('items')!.value).toEqual(['alice@test.com']);
   });
@@ -218,7 +219,11 @@ describe('Feature: Multi-Select Table Field', () => {
     } as FormModalConfig<ItemsModel, unknown>);
 
     expect(component.form.get('items')!.touched).toBeFalse();
-    component.onTableSelectionChange(field, [{ id: '1', name: 'A', email: 'a@b.com' }]);
+    component.onTableSelectionChange(field as unknown as FormFieldConfig<unknown>, [{
+      id: '1',
+      name: 'A',
+      email: 'a@b.com'
+    }]);
     expect(component.form.get('items')!.touched).toBeTrue();
   });
 
@@ -246,7 +251,13 @@ describe('Feature: Multi-Select Table Field', () => {
     const config: FormModalConfig<ItemsModel, unknown> = {
       kind: ModalKind.FORM,
       fields: [
-        { kind: FieldKind.MULTI_SELECT_TABLE, key: 'items', label: 'Items', tableDataSource: ds, validators: [Validators.required] },
+        {
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: ds as unknown as TableDataSource<unknown>,
+          validators: [Validators.required]
+        },
       ],
       onComplete: handler,
     };
@@ -270,13 +281,13 @@ describe('Feature: Multi-Select Table Field', () => {
     };
     const config: FormModalConfig<ItemsModel, unknown> = {
       kind: ModalKind.FORM,
-      fields: [field],
+      fields: [field as unknown as FormFieldConfig<ItemsModel>],
       onComplete: handler,
     };
     setup(config);
 
     // Simulate selection
-    component.onTableSelectionChange(field, [
+    component.onTableSelectionChange(field as unknown as FormFieldConfig<unknown>, [
       { id: '1', name: 'Alice', email: 'alice@test.com' },
       { id: '2', name: 'Bob', email: 'bob@test.com' },
     ]);

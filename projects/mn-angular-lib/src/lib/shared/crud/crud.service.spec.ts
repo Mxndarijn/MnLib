@@ -1,7 +1,7 @@
-import { TestBed } from '@angular/core/testing';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { CrudService } from './crud.service';
-import { API_BASE_URL } from './crud.tokens';
+import {TestBed} from '@angular/core/testing';
+import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
+import {CrudService} from './crud.service';
+import {API_BASE_URL} from './crud.tokens';
 import {HttpErrorResponse, HttpParams, HttpStatusCode, provideHttpClient} from '@angular/common/http';
 import {ApiError, QueryParams} from './crud.model';
 
@@ -225,11 +225,11 @@ describe('CrudService', () => {
       const params = (service as unknown as {
         toHttpParams: (q?: QueryParams) => HttpParams | undefined
       }).toHttpParams(query);
-      expect(params.get('page')).toBe('1');
-      expect(params.get('filter')).toBe('test');
-      expect(params.getAll('tags')).toEqual(['a', 'b']);
-      expect(params.has('empty')).toBeFalse();
-      expect(params.has('missing')).toBeFalse();
+      expect(params!.get('page')).toBe('1');
+      expect(params!.get('filter')).toBe('test');
+      expect(params!.getAll('tags')).toEqual(['a', 'b']);
+      expect(params!.has('empty')).toBeFalse();
+      expect(params!.has('missing')).toBeFalse();
     });
   });
 });

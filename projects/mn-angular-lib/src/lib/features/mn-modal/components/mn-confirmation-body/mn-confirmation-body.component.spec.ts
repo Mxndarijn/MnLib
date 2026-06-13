@@ -1,17 +1,17 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { MnConfirmationBodyComponent } from './mn-confirmation-body.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { Validators } from '@angular/forms';
-import { By } from '@angular/platform-browser';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {Validators} from '@angular/forms';
+import {By} from '@angular/platform-browser';
 import {
   ActionStyle,
   ConfirmationModalConfig,
   ConfirmationTone,
   FieldKind,
+  MnConfirmationBodyComponent,
+  MnModalRef,
   ModalCloseReason,
   ModalKind,
-} from '../../mn-modal.types';
-import {MnModalRef} from '../../mn-modal-ref';
+} from '../..';
 
 function createMockModalRef(): MnModalRef<boolean> {
   return {
@@ -33,7 +33,7 @@ describe('MnConfirmationBodyComponent', () => {
   });
 
   function setup(config: Partial<ConfirmationModalConfig> = {}) {
-    fixture = TestBed.createComponent(MnConfirmationBodyComponent);
+    fixture = TestBed.createComponent(MnConfirmationBodyComponent) as unknown as ComponentFixture<MnConfirmationBodyComponent<boolean>>;
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
     component.config = {
