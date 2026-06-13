@@ -1,38 +1,38 @@
 import {
-  FormLayoutBuilder,
+  ChainableGroupBuilder,
   FieldValidatorBuilder,
   FormContainerConfig,
-  ChainableGroupBuilder
+  FormLayoutBuilder
 } from './form-layout.builder';
 import {
-  BaseModalConfig,
-  ModalSize,
-  CloseMode,
+  AnimationOptions,
   BackdropMode,
-  KeyboardMode,
-  ModalIntent,
-  ModalFooterAction,
-  ModalPollingConfig,
-  ModalCancelHandler,
-  ModalI18nLabels,
-  Type,
-  TemplateRef,
-  ModalInputMap,
+  BaseModalConfig,
+  CloseMode,
   FormFieldConfig,
   FormFieldGroup,
-  AnimationOptions,
+  KeyboardMode,
+  ModalCancelHandler,
+  ModalFooterAction,
+  ModalI18nLabels,
+  ModalInputMap,
+  ModalIntent,
+  ModalPollingConfig,
+  ModalSize,
   StepBodyConfig,
+  TemplateRef,
+  Type,
 } from '../mn-modal.types';
 import {ValidatorFn} from '@angular/forms';
 
-export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult>, TResult = unknown, TModel = unknown> {
+export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult> & FormContainerConfig<TModel>, TResult = unknown, TModel = unknown> {
   protected config: TConfig;
   protected layoutBuilder: FormLayoutBuilder<TModel, this>;
 
   protected constructor(initialConfig: TConfig) {
     this.config = initialConfig;
     this.layoutBuilder = new FormLayoutBuilder<TModel, this>(
-      this.config as unknown as FormContainerConfig<TModel>,
+      this.config,
       this
     );
   }

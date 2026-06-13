@@ -1,25 +1,25 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Validators } from '@angular/forms';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ModalBuilder } from '../builder/modal.builder';
-import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
-import { MnConfirmationBodyComponent } from '../components/mn-confirmation-body/mn-confirmation-body.component';
-import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
-import {MnModalRef} from '../mn-modal-ref';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Validators} from '@angular/forms';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {ModalBuilder} from '../builder';
 import {
-  FieldKind,
-  ModalSize,
-  ModalKind,
-  ConfirmationTone,
   ActionStyle,
-  ModalCloseReason,
-  ValidationStatus,
-  ModalRef,
-  WizardResult,
-  FormModalConfig,
   ConfirmationModalConfig,
+  ConfirmationTone,
+  FieldKind,
+  FormModalConfig,
+  MnConfirmationBodyComponent,
+  MnFormBodyComponent,
+  MnModalRef,
+  MnWizardBodyComponent,
+  ModalCloseReason,
+  ModalKind,
+  ModalRef,
+  ModalSize,
+  ValidationStatus,
   WizardModalConfig,
-} from '../mn-modal.types';
+  WizardResult,
+} from '..';
 
 function createMockModalRef<T = unknown>(): ModalRef<T> {
   return {
@@ -382,7 +382,7 @@ describe('Integration: WizardModalBuilder → MnWizardBodyComponent', () => {
     }).compileComponents();
   });
 
-  function setup(config: Readonly<WizardModalConfig<unknown>>) {
+  function setup(config: Readonly<WizardModalConfig<WizardResult>>) {
     fixture = TestBed.createComponent(MnWizardBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef<WizardResult>();

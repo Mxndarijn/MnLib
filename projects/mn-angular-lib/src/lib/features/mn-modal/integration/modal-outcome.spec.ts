@@ -1,25 +1,26 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ComponentRef} from '@angular/core';
-import { Validators } from '@angular/forms';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ModalBuilder } from '../builder/modal.builder';
-import { MnFormBodyComponent } from '../components/mn-form-body/mn-form-body.component';
-import { MnConfirmationBodyComponent } from '../components/mn-confirmation-body/mn-confirmation-body.component';
-import { MnWizardBodyComponent } from '../components/mn-wizard-body/mn-wizard-body.component';
+import {Validators} from '@angular/forms';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {ModalBuilder} from '../builder';
 import {
+  ActionStyle,
+  BaseModalConfig,
+  ConfirmationModalConfig,
   FieldKind,
+  FormModalConfig,
+  MnConfirmationBodyComponent,
+  MnFormBodyComponent,
+  MnModalRef,
+  MnWizardBodyComponent,
+  ModalCloseEvent,
   ModalCloseReason,
   ModalKind,
-  ActionStyle,
   ValidationStatus,
-  WizardResult,
   WizardModalConfig,
-  ConfirmationModalConfig,
+  WizardResult,
   WizardStepChangeEvent,
-  ModalCloseEvent,
-  BaseModalConfig,
-} from '../mn-modal.types';
-import { MnModalRef } from '../mn-modal-ref';
+} from '..';
 
 // =============================================
 // Helper: mock MnModalRef that tracks events
@@ -87,7 +88,7 @@ describe('Outcome: Form Modal', () => {
 
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = tracker.ref;
     fixture.detectChanges();
 
@@ -121,7 +122,7 @@ describe('Outcome: Form Modal', () => {
 
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = tracker.ref;
     fixture.detectChanges();
 
@@ -141,7 +142,7 @@ describe('Outcome: Form Modal', () => {
 
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = tracker.ref;
     fixture.detectChanges();
 
@@ -165,7 +166,7 @@ describe('Outcome: Form Modal', () => {
 
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = tracker.ref;
     fixture.detectChanges();
 
@@ -192,7 +193,7 @@ describe('Outcome: Form Modal', () => {
 
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = tracker.ref;
     fixture.detectChanges();
 

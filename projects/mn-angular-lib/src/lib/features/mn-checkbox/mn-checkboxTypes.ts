@@ -1,7 +1,7 @@
 import {MnCheckboxVariants, MnCheckboxWrapperVariants} from './mn-checkboxVariants';
-import {ValidationErrors} from '@angular/forms';
+import {MnErrorMessageFn} from '../../shared/types';
 
-export type MnCheckboxErrorMessageData = string | ((args: unknown, errors: ValidationErrors) => string);
+export type MnCheckboxErrorMessageData = string | MnErrorMessageFn;
 
 export type MnCheckboxErrorMessagesData = Partial<Record<string, MnCheckboxErrorMessageData>>;
 

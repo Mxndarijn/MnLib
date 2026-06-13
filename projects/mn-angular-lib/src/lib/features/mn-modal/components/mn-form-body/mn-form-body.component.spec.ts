@@ -1,9 +1,15 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { Validators } from '@angular/forms';
-import { MnFormBodyComponent } from './mn-form-body.component';
-import {FieldKind, FormFieldConfig, FormFieldGroup, FormModalConfig, ModalKind} from '../../mn-modal.types';
-import { MnModalRef } from '../../mn-modal-ref';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {Validators} from '@angular/forms';
+import {
+  FieldKind,
+  FormFieldConfig,
+  FormFieldGroup,
+  FormModalConfig,
+  MnFormBodyComponent,
+  MnModalRef,
+  ModalKind
+} from '../..';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
 
 function createMockModalRef(): MnModalRef<unknown> {
   return {
@@ -39,7 +45,7 @@ describe('MnFormBodyComponent', () => {
     fixture = TestBed.createComponent(MnFormBodyComponent);
     component = fixture.componentInstance;
     mockModalRef = createMockModalRef();
-    component.config = config;
+    component.config = config as unknown as FormModalConfig<unknown>;
     component.modalRef = mockModalRef;
     fixture.detectChanges();
   }

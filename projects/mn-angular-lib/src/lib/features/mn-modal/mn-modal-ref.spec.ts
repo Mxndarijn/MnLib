@@ -1,5 +1,4 @@
-import { MnModalRef } from './mn-modal-ref';
-import {BaseModalConfig, ModalCloseReason, ModalKind} from './mn-modal.types';
+import {BaseModalConfig, MnModalRef, ModalCloseReason, ModalKind} from '.';
 import {ComponentRef} from '@angular/core';
 
 function createMockComponentRef() {
@@ -90,7 +89,7 @@ describe('MnModalRef', () => {
     ref.close('x');
     // Allow microtask to resolve
     await new Promise(resolve => setTimeout(resolve, 10));
-    expect(mockComponentRef.instance.startClosing).toHaveBeenCalled();
+    expect((mockComponentRef.instance as { startClosing: jasmine.Spy }).startClosing).toHaveBeenCalled();
   });
 
   it('close() should destroy the component ref', async () => {

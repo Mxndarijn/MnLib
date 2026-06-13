@@ -87,17 +87,16 @@ export class MnInputField implements OnInit {
   private readonly builtInErrorMessages: Record<string, MnErrorMessageData> = {
     required: 'This field is required',
     email: 'Please enter a valid email address',
-    minlength: (args: unknown) => `Minimum ${(args as { requiredLength: number }).requiredLength} characters required`,
-    maxlength: (args: unknown) => `Maximum ${(args as { requiredLength: number }).requiredLength} characters allowed`,
-    mnMin: (args: unknown) => `Date/time must be from ${(args as { min: string }).min} onwards`,
-    mnMax: (args: unknown) => `Date/time must be up to ${(args as { max: string }).max}`,
+    minlength: (args) => `Minimum ${args.requiredLength} characters required`,
+    maxlength: (args) => `Maximum ${args.requiredLength} characters allowed`,
+    mnMin: (args) => `Date/time must be from ${args.min} onwards`,
+    mnMax: (args) => `Date/time must be up to ${args.max}`,
   };
 
   /**
    * Constructor - Registers this component as the ControlValueAccessor
    * for the injected NgControl (FormControl).
    *
-   * @param ngControl - Angular's NgControl (injected via Dependency Injection)
    */
   constructor() {
     if (this.ngControl) this.ngControl.valueAccessor = this;
@@ -334,7 +333,7 @@ export class MnInputField implements OnInit {
     }
     // Interpolate {{placeholder}} tokens with error arguments (e.g. {{requiredLength}})
     if (errorArgs && typeof errorArgs === 'object') {
-      return msgDef.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) =>
+      return msgDef.replace(/\{\{(\w+)}}/g, (_: string, key: string) =>
         errorArgs[key] !== undefined ? String(errorArgs[key]) : `{{${key}}}`
       );
     }
