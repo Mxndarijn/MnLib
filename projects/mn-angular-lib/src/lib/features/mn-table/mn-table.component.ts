@@ -190,6 +190,9 @@ export class MnTable<T = object> implements OnInit, OnDestroy, DoCheck {
   // ── Row interaction ──
 
   onRowClick(row: T): void {
+    if (this.hasSelection) {
+      this.toggleRow(row);
+    }
     this.dataSource.onRowClick?.(row);
     this.rowClick.emit(row);
   }
