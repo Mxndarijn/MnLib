@@ -60,6 +60,19 @@
     ></mn-lib-input-field>
   </div>
 
+  <!-- Example 5: Disabled Field -->
+  <div style="margin-bottom: 30px;">
+    <h3>Example 5: Disabled Field</h3>
+    <p>
+      The FormControl is created with <code>disabled: true</code>. The input shows
+      <code>opacity-50 cursor-not-allowed</code> and hover effects are suppressed.
+    </p>
+    <mn-lib-input-field class="block w-[200px]"
+      formControlName="disabledField"
+      [props]="disabledProps"
+    ></mn-lib-input-field>
+  </div>
+
   <div style="margin-top: 30px;">
     <button type="button" (click)="form.markAllAsTouched()">
       Show All Validation Errors

@@ -29,6 +29,9 @@ export const mnInputFieldVariants = tv({
     hover: {
       true: 'hover:cursor-pointer hover:bg-base-200 transition-colors duration-300 ease-in-out',
     },
+    disabled: {
+      true: 'opacity-50 cursor-not-allowed',
+    },
   },
   defaultVariants: {
     size: 'md',
