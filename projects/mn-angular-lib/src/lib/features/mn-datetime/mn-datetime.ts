@@ -16,6 +16,7 @@ export const MN_DATETIME_CONFIG = new InjectionToken<MnDatetimeUIConfig>('MN_DAT
   standalone: true,
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-datetime.html',
+  styles: `input::-webkit-calendar-picker-indicator { cursor: pointer; }`,
 })
 export class MnDatetime implements OnInit {
   ngControl = inject(NgControl, {optional: true, self: true});
@@ -112,6 +113,14 @@ export class MnDatetime implements OnInit {
 
   handleBlur(): void {
     this.onTouched();
+  }
+
+  handleClick(input: HTMLInputElement): void {
+    try {
+      input.showPicker();
+    } catch {
+      // picker already open (icon click) or browser restriction
+    }
   }
 
   // ========== Error Handling ==========
