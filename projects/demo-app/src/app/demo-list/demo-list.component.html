@@ -1,19 +1,13 @@
-<div class="container">
-  <div class="header">
-    <h1>All Demos</h1>
-  </div>
+<h1 style="margin-bottom: 24px;">All Demos</h1>
 
-  <ul class="demo-list">
-    @for (d of demos; track d.path) {
-      <li class="demo-item">
-        <div class="info">
-          <div class="title">{{ d.title }}</div>
-          @if (d.description) {
-            <div class="desc">{{ d.description }}</div>
-          }
-        </div>
-        <button mnButton [routerLink]="d.path">View</button>
-      </li>
-    }
-  </ul>
+<div class="demo-grid">
+  @for (d of demos; track d.path) {
+    <a class="demo-card" [routerLink]="d.path">
+      <div class="card-avatar" [style.background]="d.color">{{ d.abbr }}</div>
+      <div class="card-title">{{ d.title }}</div>
+      @if (d.description) {
+        <div class="card-desc">{{ d.description }}</div>
+      }
+    </a>
+  }
 </div>
