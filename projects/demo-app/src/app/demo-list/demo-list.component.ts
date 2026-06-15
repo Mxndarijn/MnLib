@@ -1,5 +1,7 @@
 import {Component} from '@angular/core';
 import {RouterLink} from '@angular/router';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {MnInputField, MnInputProps} from 'mn-angular-lib';
 
 type DemoItem = {
   title: string;
@@ -12,21 +14,41 @@ type DemoItem = {
 @Component({
   selector: 'app-demo-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, ReactiveFormsModule, MnInputField],
   templateUrl: './demo-list.component.html',
   styles: [`
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; }
     .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
     .demo-card { display: flex; flex-direction: column; gap: 10px; padding: 20px; background: var(--color-base-200); border: 1px solid var(--color-base-300); border-radius: var(--mn-radius); text-decoration: none; color: inherit; transition: background 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.15s; cursor: pointer; }
     .demo-card:hover { background: var(--color-base-300); border-color: var(--color-primary); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
     .card-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.03em; flex-shrink: 0; }
     .card-title { font-weight: 600; font-size: 15px; color: var(--color-base-content); }
     .card-desc { color: var(--color-base-content); opacity: 0.6; font-size: 12px; line-height: 1.5; flex: 1; }
+    .no-results { grid-column: 1 / -1; text-align: center; padding: 48px; opacity: 0.4; font-size: 14px; }
   `]
 })
 export class DemoListComponent {
+  searchControl = new FormControl('');
+
+  searchProps: MnInputProps = {
+    id: 'demo-search',
+    type: 'search',
+    placeholder: 'Search demos...',
+    hover: false,
+  };
+
+  get filteredDemos(): DemoItem[] {
+    const q = (this.searchControl.value ?? '').toLowerCase().trim();
+    if (!q) return this.demos;
+    return this.demos.filter(d =>
+      d.title.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q)
+    );
+  }
+
   demos: DemoItem[] = [
     { title: 'Alerts',              path: '/demos/alerts',                    abbr: 'AL', color: '#ef4444', description: 'Alert service, providers, and outlet template.' },
     { title: 'Button',              path: '/demos/button-demo',               abbr: 'BT', color: '#3b82f6', description: 'Buttons with sizes, variants, and colors.' },
+    { title: 'Checkbox',            path: '/demos/checkbox-demo',             abbr: 'CB', color: '#22c55e', description: 'Checkbox with standalone, forms, sizes, and disabled state.' },
     { title: 'Config',              path: '/demos/config',                    abbr: 'CF', color: '#6366f1', description: 'Section scoping, component defaults, and instance overrides.' },
     { title: 'Dual Horizontal Image', path: '/demos/dual-horizontal-image-demo', abbr: 'DI', color: '#8b5cf6', description: 'Two images shown side by side.' },
     { title: 'Information Card',    path: '/demos/information-card-demo',     abbr: 'IC', color: '#0ea5e9', description: 'Card with title, description and optional images.' },

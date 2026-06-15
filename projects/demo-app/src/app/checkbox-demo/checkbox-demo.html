@@ -1,0 +1,40 @@
+<h2>Checkbox Demo</h2>
+
+<div style="max-width: 600px; display: flex; flex-direction: column; gap: 40px;">
+
+  <!-- Standalone -->
+  <div>
+    <h3>Standalone (no FormControl)</h3>
+    <p>Use <code>[checked]</code> + <code>(checkedChange)</code> outside Angular Forms.</p>
+    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px;">
+      <mn-lib-checkbox [props]="optionAProps" [checked]="optionA" (checkedChange)="optionA = $event"></mn-lib-checkbox>
+      <mn-lib-checkbox [props]="optionBProps" [checked]="optionB" (checkedChange)="optionB = $event"></mn-lib-checkbox>
+    </div>
+    <p style="margin-top: 10px; font-size: 12px; opacity: 0.5;">A: {{ optionA }} | B: {{ optionB }}</p>
+  </div>
+
+  <!-- Reactive forms + validation -->
+  <div>
+    <h3>Reactive Forms &amp; Validation</h3>
+    <p>The <em>terms</em> checkbox uses <code>Validators.requiredTrue</code>. The third is disabled via FormControl.</p>
+    <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
+      <mn-lib-checkbox formControlName="terms" [props]="termsProps"></mn-lib-checkbox>
+      <mn-lib-checkbox formControlName="newsletter" [props]="newsletterProps"></mn-lib-checkbox>
+      <mn-lib-checkbox formControlName="disabled" [props]="disabledProps"></mn-lib-checkbox>
+      <div style="margin-top: 4px;">
+        <button type="button" (click)="form.markAllAsTouched()">Validate</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Sizes -->
+  <div>
+    <h3>Sizes</h3>
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+      <mn-lib-checkbox [props]="smProps" [checked]="sizeChecked"></mn-lib-checkbox>
+      <mn-lib-checkbox [props]="mdProps" [checked]="sizeChecked"></mn-lib-checkbox>
+      <mn-lib-checkbox [props]="lgProps" [checked]="sizeChecked"></mn-lib-checkbox>
+    </div>
+  </div>
+
+</div>
