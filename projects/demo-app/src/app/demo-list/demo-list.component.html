@@ -1,7 +1,12 @@
-<h1 style="margin-bottom: 24px;">All Demos</h1>
+<div class="list-header">
+  <h1>All Demos</h1>
+  <div style="width: 260px;">
+    <mn-lib-input-field [formControl]="searchControl" [props]="searchProps"></mn-lib-input-field>
+  </div>
+</div>
 
 <div class="demo-grid">
-  @for (d of demos; track d.path) {
+  @for (d of filteredDemos; track d.path) {
     <a class="demo-card" [routerLink]="d.path">
       <div class="card-avatar" [style.background]="d.color">{{ d.abbr }}</div>
       <div class="card-title">{{ d.title }}</div>
@@ -9,5 +14,8 @@
         <div class="card-desc">{{ d.description }}</div>
       }
     </a>
+  }
+  @if (filteredDemos.length === 0) {
+    <div class="no-results">No demos match "{{ searchControl.value }}"</div>
   }
 </div>
