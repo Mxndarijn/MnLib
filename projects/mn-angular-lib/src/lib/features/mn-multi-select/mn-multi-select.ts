@@ -14,18 +14,19 @@ import {MnMultiSelectProps, MnMultiSelectOption, MnMultiSelectErrorMessageData, 
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnMultiSelectVariants} from './mn-multi-selectVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnButton} from '../mn-button/mn-button';
-import {MnConfigService} from "../../config/mn-config.service";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context/mn-context.tokens";
-import {MnLanguageService} from "../../language/mn-language.service";
+import {MnButton} from '../mn-button';
+import {MnConfigService} from "../../config";
+import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
+import {MnLanguageService} from "../../language";
 import {skip} from "rxjs";
+import {LucideX} from "@lucide/angular";
 
 export const MN_MULTI_SELECT_CONFIG = new InjectionToken<MnMultiSelectUIConfig>('MN_MULTI_SELECT_CONFIG');
 
 @Component({
   selector: 'mn-lib-multi-select',
   standalone: true,
-  imports: [NgClass, MnErrorMessage, MnButton],
+  imports: [NgClass, MnErrorMessage, MnButton, LucideX],
   templateUrl: './mn-multi-select.html',
 })
 export class MnMultiSelect implements OnInit {
