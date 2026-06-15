@@ -38,6 +38,7 @@ export class InputFieldDemo {
         Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
       ]
     }),
+    disabledField: new FormControl({ value: 'Cannot edit this', disabled: true }),
   });
 
   // Example 1: Default behavior - built-in error messages, single error display
@@ -85,6 +86,13 @@ export class InputFieldDemo {
     },
     errorPriority: ['required', 'minlength', 'noXAllowed'],
     defaultErrorMessage: 'Username validation failed',
+  } satisfies MnInputProps;
+
+  // Example 5: Disabled field
+  disabledProps = {
+    id: 'disabled-field',
+    type: 'text',
+    label: 'Disabled Field',
   } satisfies MnInputProps;
 
   // Example 4: Show ALL errors at once
