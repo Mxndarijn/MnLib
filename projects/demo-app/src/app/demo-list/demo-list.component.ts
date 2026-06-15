@@ -1,69 +1,47 @@
 import {Component} from '@angular/core';
-
 import {RouterLink} from '@angular/router';
-import {MnButton} from 'mn-angular-lib';
 
 type DemoItem = {
   title: string;
   path: string;
   description?: string;
+  abbr: string;
+  color: string;
 }
 
 @Component({
   selector: 'app-demo-list',
   standalone: true,
-  imports: [RouterLink, MnButton],
+  imports: [RouterLink],
   templateUrl: './demo-list.component.html',
   styles: [`
-    .demo-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-    .demo-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-base-200); border: 1px solid var(--color-base-300); border-radius: var(--mn-radius); transition: background 0.2s, border-color 0.2s; }
-    .title { font-weight: 600; color: var(--color-base-content); }
-    .desc { color: var(--color-base-content); opacity: 0.6; font-size: 12px; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .demo-card { display: flex; flex-direction: column; gap: 10px; padding: 20px; background: var(--color-base-200); border: 1px solid var(--color-base-300); border-radius: var(--mn-radius); text-decoration: none; color: inherit; transition: background 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.15s; cursor: pointer; }
+    .demo-card:hover { background: var(--color-base-300); border-color: var(--color-primary); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .card-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.03em; flex-shrink: 0; }
+    .card-title { font-weight: 600; font-size: 15px; color: var(--color-base-content); }
+    .card-desc { color: var(--color-base-content); opacity: 0.6; font-size: 12px; line-height: 1.5; flex: 1; }
   `]
 })
 export class DemoListComponent {
   demos: DemoItem[] = [
-    { title: 'Alerts Demo', path: '/demos/alerts', description: 'Showcase mn-alert service, providers, and outlet template.' },
-    { title: 'Button Demo', path: '/demos/button-demo', description: 'Buttons with sizes, variants, and colors.' },
-    { title: 'Config Demo', path: '/demos/config', description: 'mn-config with section scoping, component defaults, and instance overrides.' },
-    { title: 'DualHorizontalImage Demo', path: '/demos/dual-horizontal-image-demo', description: 'Two images shown horizontally.' },
-    { title: 'Information card Demo', path: '/demos/information-card-demo', description: 'Information card with title, description and optional images.' },
-    {title: 'Input field demo', path: '/demos/input-field-demo', description: 'Input field demo'},
-    {title: 'Textarea demo', path: '/demos/textarea-demo', description: 'Textarea with configurable rows, cols, resize, and error handling.'},
-    {title: 'Modal demo', path: '/demos/modal-demo', description: 'Modal system with wizard, form, confirmation, and custom variants.'},
-    {title: 'Table demo', path: '/demos/table-demo', description: 'Generic table with sorting, selection, row actions, search, and pagination.'},
-    {title: 'Language demo', path: '/demos/language-demo', description: 'Language service with locale switching, translate pipe, interpolation, and config integration.'},
-    {title: 'Calendar demo', path: '/demos/calendar-demo', description: 'Calendar with week, day, and month views, event layout, upcoming events sidebar, and pluggable event renderers.'},
-    {title: 'List demo', path: '/demos/list-demo', description: 'Generic list with search, selection, load more, pagination, and custom item templates.'},
-    {
-      title: 'Datetime demo',
-      path: '/demos/datetime-demo',
-      description: 'Datetime input with date, time, and datetime-local modes, variants, and validation.'
-    },
-    {
-      title: 'Select demo',
-      path: '/demos/select-demo',
-      description: 'Native browser select with ControlValueAccessor, validation, disabled options, and styling variants.'
-    },
-    {
-      title: 'Badge demo',
-      path: '/demos/badge-demo',
-      description: 'Badge component with color variants using tailwind-variants.'
-    },
-    {
-      title: 'Icon demo',
-      path: '/demos/icon-demo',
-      description: 'Custom icon component with attribute shorthand, color variants, and custom sizes.'
-    },
-    {
-      title: 'Multi-Select demo',
-      path: '/demos/multi-select-demo',
-      description: 'Multi-select with searchable options, max selections, disabled options, and validation.'
-    },
-    {
-      title: 'Tab demo',
-      path: '/demos/tab-demo',
-      description: 'Tab component with data source, active tab management, and click callbacks.'
-    }
+    { title: 'Alerts',              path: '/demos/alerts',                    abbr: 'AL', color: '#ef4444', description: 'Alert service, providers, and outlet template.' },
+    { title: 'Button',              path: '/demos/button-demo',               abbr: 'BT', color: '#3b82f6', description: 'Buttons with sizes, variants, and colors.' },
+    { title: 'Config',              path: '/demos/config',                    abbr: 'CF', color: '#6366f1', description: 'Section scoping, component defaults, and instance overrides.' },
+    { title: 'Dual Horizontal Image', path: '/demos/dual-horizontal-image-demo', abbr: 'DI', color: '#8b5cf6', description: 'Two images shown side by side.' },
+    { title: 'Information Card',    path: '/demos/information-card-demo',     abbr: 'IC', color: '#0ea5e9', description: 'Card with title, description and optional images.' },
+    { title: 'Input Field',         path: '/demos/input-field-demo',          abbr: 'IF', color: '#0d9488', description: 'Text inputs with masking, validation, and error display.' },
+    { title: 'Textarea',            path: '/demos/textarea-demo',             abbr: 'TX', color: '#059669', description: 'Configurable rows, cols, resize, and error handling.' },
+    { title: 'Modal',               path: '/demos/modal-demo',                abbr: 'MO', color: '#475569', description: 'Wizard, form, confirmation, and custom modal variants.' },
+    { title: 'Table',               path: '/demos/table-demo',                abbr: 'TB', color: '#0284c7', description: 'Sorting, selection, row actions, search, and pagination.' },
+    { title: 'Language',            path: '/demos/language-demo',             abbr: 'LG', color: '#a21caf', description: 'Locale switching, translate pipe, interpolation, and config.' },
+    { title: 'Calendar',            path: '/demos/calendar-demo',             abbr: 'CA', color: '#0891b2', description: 'Week, day, and month views with pluggable event renderers.' },
+    { title: 'List',                path: '/demos/list-demo',                 abbr: 'LI', color: '#16a34a', description: 'Search, selection, load more, pagination, and custom templates.' },
+    { title: 'Datetime',            path: '/demos/datetime-demo',             abbr: 'DT', color: '#dc2626', description: 'Date, time, and datetime-local modes with validation.' },
+    { title: 'Select',              path: '/demos/select-demo',               abbr: 'SL', color: '#7c3aed', description: 'Native select with ControlValueAccessor, validation, and styling.' },
+    { title: 'Badge',               path: '/demos/badge-demo',                abbr: 'BG', color: '#db2777', description: 'Badge component with color variants using tailwind-variants.' },
+    { title: 'Icon',                path: '/demos/icon-demo',                 abbr: 'IO', color: '#ea580c', description: 'Icon component with attribute shorthand, color variants, and sizes.' },
+    { title: 'Multi-Select',        path: '/demos/multi-select-demo',         abbr: 'MS', color: '#65a30d', description: 'Searchable options, max selections, disabled options, and validation.' },
+    { title: 'Tab',                 path: '/demos/tab-demo',                  abbr: 'TP', color: '#0f766e', description: 'Tab component with data source, active tab management, and callbacks.' },
   ];
 }
