@@ -13,7 +13,7 @@
       A basic select with <code>Validators.required</code>. Shows built-in error message when touched without selecting.
     </p>
     <mn-lib-select [props]="countryProps"
-                   class="block w-[300px]"
+                   class="block w-[300px] max-w-full"
                    formControlName="country"
     ></mn-lib-select>
     <p style="margin-top: 8px; font-size: 14px; color: gray;">
@@ -28,7 +28,7 @@
       Uses <code>size: 'lg'</code> and <code>borderRadius: 'lg'</code>. The "XXL" option is disabled.
     </p>
     <mn-lib-select [props]="sizeProps"
-                   class="block w-[300px]"
+                   class="block w-[300px] max-w-full"
                    formControlName="size"
     ></mn-lib-select>
     <p style="margin-top: 8px; font-size: 14px; color: gray;">
@@ -43,7 +43,7 @@
       Uses custom <code>errorMessages</code> to override the built-in "Please select an option" message.
     </p>
     <mn-lib-select [props]="priorityProps"
-                   class="block w-[300px]"
+                   class="block w-[300px] max-w-full"
                    formControlName="priority"
     ></mn-lib-select>
     <p style="margin-top: 8px; font-size: 14px; color: gray;">

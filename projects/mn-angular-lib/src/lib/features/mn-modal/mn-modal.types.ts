@@ -788,6 +788,11 @@ export type BaseModalConfig<TResult = unknown> = {
   i18n?: ModalI18nLabels;
   /** Animation configuration */
   animation?: AnimationOptions | AnimationOptions['type'];
+  /**
+   * Whether the modal renders as a bottom sheet on small screens (< 640px).
+   * Defaults to true. Set to false to keep it a centered dialog on mobile.
+   */
+  mobileBottomSheet?: boolean;
 
   /** Custom component to render in the modal body */
   component?: Type<unknown>;

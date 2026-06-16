@@ -7,7 +7,7 @@
 <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
 <div
   class="modal-container relative bg-base-100 rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
-  [ngClass]="[containerSizeClass, animationClass]"
+  [ngClass]="containerSizeClass"
   [style.height]="containerHeightStyle"
   role="dialog"
   aria-modal="true"
@@ -16,6 +16,11 @@
   tabindex="-1"
   (click)="$event.stopPropagation()"
 >
+  @if (isMobileSheet) {
+    <!-- Drag-handle grabber, visible only on mobile bottom sheets -->
+    <div class="mx-auto mt-2 -mb-2 h-1.5 w-10 rounded-full bg-base-300 sm:hidden"></div>
+  }
+
   <div [class.border-b]="config.kind !== ModalKind.WIZARD"
        [class.border-base-300]="config.kind !== ModalKind.WIZARD"
        class="flex items-center justify-between p-6">

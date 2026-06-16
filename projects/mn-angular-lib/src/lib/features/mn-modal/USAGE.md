@@ -221,6 +221,10 @@ When a group is hidden, validators on its fields are automatically cleared so th
 
 Multi-step flows with navigation, validation, and data aggregation.
 
+> The wizard auto-sizes its body to the tallest step, so the modal does not
+> resize as you move between steps. Setting an explicit `sizeHeight` (or a
+> `FULL` size) opts out of this and uses the fixed height instead.
+
 ```typescript
 import { WizardFlowMode, ValidationStatus } from 'mn-angular-lib';
 
@@ -348,6 +352,21 @@ These methods are available on every builder:
 .backdrop(BackdropMode.HIDE | STATIC | CLOSABLE)
 .keyboard(KeyboardMode.ENABLED | DISABLED)
 .intent(ModalIntent.NEUTRAL | INFO | SUCCESS | WARNING | DANGER)
+  .mobileBottomSheet(true | false)   // default: true
+```
+
+### Mobile Bottom Sheets
+
+On small screens (< 640px) modals automatically render as bottom sheets — they
+slide up from the bottom edge, span the full width with rounded top corners, and
+show a drag-handle grabber. Dismissal is unchanged (backdrop tap, close button,
+or Escape). Above 640px they remain centered dialogs.
+
+This is on by default. Opt out per modal to keep a centered dialog on mobile:
+
+```typescript
+.
+mobileBottomSheet(false)
 ```
 
 ### Custom Footer Actions

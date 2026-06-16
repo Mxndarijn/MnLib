@@ -1,38 +1,39 @@
 import {
-  Component,
-  Input,
-  OnInit,
-  OnDestroy,
-  ChangeDetectorRef,
-  ViewChildren,
-  QueryList,
   AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
   inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { MnModalRef } from '../../mn-modal-ref';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule} from '@angular/forms';
+import {Subscription} from 'rxjs';
+import {MnModalRef} from '../../mn-modal-ref';
 import {
-  WizardModalConfig,
-  WizardStepConfig,
+  ActionStyle,
+  FormModalConfig,
+  ModalCloseReason,
+  ModalFooterAction,
+  ModalKind,
+  ModalRef,
+  ModalSize,
   ModalStepId,
   NavigationDirection,
-  ModalCloseReason,
-  WizardResult,
   WizardFlowMode,
-  ModalKind,
-  FormModalConfig,
-  ModalFooterAction,
-  ActionStyle,
-  ModalRef,
+  WizardModalConfig,
+  WizardResult,
+  WizardStepConfig,
 } from '../../mn-modal.types';
-import { MnButton } from '../../../mn-button';
-import {MnButtonTypes} from '../../../mn-button/mn-buttonTypes';
-import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
-import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
-import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
-import { MnLanguageService } from '../../../../language';
+import {MnButton, MnButtonTypes} from '../../../mn-button';
+import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
+import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
+import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.component';
+import {MnLanguageService} from '../../../../language';
 
 @Component({
   selector: 'mn-wizard-body',
@@ -48,12 +49,19 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() modalRef!: MnModalRef<WizardResult>;
 
   @ViewChildren(MnFormBodyComponent) formBodies!: QueryList<MnFormBodyComponent>;
+  @ViewChildren('stepWrapper') stepWrappers!: QueryList<ElementRef<HTMLElement>>;
 
   currentStepId!: ModalStepId;
   visitedStepIds: ModalStepId[] = [];
   isCurrentStepValid = true;
   isCompleting = false;
   wizardErrors: Record<string, string> = {};
+
+  /**
+   * Min-height (px) for the step container, sized to the tallest step so the
+   * modal does not jump when navigating between steps. Monotonic — only grows.
+   */
+  measuredMinHeight = 0;
 
   private languageService = inject(MnLanguageService);
 
@@ -127,9 +135,22 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.getCurrentFormBody()?.applyAutoFocus();
       }, 100);
+      // Re-measure in case dynamic field visibility changed a step's height
+      this.measureTallestStep();
     });
     // Initial validity check
     this.trackCurrentStepValidity();
+
+    // Pre-size the modal to the tallest step so it does not jump between steps.
+    // All steps are already rendered (display:none), so this is a pure layout
+    // read — it creates no components and triggers no data loads or autofocus.
+    setTimeout(() => this.measureTallestStep(), 0);
+    // A second pass catches content that grows after async data sources resolve.
+    setTimeout(() => this.measureTallestStep(), 300);
+  }
+
+  isTextBody(step: WizardStepConfig): boolean {
+    return typeof step.body === 'string';
   }
 
   ngOnDestroy(): void {
@@ -137,8 +158,33 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.formBodiesSubscription?.unsubscribe();
   }
 
-  isTextBody(step: WizardStepConfig): boolean {
-    return typeof step.body === 'string' || typeof step.body === 'number';
+  /**
+   * Measures every step's natural height and records the tallest as
+   * {@link measuredMinHeight}. Monotonic: the value only ever grows, so a
+   * re-measure can never shrink the modal. Skipped when the modal has an
+   * explicit height or is full-size (those are already fixed-height).
+   */
+  private measureTallestStep(): void {
+    if (this.config.sizeHeight || this.config.sizeWidth === ModalSize.FULL) return;
+    const wrappers = this.stepWrappers?.toArray().map(ref => ref.nativeElement) ?? [];
+    if (wrappers.length === 0) return;
+
+    // Synchronous pre-paint pass: show one step at a time, read its height,
+    // then restore the original display values (so there is no visible flicker).
+    const originalDisplay = wrappers.map(el => el.style.display);
+    let tallest = 0;
+    for (let i = 0; i < wrappers.length; i++) {
+      for (let j = 0; j < wrappers.length; j++) {
+        wrappers[j].style.display = i === j ? 'block' : 'none';
+      }
+      tallest = Math.max(tallest, wrappers[i].offsetHeight);
+    }
+    wrappers.forEach((el, i) => (el.style.display = originalDisplay[i]));
+
+    if (tallest > this.measuredMinHeight) {
+      this.measuredMinHeight = tallest;
+      this.cdr.detectChanges();
+    }
   }
 
   /** Get visible steps (filtered by visibility condition) */
