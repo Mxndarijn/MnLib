@@ -359,8 +359,10 @@ These methods are available on every builder:
 
 On small screens (< 640px) modals automatically render as bottom sheets — they
 slide up from the bottom edge, span the full width with rounded top corners, and
-show a drag-handle grabber. Dismissal is unchanged (backdrop tap, close button,
-or Escape). Above 640px they remain centered dialogs.
+show a drag-handle grabber. If the modal is closable, you can **swipe it down by
+the grabber to dismiss** (a short drag springs back; a guarded close still runs
+its guard). Backdrop tap, close button, and Escape work as before. Above 640px
+they remain centered dialogs.
 
 This is on by default. Opt out per modal to keep a centered dialog on mobile:
 

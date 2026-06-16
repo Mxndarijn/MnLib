@@ -1,13 +1,14 @@
-<div class="flex flex-col gap-6 h-full">
+<div class="flex flex-col h-full min-h-0">
   @if (config.component || config.template) {
     <mn-custom-body-host
       [config]="$any(config)"
       [modalRef]="$any(modalRef)"
-      class="block"
+      class="block flex-none px-6 pt-6"
     ></mn-custom-body-host>
   }
 
-  <div class="pb-4 border-b border-base-300 -mx-6 px-6 -mt-4">
+  <!-- Steps header — fixed (does not scroll with the step body) -->
+  <div class="flex-none px-6 pt-2 pb-4 border-b border-base-300 bg-base-100">
     <div class="relative flex items-start">
       <!-- Background line spanning from first circle center to last circle center -->
       <div
@@ -56,7 +57,9 @@
     </div>
   </div>
 
-  <div [style.min-height]="measuredMinHeight ? measuredMinHeight + 'px' : null" class="min-h-48 flex-1">
+  <!-- Step body — the only scrolling region in the wizard -->
+  <div class="flex-1 min-h-0 overflow-y-auto px-6 py-6">
+    <div [style.min-height]="measuredMinHeight ? measuredMinHeight + 'px' : null" class="min-h-48">
     @for (step of config.steps; track step.id) {
       <div #stepWrapper [style.display]="step.id === currentStepId ? 'block' : 'none'">
         <h3 class="text-lg font-semibold text-base-content mb-4">{{ step.title }}</h3>
@@ -83,11 +86,12 @@
         </div>
       </div>
     }
+    </div>
   </div>
 
-  <!-- Wizard-level errors (from onBeforeComplete) -->
+  <!-- Wizard-level errors (from onBeforeComplete) — fixed, above the footer -->
   @if (wizardErrors && (wizardErrors | keyvalue).length > 0) {
-    <div class="flex flex-col gap-1 px-2 py-2 bg-red-50 rounded-md">
+    <div class="flex flex-col gap-1 mx-6 mb-2 px-2 py-2 bg-red-50 rounded-md">
       @for (err of wizardErrors | keyvalue; track err.key) {
         <div class="text-red-500 text-sm">
           {{ err.value }}
@@ -96,7 +100,8 @@
     </div>
   }
 
-  <div class="flex gap-3 pt-4 border-t border-base-300 mt-auto">
+  <!-- Footer — fixed (does not scroll with the step body) -->
+  <div class="flex-none flex gap-3 px-6 pt-4 pb-6 border-t border-base-300 bg-base-100">
     @if (!currentStep?.hideBack) {
       <button
         mnButton
