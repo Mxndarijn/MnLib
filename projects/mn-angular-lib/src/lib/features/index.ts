@@ -14,5 +14,6 @@ export * from './mn-table'
 export * from './mn-list'
 export * from './mn-calendar'
 export * from './mn-tab'
-export * from './mn-icon'
+export * from './mn-icon';
+export * from './mn-skeleton';
 
