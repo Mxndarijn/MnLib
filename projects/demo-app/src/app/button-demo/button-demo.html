@@ -100,6 +100,25 @@
       </div>
     </div>
 
+    <!-- No hover -->
+    <div class="flex flex-col gap-y-4">
+      <h1>No hover buttons</h1>
+      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+        <button mnButton [data]="{ color: 'primary', size: 'md', variant: 'fill', hover: false }">
+          Fill no hover
+        </button>
+        <button mnButton [data]="{ color: 'primary', size: 'md', variant: 'outline', hover: false }">
+          Outline no hover
+        </button>
+        <button mnButton [data]="{ color: 'primary', size: 'md', variant: 'text', hover: false }">
+          Text no hover
+        </button>
+        <button mnButton [data]="{ color: 'primary', size: 'md', variant: 'textUnderline', hover: false }">
+          Text underline no hover
+        </button>
+      </div>
+    </div>
+
     <!-- Disabled -->
     <div class="flex flex-col gap-y-4">
       <h1>Disabled buttons</h1>

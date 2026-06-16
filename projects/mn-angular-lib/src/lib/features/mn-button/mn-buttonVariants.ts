@@ -44,42 +44,77 @@ export const mnButtonVariants = tv({
     wrap: {
       true: 'whitespace-normal',
       false: 'whitespace-nowrap',
-    }
+    },
+    hover: {
+      true: '',
+    },
   },
 
   compoundVariants: [
-    // Fill
-    { variant: 'fill', color: 'primary',   class: 'bg-primary text-primary-content border border-primary hover:brightness-60' },
-    { variant: 'fill', color: 'secondary', class: 'bg-neutral text-neutral-content border border-neutral hover:brightness-60' },
-    { variant: 'fill', color: 'danger',    class: 'bg-error text-error-content border border-error hover:brightness-60' },
-    { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content border border-warning hover:brightness-60' },
-    { variant: 'fill', color: 'success',   class: 'bg-success text-success-content border border-success hover:brightness-60' },
-    { variant: 'fill', color: 'accent',    class: 'bg-accent text-accent-content border border-accent hover:brightness-60' },
-    { variant: 'fill', color: 'gray',     class: 'bg-base-content/10 text-base-content/70 border border-base-content/10 hover:bg-base-content/20' },
-    // Outline
-    { variant: 'outline', color: 'primary',   class: 'border-primary text-primary hover:bg-primary/10' },
-    { variant: 'outline', color: 'secondary', class: 'border-neutral text-neutral hover:bg-neutral/10' },
-    { variant: 'outline', color: 'danger',    class: 'border-error text-error hover:bg-error/10' },
-    { variant: 'outline', color: 'warning',   class: 'border-warning text-warning hover:bg-warning/10' },
-    { variant: 'outline', color: 'success',   class: 'border-success text-success hover:bg-success/10' },
-    { variant: 'outline', color: 'accent',    class: 'border-accent text-accent hover:bg-accent/10' },
-    { variant: 'outline', color: 'gray',     class: 'border-base-content/70 text-base-content/70 hover:bg-base-content/10' },
-    // Text
-    { variant: 'text', color: 'primary',   class: 'text-primary hover:bg-primary/10' },
-    { variant: 'text', color: 'secondary', class: 'text-neutral hover:bg-neutral/10' },
-    { variant: 'text', color: 'danger',    class: 'text-error hover:bg-error/10' },
-    { variant: 'text', color: 'warning',   class: 'text-warning hover:bg-warning/10' },
-    { variant: 'text', color: 'success',   class: 'text-success hover:bg-success/10' },
-    { variant: 'text', color: 'accent',    class: 'text-accent hover:bg-accent/10' },
-    { variant: 'text', color: 'gray',     class: 'text-base-content/70 hover:bg-base-content/10' },
-    // Text Underline
-    { variant: 'textUnderline', color: 'primary',   class: 'text-primary underline underline-offset-2 hover:bg-primary/10' },
-    { variant: 'textUnderline', color: 'secondary', class: 'text-neutral underline underline-offset-2 hover:bg-neutral/10' },
-    { variant: 'textUnderline', color: 'danger',    class: 'text-error underline underline-offset-2 hover:bg-error/10' },
-    { variant: 'textUnderline', color: 'warning',   class: 'text-warning underline underline-offset-2 hover:bg-warning/10' },
-    { variant: 'textUnderline', color: 'success',   class: 'text-success underline underline-offset-2 hover:bg-success/10' },
-    { variant: 'textUnderline', color: 'accent',    class: 'text-accent underline underline-offset-2 hover:bg-accent/10' },
-    { variant: 'textUnderline', color: 'gray',     class: 'text-base-content/70 underline underline-offset-2 hover:bg-base-content/10' },
+    // Fill — base
+    { variant: 'fill', color: 'primary',   class: 'bg-primary text-primary-content border border-primary' },
+    { variant: 'fill', color: 'secondary', class: 'bg-neutral text-neutral-content border border-neutral' },
+    { variant: 'fill', color: 'danger',    class: 'bg-error text-error-content border border-error' },
+    { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content border border-warning' },
+    { variant: 'fill', color: 'success',   class: 'bg-success text-success-content border border-success' },
+    { variant: 'fill', color: 'accent',    class: 'bg-accent text-accent-content border border-accent' },
+    { variant: 'fill', color: 'gray',      class: 'bg-base-content/10 text-base-content/70 border border-base-content/10' },
+    // Fill — hover
+    { variant: 'fill', color: 'primary',   hover: true, class: 'hover:brightness-60' },
+    { variant: 'fill', color: 'secondary', hover: true, class: 'hover:brightness-60' },
+    { variant: 'fill', color: 'danger',    hover: true, class: 'hover:brightness-60' },
+    { variant: 'fill', color: 'warning',   hover: true, class: 'hover:brightness-60' },
+    { variant: 'fill', color: 'success',   hover: true, class: 'hover:brightness-60' },
+    { variant: 'fill', color: 'accent',    hover: true, class: 'hover:brightness-60' },
+    { variant: 'fill', color: 'gray',      hover: true, class: 'hover:bg-base-content/20' },
+    // Outline — base
+    { variant: 'outline', color: 'primary',   class: 'border-primary text-primary' },
+    { variant: 'outline', color: 'secondary', class: 'border-neutral text-neutral' },
+    { variant: 'outline', color: 'danger',    class: 'border-error text-error' },
+    { variant: 'outline', color: 'warning',   class: 'border-warning text-warning' },
+    { variant: 'outline', color: 'success',   class: 'border-success text-success' },
+    { variant: 'outline', color: 'accent',    class: 'border-accent text-accent' },
+    { variant: 'outline', color: 'gray',      class: 'border-base-content/70 text-base-content/70' },
+    // Outline — hover
+    { variant: 'outline', color: 'primary',   hover: true, class: 'hover:bg-primary/10' },
+    { variant: 'outline', color: 'secondary', hover: true, class: 'hover:bg-neutral/10' },
+    { variant: 'outline', color: 'danger',    hover: true, class: 'hover:bg-error/10' },
+    { variant: 'outline', color: 'warning',   hover: true, class: 'hover:bg-warning/10' },
+    { variant: 'outline', color: 'success',   hover: true, class: 'hover:bg-success/10' },
+    { variant: 'outline', color: 'accent',    hover: true, class: 'hover:bg-accent/10' },
+    { variant: 'outline', color: 'gray',      hover: true, class: 'hover:bg-base-content/10' },
+    // Text — base
+    { variant: 'text', color: 'primary',   class: 'text-primary' },
+    { variant: 'text', color: 'secondary', class: 'text-neutral' },
+    { variant: 'text', color: 'danger',    class: 'text-error' },
+    { variant: 'text', color: 'warning',   class: 'text-warning' },
+    { variant: 'text', color: 'success',   class: 'text-success' },
+    { variant: 'text', color: 'accent',    class: 'text-accent' },
+    { variant: 'text', color: 'gray',      class: 'text-base-content/70' },
+    // Text — hover
+    { variant: 'text', color: 'primary',   hover: true, class: 'hover:bg-primary/10' },
+    { variant: 'text', color: 'secondary', hover: true, class: 'hover:bg-neutral/10' },
+    { variant: 'text', color: 'danger',    hover: true, class: 'hover:bg-error/10' },
+    { variant: 'text', color: 'warning',   hover: true, class: 'hover:bg-warning/10' },
+    { variant: 'text', color: 'success',   hover: true, class: 'hover:bg-success/10' },
+    { variant: 'text', color: 'accent',    hover: true, class: 'hover:bg-accent/10' },
+    { variant: 'text', color: 'gray',      hover: true, class: 'hover:bg-base-content/10' },
+    // Text Underline — base
+    { variant: 'textUnderline', color: 'primary',   class: 'text-primary underline underline-offset-2' },
+    { variant: 'textUnderline', color: 'secondary', class: 'text-neutral underline underline-offset-2' },
+    { variant: 'textUnderline', color: 'danger',    class: 'text-error underline underline-offset-2' },
+    { variant: 'textUnderline', color: 'warning',   class: 'text-warning underline underline-offset-2' },
+    { variant: 'textUnderline', color: 'success',   class: 'text-success underline underline-offset-2' },
+    { variant: 'textUnderline', color: 'accent',    class: 'text-accent underline underline-offset-2' },
+    { variant: 'textUnderline', color: 'gray',      class: 'text-base-content/70 underline underline-offset-2' },
+    // Text Underline — hover
+    { variant: 'textUnderline', color: 'primary',   hover: true, class: 'hover:bg-primary/10' },
+    { variant: 'textUnderline', color: 'secondary', hover: true, class: 'hover:bg-neutral/10' },
+    { variant: 'textUnderline', color: 'danger',    hover: true, class: 'hover:bg-error/10' },
+    { variant: 'textUnderline', color: 'warning',   hover: true, class: 'hover:bg-warning/10' },
+    { variant: 'textUnderline', color: 'success',   hover: true, class: 'hover:bg-success/10' },
+    { variant: 'textUnderline', color: 'accent',    hover: true, class: 'hover:bg-accent/10' },
+    { variant: 'textUnderline', color: 'gray',      hover: true, class: 'hover:bg-base-content/10' },
   ],
 
   defaultVariants: {
@@ -89,6 +124,7 @@ export const mnButtonVariants = tv({
     borderRadius: 'lg',
     disabled: false,
     wrap: false,
+    hover: true,
   },
 });
 

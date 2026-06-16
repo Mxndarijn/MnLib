@@ -7,4 +7,5 @@ export type MnButtonTypes = {
   color: MnButtonVariants['color'];
   disabled?: MnButtonVariants['disabled'];
   wrap?: MnButtonVariants['wrap'];
+  hover?: MnButtonVariants['hover'];
 }
