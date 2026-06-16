@@ -20,6 +20,7 @@ export class MnButton {
       borderRadius: this.data.borderRadius,
       disabled: this.data.disabled,
       wrap: this.data.wrap,
+      hover: this.data.hover,
     });
   }
   // For accessibility (works for both <button> and <a>)

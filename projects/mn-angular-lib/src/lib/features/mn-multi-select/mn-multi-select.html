@@ -26,7 +26,7 @@
     (keydown.space)="toggle(); $event.preventDefault()"
     (blur)="handleBlur()"
   >
-    <div class="flex flex-row items-center gap-x-2 flex-wrap min-h-[1.5rem]">
+    <div class="flex flex-row items-center gap-x-2 flex-wrap min-h-6">
       @if (selectedOptions.length === 0) {
         <span class="text-base-content/50">{{ uiConfig.placeholder || props.placeholder || 'Select...' }}</span>
       } @else {
@@ -37,9 +37,9 @@
             {{ opt.label }}
             <button
               mnButton
-              [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
+              [data]="{ size: 'sm', variant: 'text', color: 'secondary', hover: false }"
               type="button"
-              class="text-base-content/50 hover:text-base-content cursor-pointer"
+              class="text-base-content/50 cursor-pointer"
               (click)="removeOption(opt, $event)"
               [attr.aria-label]="'Remove ' + opt.label"
             ><svg lucideX [size]="18"></svg></button>
@@ -61,7 +61,7 @@
       [id]="resolvedId + '-listbox'"
       aria-multiselectable="true"
       role="listbox"
-      class="fixed z-[9999] bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto"
+      class="fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto"
       [style.top]="dropdownStyle.top"
       [style.left]="dropdownStyle.left"
       [style.width]="dropdownStyle.width"
