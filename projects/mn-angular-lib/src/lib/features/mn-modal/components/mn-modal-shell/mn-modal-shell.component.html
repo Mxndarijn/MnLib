@@ -7,8 +7,10 @@
 <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
 <div
   class="modal-container relative bg-base-100 rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
+  [class.sheet-dragging]="isDraggingSheet"
   [ngClass]="containerSizeClass"
   [style.height]="containerHeightStyle"
+  [style.transform]="sheetDragY ? 'translateY(' + sheetDragY + 'px)' : null"
   role="dialog"
   aria-modal="true"
   [attr.aria-labelledby]="config.title ? 'mn-modal-title' : null"
@@ -17,8 +19,16 @@
   (click)="$event.stopPropagation()"
 >
   @if (isMobileSheet) {
-    <!-- Drag-handle grabber, visible only on mobile bottom sheets -->
-    <div class="mx-auto mt-2 -mb-2 h-1.5 w-10 rounded-full bg-base-300 sm:hidden"></div>
+    <!-- Drag handle for swipe-to-dismiss, visible only on mobile bottom sheets -->
+    <div
+      (pointercancel)="onGrabberPointerUp()"
+      (pointerdown)="onGrabberPointerDown($event)"
+      (pointermove)="onGrabberPointerMove($event)"
+      (pointerup)="onGrabberPointerUp()"
+      class="sm:hidden flex justify-center pt-2 pb-1 touch-none cursor-grab"
+    >
+      <div class="h-1.5 w-10 rounded-full bg-base-300"></div>
+    </div>
   }
 
   <div [class.border-b]="config.kind !== ModalKind.WIZARD"
@@ -46,7 +56,7 @@
     <p class="m-0 px-6 text-sm text-base-content/60 leading-relaxed" id="mn-modal-description">{{ config.description }}</p>
   }
 
-  <div class="flex-1 overflow-y-auto p-6">
+  <div class="flex-1 overflow-y-auto px-6 pt-6">
     @if (config.kind === ModalKind.WIZARD) {
       <mn-wizard-body
         [config]="asWizard(config)"
@@ -74,6 +84,7 @@
       <mn-custom-body-host
         [config]="asCustom(config)"
         [modalRef]="$any(modalRef)"
+        class="block pb-6"
       ></mn-custom-body-host>
     }
   </div>
