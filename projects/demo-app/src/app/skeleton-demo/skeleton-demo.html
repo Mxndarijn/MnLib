@@ -1,0 +1,79 @@
+<div class="container">
+  <div class="header">
+    <h1>Skeleton Demo</h1>
+    <p>Composable loading placeholders — combine shapes to match any component layout.</p>
+  </div>
+
+  <section class="flex flex-col gap-y-10">
+
+    <!-- Toggle -->
+    <div class="flex items-center gap-x-3">
+      <button mnButton [data]="{ color: 'secondary', size: 'sm', variant: 'outline' }" (click)="toggleAnimation()">
+        Animation: {{ animated ? 'on' : 'off' }}
+      </button>
+    </div>
+
+    <!-- Shapes -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-lg font-semibold">Shapes</h2>
+      <div class="flex items-center gap-x-6 flex-wrap gap-y-4">
+        <div class="flex flex-col items-center gap-y-2">
+          <mn-skeleton [data]="{ shape: 'circle', width: '56px', height: '56px', animated: animated }"></mn-skeleton>
+          <span class="text-xs text-base-content/60">circle</span>
+        </div>
+        <div class="flex flex-col items-center gap-y-2">
+          <mn-skeleton [data]="{ shape: 'rectangle', width: '160px', height: '56px', animated: animated }"></mn-skeleton>
+          <span class="text-xs text-base-content/60">rectangle</span>
+        </div>
+        <div class="flex flex-col gap-y-2">
+          <mn-skeleton [data]="{ shape: 'text', width: '200px', animated: animated }"></mn-skeleton>
+          <mn-skeleton [data]="{ shape: 'text', width: '140px', animated: animated }"></mn-skeleton>
+          <span class="text-xs text-base-content/60">text</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Button skeleton -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-lg font-semibold">Button skeletons</h2>
+      <div class="flex items-center gap-x-3 flex-wrap gap-y-3">
+        <mn-skeleton [data]="{ shape: 'rectangle', width: '80px', height: '32px', animated: animated }"></mn-skeleton>
+        <mn-skeleton [data]="{ shape: 'rectangle', width: '100px', height: '40px', animated: animated }"></mn-skeleton>
+        <mn-skeleton [data]="{ shape: 'rectangle', width: '120px', height: '44px', animated: animated }"></mn-skeleton>
+      </div>
+    </div>
+
+    <!-- Card skeleton (information card style) -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-lg font-semibold">Card skeleton</h2>
+      <div class="flex flex-col gap-y-4 p-4 border border-base-300 rounded-lg w-72">
+        <mn-skeleton [data]="{ shape: 'rectangle', width: '100%', height: '140px', animated: animated }"></mn-skeleton>
+        <div class="flex items-center gap-x-3">
+          <mn-skeleton [data]="{ shape: 'circle', width: '40px', height: '40px', animated: animated }"></mn-skeleton>
+          <div class="flex flex-col gap-y-2 flex-1">
+            <mn-skeleton [data]="{ shape: 'text', animated: animated }"></mn-skeleton>
+            <mn-skeleton [data]="{ shape: 'text', width: '65%', animated: animated }"></mn-skeleton>
+          </div>
+        </div>
+        <mn-skeleton [data]="{ shape: 'rectangle', width: '96px', height: '36px', animated: animated }"></mn-skeleton>
+      </div>
+    </div>
+
+    <!-- List skeleton -->
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-lg font-semibold">List skeleton</h2>
+      <div class="flex flex-col gap-y-3 w-96">
+        @for (row of skeletonRows; track $index) {
+          <div class="flex items-center gap-x-3 p-2">
+            <mn-skeleton [data]="{ shape: 'circle', width: '40px', height: '40px', animated: animated }"></mn-skeleton>
+            <div class="flex flex-col gap-y-2 flex-1">
+              <mn-skeleton [data]="{ shape: 'text', animated: animated }"></mn-skeleton>
+              <mn-skeleton [data]="{ shape: 'text', width: '55%', animated: animated }"></mn-skeleton>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+  </section>
+</div>

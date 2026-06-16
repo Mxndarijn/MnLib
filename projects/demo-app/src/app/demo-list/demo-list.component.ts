@@ -65,5 +65,6 @@ export class DemoListComponent {
     { title: 'Icon',                path: '/demos/icon-demo',                 abbr: 'IO', color: '#ea580c', description: 'Icon component with attribute shorthand, color variants, and sizes.' },
     { title: 'Multi-Select',        path: '/demos/multi-select-demo',         abbr: 'MS', color: '#65a30d', description: 'Searchable options, max selections, disabled options, and validation.' },
     { title: 'Tab',                 path: '/demos/tab-demo',                  abbr: 'TP', color: '#0f766e', description: 'Tab component with data source, active tab management, and callbacks.' },
+    { title: 'Skeleton',            path: '/demos/skeleton-demo',             abbr: 'SK', color: '#94a3b8', description: 'Generic loading placeholders — compose shapes to match any component layout.' },
   ];
 }
