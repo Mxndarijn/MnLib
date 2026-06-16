@@ -196,20 +196,27 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     return this.config.closeMode !== CloseMode.DISABLED;
   }
 
-  onGrabberPointerDown(event: PointerEvent): void {
+  /** Tailwind's `sm` breakpoint — below this the modal renders as a bottom sheet. */
+  private static readonly SHEET_MAX_WIDTH = 639.98;
+
+  onSheetPointerDown(event: PointerEvent): void {
     if (!this.isMobileSheet || !this.canClose) return;
+    // Only a bottom sheet (mobile-width viewport) can be swiped away.
+    if (window.innerWidth > MnModalShellComponent.SHEET_MAX_WIDTH) return;
+    // Don't hijack drags that begin on an interactive control (e.g. the close button).
+    if ((event.target as HTMLElement).closest('button')) return;
     this.isDraggingSheet = true;
     this.dragStartY = event.clientY;
     (event.target as HTMLElement).setPointerCapture(event.pointerId);
   }
 
-  onGrabberPointerMove(event: PointerEvent): void {
+  onSheetPointerMove(event: PointerEvent): void {
     if (!this.isDraggingSheet) return;
     // Only track downward movement.
     this.sheetDragY = Math.max(0, event.clientY - this.dragStartY);
   }
 
-  async onGrabberPointerUp(): Promise<void> {
+  async onSheetPointerUp(): Promise<void> {
     if (!this.isDraggingSheet) return;
     this.isDraggingSheet = false;
 
