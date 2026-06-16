@@ -21,18 +21,28 @@
   @if (isMobileSheet) {
     <!-- Drag handle for swipe-to-dismiss, visible only on mobile bottom sheets -->
     <div
-      (pointercancel)="onGrabberPointerUp()"
-      (pointerdown)="onGrabberPointerDown($event)"
-      (pointermove)="onGrabberPointerMove($event)"
-      (pointerup)="onGrabberPointerUp()"
+    (pointercancel)="onSheetPointerUp()"
+    (pointerdown)="onSheetPointerDown($event)"
+    (pointermove)="onSheetPointerMove($event)"
+    (pointerup)="onSheetPointerUp()"
       class="sm:hidden flex justify-center pt-2 pb-1 touch-none cursor-grab"
     >
       <div class="h-1.5 w-10 rounded-full bg-base-300"></div>
     </div>
   }
 
+  <!-- On mobile the whole header doubles as a swipe-to-dismiss surface (drags that
+       start on the close button are ignored). The grabber above is the visual cue. -->
   <div [class.border-b]="config.kind !== ModalKind.WIZARD"
        [class.border-base-300]="config.kind !== ModalKind.WIZARD"
+       (pointercancel)="onSheetPointerUp()"
+       (pointerdown)="onSheetPointerDown($event)"
+       (pointermove)="onSheetPointerMove($event)"
+       (pointerup)="onSheetPointerUp()"
+       [class.cursor-grab]="isMobileSheet"
+       [class.sm:cursor-auto]="isMobileSheet"
+       [class.sm:touch-auto]="isMobileSheet"
+       [class.touch-none]="isMobileSheet"
        class="flex items-center justify-between p-6">
     <div class="flex flex-col gap-0.5">
       @if (config.title) {
@@ -56,38 +66,42 @@
     <p class="m-0 px-6 text-sm text-base-content/60 leading-relaxed" id="mn-modal-description">{{ config.description }}</p>
   }
 
-  <div class="flex-1 overflow-y-auto px-6 pt-6">
-    @if (config.kind === ModalKind.WIZARD) {
+  @if (config.kind === ModalKind.WIZARD) {
+    <!-- Wizard manages its own internal scrolling so the steps header and footer
+         stay fixed while only the step body scrolls. No padding/scroll here. -->
+    <div class="flex-1 min-h-0 overflow-hidden">
       <mn-wizard-body
         [config]="asWizard(config)"
         [modalRef]="$any(modalRef)"
         class="block h-full"
       ></mn-wizard-body>
-    }
+    </div>
+  } @else {
+    <div class="flex-1 overflow-y-auto px-6 pt-6">
+      @if (config.kind === ModalKind.FORM) {
+        <mn-form-body
+          [config]="asForm(config)"
+          [modalRef]="$any(modalRef)"
+          class="block h-full"
+        ></mn-form-body>
+      }
 
-    @if (config.kind === ModalKind.FORM) {
-      <mn-form-body
-        [config]="asForm(config)"
-        [modalRef]="$any(modalRef)"
-        class="block h-full"
-      ></mn-form-body>
-    }
+      @if (config.kind === ModalKind.CONFIRMATION) {
+        <mn-confirmation-body
+          [config]="asConfirmation(config)"
+          [modalRef]="$any(modalRef)"
+        ></mn-confirmation-body>
+      }
 
-    @if (config.kind === ModalKind.CONFIRMATION) {
-      <mn-confirmation-body
-        [config]="asConfirmation(config)"
-        [modalRef]="$any(modalRef)"
-      ></mn-confirmation-body>
-    }
-
-    @if (config.kind === ModalKind.CUSTOM) {
-      <mn-custom-body-host
-        [config]="asCustom(config)"
-        [modalRef]="$any(modalRef)"
-        class="block pb-6"
-      ></mn-custom-body-host>
-    }
-  </div>
+      @if (config.kind === ModalKind.CUSTOM) {
+        <mn-custom-body-host
+          [config]="asCustom(config)"
+          [modalRef]="$any(modalRef)"
+          class="block pb-6"
+        ></mn-custom-body-host>
+      }
+    </div>
+  }
 
   <!-- Custom Footer Actions (not for wizard modals, they render their own) -->
   @if (hasCustomFooterActions && config.kind !== ModalKind.WIZARD) {
