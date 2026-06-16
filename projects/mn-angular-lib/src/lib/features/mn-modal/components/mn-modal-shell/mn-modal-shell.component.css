@@ -15,6 +15,15 @@
   opacity: 0.8;
 }
 
+/* Swipe-to-dismiss: animate the spring-back, but follow the finger 1:1 while dragging. */
+.modal-container {
+  transition: transform 0.2s ease;
+}
+
+.modal-container.sheet-dragging {
+  transition: none;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
