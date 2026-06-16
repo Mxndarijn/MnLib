@@ -45,6 +45,42 @@
   to { opacity: 0; transform: scale(0.95); }
 }
 
+@keyframes slideUpIn {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+/* Open animations — keyed by the same .anim-* host classes as the close animations
+   below, so mobile bottom-sheet overrides can target both in one place. */
+:host(.anim-slide) .modal-container {
+  animation: slideIn 0.2s ease-in-out;
+}
+
+:host(.anim-fade) .modal-container {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+:host(.anim-zoom) .modal-container {
+  animation: zoomIn 0.2s ease-in-out;
+}
+
 :host(.closing) .modal-backdrop {
   animation: fadeOut 0.15s ease-in-out forwards;
 }
@@ -59,4 +95,37 @@
 
 :host(.closing).anim-zoom .modal-container {
   animation: zoomOut 0.15s ease-in-out forwards;
+}
+
+/* =========================
+   Mobile bottom sheet (< 640px), gated by the .mobile-sheet host class.
+   Anchors the modal to the bottom, makes it full-width with rounded top
+   corners, and overrides every open/close animation with a slide-up.
+   ========================= */
+@media (max-width: 639.98px) {
+  :host(.mobile-sheet) {
+    align-items: flex-end;
+  }
+
+  :host(.mobile-sheet) .modal-container {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 1rem 1rem 0 0;
+    animation: slideUpIn 0.25s ease-out;
+  }
+
+  /* Override whichever anim-* open animation was selected */
+  :host(.mobile-sheet).anim-slide .modal-container,
+  :host(.mobile-sheet).anim-fade .modal-container,
+  :host(.mobile-sheet).anim-zoom .modal-container {
+    animation: slideUpIn 0.25s ease-out;
+  }
+
+  :host(.mobile-sheet).closing .modal-container,
+  :host(.mobile-sheet).closing.anim-slide .modal-container,
+  :host(.mobile-sheet).closing.anim-fade .modal-container,
+  :host(.mobile-sheet).closing.anim-zoom .modal-container {
+    animation: slideUpOut 0.2s ease-in forwards;
+  }
 }
