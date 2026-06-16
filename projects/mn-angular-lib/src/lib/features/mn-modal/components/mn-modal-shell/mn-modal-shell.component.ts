@@ -1,37 +1,37 @@
 import {
+  AfterViewInit,
+  ChangeDetectorRef,
   Component,
+  ElementRef,
   HostBinding,
   HostListener,
+  inject,
   Input,
-  ElementRef,
-  AfterViewInit,
   OnDestroy,
-  OnInit,
-  ChangeDetectorRef,
-  inject
+  OnInit
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MnModalRef } from '../../mn-modal-ref';
+import {CommonModule} from '@angular/common';
+import {MnModalRef} from '../../mn-modal-ref';
 import {
-  ModalConfig,
-  ModalKind,
-  ModalSize,
-  BackdropMode,
-  KeyboardMode,
-  CloseMode,
-  ModalCloseReason,
-  ModalFooterAction,
   ActionStyle,
-  WizardModalConfig,
-  FormModalConfig,
+  BackdropMode,
+  CloseMode,
   ConfirmationModalConfig,
   CustomModalConfig,
+  FormModalConfig,
+  KeyboardMode,
+  ModalCloseReason,
+  ModalConfig,
+  ModalFooterAction,
+  ModalKind,
+  ModalSize,
+  WizardModalConfig,
 } from '../../mn-modal.types';
-import { MnWizardBodyComponent } from '../mn-wizard-body/mn-wizard-body.component';
-import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
-import { MnConfirmationBodyComponent } from '../mn-confirmation-body/mn-confirmation-body.component';
-import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
-import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
+import {MnWizardBodyComponent} from '../mn-wizard-body/mn-wizard-body.component';
+import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
+import {MnConfirmationBodyComponent} from '../mn-confirmation-body/mn-confirmation-body.component';
+import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
+import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.component';
 
 @Component({
   selector: 'mn-modal-shell',
@@ -140,7 +140,13 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
       : this.config.animation?.type || 'slide';
     const animation = ` anim-${animType}`;
     const stacked = this.isStacked ? ' is-stacked' : '';
-    return `modal-shell modal-${size}${closing}${animation}${stacked}`;
+    const mobileSheet = this.isMobileSheet ? ' mobile-sheet' : '';
+    return `modal-shell modal-${size}${closing}${animation}${stacked}${mobileSheet}`;
+  }
+
+  /** Whether this modal renders as a bottom sheet on small screens (default: true). */
+  get isMobileSheet(): boolean {
+    return this.config.mobileBottomSheet !== false;
   }
 
   /** Triggers the closing animation. Deferred to avoid NG0100 when called during a CD cycle. */
@@ -221,19 +227,6 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
 
   get showCloseButton(): boolean {
     return this.config.closeMode !== CloseMode.DISABLED;
-  }
-
-  get animationClass(): string {
-    const animType = typeof this.config.animation === 'string'
-      ? this.config.animation
-      : this.config.animation?.type || 'slide';
-
-    switch (animType) {
-      case 'fade': return 'animate-[fadeIn_0.2s_ease-in-out]';
-      case 'zoom': return 'animate-[zoomIn_0.2s_ease-in-out]';
-      case 'slide':
-      default: return 'animate-[slideIn_0.2s_ease-in-out]';
-    }
   }
 
   // =========================

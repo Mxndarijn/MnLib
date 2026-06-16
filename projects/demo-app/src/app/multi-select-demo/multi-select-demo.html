@@ -13,7 +13,7 @@
       A basic multi-select with <code>Validators.required</code>. Shows error when touched without selecting.
     </p>
     <mn-lib-multi-select [props]="fruitsProps"
-                         class="block w-[300px]"
+                         class="block w-[300px] max-w-full"
                          formControlName="fruits"
     ></mn-lib-multi-select>
     <p style="margin-top: 8px; font-size: 14px; color: gray;">
@@ -28,7 +28,7 @@
       Uses <code>searchable: true</code> and <code>maxSelections: 3</code>. Once 3 items are selected, remaining options are disabled.
     </p>
     <mn-lib-multi-select [props]="colorsProps"
-                         class="block w-[300px]"
+                         class="block w-[300px] max-w-full"
                          formControlName="colors"
     ></mn-lib-multi-select>
     <p style="margin-top: 8px; font-size: 14px; color: gray;">
@@ -43,7 +43,7 @@
       The "COBOL" option is disabled. Uses custom <code>errorMessages</code> for the required validator.
     </p>
     <mn-lib-multi-select [props]="languagesProps"
-                         class="block w-[300px]"
+                         class="block w-[300px] max-w-full"
                          formControlName="languages"
     ></mn-lib-multi-select>
     <p style="margin-top: 8px; font-size: 14px; color: gray;">

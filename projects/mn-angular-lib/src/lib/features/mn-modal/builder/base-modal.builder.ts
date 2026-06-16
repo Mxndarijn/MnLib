@@ -140,6 +140,15 @@ export abstract class BaseModalBuilder<TConfig extends BaseModalConfig<TResult> 
   }
 
   /**
+   * Control whether the modal renders as a bottom sheet on small screens (< 640px).
+   * Enabled by default; pass `false` to keep a centered dialog on mobile.
+   */
+  mobileBottomSheet(enabled = true): this {
+    this.config.mobileBottomSheet = enabled;
+    return this;
+  }
+
+  /**
    * Add a custom body/content to the modal.
    */
   body(body: StepBodyConfig): this {
