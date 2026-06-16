@@ -39,10 +39,10 @@ export class DemoListComponent {
 
   get filteredDemos(): DemoItem[] {
     const q = (this.searchControl.value ?? '').toLowerCase().trim();
-    if (!q) return this.demos;
-    return this.demos.filter(d =>
+    const items = !q ? this.demos : this.demos.filter(d =>
       d.title.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q)
     );
+    return [...items].sort((a, b) => a.title.localeCompare(b.title));
   }
 
   demos: DemoItem[] = [
