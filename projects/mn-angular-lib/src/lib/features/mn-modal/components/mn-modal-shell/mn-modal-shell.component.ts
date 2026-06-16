@@ -180,19 +180,73 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     this.handleClose(ModalCloseReason.DISMISSED);
   }
 
-  private async handleClose(reason: ModalCloseReason): Promise<void> {
+  private static readonly SWIPE_DISMISS_THRESHOLD = 100;
+
+  // =========================
+  // Mobile bottom-sheet swipe-to-dismiss (via the grabber handle)
+  // =========================
+  /** Current downward drag offset (px) applied to the sheet while swiping. */
+  sheetDragY = 0;
+  /** True while the user is actively dragging the grabber (disables snap transition). */
+  isDraggingSheet = false;
+  private dragStartY = 0;
+
+  /** Whether the sheet can be dismissed at all (drives whether the swipe is armed). */
+  private get canClose(): boolean {
+    return this.config.closeMode !== CloseMode.DISABLED;
+  }
+
+  /** Tailwind's `sm` breakpoint — below this the modal renders as a bottom sheet. */
+  private static readonly SHEET_MAX_WIDTH = 639.98;
+
+  onSheetPointerDown(event: PointerEvent): void {
+    if (!this.isMobileSheet || !this.canClose) return;
+    // Only a bottom sheet (mobile-width viewport) can be swiped away.
+    if (window.innerWidth > MnModalShellComponent.SHEET_MAX_WIDTH) return;
+    // Don't hijack drags that begin on an interactive control (e.g. the close button).
+    if ((event.target as HTMLElement).closest('button')) return;
+    this.isDraggingSheet = true;
+    this.dragStartY = event.clientY;
+    (event.target as HTMLElement).setPointerCapture(event.pointerId);
+  }
+
+  onSheetPointerMove(event: PointerEvent): void {
+    if (!this.isDraggingSheet) return;
+    // Only track downward movement.
+    this.sheetDragY = Math.max(0, event.clientY - this.dragStartY);
+  }
+
+  async onSheetPointerUp(): Promise<void> {
+    if (!this.isDraggingSheet) return;
+    this.isDraggingSheet = false;
+
+    if (this.sheetDragY > MnModalShellComponent.SWIPE_DISMISS_THRESHOLD) {
+      const closed = await this.handleClose(ModalCloseReason.DISMISSED);
+      if (!closed) {
+        this.sheetDragY = 0; // guard rejected — spring back
+      }
+      // closed === true: leave it; the closing animation takes over.
+    } else {
+      this.sheetDragY = 0; // not far enough — spring back
+    }
+  }
+
+  /** Attempts to dismiss the modal. Resolves true if it was actually dismissed,
+   *  false if blocked by a DISABLED close mode or a rejected close guard. */
+  private async handleClose(reason: ModalCloseReason): Promise<boolean> {
     if (this.config.closeMode === CloseMode.DISABLED) {
-      return;
+      return false;
     }
 
     if (this.config.closeMode === CloseMode.GUARDED) {
       if (this.config.closeGuard) {
         const allowed = await this.config.closeGuard();
-        if (!allowed) return;
+        if (!allowed) return false;
       }
     }
 
     this.modalRef.dismiss(reason);
+    return true;
   }
 
   get showBackdrop(): boolean {
