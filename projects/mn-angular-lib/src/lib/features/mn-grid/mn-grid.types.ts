@@ -36,6 +36,15 @@ export type GridSkeleton =
   | { lines: Partial<MnSkeletonProps>[] };
 
 // ── Grid Data Source ──
+/**
+ * Configures an {@link import('./mn-grid.component').MnGrid}.
+ *
+ * Empty state (inherited from {@link MnCollectionDataSource}): provide **either**
+ * a default text via `emptyMessage` / `emptyMessageKey`, **or** a whole custom
+ * component/markup via `emptyTemplate`. A supplied `emptyTemplate` is rendered
+ * unwrapped — it fully controls its own layout — while the text variant gets the
+ * grid's default centered placeholder.
+ */
 export type GridDataSource<T> = MnCollectionDataSource<T> & {
   /** Template used to render each card. Receives the item as `$implicit` and `data`. */
   cardTemplate: TemplateRef<unknown>;
