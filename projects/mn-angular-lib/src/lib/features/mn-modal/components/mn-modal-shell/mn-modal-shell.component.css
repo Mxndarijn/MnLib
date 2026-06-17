@@ -1,4 +1,9 @@
 :host {
+  /* Native-feeling sheet curve (iOS-style decelerate, no out-of-bounds overshoot
+     which would expose a gap below a bottom-anchored sheet). Shared by the
+     slide keyframes, the drag spring-back, and the swipe-dismiss glide. */
+  --mn-sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
+
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -17,7 +22,7 @@
 
 /* Swipe-to-dismiss: animate the spring-back, but follow the finger 1:1 while dragging. */
 .modal-container {
-  transition: transform 0.2s ease;
+  transition: transform 0.35s var(--mn-sheet-ease);
 }
 
 .modal-container.sheet-dragging {
@@ -30,7 +35,7 @@
 :host(.swipe-dismissing) .modal-container,
 :host(.swipe-dismissing).closing .modal-container {
   animation: none !important;
-  transition: transform 0.2s ease-in;
+  transition: transform 0.3s var(--mn-sheet-ease);
 }
 
 @keyframes fadeIn {
@@ -130,20 +135,35 @@
     max-width: 100%;
     max-height: 92vh;
     border-radius: 1rem 1rem 0 0;
-    animation: slideUpIn 0.25s ease-out;
+    animation: slideUpIn 0.35s var(--mn-sheet-ease);
   }
 
   /* Override whichever anim-* open animation was selected */
   :host(.mobile-sheet).anim-slide .modal-container,
   :host(.mobile-sheet).anim-fade .modal-container,
   :host(.mobile-sheet).anim-zoom .modal-container {
-    animation: slideUpIn 0.25s ease-out;
+    animation: slideUpIn 0.35s var(--mn-sheet-ease);
   }
 
   :host(.mobile-sheet).closing .modal-container,
   :host(.mobile-sheet).closing.anim-slide .modal-container,
   :host(.mobile-sheet).closing.anim-fade .modal-container,
   :host(.mobile-sheet).closing.anim-zoom .modal-container {
-    animation: slideUpOut 0.2s ease-in forwards;
+    animation: slideUpOut 0.25s var(--mn-sheet-ease) forwards;
+  }
+}
+
+/* =========================
+   Reduced motion: collapse every open/close/drag animation to ~instant.
+   Kept at 0.01ms (not `none`) so animationend still fires for the
+   event-driven close teardown in the shell component. The shell also
+   short-circuits its close wait when reduced motion is requested.
+   ========================= */
+@media (prefers-reduced-motion: reduce) {
+  :host .modal-backdrop,
+  :host .modal-container {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
