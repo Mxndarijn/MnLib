@@ -1,22 +1,6 @@
 import {TemplateRef} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-
-// ── Pagination Strategy ──
-export type PaginationStrategy = {
-  hasMoreRows: boolean;
-  loadMore: () => Promise<void>;
-  reset?: () => void;
-}
-
-export type CursorPaginationStrategy = {
-  endCursor?: string;
-} & PaginationStrategy
-
-export type OffsetPaginationStrategy = {
-  currentPage: number;
-  pageSize: number;
-  totalItems?: number;
-} & PaginationStrategy
+import {MnSkeletonProps} from '../mn-skeleton';
+import {MnCollectionLabels, MnSelectableCollectionDataSource} from '../mn-collection';
 
 // ── Column Sort Type ──
 export enum ColumnSortType {
@@ -48,6 +32,15 @@ export type ColumnFilterOption = {
   label: string;
   value: string;
 }
+
+// ── Column Skeleton ──
+/**
+ * Customizes the loading-skeleton placeholder rendered in a column's cells.
+ * Either a partial {@link MnSkeletonProps} (shape/width/height/animated) or a
+ * `TemplateRef` for a fully custom placeholder. When omitted, a text-shaped
+ * skeleton at 75% width is used (matching the previous default).
+ */
+export type ColumnSkeleton = Partial<MnSkeletonProps> | TemplateRef<unknown>;
 
 // ── Column Definition ──
 export type ColumnDefinition<T> = {
@@ -81,75 +74,16 @@ export type ColumnDefinition<T> = {
   filterMaxLength?: number;
   /** Custom filter function. Receives the row and the current filter value. */
   filterFn?: (row: T, filterValue: string) => boolean;
+  /** Customizes the loading-skeleton placeholder shown in this column's cells while data loads. */
+  skeleton?: ColumnSkeleton;
 }
 
 // ── Table Data Source ──
-export type TableDataSource<T> = {
-  dataRows: BehaviorSubject<T[]>;
+export type TableDataSource<T> = MnSelectableCollectionDataSource<T> & {
   columns: ColumnDefinition<T>[];
-  getID: (row: T) => string;
-  emptyMessage: string;
-  /** Translation key for the empty message. When set, mn-table resolves it via MnLanguageService. */
-  emptyMessageKey?: string;
-  emptyTemplate?: TemplateRef<unknown>;
-  isDataLoading: boolean;
-
-  // Search
-  canSearch: boolean;
-  searchPlaceholder?: string;
-  /** Translation key for the search placeholder. When set, mn-table resolves it via MnLanguageService. */
-  searchPlaceholderKey?: string;
-  isInSearch?: (row: T, searchValue: string) => boolean;
-  searchForAdditionalItems?: (searchValue: string) => Promise<T[]>;
-
-  // Pagination
-  paginationMode?: 'none' | 'load-more' | 'paginated' | 'client-side-pagination' | 'infinite-scroll';
-  paginationStrategy?: PaginationStrategy;
-  loadAdditionalRows?: () => Promise<T[]>;
-
-  /** Number of rows per page when paginationMode is 'paginated'. Defaults to 10. */
-  pageSize?: number;
-
-  /** Options for the page-size selector dropdown. Defaults to [5, 10, 25, 50]. */
-  pageSizeOptions?: number[];
-
-  /** Callback invoked when the user changes the page size via the dropdown. */
-  onPageSizeChange?: (newSize: number) => void;
-
-  /**
-   * Total number of items on the server.
-   * When set, pagination and infinite-scroll use this instead of filteredItems.length.
-   */
-  totalItems?: number;
-
-  /**
-   * Callback invoked when the user navigates to a different page.
-   * When provided, the table delegates pagination to the consumer (server-side).
-   * The consumer is responsible for fetching the new page data and updating dataRows.
-   */
-  onPageChange?: (page: number) => void;
-
-  /**
-   * Callback invoked when the user types in the search box (server-side search).
-   * When provided, the table skips client-side filtering and delegates to the consumer.
-   */
-  onServerSearch?: (searchValue: string) => void;
-
-  /**
-   * Callback invoked when the user scrolls to the bottom in infinite-scroll mode.
-   * When provided, the table delegates loading more rows to the consumer (server-side).
-   * The consumer is responsible for appending new data to dataRows.
-   */
-  onLoadMore?: () => void;
 
   // Sorting
   defaultSort?: SortState;
-
-  // Selection
-  selectionMode?: 'none' | 'single' | 'multi';
-  selectedRows?: BehaviorSubject<T[]>;
-  /** IDs to pre-select when the table initializes. */
-  initialSelectedIds?: string[];
 
   // Row interaction
   onRowClick?: (row: T) => void;
@@ -162,16 +96,7 @@ export type TableDataSource<T> = {
   toolbarLeftTemplate?: TemplateRef<unknown>;
   /** Template rendered on the right side of the toolbar (after the search field). */
   toolbarRightTemplate?: TemplateRef<unknown>;
-
-  // Labels / i18n
-  labels?: TableLabels;
 }
 
-export type TableLabels = {
-  loadMore?: string;
-  /** Translation key for the "Load more" button label. */
-  loadMoreKey?: string;
-  rowsPerPage?: string;
-  /** Translation key for the "Rows per page" label. */
-  rowsPerPageKey?: string;
-}
+/** @deprecated Use {@link MnCollectionLabels}. */
+export type TableLabels = MnCollectionLabels;

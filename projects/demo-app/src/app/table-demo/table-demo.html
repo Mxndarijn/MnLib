@@ -7,6 +7,47 @@
     <mn-table [dataSource]="basicDataSource" (sortChange)="onSortChange($event)"></mn-table>
   </section>
 
+  <!-- Cell templates for the profile skeleton table -->
+  <ng-template #avatarTpl let-user>
+    <div
+      [style.background]="avatarColor(user)"
+      class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-semibold"
+    >{{ initials(user) }}
+    </div>
+  </ng-template>
+  <ng-template #roleBadgeTpl let-user>
+    <span class="text-xs px-2 py-0.5 rounded bg-base-200">{{ user.role }}</span>
+  </ng-template>
+
+  <!-- Loading skeletons -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Loading Skeletons</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      Skeleton rows now use the <code>mn-skeleton</code> component (shimmer + reduced-motion aware).
+      Use the optional per-column <code>skeleton</code> field to customize each placeholder. Toggle to compare
+      the loading and loaded states.
+    </p>
+    <div style="margin-bottom: 16px;">
+      <button (click)="toggleSkeletonLoading()" [data]="{ color: 'secondary', size: 'sm', variant: 'outline' }"
+              mnButton>
+        {{ defaultSkeletonDataSource.isDataLoading ? 'Show loaded data' : 'Show loading state' }}
+      </button>
+    </div>
+
+    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Without customization (default)</h3>
+    <p style="font-size: 13px; color: #888; margin-bottom: 8px;">No <code>skeleton</code> field — every cell falls back
+      to the default text bar.</p>
+    <div style="margin-bottom: 28px;">
+      <mn-table [dataSource]="defaultSkeletonDataSource"></mn-table>
+    </div>
+
+    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">With custom skeletons (user profile)</h3>
+    <p style="font-size: 13px; color: #888; margin-bottom: 8px;">
+      Circle for the profile picture, wide bars for name/email, and a small rounded rectangle for the role badge.
+    </p>
+    <mn-table [dataSource]="profileSkeletonDataSource"></mn-table>
+  </section>
+
   <!-- Toolbar right template -->
   <ng-template #toolbarRightTpl>
     <button mnButton [data]="{ color: 'primary', size: 'sm', variant: 'fill' }" (click)="onToolbarAction()">

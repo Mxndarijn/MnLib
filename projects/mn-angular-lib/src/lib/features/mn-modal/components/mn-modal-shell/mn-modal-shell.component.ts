@@ -132,17 +132,7 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     return config as unknown as CustomModalConfig;
   }
 
-  @HostBinding('class') get hostClasses(): string {
-    const size = this.config.sizeWidth || ModalSize.MD;
-    const closing = this.isClosing ? ' closing' : '';
-    const animType = typeof this.config.animation === 'string'
-      ? this.config.animation
-      : this.config.animation?.type || 'slide';
-    const animation = ` anim-${animType}`;
-    const stacked = this.isStacked ? ' is-stacked' : '';
-    const mobileSheet = this.isMobileSheet ? ' mobile-sheet' : '';
-    return `modal-shell modal-${size}${closing}${animation}${stacked}${mobileSheet}`;
-  }
+  private static readonly SWIPE_DISMISS_THRESHOLD = 150;
 
   /** Whether this modal renders as a bottom sheet on small screens (default: true). */
   get isMobileSheet(): boolean {
@@ -179,8 +169,9 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   onCloseButtonClick(): void {
     this.handleClose(ModalCloseReason.DISMISSED);
   }
-
-  private static readonly SWIPE_DISMISS_THRESHOLD = 100;
+  /** True once a swipe has crossed the dismiss threshold — slides the sheet off-screen
+   *  via the transform transition instead of replaying the slide-up keyframe. */
+  swipeDismissing = false;
 
   // =========================
   // Mobile bottom-sheet swipe-to-dismiss (via the grabber handle)
@@ -189,6 +180,19 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   sheetDragY = 0;
   /** True while the user is actively dragging the grabber (disables snap transition). */
   isDraggingSheet = false;
+
+  @HostBinding('class') get hostClasses(): string {
+    const size = this.config.sizeWidth || ModalSize.MD;
+    const closing = this.isClosing ? ' closing' : '';
+    const animType = typeof this.config.animation === 'string'
+      ? this.config.animation
+      : this.config.animation?.type || 'slide';
+    const animation = ` anim-${animType}`;
+    const stacked = this.isStacked ? ' is-stacked' : '';
+    const mobileSheet = this.isMobileSheet ? ' mobile-sheet' : '';
+    const swiping = this.swipeDismissing ? ' swipe-dismissing' : '';
+    return `modal-shell modal-${size}${closing}${animation}${stacked}${mobileSheet}${swiping}`;
+  }
   private dragStartY = 0;
 
   /** Whether the sheet can be dismissed at all (drives whether the swipe is armed). */
@@ -222,10 +226,15 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
 
     if (this.sheetDragY > MnModalShellComponent.SWIPE_DISMISS_THRESHOLD) {
       const closed = await this.handleClose(ModalCloseReason.DISMISSED);
-      if (!closed) {
+      if (closed) {
+        // Continue the gesture: glide the sheet the rest of the way down rather than
+        // snapping back to 0 and replaying the slide-up keyframe (which looked un-animated).
+        this.swipeDismissing = true;
+        this.sheetDragY = window.innerHeight;
+        this.cdr.detectChanges();
+      } else {
         this.sheetDragY = 0; // guard rejected — spring back
       }
-      // closed === true: leave it; the closing animation takes over.
     } else {
       this.sheetDragY = 0; // not far enough — spring back
     }

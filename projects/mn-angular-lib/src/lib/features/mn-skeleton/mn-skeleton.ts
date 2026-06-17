@@ -11,6 +11,10 @@ import {mnSkeletonVariants} from './mn-skeletonVariants';
 export class MnSkeleton {
   @Input() data: Partial<MnSkeletonProps> = {};
 
+  // Skeletons are decorative loading placeholders; hide them from assistive tech.
+  // The container that swaps skeleton↔content should carry aria-busy / a live region.
+  @HostBinding('attr.aria-hidden') readonly ariaHidden = 'true';
+
   @HostBinding('class')
   get hostClasses(): string {
     return mnSkeletonVariants({shape: this.data.shape});

@@ -12,6 +12,7 @@ import {TableDemo} from './table-demo/table-demo';
 import {LanguageDemo} from './language-demo/language-demo';
 import {CalendarDemo} from './calendar-demo/calendar-demo';
 import {ListDemo} from './list-demo/list-demo';
+import {GridDemo} from './grid-demo/grid-demo';
 import {DatetimeDemo} from './datetime-demo/datetime-demo';
 import {SelectDemo} from './select-demo/select-demo';
 import {BadgeDemo} from './badge-demo/badge-demo';
@@ -36,6 +37,7 @@ export const routes: Routes = [
   {path: 'demos/language-demo', component: LanguageDemo, title: 'Language Demo' },
   {path: 'demos/calendar-demo', component: CalendarDemo, title: 'Calendar Demo' },
   {path: 'demos/list-demo', component: ListDemo, title: 'List Demo' },
+  {path: 'demos/grid-demo', component: GridDemo, title: 'Grid Demo'},
   {path: 'demos/datetime-demo', component: DatetimeDemo, title: 'Datetime Demo'},
   {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'},
   {path: 'demos/badge-demo', component: BadgeDemo, title: 'Badge Demo'},

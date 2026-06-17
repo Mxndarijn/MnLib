@@ -73,6 +73,50 @@
     }
   </section>
 
+  <!-- Custom skeleton template: avatar circle beside two text lines -->
+  <ng-template #listSkeletonTpl>
+    <div class="flex items-center gap-3 w-full">
+      <mn-skeleton [data]="{ shape: 'circle', width: '40px', height: '40px' }"></mn-skeleton>
+      <div class="flex flex-col gap-1 flex-1">
+        <mn-skeleton [data]="{ shape: 'text', width: '40%' }"></mn-skeleton>
+        <mn-skeleton [data]="{ shape: 'text', width: '70%', height: '0.75rem' }"></mn-skeleton>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Loading skeletons -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Loading Skeletons</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      Skeleton items now use the <code>mn-skeleton</code> component. Customize via <code>skeleton.lines</code>
+      (stacked bars) or a <code>skeleton</code> <code>TemplateRef</code> for a fully custom placeholder.
+      Toggle to compare loading and loaded states.
+    </p>
+    @if (defaultSkeletonDataSource) {
+      <div style="margin-bottom: 16px;">
+        <button (click)="toggleSkeletonLoading()" [data]="{ color: 'secondary', size: 'sm', variant: 'outline' }"
+                mnButton>
+          {{ defaultSkeletonDataSource.isDataLoading ? 'Show loaded data' : 'Show loading state' }}
+        </button>
+      </div>
+
+      <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Without customization (default)</h3>
+      <div style="margin-bottom: 28px;">
+        <mn-list [dataSource]="defaultSkeletonDataSource"></mn-list>
+      </div>
+
+      <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Custom <code>skeleton.lines</code> (three bars)
+      </h3>
+      <div style="margin-bottom: 28px;">
+        <mn-list [dataSource]="linesSkeletonDataSource"></mn-list>
+      </div>
+
+      <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Custom <code>skeleton</code> template (avatar
+        profile)</h3>
+      <mn-list [dataSource]="templateSkeletonDataSource"></mn-list>
+    }
+  </section>
+
   <!-- Selection list -->
   <section style="margin-bottom: 48px;">
     <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Multi-Select List</h2>

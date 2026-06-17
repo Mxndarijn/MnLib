@@ -59,6 +59,13 @@ export class DemoListComponent {
     { title: 'Language',            path: '/demos/language-demo',             abbr: 'LG', color: '#a21caf', description: 'Locale switching, translate pipe, interpolation, and config.' },
     { title: 'Calendar',            path: '/demos/calendar-demo',             abbr: 'CA', color: '#0891b2', description: 'Week, day, and month views with pluggable event renderers.' },
     { title: 'List',                path: '/demos/list-demo',                 abbr: 'LI', color: '#16a34a', description: 'Search, selection, load more, pagination, and custom templates.' },
+    {
+      title: 'Grid',
+      path: '/demos/grid-demo',
+      abbr: 'GR',
+      color: '#2563eb',
+      description: 'Responsive card grid with cols/auto-fit layout, skeleton, preview cap, and search.'
+    },
     { title: 'Datetime',            path: '/demos/datetime-demo',             abbr: 'DT', color: '#dc2626', description: 'Date, time, and datetime-local modes with validation.' },
     { title: 'Select',              path: '/demos/select-demo',               abbr: 'SL', color: '#7c3aed', description: 'Native select with ControlValueAccessor, validation, and styling.' },
     { title: 'Badge',               path: '/demos/badge-demo',                abbr: 'BG', color: '#db2777', description: 'Badge component with color variants using tailwind-variants.' },

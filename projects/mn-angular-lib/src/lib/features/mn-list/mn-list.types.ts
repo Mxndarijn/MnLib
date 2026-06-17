@@ -1,6 +1,17 @@
 import {TemplateRef} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {PaginationStrategy} from '../mn-table';
+import {MnSkeletonProps} from '../mn-skeleton';
+import {MnCollectionLabels, MnSelectableCollectionDataSource} from '../mn-collection';
+
+// ── List Skeleton ──
+/**
+ * Customizes the loading-skeleton placeholder rendered for each list item.
+ * Either a set of skeleton lines (each a partial {@link MnSkeletonProps}) stacked
+ * vertically, or a `TemplateRef` for a fully custom placeholder. When omitted,
+ * two text-shaped lines (75% and 50% width) are used, matching the previous default.
+ */
+export type ListSkeleton =
+  | { lines: Partial<MnSkeletonProps>[] }
+  | TemplateRef<unknown>;
 
 // ── List Appearance ──
 export type ListAppearance = {
@@ -15,66 +26,12 @@ export type ListAppearance = {
 }
 
 // ── List Data Source ──
-export type ListDataSource<T> = {
-  dataRows: BehaviorSubject<T[]>;
-  getID: (row: T) => string;
-
+export type ListDataSource<T> = MnSelectableCollectionDataSource<T> & {
   /** Template used to render each list item. Receives the item as `$implicit` and `data`. */
   itemTemplate: TemplateRef<unknown>;
 
-  emptyMessage: string;
-  emptyTemplate?: TemplateRef<unknown>;
-  isDataLoading: boolean;
-
-  // Search
-  canSearch: boolean;
-  searchPlaceholder?: string;
-  isInSearch?: (row: T, searchValue: string) => boolean;
-  searchForAdditionalItems?: (searchValue: string) => Promise<T[]>;
-
-  // Pagination
-  paginationMode?: 'none' | 'load-more' | 'paginated' | 'client-side-pagination' | 'infinite-scroll';
-  paginationStrategy?: PaginationStrategy;
-  loadAdditionalRows?: () => Promise<T[]>;
-
-  /** Number of items per page when paginationMode is 'paginated'. Defaults to 10. */
-  pageSize?: number;
-
-  /** Options for the page-size selector dropdown. Defaults to [5, 10, 25, 50]. */
-  pageSizeOptions?: number[];
-
-  /** Callback invoked when the user changes the page size via the dropdown. */
-  onPageSizeChange?: (newSize: number) => void;
-
-  /**
-   * Total number of items on the server.
-   * When set, pagination and infinite-scroll use this instead of filteredItems.length.
-   */
-  totalItems?: number;
-
-  /**
-   * Callback invoked when the user navigates to a different page.
-   * When provided, the list delegates pagination to the consumer (server-side).
-   */
-  onPageChange?: (page: number) => void;
-
-  /**
-   * Callback invoked when the user types in the search box (server-side search).
-   * When provided, the list skips client-side filtering and delegates to the consumer.
-   */
-  onServerSearch?: (searchValue: string) => void;
-
-  /**
-   * Callback invoked when the user scrolls to the bottom in infinite-scroll mode.
-   * When provided, the list delegates loading more rows to the consumer (server-side).
-   */
-  onLoadMore?: () => void;
-
-  // Selection
-  selectionMode?: 'none' | 'single' | 'multi';
-  selectedRows?: BehaviorSubject<T[]>;
-  /** IDs to pre-select when the list initializes. */
-  initialSelectedIds?: string[];
+  /** Customizes the loading-skeleton placeholder shown for each item while data loads. */
+  skeleton?: ListSkeleton;
 
   // Item interaction
   onItemClick?: (item: T) => void;
@@ -84,12 +41,7 @@ export type ListDataSource<T> = {
 
   // Toolbar
   toolbarTemplate?: TemplateRef<unknown>;
-
-  // Labels / i18n
-  labels?: ListLabels;
 }
 
-export type ListLabels = {
-  loadMore?: string;
-  rowsPerPage?: string;
-}
+/** @deprecated Use {@link MnCollectionLabels}. */
+export type ListLabels = MnCollectionLabels;

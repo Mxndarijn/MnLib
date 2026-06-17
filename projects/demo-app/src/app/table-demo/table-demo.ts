@@ -51,6 +51,27 @@ export class TableDemo implements OnInit {
 
   readonly actionsTpl = viewChild.required<TemplateRef<unknown>>('actionsTpl');
   readonly toolbarRightTpl = viewChild.required<TemplateRef<unknown>>('toolbarRightTpl');
+  readonly avatarTpl = viewChild.required<TemplateRef<unknown>>('avatarTpl');
+  readonly roleBadgeTpl = viewChild.required<TemplateRef<unknown>>('roleBadgeTpl');
+  // ── Loading skeleton: default (no per-column customization) ──
+  defaultSkeletonDataSource: TableDataSource<User> = {
+    dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+    getID: (row) => row.id,
+    emptyMessage: 'No users found.',
+    isDataLoading: true,
+    skeletonRowCount: 4,
+    canSearch: false,
+    paginationMode: 'none',
+    appearance: {hover: true, striped: true},
+    columns: [
+      {key: 'name', header: 'Name', cell: (row) => row.name},
+      {key: 'email', header: 'Email', cell: (row) => row.email, hiddenBelow: 'sm'},
+      {key: 'role', header: 'Role', cell: (row) => row.role, width: '120px'},
+    ],
+  };
+  // ── Loading skeleton: custom user-profile skeletons (built in ngOnInit for the cell templates) ──
+  profileSkeletonDataSource!: TableDataSource<User>;
+  private readonly avatarColors = ['#0ea5e9', '#16a34a', '#7c3aed', '#db2777', '#ea580c', '#0d9488'];
 
   // ── Basic table ──
   basicDataSource: TableDataSource<User> = {
@@ -70,6 +91,16 @@ export class TableDemo implements OnInit {
     ],
     defaultSort: {columnKey: 'name', direction: 'asc'},
   };
+
+  /** Deterministic avatar background color derived from the user id. */
+  avatarColor(user: User): string {
+    return this.avatarColors[Number(user.id) % this.avatarColors.length];
+  }
+
+  /** Uppercase initials for the avatar placeholder. */
+  initials(user: User): string {
+    return user.name.split(' ').map(part => part.charAt(0)).join('').slice(0, 2).toUpperCase();
+  }
   // ── Selection table ──
   selectionDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
@@ -287,6 +318,33 @@ export class TableDemo implements OnInit {
       ],
     };
 
+    this.profileSkeletonDataSource = {
+      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+      getID: (row) => row.id,
+      emptyMessage: 'No users found.',
+      isDataLoading: true,
+      skeletonRowCount: 4,
+      canSearch: false,
+      paginationMode: 'none',
+      appearance: {hover: true},
+      columns: [
+        // Profile picture → circular skeleton.
+        {
+          key: 'avatar', header: '', cell: this.avatarTpl(), width: '64px',
+          skeleton: {shape: 'circle', width: '40px', height: '40px'}
+        },
+        // Name → wider text bar.
+        {key: 'name', header: 'Name', cell: (row) => row.name, skeleton: {width: '70%'}},
+        // Email → near-full-width text bar.
+        {key: 'email', header: 'Email', cell: (row) => row.email, hiddenBelow: 'sm', skeleton: {width: '90%'}},
+        // Role badge → small rounded rectangle matching the badge footprint.
+        {
+          key: 'role', header: 'Role', cell: this.roleBadgeTpl(), width: '120px',
+          skeleton: {shape: 'rectangle', width: '64px', height: '22px'}
+        },
+      ],
+    };
+
     // Initialize paginated table with first page
     this.fetchPaginatedPage();
 
@@ -296,6 +354,13 @@ export class TableDemo implements OnInit {
 
   onSortChange(sort: SortState | null): void {
     console.log('Sort changed:', sort);
+  }
+
+  toggleSkeletonLoading(): void {
+    const loading = !this.defaultSkeletonDataSource.isDataLoading;
+    // mn-table is OnPush: replace the dataSource reference so the new isDataLoading is detected.
+    this.defaultSkeletonDataSource = {...this.defaultSkeletonDataSource, isDataLoading: loading};
+    this.profileSkeletonDataSource = {...this.profileSkeletonDataSource, isDataLoading: loading};
   }
 
   onSelectionChange(selected: User[]): void {

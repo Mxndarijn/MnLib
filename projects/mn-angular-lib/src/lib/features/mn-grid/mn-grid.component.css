@@ -1,0 +1,63 @@
+/*
+ * Responsive card grid driven by CSS custom properties set inline by the
+ * component. Dynamic Tailwind classes (e.g. md:grid-cols-3) can't be used: the
+ * consuming app's JIT can't see runtime values and would drop them. Breakpoints
+ * match Tailwind defaults (sm 640, md 768, lg 1024, xl 1280).
+ *
+ * Each `--mn-grid-cols-*` falls back to the next-smaller breakpoint so consumers
+ * only set the breakpoints they care about.
+ */
+:host {
+  display: block;
+}
+
+.mn-grid {
+  display: grid;
+  gap: var(--mn-grid-gap, 1rem);
+  grid-template-columns: repeat(var(--mn-grid-cols-base, 1), minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .mn-grid {
+    grid-template-columns: repeat(
+      var(--mn-grid-cols-sm, var(--mn-grid-cols-base, 1)),
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (min-width: 768px) {
+  .mn-grid {
+    grid-template-columns: repeat(
+      var(--mn-grid-cols-md, var(--mn-grid-cols-sm, var(--mn-grid-cols-base, 1))),
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (min-width: 1024px) {
+  .mn-grid {
+    grid-template-columns: repeat(
+      var(--mn-grid-cols-lg, var(--mn-grid-cols-md, var(--mn-grid-cols-sm, var(--mn-grid-cols-base, 1)))),
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (min-width: 1280px) {
+  .mn-grid {
+    grid-template-columns: repeat(
+      var(--mn-grid-cols-xl, var(--mn-grid-cols-lg, var(--mn-grid-cols-md, var(--mn-grid-cols-sm, var(--mn-grid-cols-base, 1))))),
+      minmax(0, 1fr)
+    );
+  }
+}
+
+/*
+ * auto-fit layout (minCardWidth). Two classes → higher specificity than the
+ * single-class media-query rules above, so it wins at every width regardless of
+ * any `cols` vars that may also be set.
+ */
+.mn-grid.mn-grid--auto {
+  grid-template-columns: repeat(auto-fit, minmax(var(--mn-grid-min, 18rem), 1fr));
+}

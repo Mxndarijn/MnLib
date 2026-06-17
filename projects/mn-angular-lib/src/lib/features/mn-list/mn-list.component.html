@@ -28,9 +28,16 @@
   <!-- Loading state -->
   @if (dataSource.isDataLoading) {
     @for (_ of skeletonRows; track $index) {
-      <div class="animate-pulse px-4 py-3" [class.py-2]="dataSource.appearance?.compact" role="listitem">
-        <div class="h-4 w-3/4 rounded bg-base-300 mb-1"></div>
-        <div class="h-3 w-1/2 rounded bg-base-300"></div>
+      <div [class.py-2]="dataSource.appearance?.compact" class="px-4 py-3" role="listitem">
+        @if (isTemplateRef(dataSource.skeleton)) {
+          <ng-container [ngTemplateOutlet]="$any(dataSource.skeleton)"></ng-container>
+        } @else {
+          <div class="flex flex-col gap-1">
+            @for (line of skeletonLines; track $index) {
+              <mn-skeleton [data]="line"></mn-skeleton>
+            }
+          </div>
+        }
       </div>
       @if (!$last && (dataSource.appearance?.dividers !== false)) {
         <div class="border-b border-base-300"></div>
@@ -85,7 +92,7 @@
           <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
           <div (click)="$event.stopPropagation()" class="shrink-0">
             <mn-lib-checkbox
-              (checkedChange)="toggleItem(item)"
+              (checkedChange)="toggle(item)"
               [checked]="isSelected(item)"
               [props]="{ id: 'mn-list-item-' + $index, size: 'sm' }"
             ></mn-lib-checkbox>
@@ -107,96 +114,21 @@
   }
 </div>
 
-<!-- Load more button -->
-@if (showLoadMore) {
-  <div class="flex justify-center py-4">
-    <button
-      mnButton
-      [data]="{ size: 'sm', variant: 'outline', color: 'primary' }"
-      class="px-4 py-1.5 text-sm rounded border border-brand-500 text-brand-500 hover:bg-brand-100 transition-colors disabled:opacity-50"
-      (click)="loadMoreRows()"
-      [disabled]="loadingMoreRows"
-    >
-      @if (loadingMoreRows) {
-        <span class="inline-block w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mr-2"></span>
-      }
-      {{ dataSource.labels?.loadMore || 'Load more' }}
-    </button>
-  </div>
-}
-
-<!-- Pagination controls -->
-@if (isPaginated && (totalPages > 1 || isServerPaginated)) {
-  <div class="flex items-center justify-between px-2 py-3 text-sm text-base-content">
-    <div class="flex items-center gap-2">
-      <span>{{ dataSource.labels?.rowsPerPage || 'Items per page:' }}</span>
-      <mn-lib-select
-        (ngModelChange)="onPageSizeChange($event)"
-        [ngModel]="pageSize"
-        [props]="{
-          id: 'mn-list-page-size',
-          options: pageSizeSelectOptions,
-          size: 'sm'
-        }"
-      ></mn-lib-select>
-    </div>
-
-    <div class="flex items-center gap-1">
-      <span class="text-xs mr-2">{{ (currentPage - 1) * pageSize + 1 }}
-        –{{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
-        of {{ totalItemCount }}</span>
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === 1"
-        (click)="goToPage(1)"
-        aria-label="First page"
-      >«</button>
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === 1"
-        (click)="goToPage(currentPage - 1)"
-        aria-label="Previous page"
-      >‹</button>
-
-      @for (page of visiblePages; track page) {
-        <button
-          mnButton
-          [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
-          class="px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
-          [class.border-secondary]="page === currentPage"
-          [class.text-accent]="page === currentPage"
-          [class.text-white]="page !== currentPage"
-          [class.border-base-300]="page !== currentPage"
-          [class.hover:bg-base-200]="page !== currentPage"
-          (click)="goToPage(page)"
-          [attr.aria-label]="'Page ' + page"
-          [attr.aria-current]="page === currentPage ? 'page' : null"
-        >{{ page }}</button>
-      }
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(currentPage + 1)"
-        aria-label="Next page"
-      >›</button>
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(totalPages)"
-        aria-label="Last page"
-      >»</button>
-    </div>
-  </div>
-}
+<!-- Load more + pagination -->
+<mn-collection-pagination
+  (loadMore)="loadMoreRows()"
+  (pageChange)="goToPage($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+  [currentPage]="currentPage"
+  [isPaginated]="isPaginated"
+  [isServerPaginated]="isServerPaginated"
+  [labels]="dataSource.labels"
+  [loadingMoreRows]="loadingMoreRows"
+  [pageSizeSelectOptions]="pageSizeSelectOptions"
+  [pageSize]="pageSize"
+  [showLoadMore]="showLoadMore"
+  [totalItemCount]="totalItemCount"
+  [totalPages]="totalPages"
+  [visiblePages]="visiblePages"
+  idPrefix="mn-list"
+></mn-collection-pagination>
