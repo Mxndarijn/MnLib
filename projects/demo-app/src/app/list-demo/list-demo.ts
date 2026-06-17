@@ -1,6 +1,6 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {ListDataSource, MnList} from 'mn-angular-lib';
+import {ListDataSource, MnButton, MnList, MnSkeleton} from 'mn-angular-lib';
 
 type User = {
   id: string;
@@ -40,7 +40,7 @@ const ALL_USERS: User[] = [
 @Component({
   selector: 'app-list-demo',
   standalone: true,
-  imports: [MnList],
+  imports: [MnList, MnButton, MnSkeleton],
   templateUrl: './list-demo.html',
 })
 export class ListDemo implements OnInit {
@@ -72,6 +72,13 @@ export class ListDemo implements OnInit {
 
   // ── Empty list ──
   emptyDataSource!: ListDataSource<User>;
+
+  // ── Loading skeleton lists ──
+  defaultSkeletonDataSource!: ListDataSource<User>;   // no skeleton config (default two bars)
+  linesSkeletonDataSource!: ListDataSource<User>;     // custom skeleton.lines
+  templateSkeletonDataSource!: ListDataSource<User>;  // custom skeleton TemplateRef (avatar profile)
+
+  readonly listSkeletonTpl = viewChild.required<TemplateRef<unknown>>('listSkeletonTpl');
 
   ngOnInit(): void {
     this.basicDataSource = {
@@ -171,9 +178,63 @@ export class ListDemo implements OnInit {
       paginationMode: 'none',
     };
 
+    this.defaultSkeletonDataSource = {
+      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+      getID: (row) => row.id,
+      itemTemplate: this.basicItemTpl(),
+      emptyMessage: 'No users found.',
+      isDataLoading: true,
+      skeletonRowCount: 4,
+      canSearch: false,
+      paginationMode: 'none',
+      appearance: {hover: true, dividers: true},
+    };
+
+    this.linesSkeletonDataSource = {
+      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+      getID: (row) => row.id,
+      itemTemplate: this.basicItemTpl(),
+      emptyMessage: 'No users found.',
+      isDataLoading: true,
+      skeletonRowCount: 4,
+      // Three stacked lines instead of the default two.
+      skeleton: {
+        lines: [
+          {shape: 'text', width: '40%'},
+          {shape: 'text', width: '80%', height: '0.75rem'},
+          {shape: 'text', width: '60%', height: '0.75rem'},
+        ],
+      },
+      canSearch: false,
+      paginationMode: 'none',
+      appearance: {hover: true, dividers: true},
+    };
+
+    this.templateSkeletonDataSource = {
+      dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
+      getID: (row) => row.id,
+      itemTemplate: this.basicItemTpl(),
+      emptyMessage: 'No users found.',
+      isDataLoading: true,
+      skeletonRowCount: 4,
+      // Fully custom placeholder: an avatar circle beside two text lines.
+      skeleton: this.listSkeletonTpl(),
+      canSearch: false,
+      paginationMode: 'none',
+      appearance: {hover: true, dividers: true},
+    };
+
     // Initialize server-side data
     this.fetchPaginatedPage();
     this.fetchLoadMoreBatch(true);
+  }
+
+  toggleSkeletonLoading(): void {
+    const loading = !this.defaultSkeletonDataSource.isDataLoading;
+    // mn-list is OnPush: replace each dataSource reference so the new isDataLoading is detected.
+    this.defaultSkeletonDataSource = {...this.defaultSkeletonDataSource, isDataLoading: loading};
+    this.linesSkeletonDataSource = {...this.linesSkeletonDataSource, isDataLoading: loading};
+    this.templateSkeletonDataSource = {...this.templateSkeletonDataSource, isDataLoading: loading};
   }
 
   onSelectionChange(selected: User[]): void {

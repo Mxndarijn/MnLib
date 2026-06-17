@@ -14,11 +14,19 @@
 .mn-skeleton-shimmer-bar {
   position: absolute;
   inset: 0;
+  /* Highlight band derives from a theme token (base-100) so it contrasts against
+     the base-300 surface in both light and dark themes, instead of a fixed white. */
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.15) 50%,
+    color-mix(in srgb, var(--color-base-100) 65%, transparent) 50%,
     transparent 100%
   );
   animation: mn-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-skeleton-shimmer-bar {
+    animation: none;
+  }
 }

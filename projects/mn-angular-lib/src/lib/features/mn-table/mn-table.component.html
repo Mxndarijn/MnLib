@@ -132,15 +132,22 @@
       <!-- Loading state -->
       @if (dataSource.isDataLoading) {
         @for (_ of skeletonRows; track $index) {
-          <tr class="animate-pulse">
+          <tr>
             @if (hasSelection) {
-              <td class="px-2 py-3"><div class="h-4 w-4 rounded bg-base-300"></div></td>
+              <td class="px-2 py-3">
+                <mn-skeleton [data]="{ shape: 'rectangle', width: '1rem', height: '1rem' }"></mn-skeleton>
+              </td>
             }
             @for (column of dataSource.columns; track column.key) {
               <td class="px-4 py-3"
                 [mnHiddenBelow]="column.hiddenBelow"
+                  [style.width]="column.width ?? null"
               >
-                <div class="h-4 w-3/4 rounded bg-base-300"></div>
+                @if (isTemplateRef(column.skeleton)) {
+                  <ng-container [ngTemplateOutlet]="$any(column.skeleton)"></ng-container>
+                } @else {
+                  <mn-skeleton [data]="getColumnSkeletonData(column)"></mn-skeleton>
+                }
               </td>
             }
           </tr>
@@ -180,7 +187,7 @@
             @if (hasSelection) {
               <td (click)="$event.stopPropagation()" class="w-10 text-center px-2 py-2">
                 <mn-lib-checkbox
-                  (checkedChange)="toggleRow(row)"
+                  (checkedChange)="toggle(row)"
                   [checked]="isSelected(row)"
                   [props]="{ id: 'mn-table-row-' + $index, size: 'sm' }"
                 ></mn-lib-checkbox>
@@ -234,90 +241,21 @@
   </table>
 </div>
 
-<!-- Load more button -->
-@if (showLoadMore) {
-  <div class="flex justify-center py-4">
-    <button
-      mnButton
-      [data]="{ size: 'md', variant: 'outline', color: 'primary' }"
-      (click)="loadMoreRows()"
-      [disabled]="loadingMoreRows"
-    >
-      @if (loadingMoreRows) {
-        <span class="inline-block w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mr-2"></span>
-      }
-      {{ dataSource.labels?.loadMore || 'Load more' }}
-    </button>
-  </div>
-}
-
-<!-- Pagination controls -->
-@if (isPaginated && (totalPages > 1 || isServerPaginated)) {
-  <div class="flex items-center justify-center md:justify-between px-2 py-3 text-sm text-base-content">
-    <div class="hidden md:flex items-center gap-2">
-      <span>{{ dataSource.labels?.rowsPerPage || 'Rows:' }}</span>
-      <mn-lib-select
-        (ngModelChange)="onPageSizeChange($event)"
-        [ngModel]="pageSize"
-        [props]="{
-          id: 'mn-table-page-size',
-          options: pageSizeSelectOptions,
-          size: 'sm'
-        }"
-      ></mn-lib-select>
-    </div>
-
-    <div class="flex items-center gap-1">
-      <span class="text-xs mr-2 hidden md:inline">{{ (currentPage - 1) * pageSize + 1 }}
-        – {{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
-        of {{ totalItemCount }}</span>
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === 1"
-        (click)="goToPage(1)"
-        aria-label="First page"
-      >«</button>
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === 1"
-        (click)="goToPage(currentPage - 1)"
-        aria-label="Previous page"
-      >‹</button>
-
-      @for (page of visiblePages; track page) {
-        <button
-          mnButton
-          [data]="{ size: 'sm', variant: 'text', color: page === currentPage ? 'primary' : 'gray' }"
-          class="px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
-          (click)="goToPage(page)"
-          [attr.aria-label]="'Page ' + page"
-          [attr.aria-current]="page === currentPage ? 'page' : null"
-        >{{ page }}</button>
-      }
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(currentPage + 1)"
-        aria-label="Next page"
-      >›</button>
-
-      <button
-        mnButton
-        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
-        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(totalPages)"
-        aria-label="Last page"
-      >»</button>
-    </div>
-  </div>
-}
+<!-- Load more + pagination -->
+<mn-collection-pagination
+  (loadMore)="loadMoreRows()"
+  (pageChange)="goToPage($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+  [currentPage]="currentPage"
+  [isPaginated]="isPaginated"
+  [isServerPaginated]="isServerPaginated"
+  [labels]="dataSource.labels"
+  [loadingMoreRows]="loadingMoreRows"
+  [pageSizeSelectOptions]="pageSizeSelectOptions"
+  [pageSize]="pageSize"
+  [showLoadMore]="showLoadMore"
+  [totalItemCount]="totalItemCount"
+  [totalPages]="totalPages"
+  [visiblePages]="visiblePages"
+  idPrefix="mn-table"
+></mn-collection-pagination>

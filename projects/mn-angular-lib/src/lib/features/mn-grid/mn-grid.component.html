@@ -1,0 +1,120 @@
+<!-- Toolbar: search + custom toolbar template -->
+@if (dataSource.canSearch || dataSource.toolbarTemplate) {
+  <div class="flex flex-row items-center justify-end gap-2 mb-3">
+    @if (dataSource.canSearch) {
+      <mn-lib-input-field
+        (ngModelChange)="onSearch($event)"
+        [ngModel]="searchValue"
+        [props]="{
+          id: 'mn-grid-search',
+          type: 'search',
+          label: '',
+          placeholder: dataSource.searchPlaceholder ?? 'Search...',
+          size: 'sm',
+          borderRadius: 'md',
+          fullWidth: true
+        }"
+        class="w-full max-w-xs"
+      ></mn-lib-input-field>
+    }
+    @if (dataSource.toolbarTemplate) {
+      <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
+    }
+  </div>
+}
+
+<!-- Loading state -->
+@if (dataSource.isDataLoading) {
+  <div
+    [class.mn-grid--auto]="isAutoLayout"
+    [style.--mn-grid-cols-base]="dataSource.layout?.cols?.base"
+    [style.--mn-grid-cols-lg]="dataSource.layout?.cols?.lg"
+    [style.--mn-grid-cols-md]="dataSource.layout?.cols?.md"
+    [style.--mn-grid-cols-sm]="dataSource.layout?.cols?.sm"
+    [style.--mn-grid-cols-xl]="dataSource.layout?.cols?.xl"
+    [style.--mn-grid-gap]="dataSource.layout?.gap"
+    [style.--mn-grid-min]="dataSource.layout?.minCardWidth"
+    aria-busy="true"
+    aria-label="Loading"
+    class="mn-grid"
+    role="list"
+  >
+    @for (_ of skeletonRows; track $index) {
+      <div role="listitem">
+        @if (isTemplateRef(dataSource.skeleton)) {
+          <ng-container [ngTemplateOutlet]="$any(dataSource.skeleton)"></ng-container>
+        } @else {
+          <div class="flex flex-col gap-2 p-4 border border-base-300 rounded-lg">
+            @for (line of skeletonLines; track $index) {
+              <mn-skeleton [data]="line"></mn-skeleton>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <!-- Empty state -->
+  @if (filteredItems.length === 0) {
+    <div class="text-center text-xs py-8">
+      @if (dataSource.emptyTemplate) {
+        <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
+      } @else {
+        <div
+          class="flex items-center justify-center min-h-[6rem] rounded-xl border border-dashed border-base-content/15 bg-base-100">
+          <p class="text-sm text-base-content/40">{{ dataSource.emptyMessage }}</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Card grid -->
+    <div
+      [class.mn-grid--auto]="isAutoLayout"
+      [style.--mn-grid-cols-base]="dataSource.layout?.cols?.base"
+      [style.--mn-grid-cols-lg]="dataSource.layout?.cols?.lg"
+      [style.--mn-grid-cols-md]="dataSource.layout?.cols?.md"
+      [style.--mn-grid-cols-sm]="dataSource.layout?.cols?.sm"
+      [style.--mn-grid-cols-xl]="dataSource.layout?.cols?.xl"
+      [style.--mn-grid-gap]="dataSource.layout?.gap"
+      [style.--mn-grid-min]="dataSource.layout?.minCardWidth"
+      aria-label="Card grid"
+      class="mn-grid"
+      role="list"
+    >
+      @for (item of paginatedItems; track trackByID($index, item)) {
+        <div
+          (click)="onItemClick(item)"
+          (keyup.enter)="onItemClick(item)"
+          [attr.tabindex]="dataSource.onItemClick ? 0 : null"
+          [class.cursor-pointer]="!!dataSource.onItemClick"
+          class="transition-colors duration-150"
+          role="listitem"
+        >
+          <ng-container
+            [ngTemplateOutletContext]="{ $implicit: item, data: item }"
+            [ngTemplateOutlet]="dataSource.cardTemplate"
+          ></ng-container>
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- Load more + pagination -->
+<mn-collection-pagination
+  (loadMore)="loadMoreRows()"
+  (pageChange)="goToPage($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+  [currentPage]="currentPage"
+  [isPaginated]="isPaginated"
+  [isServerPaginated]="isServerPaginated"
+  [labels]="dataSource.labels"
+  [loadingMoreRows]="loadingMoreRows"
+  [pageSizeSelectOptions]="pageSizeSelectOptions"
+  [pageSize]="pageSize"
+  [showLoadMore]="showLoadMore"
+  [totalItemCount]="totalItemCount"
+  [totalPages]="totalPages"
+  [visiblePages]="visiblePages"
+  idPrefix="mn-grid"
+></mn-collection-pagination>

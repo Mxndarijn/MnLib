@@ -1,0 +1,166 @@
+<div style="padding: 24px; max-width: 1200px; margin: 0 auto;">
+  <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">MnGrid Demo</h1>
+  <p style="font-size: 14px; color: #666; margin-bottom: 32px;">
+    A responsive card grid that shares its chrome (search, pagination, loading skeleton, empty state, toolbar)
+    with <code>mn-list</code> and <code>mn-table</code>. The consumer supplies only the card template and the data.
+  </p>
+
+  <!-- Shared card template -->
+  <ng-template #cardTpl let-user>
+    <div class="flex flex-col gap-3 p-4 border border-base-300 rounded-lg bg-base-100 h-full">
+      <div class="flex items-center gap-3">
+        <div
+          [style.background]="avatarColor(user)"
+          class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
+        >{{ initials(user) }}
+        </div>
+        <div class="min-w-0">
+          <div class="font-semibold text-sm truncate">{{ user.name }}</div>
+          <div class="text-xs text-base-content/60 truncate">{{ user.email }}</div>
+        </div>
+      </div>
+      <span class="text-xs px-2 py-0.5 rounded bg-base-200 self-start">{{ user.role }}</span>
+    </div>
+  </ng-template>
+
+  <!-- Card template with in-card action buttons -->
+  <ng-template #actionsCardTpl let-user>
+    <div class="flex flex-col gap-3 p-4 border border-base-300 rounded-lg bg-base-100 h-full">
+      <div class="flex items-center gap-3">
+        <div
+          [style.background]="avatarColor(user)"
+          class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
+        >{{ initials(user) }}
+        </div>
+        <div class="min-w-0">
+          <div class="font-semibold text-sm truncate">{{ user.name }}</div>
+          <div class="text-xs text-base-content/60 truncate">{{ user.email }}</div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-auto">
+        <button
+          (click)="$event.stopPropagation(); onAction('Approve', user)" [data]="{ color: 'primary', size: 'sm', variant: 'fill' }"
+          mnButton
+        >Approve
+        </button>
+        <button
+          (click)="$event.stopPropagation(); onAction('Reject', user)" [data]="{ color: 'secondary', size: 'sm', variant: 'outline' }"
+          mnButton
+        >Reject
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Consumer-profiled skeleton card -->
+  <ng-template #skeletonTpl>
+    <div class="flex flex-col gap-3 p-4 border border-base-300 rounded-lg">
+      <div class="flex items-center gap-3">
+        <mn-skeleton [data]="{ shape: 'circle', width: '40px', height: '40px' }"></mn-skeleton>
+        <div class="flex flex-col gap-2 flex-1">
+          <mn-skeleton [data]="{ shape: 'text', width: '60%' }"></mn-skeleton>
+          <mn-skeleton [data]="{ shape: 'text', width: '85%', height: '0.75rem' }"></mn-skeleton>
+        </div>
+      </div>
+      <mn-skeleton [data]="{ shape: 'rectangle', width: '64px', height: '22px' }"></mn-skeleton>
+    </div>
+  </ng-template>
+
+  <!-- Toolbar template -->
+  <ng-template #toolbarTpl>
+    <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">3 of 6 shown</span>
+    <button (click)="onToolbarAction()" [data]="{ color: 'primary', size: 'sm', variant: 'text' }" mnButton>
+      View all
+    </button>
+  </ng-template>
+
+  <!-- Basic grid: explicit columns -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Basic Grid (explicit columns)</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      <code>layout.cols = &#123; base: 1, sm: 2, lg: 3 &#125;</code> — 1 column on phones, 2 on small screens, 3 on
+      large.
+    </p>
+    <mn-grid [dataSource]="basicDataSource"></mn-grid>
+  </section>
+
+  <!-- Auto-fit grid -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Auto-Fit Grid (minCardWidth)</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      <code>layout.minCardWidth = '16rem'</code> — cards fill the row automatically via CSS
+      <code>auto-fit</code>/<code>minmax</code>; no breakpoint configuration. Resize the window to compare with the grid
+      above.
+    </p>
+    <mn-grid [dataSource]="autoFitDataSource"></mn-grid>
+  </section>
+
+  <!-- Preview cap -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Preview Cap (maxItems) + Toolbar</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      <code>layout.maxItems = 3</code> shows only the first three cards;
+      <code>toolbarTemplate</code> hosts the count badge and a "view all" button.
+    </p>
+    <mn-grid [dataSource]="previewDataSource"></mn-grid>
+  </section>
+
+  <!-- Loading skeletons -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Loading Skeletons</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      With no <code>skeleton</code> field the grid renders a default card placeholder. Provide a
+      <code>TemplateRef</code> via <code>skeleton</code> to profile the exact card shape. Toggle to compare states.
+    </p>
+    <div style="margin-bottom: 16px;">
+      <button (click)="toggleSkeletonLoading()" [data]="{ color: 'secondary', size: 'sm', variant: 'outline' }"
+              mnButton>
+        {{ defaultSkeletonDataSource.isDataLoading ? 'Show loaded data' : 'Show loading state' }}
+      </button>
+    </div>
+
+    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Default skeleton</h3>
+    <div style="margin-bottom: 28px;">
+      <mn-grid [dataSource]="defaultSkeletonDataSource"></mn-grid>
+    </div>
+
+    <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Custom (profiled) skeleton</h3>
+    <mn-grid [dataSource]="customSkeletonDataSource"></mn-grid>
+  </section>
+
+  <!-- Search + client-side pagination -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Search + Client-Side Pagination</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      <code>canSearch</code> with <code>isInSearch</code> and
+      <code>paginationMode: 'client-side-pagination'</code> (6 per page). Search and paging happen in the browser.
+    </p>
+    <mn-grid [dataSource]="searchPaginatedDataSource"></mn-grid>
+  </section>
+
+  <!-- Whole-card click -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Clickable Cards (itemClick)</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      Each card is clickable via <code>onItemClick</code> / the <code>(itemClick)</code> output.
+    </p>
+    <mn-grid (itemClick)="onItemClick($event)" [dataSource]="clickDataSource"></mn-grid>
+    <p style="margin-top: 8px; font-size: 14px; color: #666;">Last clicked: {{ clickedName }}</p>
+  </section>
+
+  <!-- In-card actions -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">In-Card Action Buttons</h2>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
+      Buttons inside the card call <code>$event.stopPropagation()</code> so they fire their own handler without
+      triggering the card click.
+    </p>
+    <mn-grid (itemClick)="onItemClick($event)" [dataSource]="actionsDataSource"></mn-grid>
+  </section>
+
+  <!-- Empty grid -->
+  <section style="margin-bottom: 48px;">
+    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Empty Grid</h2>
+    <mn-grid [dataSource]="emptyDataSource"></mn-grid>
+  </section>
+</div>

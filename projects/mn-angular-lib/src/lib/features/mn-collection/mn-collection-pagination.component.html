@@ -1,0 +1,94 @@
+<!-- Load more button -->
+@if (showLoadMore) {
+  <div class="flex justify-center py-4">
+    <button
+      (click)="loadMore.emit()"
+      [data]="{ size: 'sm', variant: 'outline', color: 'primary' }"
+      [disabled]="loadingMoreRows"
+      class="px-4 py-1.5 text-sm rounded border border-brand-500 text-brand-500 hover:bg-brand-100 transition-colors disabled:opacity-50"
+      mnButton
+    >
+      @if (loadingMoreRows) {
+        <span
+          class="inline-block w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mr-2"></span>
+      }
+      {{ labels?.loadMore || 'Load more' }}
+    </button>
+  </div>
+}
+
+<!-- Pagination controls -->
+@if (showPagination) {
+  <div class="flex items-center justify-center md:justify-between px-2 py-3 text-sm text-base-content">
+    <div class="hidden md:flex items-center gap-2">
+      <span>{{ labels?.rowsPerPage || 'Items per page:' }}</span>
+      <mn-lib-select
+        (ngModelChange)="pageSizeChange.emit($event)"
+        [ngModel]="pageSize"
+        [props]="{
+          id: idPrefix + '-page-size',
+          options: pageSizeSelectOptions,
+          size: 'sm'
+        }"
+      ></mn-lib-select>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <span class="text-xs mr-2 hidden md:inline">{{ (currentPage - 1) * pageSize + 1 }}
+        – {{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
+        of {{ totalItemCount }}</span>
+
+      <button
+        (click)="pageChange.emit(1)"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
+        [disabled]="currentPage === 1"
+        aria-label="First page"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
+        mnButton
+      >«
+      </button>
+
+      <button
+        (click)="pageChange.emit(currentPage - 1)"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === 1 }"
+        [disabled]="currentPage === 1"
+        aria-label="Previous page"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
+        mnButton
+      >‹
+      </button>
+
+      @for (page of visiblePages; track page) {
+        <button
+          (click)="pageChange.emit(page)"
+          [attr.aria-current]="page === currentPage ? 'page' : null"
+          [attr.aria-label]="'Page ' + page"
+          [data]="{ size: 'sm', variant: 'text', color: page === currentPage ? 'primary' : 'gray' }"
+          class="px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
+          mnButton
+        >{{ page }}
+        </button>
+      }
+
+      <button
+        (click)="pageChange.emit(currentPage + 1)"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
+        [disabled]="currentPage === totalPages"
+        aria-label="Next page"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
+        mnButton
+      >›
+      </button>
+
+      <button
+        (click)="pageChange.emit(totalPages)"
+        [data]="{ size: 'sm', variant: 'outline', color: 'secondary', disabled: currentPage === totalPages }"
+        [disabled]="currentPage === totalPages"
+        aria-label="Last page"
+        class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
+        mnButton
+      >»
+      </button>
+    </div>
+  </div>
+}

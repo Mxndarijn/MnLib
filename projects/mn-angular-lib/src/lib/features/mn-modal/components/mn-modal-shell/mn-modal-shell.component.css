@@ -24,6 +24,15 @@
   transition: none;
 }
 
+/* A swipe past the dismiss threshold glides the sheet off-screen via its transform
+   transition. Suppress the slide-up keyframe (it would snap back to 0 first); the
+   backdrop still fades out via its own .closing animation. */
+:host(.swipe-dismissing) .modal-container,
+:host(.swipe-dismissing).closing .modal-container {
+  animation: none !important;
+  transition: transform 0.2s ease-in;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

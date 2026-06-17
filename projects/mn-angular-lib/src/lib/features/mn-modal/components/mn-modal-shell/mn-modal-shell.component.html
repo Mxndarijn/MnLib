@@ -69,11 +69,11 @@
   @if (config.kind === ModalKind.WIZARD) {
     <!-- Wizard manages its own internal scrolling so the steps header and footer
          stay fixed while only the step body scrolls. No padding/scroll here. -->
-    <div class="flex-1 min-h-0 overflow-hidden">
+    <div class="flex-auto min-h-0 overflow-hidden flex flex-col">
       <mn-wizard-body
         [config]="asWizard(config)"
         [modalRef]="$any(modalRef)"
-        class="block h-full"
+        class="flex-auto min-h-0 flex flex-col"
       ></mn-wizard-body>
     </div>
   } @else {
