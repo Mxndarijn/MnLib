@@ -32,6 +32,8 @@ import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
 import {MnConfirmationBodyComponent} from '../mn-confirmation-body/mn-confirmation-body.component';
 import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
 import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.component';
+import {MnButton} from '../../../mn-button';
+import {LucideX} from '@lucide/angular';
 
 @Component({
   selector: 'mn-modal-shell',
@@ -43,6 +45,8 @@ import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.c
     MnConfirmationBodyComponent,
     MnCustomBodyHostComponent,
     MnFooterActionsComponent,
+    MnButton,
+    LucideX,
   ],
   templateUrl: './mn-modal-shell.component.html',
   styleUrls: ['./mn-modal-shell.component.css'],
@@ -210,7 +214,9 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   }
 
   onBackdropClick(): void {
-    if (this.config.backdrop === BackdropMode.CLOSABLE) {
+    const shouldClose = this.config.backdrop === BackdropMode.CLOSABLE
+      || (this.isMobileSheet && this.config.backdrop !== BackdropMode.STATIC);
+    if (shouldClose) {
       this.handleClose(ModalCloseReason.BACKDROP);
     }
   }
