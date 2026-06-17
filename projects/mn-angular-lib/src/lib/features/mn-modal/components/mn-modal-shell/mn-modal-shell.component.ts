@@ -134,20 +134,69 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
 
   private static readonly SWIPE_DISMISS_THRESHOLD = 150;
 
+  /** Upper bound for the close wait if no animation/transition end event fires
+   *  (e.g. an animation was suppressed). Longer than the slowest close path
+   *  (mobile slide-down 0.25s, swipe glide 0.3s) so it never preempts. */
+  private static readonly CLOSE_FALLBACK_MS = 450;
+
   /** Whether this modal renders as a bottom sheet on small screens (default: true). */
   get isMobileSheet(): boolean {
     return this.config.mobileBottomSheet !== false;
   }
 
-  /** Triggers the closing animation. Deferred to avoid NG0100 when called during a CD cycle. */
+  /**
+   * Triggers the closing animation and resolves once it has actually finished.
+   *
+   * Deferred via setTimeout to avoid NG0100 when called during a CD cycle.
+   * Rather than guess a fixed duration (the old hardcoded 150ms truncated the
+   * mobile slide-down, which runs 250ms — and the swipe glide, 300ms), we wait
+   * for the container's `animationend`/`transitionend` and tear down then. A
+   * fallback timeout guarantees resolution if no such event fires, and we
+   * short-circuit entirely under reduced motion (the CSS collapses to instant).
+   */
   startClosing(): Promise<void> {
     return new Promise(resolve => {
       setTimeout(() => {
         this.isClosing = true;
         this.cdr.detectChanges();
-        setTimeout(resolve, 150);
+
+        if (this.prefersReducedMotion()) {
+          resolve();
+          return;
+        }
+
+        const container = this.el.nativeElement.querySelector('.modal-container') as HTMLElement | null;
+        if (!container) {
+          resolve();
+          return;
+        }
+
+        let settled = false;
+        const done = (event?: Event): void => {
+          // Ignore end events bubbling up from descendant animations/transitions.
+          if (event && event.target !== container) return;
+          if (settled) return;
+          settled = true;
+          container.removeEventListener('animationend', done);
+          container.removeEventListener('transitionend', done);
+          clearTimeout(fallback);
+          resolve();
+        };
+
+        // Normal close ends via a keyframe (animationend); the swipe-dismiss
+        // glide ends via the transform transition (transitionend).
+        container.addEventListener('animationend', done);
+        container.addEventListener('transitionend', done);
+        // `done` only runs asynchronously, after this assignment completes.
+        const fallback = setTimeout(done, MnModalShellComponent.CLOSE_FALLBACK_MS);
       });
     });
+  }
+
+  private prefersReducedMotion(): boolean {
+    return typeof window !== 'undefined'
+      && typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   @HostListener('document:keydown.escape', ['$event'])
