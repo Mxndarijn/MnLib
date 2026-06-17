@@ -53,13 +53,18 @@
       }
     </div>
     @if (showCloseButton) {
-      <button
-        class="bg-transparent border-none text-2xl cursor-pointer text-base-content/50 p-0 w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-base-200 hover:text-base-content"
-        (click)="onCloseButtonClick()"
-        aria-label="Close modal"
-      >
-        ×
-      </button>
+      <div [class]="isMobileSheet ? 'hidden sm:flex' : ''">
+        <button
+          mnButton
+          [data]="{ size: 'sm', variant: 'text', color: 'gray', hover: true, borderRadius: 'md' }"
+          type="button"
+          class="w-8 h-8"
+          (click)="onCloseButtonClick()"
+          aria-label="Close modal"
+        >
+          <svg lucideX [size]="18"></svg>
+        </button>
+      </div>
     }
   </div>
   @if (config.description) {
