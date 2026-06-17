@@ -26,6 +26,7 @@ export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHE
   standalone: true,
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-checkbox.html',
+  styleUrl: './mn-checkbox.css',
 })
 export class MnCheckbox implements OnInit, OnChanges {
   ngControl = inject(NgControl, {optional: true, self: true});
@@ -188,6 +189,7 @@ export class MnCheckbox implements OnInit, OnChanges {
   get checkboxClasses(): string {
     return mnCheckboxVariants({
       size: this.props.size,
+      color: this.props.color,
       borderRadius: this.props.borderRadius,
     });
   }

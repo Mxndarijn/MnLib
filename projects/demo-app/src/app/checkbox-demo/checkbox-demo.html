@@ -31,9 +31,21 @@
   <div>
     <h3>Sizes</h3>
     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+      <mn-lib-checkbox [checked]="sizeChecked" [props]="xsProps"></mn-lib-checkbox>
       <mn-lib-checkbox [props]="smProps" [checked]="sizeChecked"></mn-lib-checkbox>
       <mn-lib-checkbox [props]="mdProps" [checked]="sizeChecked"></mn-lib-checkbox>
       <mn-lib-checkbox [props]="lgProps" [checked]="sizeChecked"></mn-lib-checkbox>
+      <mn-lib-checkbox [checked]="sizeChecked" [props]="xlProps"></mn-lib-checkbox>
+    </div>
+  </div>
+
+  <!-- Colors -->
+  <div>
+    <h3>Colors</h3>
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+      @for (cp of colorProps; track cp.id) {
+        <mn-lib-checkbox [checked]="colorChecked" [props]="cp"></mn-lib-checkbox>
+      }
     </div>
   </div>
 

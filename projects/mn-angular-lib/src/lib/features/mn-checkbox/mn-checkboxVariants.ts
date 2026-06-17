@@ -1,23 +1,36 @@
 import {tv, type VariantProps} from 'tailwind-variants';
 
 export const mnCheckboxVariants = tv({
-  base: '',
+  base: 'mn-checkbox',
   variants: {
     size: {
-      sm: 'checkbox-sm',
-      md: 'checkbox-md',
-      lg: 'checkbox-lg',
+      xs: 'mn-checkbox-xs',
+      sm: 'mn-checkbox-sm',
+      md: 'mn-checkbox-md',
+      lg: 'mn-checkbox-lg',
+      xl: 'mn-checkbox-xl',
+    },
+    color: {
+      primary: 'mn-checkbox-primary',
+      secondary: 'mn-checkbox-secondary',
+      accent: 'mn-checkbox-accent',
+      neutral: 'mn-checkbox-neutral',
+      info: 'mn-checkbox-info',
+      success: 'mn-checkbox-success',
+      warning: 'mn-checkbox-warning',
+      error: 'mn-checkbox-error',
     },
     borderRadius: {
-      none: 'rounded-none',
-      xs: 'rounded-xs',
-      sm: 'rounded-sm',
-      md: 'rounded-md',
-      lg: 'rounded-lg',
+      none: 'mn-checkbox-radius-none',
+      xs: 'mn-checkbox-radius-xs',
+      sm: 'mn-checkbox-radius-sm',
+      md: 'mn-checkbox-radius-md',
+      lg: 'mn-checkbox-radius-lg',
     },
   },
   defaultVariants: {
     size: 'md',
+    color: 'primary',
     borderRadius: 'sm',
   },
 });
@@ -26,9 +39,11 @@ export const mnCheckboxWrapperVariants = tv({
   base: 'text-base-content',
   variants: {
     size: {
+      xs: 'text-sm',
       sm: 'text-sm',
       md: 'text-sm',
       lg: 'text-base',
+      xl: 'text-base',
     },
     fullWidth: {
       true: 'w-full',

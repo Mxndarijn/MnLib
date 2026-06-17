@@ -20,6 +20,9 @@ export type MnCheckboxProps = {
   /** Size variant of the checkbox (default: 'md') */
   size?: MnCheckboxVariants['size'];
 
+  /** Color variant of the checkbox (default: 'primary') */
+  color?: MnCheckboxVariants['color'];
+
   /** Border radius variant (default: 'sm') */
   borderRadius?: MnCheckboxVariants['borderRadius'];
 
