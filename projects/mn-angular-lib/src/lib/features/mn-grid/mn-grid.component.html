@@ -54,18 +54,17 @@
     }
   </div>
 } @else {
-  <!-- Empty state -->
+  <!-- Empty state: a caller-provided template/component (rendered unwrapped, full
+       control over its own layout) or, when none is given, the default text. -->
   @if (filteredItems.length === 0) {
-    <div class="text-center text-xs py-8">
-      @if (dataSource.emptyTemplate) {
-        <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
-      } @else {
-        <div
-          class="flex items-center justify-center min-h-[6rem] rounded-xl border border-dashed border-base-content/15 bg-base-100">
-          <p class="text-sm text-base-content/40">{{ dataSource.emptyMessage }}</p>
-        </div>
-      }
-    </div>
+    @if (dataSource.emptyTemplate) {
+      <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
+    } @else {
+      <div
+        class="flex items-center justify-center min-h-[6rem] py-8 rounded-xl border border-dashed border-base-content/15 bg-base-100">
+        <p class="text-sm text-base-content/40">{{ dataSource.emptyMessage }}</p>
+      </div>
+    }
   } @else {
     <!-- Card grid -->
     <div
