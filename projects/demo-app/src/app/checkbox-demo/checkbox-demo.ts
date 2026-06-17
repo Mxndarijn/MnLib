@@ -35,7 +35,22 @@ export class CheckboxDemo {
   newsletterProps: MnCheckboxProps = {id: 'newsletter', label: 'Subscribe to newsletter', hover: true};
   disabledProps: MnCheckboxProps = {id: 'disabled-cb', label: 'Disabled option (pre-checked)'};
 
+  xsProps: MnCheckboxProps = {id: 'size-xs', label: 'Extra small', size: 'xs'};
   smProps: MnCheckboxProps = {id: 'size-sm', label: 'Small', size: 'sm'};
   mdProps: MnCheckboxProps = {id: 'size-md', label: 'Medium (default)', size: 'md'};
   lgProps: MnCheckboxProps = {id: 'size-lg', label: 'Large', size: 'lg'};
+  xlProps: MnCheckboxProps = {id: 'size-xl', label: 'Extra large', size: 'xl'};
+
+  // Colors
+  colorChecked = true;
+  colorProps: MnCheckboxProps[] = [
+    {id: 'color-primary', label: 'Primary', color: 'primary'},
+    {id: 'color-secondary', label: 'Secondary', color: 'secondary'},
+    {id: 'color-accent', label: 'Accent', color: 'accent'},
+    {id: 'color-neutral', label: 'Neutral', color: 'neutral'},
+    {id: 'color-info', label: 'Info', color: 'info'},
+    {id: 'color-success', label: 'Success', color: 'success'},
+    {id: 'color-warning', label: 'Warning', color: 'warning'},
+    {id: 'color-error', label: 'Error', color: 'error'},
+  ];
 }
