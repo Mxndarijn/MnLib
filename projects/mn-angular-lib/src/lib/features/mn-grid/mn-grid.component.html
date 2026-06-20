@@ -23,6 +23,8 @@
   </div>
 }
 
+<!-- Body: skeleton/data swap region. Wrapper holds its height during a server reload. -->
+<div #collectionBody [style.min-height.px]="lockedMinHeight || null">
 <!-- Loading state -->
 @if (dataSource.isDataLoading) {
   <div
@@ -98,6 +100,7 @@
     </div>
   }
 }
+</div>
 
 <!-- Load more + pagination -->
 <mn-collection-pagination

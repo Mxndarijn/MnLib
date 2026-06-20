@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Output, TemplateRef,} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {GridDataSource} from './mn-grid.types';
@@ -54,6 +62,8 @@ export class MnGrid<T = unknown> extends MnCollectionBase<T, GridDataSource<T>> 
   protected get trackedToolbarTemplate(): TemplateRef<unknown> | undefined {
     return this.dataSource?.toolbarTemplate;
   }
+
+  @ViewChild('collectionBody') protected collectionBody?: ElementRef<HTMLElement>;
 
   // ── Skeleton ──
 
