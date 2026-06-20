@@ -79,17 +79,6 @@
   }
 }
 
-@keyframes slideUpOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-}
-
 /* Open animations — keyed by the same .anim-* host classes as the close animations
    below, so mobile bottom-sheet overrides can target both in one place. */
 :host(.anim-slide) .modal-container {
@@ -135,21 +124,29 @@
     max-width: 100%;
     max-height: 92vh;
     border-radius: 1rem 1rem 0 0;
-    animation: slideUpIn 0.35s var(--mn-sheet-ease);
+    animation: slideUpIn 0.45s var(--mn-sheet-ease);
   }
 
   /* Override whichever anim-* open animation was selected */
   :host(.mobile-sheet).anim-slide .modal-container,
   :host(.mobile-sheet).anim-fade .modal-container,
   :host(.mobile-sheet).anim-zoom .modal-container {
-    animation: slideUpIn 0.35s var(--mn-sheet-ease);
+    animation: slideUpIn 0.45s var(--mn-sheet-ease);
   }
 
+  /* Close via a transform TRANSITION, not a re-triggered keyframe. Replaying the
+     slideUpOut KEYFRAME on a sheet whose open keyframe has already finished does
+     not animate reliably on mobile browsers — the sheet just disappears. A
+     transition animates dependably there (it's the same mechanism swipe-to-dismiss
+     uses), and works whether or not change detection flushes the host class. */
   :host(.mobile-sheet).closing .modal-container,
   :host(.mobile-sheet).closing.anim-slide .modal-container,
   :host(.mobile-sheet).closing.anim-fade .modal-container,
   :host(.mobile-sheet).closing.anim-zoom .modal-container {
-    animation: slideUpOut 0.25s var(--mn-sheet-ease) forwards;
+    animation: none !important;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.45s var(--mn-sheet-ease), opacity 0.45s var(--mn-sheet-ease);
   }
 }
 
