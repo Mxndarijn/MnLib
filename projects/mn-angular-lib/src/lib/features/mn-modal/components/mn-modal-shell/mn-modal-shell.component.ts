@@ -139,9 +139,9 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   private static readonly SWIPE_DISMISS_THRESHOLD = 150;
 
   /** Upper bound for the close wait if no animation/transition end event fires
-   *  (e.g. an animation was suppressed). Longer than the slowest close path
-   *  (mobile slide-down 0.25s, swipe glide 0.3s) so it never preempts. */
-  private static readonly CLOSE_FALLBACK_MS = 450;
+   *  (e.g. an animation was suppressed). Must stay longer than the slowest close
+   *  path (mobile sheet slide-down 0.45s, swipe glide 0.3s) so it never preempts. */
+  private static readonly CLOSE_FALLBACK_MS = 700;
 
   /** Whether this modal renders as a bottom sheet on small screens (default: true). */
   get isMobileSheet(): boolean {
@@ -162,6 +162,12 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     return new Promise(resolve => {
       setTimeout(() => {
         this.isClosing = true;
+        // @HostBinding('class') updates are flushed when the host view is checked
+        // (appRef.tick), not by a bare detectChanges() on this dynamically-created
+        // root component. Relying on CD alone means the `.closing` class — and thus
+        // the slide-down animation — never lands in a zoneless app and is timing-
+        // fragile elsewhere. Apply it directly so the close animation is reliable.
+        this.el.nativeElement.classList.add('closing');
         this.cdr.detectChanges();
 
         if (this.prefersReducedMotion()) {
