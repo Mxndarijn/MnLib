@@ -1,4 +1,14 @@
-import {ChangeDetectorRef, Directive, DoCheck, inject, Input, OnDestroy, OnInit, TemplateRef,} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Directive,
+  DoCheck,
+  ElementRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+} from '@angular/core';
 import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {MnLanguageService} from '../../language';
 import {MnSelectOption} from '../mn-select';
@@ -29,6 +39,14 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
 
   currentPage = 1;
   pageSize = 10;
+
+  /**
+   * Measured pixel height of the body container, applied as a `min-height` floor
+   * while a server reload is in flight so the container can't collapse when the
+   * data rows are swapped for skeletons. Released in {@link ngDoCheck} the moment
+   * `isDataLoading` clears. `0` means no lock.
+   */
+  lockedMinHeight = 0;
 
   protected readonly cdr = inject(ChangeDetectorRef);
   protected readonly lang = inject(MnLanguageService);
@@ -114,13 +132,22 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   }
 
   // ── Pagination ──
-
-  get skeletonRows(): number[] {
-    return Array.from({length: this.dataSource.skeletonRowCount ?? 5});
-  }
+  /**
+   * Body container wrapping the skeleton/data swap region, used to measure its
+   * height for {@link lockBodyHeight}. Implemented by each component with a
+   * `@ViewChild('collectionBody')` so the template reference resolves there.
+   */
+  protected abstract collectionBody?: ElementRef<HTMLElement>;
 
   /** The toolbar template whose identity is watched in change detection. */
   protected abstract get trackedToolbarTemplate(): TemplateRef<unknown> | undefined;
+
+  get skeletonRows(): number[] {
+    // Explicit override wins; otherwise match the rows currently on screen so the
+    // skeleton fills the same space on a reload; fall back to 5 on the first load.
+    const count = this.dataSource.skeletonRowCount ?? (this.paginatedItems.length || 5);
+    return Array.from({length: count});
+  }
 
   ngOnInit(): void {
     this.validateDataSource();
@@ -152,6 +179,11 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   }
 
   ngDoCheck(): void {
+    // Release the height lock as soon as loading ends — same CD cycle that clears
+    // the skeleton, so the lock can never outlive the skeleton it protects.
+    if (this.lockedMinHeight && !this.dataSource.isDataLoading) {
+      this.lockedMinHeight = 0;
+    }
     const currentTemplate = this.trackedToolbarTemplate;
     if (currentTemplate !== this.previousToolbarTemplate) {
       this.previousToolbarTemplate = currentTemplate;
@@ -168,6 +200,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   onSearch(searchString: string): void {
     this.currentPage = 1;
     if (this.isServerSearched) {
+      this.lockBodyHeight();
       this.searchValue = searchString;
       this.dataSource.onServerSearch?.(searchString);
       this.cdr.markForCheck();
@@ -182,6 +215,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     if (this.dataSource.paginationMode === 'client-side-pagination') {
       this.applyPagination();
     } else {
+      this.lockBodyHeight();
       this.dataSource.onPageChange?.(page);
     }
     this.cdr.markForCheck();
@@ -193,6 +227,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     if (this.dataSource.paginationMode === 'client-side-pagination') {
       this.applyPagination();
     } else {
+      this.lockBodyHeight();
       this.dataSource.onPageSizeChange?.(newSize);
     }
     this.cdr.markForCheck();
@@ -259,6 +294,19 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   }
 
   // ── Shared internals ──
+
+  /**
+   * Captures the body container's current height into {@link lockedMinHeight} so it
+   * holds while a server reload swaps the data rows for skeletons. Must be called
+   * while the old rows are still rendered (before delegating to the consumer), and
+   * only locks when rows are present — the first load has nothing to preserve.
+   */
+  protected lockBodyHeight(): void {
+    const el = this.collectionBody?.nativeElement;
+    if (el && this.paginatedItems.length > 0) {
+      this.lockedMinHeight = el.offsetHeight;
+    }
+  }
 
   protected applyPagination(): void {
     if (this.dataSource.paginationMode === 'client-side-pagination') {

@@ -3,6 +3,10 @@ import {MnTranslatePipe} from '../../language';
 import {MnTabDataSource, MnTabItem} from './mn-tab.types';
 import {CommonModule} from '@angular/common';
 import {MnBadge} from '../mn-badge';
+import {MnSkeleton} from '../mn-skeleton';
+
+/** Fallback number of skeleton tabs when no items are known and no count is given. */
+const DEFAULT_SKELETON_TAB_COUNT = 3;
 
 /**
  * Tab component that renders a horizontal tab bar.
@@ -11,7 +15,7 @@ import {MnBadge} from '../mn-badge';
 @Component({
   selector: 'mn-tab',
   standalone: true,
-  imports: [MnTranslatePipe, CommonModule, MnBadge],
+  imports: [MnTranslatePipe, CommonModule, MnBadge, MnSkeleton],
   templateUrl: './mn-tab.component.html',
 })
 export class MnTabComponent implements OnInit {
@@ -35,6 +39,17 @@ export class MnTabComponent implements OnInit {
 
   /** The currently active tab item. */
   currentActive?: MnTabItem;
+
+  /**
+   * Index array sizing the loading skeleton: `skeletonCount` when provided,
+   * otherwise the number of known items, falling back to a default when none.
+   */
+  get skeletonTabs(): number[] {
+    const count =
+      this.dataSource.skeletonCount ??
+      (this.dataSource.items.length || DEFAULT_SKELETON_TAB_COUNT);
+    return Array.from({length: count}, (_, index) => index);
+  }
 
   /** Initializes the default active tab based on the data source configuration. */
   ngOnInit(): void {

@@ -9,28 +9,39 @@
       class="tabs flex flex-nowrap -mb-[1px] border-b border-base-300"
       [class.w-full]="justified"
     >
-      @for (item of dataSource.items; track item.label) {
-        <div
-          role="tab"
-          (keyup.enter)="setActive(item)"
-          [class.flex-1]="justified"
-          [class.text-primary]="currentActive === item"
-          [class.font-bold]="currentActive === item"
-          [class.border-primary]="currentActive === item"
-          [class.border-transparent]="currentActive !== item"
-          [class.text-base-content]="currentActive !== item"
-          [attr.aria-selected]="currentActive === item"
-          (keyup.space)="setActive(item)"
-          (click)="setActive(item)"
-          class="tab px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2"
-          tabindex="0"
-        >
-          {{ item.label | mnTranslate }}
-          @let badge = getBadge(item);
-          @if (badge && badge > 0) {
-            <span [data]="{ size: 'sm', color: 'accent', variant: 'fill' }" mnBadge>{{ badge }}</span>
-          }
-        </div>
+      @if (dataSource.isDataLoading) {
+        @for (i of skeletonTabs; track i) {
+          <div
+            [class.flex-1]="justified"
+            class="tab px-4 py-2 border-b-2 border-transparent flex items-center justify-center"
+          >
+            <mn-skeleton [data]="{ shape: 'rectangle', width: '4.5rem', height: '1rem' }"></mn-skeleton>
+          </div>
+        }
+      } @else {
+        @for (item of dataSource.items; track item.label) {
+          <div
+            (click)="setActive(item)"
+            (keyup.enter)="setActive(item)"
+            (keyup.space)="setActive(item)"
+            [attr.aria-selected]="currentActive === item"
+            [class.border-primary]="currentActive === item"
+            [class.border-transparent]="currentActive !== item"
+            [class.flex-1]="justified"
+            [class.font-bold]="currentActive === item"
+            [class.text-base-content]="currentActive !== item"
+            [class.text-primary]="currentActive === item"
+            class="tab px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2"
+            role="tab"
+            tabindex="0"
+          >
+            {{ item.label | mnTranslate }}
+            @let badge = getBadge(item);
+            @if (badge && badge > 0) {
+              <span [data]="{ size: 'sm', color: 'accent', variant: 'fill' }" mnBadge>{{ badge }}</span>
+            }
+          </div>
+        }
       }
     </div>
   </div>
