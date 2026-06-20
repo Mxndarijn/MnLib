@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Output, TemplateRef,} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
@@ -36,6 +44,8 @@ export class MnTable<T = object>
   protected get trackedToolbarTemplate(): TemplateRef<unknown> | undefined {
     return this.dataSource?.toolbarLeftTemplate;
   }
+
+  @ViewChild('collectionBody') protected collectionBody?: ElementRef<HTMLElement>;
 
   /** Updates a column filter value and re-applies filtering. */
   onColumnFilter(columnKey: string, value: string): void {

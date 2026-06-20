@@ -18,6 +18,8 @@
 
 <!-- List wrapper -->
 <div
+  #collectionBody
+  [style.min-height.px]="lockedMinHeight || null"
   class="w-full"
   [class.border]="dataSource.appearance?.bordered"
   [class.border-base-300]="dataSource.appearance?.bordered"

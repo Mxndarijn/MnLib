@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Output, TemplateRef,} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {ListDataSource} from './mn-list.types';
 import {MnCheckbox} from '../mn-checkbox';
@@ -46,6 +54,8 @@ export class MnList<T = unknown>
   protected get trackedToolbarTemplate(): TemplateRef<unknown> | undefined {
     return this.dataSource?.toolbarTemplate;
   }
+
+  @ViewChild('collectionBody') protected collectionBody?: ElementRef<HTMLElement>;
 
   // ── Filtering ──
 
