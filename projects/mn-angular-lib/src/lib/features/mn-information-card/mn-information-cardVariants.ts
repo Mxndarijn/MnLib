@@ -1,10 +1,10 @@
-import { tv, type VariantProps } from 'tailwind-variants';
+﻿import { tv, type VariantProps } from 'tailwind-variants';
 
 export const mnInformationCardVariants = tv({
   base: '',
   variants: {
     bottomBorder: {
-      true: 'border-b border-b-2 border-brand-500',
+      true: 'border-b border-b-2 border-primary-500',
     },
     shadow: {
       true: 'shadow-xl',

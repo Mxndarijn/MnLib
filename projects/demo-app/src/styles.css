@@ -1,19 +1,19 @@
-/* Global styles for the demo app */
+﻿/* Global styles for the demo app */
 /* Import the library CSS variables so we can use --mn-primary etc. */
 @import '../../mn-angular-lib/src/lib/styles/index.css';
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50:  #ECFEFF;
-  --color-brand-100: #CFFAFE;
-  --color-brand-200: #A5F3FC;
-  --color-brand-300: #67E8F9;
-  --color-brand-400: #22D3EE;
-  --color-brand-500: #14B8A6;
-  --color-brand-600: #0D9488;
-  --color-brand-700: #0F766E;
-  --color-brand-800: #115E59;
-  --color-brand-900: #134E4A;
+  --color-primary-50:  #ECFEFF;
+  --color-primary-100: #CFFAFE;
+  --color-primary-200: #A5F3FC;
+  --color-primary-300: #67E8F9;
+  --color-primary-400: #22D3EE;
+  --color-primary-500: #14B8A6;
+  --color-primary-600: #0D9488;
+  --color-primary-700: #0F766E;
+  --color-primary-800: #115E59;
+  --color-primary-900: #134E4A;
 
   --color-primary: #0ea5e9;
   --color-primary-content: #ffffff;
