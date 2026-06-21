@@ -3,7 +3,7 @@
   @if (isMobileView) {
     <!-- Mobile (<375px): two rows â€” Today+action / date-nav -->
     <div class="flex flex-col gap-2 py-3">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center justify-center gap-2">
         <button mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
           {{ config.todayLabel }}
         </button>
@@ -16,7 +16,7 @@
           }
         </div>
       </div>
-      <div class="flex items-center gap-1">
+      <div class="flex items-center justify-center gap-1">
         <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
         <mn-lib-datetime [props]="{ id: 'calendar-date-picker', mode: 'date', size: 'md' }" [ngModel]="dateInputValue" (ngModelChange)="onDateStringChange($event)"></mn-lib-datetime>
         <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigateNext()" aria-label="Next">&#8250;</button>
