@@ -17,6 +17,16 @@ export const MN_DATETIME_CONFIG = new InjectionToken<MnDatetimeUIConfig>('MN_DAT
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-datetime.html',
   styles: `input::-webkit-calendar-picker-indicator { cursor: pointer; }`,
+  host: {
+    // Native date/time inputs have a platform-specific intrinsic width. Without an
+    // explicit host width the inline host collapses to that intrinsic size, so the
+    // input's `w-full` (width:100%) resolves against a content-sized box and fails to
+    // fill the parent on real mobile devices (desktop devtools hides this because it
+    // still renders the control with the desktop engine). Give the host a real width
+    // when fullWidth is requested so 100% has something to fill.
+    '[style.display]': "props?.fullWidth ? 'block' : null",
+    '[style.width]': "props?.fullWidth ? '100%' : null",
+  },
 })
 export class MnDatetime implements OnInit {
   ngControl = inject(NgControl, {optional: true, self: true});
