@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostListener,
   Output,
   TemplateRef,
   ViewChild,
@@ -118,9 +119,59 @@ export class MnTable<T = object>
 
   // ── Row interaction ──
 
+  /** Rows shown per page on mobile (< md). Forced regardless of any configured pageSize. */
+  private static readonly MOBILE_PAGE_SIZE = 10;
+
+  /** Page size to use at/above the `md` breakpoint (consumer's pageSize, or the user's selection). */
+  private desktopPageSize = 10;
+
+  /** True when the viewport is below the `md` (768px) breakpoint. */
+  private isMobileViewport(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  }
+
+  /**
+   * Applies the breakpoint-appropriate page size: {@link MOBILE_PAGE_SIZE} below `md`,
+   * the desktop size at/above it. When the size actually changes, client-side tables
+   * re-slice locally and server-side tables ask the consumer to refetch, so the
+   * rendered rows update in every pagination mode (used at init and on window resize).
+   */
+  private applyResponsivePageSize(reflow: boolean): void {
+    const target = this.isMobileViewport() ? MnTable.MOBILE_PAGE_SIZE : this.desktopPageSize;
+    if (target === this.pageSize) return;
+    this.pageSize = target;
+    this.currentPage = 1;
+
+    if (this.dataSource.paginationMode === 'client-side-pagination') {
+      this.applyPagination();
+    } else if (this.isServerPaginated) {
+      // Server owns the slice — tell the consumer to refetch with the new size.
+      this.dataSource.onPageSizeChange?.(target);
+    }
+
+    if (reflow) this.cdr.markForCheck();
+  }
+
+  /** Re-evaluate the responsive page size when the viewport crosses the breakpoint. */
+  @HostListener('window:resize')
+  protected onWindowResize(): void {
+    this.applyResponsivePageSize(true);
+  }
+
+  /** Tracks the desktop page size when the user picks one (selector only shows at >= md). */
+  override onPageSizeChange(newSize: number): void {
+    this.desktopPageSize = newSize;
+    super.onPageSizeChange(newSize);
+  }
+
   /** Sets sort/filter state seeded from the data source before the first filter pass. */
   protected override beforeInitialFilter(): void {
     super.beforeInitialFilter();
+
+    // Force the mobile row count below `md`; use the consumer's pageSize (or 10) above it.
+    this.desktopPageSize = this.dataSource.pageSize ?? 10;
+    this.applyResponsivePageSize(false);
+
     this.currentSort = this.dataSource.defaultSort ?? null;
     for (const col of this.dataSource.columns) {
       if (col.filterable) {
