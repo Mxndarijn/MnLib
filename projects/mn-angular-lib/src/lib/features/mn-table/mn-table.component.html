@@ -33,7 +33,7 @@
 </div>
 
 <!-- Table wrapper with horizontal scroll -->
-<div #collectionBody [style.min-height.px]="lockedMinHeight || null" aria-label="Data table" class="overflow-x-auto"
+<div #collectionBody [style.min-height.px]="bodyMinHeight" aria-label="Data table" class="overflow-x-auto"
      role="region">
   <table [class]="tableClasses">
     <thead>

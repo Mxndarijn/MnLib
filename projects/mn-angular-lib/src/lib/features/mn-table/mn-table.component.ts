@@ -139,6 +139,7 @@ export class MnTable<T = object>
   private applyResponsivePageSize(reflow: boolean): void {
     const target = this.isMobileViewport() ? MnTable.MOBILE_PAGE_SIZE : this.desktopPageSize;
     if (target === this.pageSize) return;
+    this.invalidatePageHeight();
     this.pageSize = target;
     this.currentPage = 1;
 

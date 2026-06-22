@@ -114,6 +114,19 @@
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>paginationMode:
       'client-side-pagination'</code>. All data is loaded upfront; pagination, search, and sorting happen entirely in
       the browser.</p>
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Go to the <strong>last page</strong>, then click
+      <em>Remove last row</em> a few times: the table body keeps its height (blank space fills the bottom) instead of
+      jumping the pager up.</p>
+    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+      <button (click)="removeClientRow()" style="padding: 6px 12px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer;"
+              type="button">
+        Remove last row
+      </button>
+      <button (click)="resetClientRows()" style="padding: 6px 12px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer;"
+              type="button">
+        Reset
+      </button>
+    </div>
     <mn-table (sortChange)="onSortChange($event)" [dataSource]="clientPaginatedDataSource"></mn-table>
   </section>
 
