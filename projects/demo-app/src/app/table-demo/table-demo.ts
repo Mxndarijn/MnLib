@@ -367,6 +367,18 @@ export class TableDemo implements OnInit {
     this.selectedNames = selected.length > 0 ? selected.map(u => u.name).join(', ') : 'none';
   }
 
+  /** Removes the last row of the client-paginated table (demonstrates the no-jump fix). */
+  removeClientRow(): void {
+    const rows = this.clientPaginatedDataSource.dataRows.value;
+    if (rows.length === 0) return;
+    this.clientPaginatedDataSource.dataRows.next(rows.slice(0, -1));
+  }
+
+  /** Restores the full client-paginated dataset. */
+  resetClientRows(): void {
+    this.clientPaginatedDataSource.dataRows.next([...ALL_USERS]);
+  }
+
   // ── Server-side simulation helpers ──
 
   private getFilteredUsers(search: string): User[] {

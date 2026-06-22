@@ -1,4 +1,5 @@
 import {
+  afterEveryRender,
   ChangeDetectorRef,
   Directive,
   DoCheck,
@@ -48,6 +49,19 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
    */
   lockedMinHeight = 0;
 
+  /**
+   * Measured pixel height of one full page, applied as a persistent `min-height` floor
+   * while paginated so a short page (the last page, or after a row is removed/filtered)
+   * can't collapse the body and jump the layout below it. Blank space fills the remainder
+   * at the bottom. Captured once a full page is actually on screen; `0` means unmeasured.
+   * Distinct from the transient {@link lockedMinHeight} reload lock — both combine in
+   * {@link bodyMinHeight} via `Math.max`.
+   */
+  fullPageHeight = 0;
+
+  /** Write-once guard so {@link fullPageHeight} is measured once per pageSize. */
+  private pageHeightMeasured = false;
+
   protected readonly cdr = inject(ChangeDetectorRef);
   protected readonly lang = inject(MnLanguageService);
   /** Prefix used in validation error messages, e.g. `MnList`. Overridden by subclasses. */
@@ -58,6 +72,22 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   private langSubscription?: Subscription;
   /** Tracks the previous toolbar template reference for change detection. */
   private previousToolbarTemplate?: TemplateRef<unknown>;
+
+  constructor() {
+    // Measure the body's height once a full page is on screen and cache it as the persistent
+    // {@link fullPageHeight} floor. Runs after every render (outside change detection, so
+    // writing the bound field can't trigger `ExpressionChangedAfterItHasBeenChecked`); the
+    // {@link pageHeightMeasured} guard limits the actual measurement to once per pageSize.
+    afterEveryRender(() => {
+      if (this.pageHeightMeasured || !this.isPaginated || this.dataSource.isDataLoading) return;
+      if (this.paginatedItems.length !== this.pageSize) return;
+      const el = this.collectionBody?.nativeElement;
+      if (!el) return;
+      this.fullPageHeight = el.offsetHeight;
+      this.pageHeightMeasured = true;
+      this.cdr.markForCheck();
+    });
+  }
 
   // ── Template-method hooks ──
 
@@ -87,6 +117,27 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     const strategy = this.dataSource.paginationStrategy;
     const hasMore = strategy ? strategy.hasMoreRows : !!this.dataSource.loadAdditionalRows;
     return mode === 'load-more' && hasMore;
+  }
+
+  // ── Height stabilization ──
+
+  /**
+   * The measured full-page {@link fullPageHeight} floor, but only while it should apply:
+   * paginated, not loading, with rows present. Keeps a short page from collapsing the body.
+   */
+  get reservedPageHeight(): number {
+    if (this.isPaginated && !this.dataSource.isDataLoading && this.filteredItems.length > 0) {
+      return this.fullPageHeight;
+    }
+    return 0;
+  }
+
+  /**
+   * `min-height` (px) applied to the body: the larger of the transient reload lock and the
+   * persistent full-page floor, so neither can shrink the body below the other. `null` clears it.
+   */
+  get bodyMinHeight(): number | null {
+    return Math.max(this.lockedMinHeight, this.reservedPageHeight) || null;
   }
 
   // ── Lifecycle ──
@@ -222,6 +273,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   }
 
   onPageSizeChange(newSize: number): void {
+    this.invalidatePageHeight();
     this.pageSize = newSize;
     this.currentPage = 1;
     if (this.dataSource.paginationMode === 'client-side-pagination') {
@@ -306,6 +358,15 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     if (el && this.paginatedItems.length > 0) {
       this.lockedMinHeight = el.offsetHeight;
     }
+  }
+
+  /**
+   * Drops the cached {@link fullPageHeight} floor so it is re-measured on the next full page.
+   * Must run whenever the page size changes (the old floor is for a different row count).
+   */
+  protected invalidatePageHeight(): void {
+    this.fullPageHeight = 0;
+    this.pageHeightMeasured = false;
   }
 
   protected applyPagination(): void {

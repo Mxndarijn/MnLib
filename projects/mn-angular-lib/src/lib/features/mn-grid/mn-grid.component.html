@@ -24,7 +24,7 @@
 }
 
 <!-- Body: skeleton/data swap region. Wrapper holds its height during a server reload. -->
-<div #collectionBody [style.min-height.px]="lockedMinHeight || null">
+<div #collectionBody [style.min-height.px]="bodyMinHeight">
 <!-- Loading state -->
 @if (dataSource.isDataLoading) {
   <div
