@@ -1,0 +1,180 @@
+<div [class.w-full]="props.fullWidth !== false && displayMode !== 'compact'" class="flex flex-col">
+  <!-- Label -->
+  @if (uiConfig.label) {
+    <label [attr.for]="resolvedId" class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!">
+      <p>{{ uiConfig.label }}</p>
+      @if (isRequired()) {
+        <span class="text-red-500">*</span>
+      }
+    </label>
+  }
+
+  <!-- Hidden native file input shared by every trigger -->
+  <input
+    #fileInput
+    (change)="onFileSelected($event)"
+    [accept]="acceptAttr"
+    [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || null"
+    [attr.multiple]="props.multiple || null"
+    [attr.name]="resolvedName"
+    [disabled]="isDisabled"
+    [id]="resolvedId"
+    class="hidden"
+    type="file"
+  />
+
+  @switch (displayMode) {
+    <!-- Compact: inline button + filename chips -->
+    @case ('compact') {
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          (click)="fileInput.click()"
+          [disabled]="isDisabled"
+          [ngClass]="controlClasses"
+          class="inline-flex items-center gap-2 cursor-pointer hover:bg-base-200"
+          type="button">
+          <mn-icon [data]="{ size: 18 }" mnIconUpload></mn-icon>
+          <span class="text-sm">{{ uiConfig.replaceLabel }}</span>
+        </button>
+        @for (item of displayItems(); track itemKey(item)) {
+          <span class="inline-flex items-center gap-1 text-sm text-base-content/70">
+            @if (item.isImage && item.previewUrl) {
+              <img [src]="item.previewUrl" alt="" class="h-6 w-6 rounded object-cover"/>
+            } @else {
+              <mn-icon [data]="{ size: 16 }" class="text-base-content/50" mnIconFile></mn-icon>
+            }
+            <span class="max-w-40 truncate">{{ item.name }}</span>
+            <button
+              (click)="item.existing ? removeExisting(item.index) : removeFile(item.index)"
+              [attr.aria-label]="uiConfig.removeLabel"
+              class="text-base-content/50 hover:text-error cursor-pointer"
+              type="button">
+              <mn-icon [data]="{ size: 14 }" mnIconX></mn-icon>
+            </button>
+          </span>
+        }
+      </div>
+    }
+
+    <!-- List: compact rows of file icon + name + size -->
+    @case ('list') {
+      <button
+        (click)="fileInput.click()"
+        [disabled]="isDisabled"
+        [ngClass]="controlClasses"
+        class="flex flex-row items-center justify-center gap-2 cursor-pointer hover:bg-base-200"
+        type="button">
+        <mn-icon [data]="{ size: 18 }" mnIconUpload></mn-icon>
+        <span class="text-sm">{{ uiConfig.replaceLabel }}</span>
+      </button>
+      @if (displayItems().length > 0) {
+        <div class="mt-2 flex flex-col gap-1">
+          @for (item of displayItems(); track itemKey(item)) {
+            <div class="flex items-center gap-2 rounded-lg bg-base-200 px-3 py-1.5 text-sm">
+              <mn-icon [data]="{ size: 16 }" class="text-base-content/50" mnIconFile></mn-icon>
+              <span class="flex-1 truncate text-base-content">{{ item.name }}</span>
+              @if (item.sizeLabel) {
+                <span class="text-base-content/50">{{ item.sizeLabel }}</span>
+              }
+              <button
+                (click)="item.existing ? removeExisting(item.index) : removeFile(item.index)"
+                [attr.aria-label]="uiConfig.removeLabel"
+                class="text-base-content/50 hover:text-error cursor-pointer"
+                type="button">
+                <mn-icon [data]="{ size: 16 }" mnIconX></mn-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- Thumbnail: grid of tiles with overlay remove + add tile -->
+    @case ('thumbnail') {
+      <div class="flex flex-wrap gap-3">
+        @for (item of displayItems(); track itemKey(item)) {
+          <div class="relative h-24 w-24 overflow-hidden rounded-xl border border-base-300 bg-base-100">
+            @if (item.isImage && item.previewUrl) {
+              <img [src]="item.previewUrl" alt="" class="h-full w-full object-cover"/>
+            } @else {
+              <div class="flex h-full w-full flex-col items-center justify-center gap-1 p-1 text-center">
+                <mn-icon [data]="{ size: 22 }" class="text-base-content/50" mnIconFile></mn-icon>
+                <span class="w-full truncate text-xs text-base-content/60">{{ item.name }}</span>
+              </div>
+            }
+            <button
+              (click)="item.existing ? removeExisting(item.index) : removeFile(item.index)"
+              [attr.aria-label]="uiConfig.removeLabel"
+              class="btn btn-circle btn-xs absolute top-1 right-1 border-none bg-black/60 text-white hover:bg-black/80"
+              type="button">
+              <mn-icon [data]="{ size: 14 }" mnIconX></mn-icon>
+            </button>
+          </div>
+        }
+        @if (props.multiple || displayItems().length === 0) {
+          <button
+            (click)="fileInput.click()"
+            [disabled]="isDisabled"
+            class="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-base-300 text-base-content/50 hover:border-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button">
+            <mn-icon [data]="{ size: 22 }" mnIconImagePlus></mn-icon>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Dropzone (default): large dashed area + preview rows -->
+    @default {
+      <button
+        (click)="fileInput.click()"
+        [disabled]="isDisabled"
+        [ngClass]="controlClasses"
+        type="button">
+        <mn-icon [data]="{ size: 28 }" class="text-base-content/40" mnIconImagePlus></mn-icon>
+        <span class="text-sm text-base-content/60">{{ uiConfig.dropzoneHint }}</span>
+      </button>
+      @if (displayItems().length > 0) {
+        <div class="mt-2 flex flex-col gap-2">
+          @for (item of displayItems(); track itemKey(item)) {
+            <div class="flex items-center gap-3 rounded-lg bg-base-200 p-2">
+              @if (item.isImage && item.previewUrl) {
+                <img [src]="item.previewUrl" alt="" class="h-12 w-12 rounded-md object-cover"/>
+              } @else {
+                <mn-icon [data]="{ size: 24 }" class="text-base-content/50" mnIconFile></mn-icon>
+              }
+              <span class="flex-1 truncate text-sm text-base-content">{{ item.name }}</span>
+              @if (item.sizeLabel) {
+                <span class="text-sm text-base-content/50">{{ item.sizeLabel }}</span>
+              }
+              <button
+                (click)="item.existing ? removeExisting(item.index) : removeFile(item.index)"
+                [attr.aria-label]="uiConfig.removeLabel"
+                class="btn btn-circle btn-sm btn-ghost text-base-content/60 hover:text-error"
+                type="button">
+                <mn-icon [data]="{ size: 16 }" mnIconTrash2></mn-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+
+  <!-- Selection-limit error (accept / maxSize / maxFiles) -->
+  @if (internalError(); as msg) {
+    <mn-error-message [errorMessage]="msg" [id]="resolvedId + '-selection'"></mn-error-message>
+  }
+
+  <!-- Control validation errors -->
+  @if (showError) {
+    @if (props.showAllErrors) {
+      <div class="flex flex-col gap-y-1">
+        @for (error of errorMessages; track $index) {
+          <mn-error-message [errorMessage]="error" [id]="resolvedId + '-' + $index"></mn-error-message>
+        }
+      </div>
+    } @else if (errorMessage !== null) {
+      <mn-error-message [errorMessage]="errorMessage" [id]="resolvedId"></mn-error-message>
+    }
+  }
+</div>

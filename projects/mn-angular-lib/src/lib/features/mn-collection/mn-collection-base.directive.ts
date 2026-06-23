@@ -52,7 +52,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   /**
    * Measured pixel height of one full page, applied as a persistent `min-height` floor
    * while paginated so a short page (the last page, or after a row is removed/filtered)
-   * can't collapse the body and jump the layout below it. Blank space fills the remainder
+   * can't collapse the body and jump the layout below it. Blank space fills the remaindernpm
    * at the bottom. Captured once a full page is actually on screen; `0` means unmeasured.
    * Distinct from the transient {@link lockedMinHeight} reload lock — both combine in
    * {@link bodyMinHeight} via `Math.max`.

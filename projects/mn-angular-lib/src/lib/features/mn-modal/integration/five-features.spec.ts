@@ -1,8 +1,10 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {AbstractControl, AsyncValidatorFn, ValidationErrors, Validators} from '@angular/forms';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {By} from '@angular/platform-browser';
 import {map, Observable, of, timer} from 'rxjs';
 import {ModalBuilder} from '../builder';
+import {MnFileInput} from 'mn-angular-lib';
 import {
   FieldKind,
   FileFieldConfig,
@@ -632,128 +634,104 @@ describe('Feature 5: File Upload Fields', () => {
     expect(component.form.contains('doc')).toBeTrue();
   });
 
-  it('should handle file selection via onFileChange', () => {
-    type Model = { doc: File[]; }
+  /** Returns the rendered MnFileInput instance for the (single) FILE field. */
+  function fileInput(): MnFileInput {
+    return fixture.debugElement.query(By.directive(MnFileInput)).componentInstance as MnFileInput;
+  }
+
+  /** Simulates picking files through the rendered file input. */
+  function pick(files: File[]): void {
+    fileInput().onFileSelected({target: {files, value: ''}} as unknown as Event);
+    fixture.detectChanges();
+  }
+
+  it('writes the picked File to the form control (single mode)', () => {
+    type Model = { doc: File | null; }
     const config = ModalBuilder.form<Model>()
-      .field({
-        kind: FieldKind.FILE,
-        key: 'doc',
-        label: 'Document',
-      })
+      .field({kind: FieldKind.FILE, key: 'doc', label: 'Document'})
       .build();
 
     setup(config);
+    pick([createMockFile('test.pdf', 100)]);
 
-    const file = createMockFile('test.pdf', 100);
-    const event = {target: {files: [file], value: ''}} as unknown as Event;
-    component.onFileChange(config.fields[0], event);
-
-    expect(component.getSelectedFiles('doc').length).toBe(1);
-    expect(component.getSelectedFiles('doc')[0].name).toBe('test.pdf');
+    const value = component.form.get('doc')!.value as File;
+    expect(value instanceof File).toBeTrue();
+    expect(value.name).toBe('test.pdf');
   });
 
-  it('should filter out oversized files when maxSize is set', () => {
-    type Model = { doc: File[]; }
+  it('filters out oversized files when maxSize is set', () => {
+    type Model = { doc: File | null; }
     const config = ModalBuilder.form<Model>()
-      .field({
-        kind: FieldKind.FILE,
-        key: 'doc',
-        label: 'Document',
-        maxSize: 50,
-      })
+      .field({kind: FieldKind.FILE, key: 'doc', label: 'Document', maxSize: 50})
       .build();
 
     setup(config);
+    pick([createMockFile('big.pdf', 100), createMockFile('small.pdf', 30)]);
 
-    const bigFile = createMockFile('big.pdf', 100);
-    const smallFile = createMockFile('small.pdf', 30);
-    const event = {target: {files: [bigFile, smallFile], value: ''}} as unknown as Event;
-    component.onFileChange(config.fields[0], event);
-
-    expect(component.getSelectedFiles('doc').length).toBe(1);
-    expect(component.getSelectedFiles('doc')[0].name).toBe('small.pdf');
+    const value = component.form.get('doc')!.value as File;
+    expect(value.name).toBe('small.pdf');
   });
 
-  it('should enforce maxFiles limit', () => {
+  it('enforces the maxFiles limit (multiple mode)', () => {
     type Model = { docs: File[]; }
     const config = ModalBuilder.form<Model>()
-      .field({
-        kind: FieldKind.FILE,
-        key: 'docs',
-        label: 'Documents',
-        multiple: true,
-        maxFiles: 2,
-      })
+      .field({kind: FieldKind.FILE, key: 'docs', label: 'Documents', multiple: true, maxFiles: 2})
       .build();
 
     setup(config);
+    pick([createMockFile('a.pdf', 10), createMockFile('b.pdf', 10), createMockFile('c.pdf', 10)]);
 
-    const files = [
-      createMockFile('a.pdf', 10),
-      createMockFile('b.pdf', 10),
-      createMockFile('c.pdf', 10),
-    ];
-    const event = {target: {files, value: ''}} as unknown as Event;
-    component.onFileChange(config.fields[0], event);
-
-    expect(component.getSelectedFiles('docs').length).toBe(2);
+    expect((component.form.get('docs')!.value as File[]).length).toBe(2);
   });
 
-  it('should remove a file by index', () => {
-    type Model = { doc: File[]; }
+  it('removes a file by index (multiple mode)', () => {
+    type Model = { docs: File[]; }
     const config = ModalBuilder.form<Model>()
-      .field({
-        kind: FieldKind.FILE,
-        key: 'doc',
-        label: 'Document',
-        multiple: true,
-      })
+      .field({kind: FieldKind.FILE, key: 'docs', label: 'Documents', multiple: true})
       .build();
 
     setup(config);
+    pick([createMockFile('a.pdf', 10), createMockFile('b.pdf', 10)]);
+    expect((component.form.get('docs')!.value as File[]).length).toBe(2);
 
-    const files = [createMockFile('a.pdf', 10), createMockFile('b.pdf', 10)];
-    const event = {target: {files, value: ''}} as unknown as Event;
-    component.onFileChange(config.fields[0], event);
-
-    expect(component.getSelectedFiles('doc').length).toBe(2);
-
-    component.removeFile('doc', 0);
-    expect(component.getSelectedFiles('doc').length).toBe(1);
-    expect(component.getSelectedFiles('doc')[0].name).toBe('b.pdf');
+    fileInput().removeFile(0);
+    fixture.detectChanges();
+    const value = component.form.get('docs')!.value as File[];
+    expect(value.length).toBe(1);
+    expect(value[0].name).toBe('b.pdf');
   });
 
-  it('should set form control value to null when all files removed', () => {
-    type Model = { doc: File[]; }
+  it('sets the form control value to null when the only file is removed', () => {
+    type Model = { doc: File | null; }
     const config = ModalBuilder.form<Model>()
-      .field({
-        kind: FieldKind.FILE,
-        key: 'doc',
-        label: 'Document',
-      })
+      .field({kind: FieldKind.FILE, key: 'doc', label: 'Document'})
       .build();
 
     setup(config);
+    pick([createMockFile('test.pdf', 10)]);
 
-    const file = createMockFile('test.pdf', 10);
-    const event = {target: {files: [file], value: ''}} as unknown as Event;
-    component.onFileChange(config.fields[0], event);
-
-    component.removeFile('doc', 0);
+    fileInput().removeFile(0);
+    fixture.detectChanges();
     expect(component.form.get('doc')!.value).toBeNull();
   });
 
-  it('should format file sizes correctly', () => {
-    type Model = { doc: File[]; }
+  it('invokes the field onClear callback when an existing image is removed', () => {
+    type Model = { doc: File | null; }
+    const onClear = jasmine.createSpy('onClear');
     const config = ModalBuilder.form<Model>()
-      .field({ kind: FieldKind.FILE, key: 'doc', label: 'Doc' })
+      .field({
+        kind: FieldKind.FILE,
+        key: 'doc',
+        label: 'Document',
+        currentUrl: 'https://example.com/cover.png',
+        onClear,
+      })
       .build();
 
     setup(config);
+    fileInput().removeExisting(0);
 
-    expect(component.formatFileSize(500)).toBe('500 B');
-    expect(component.formatFileSize(1024)).toBe('1.0 KB');
-    expect(component.formatFileSize(1048576)).toBe('1.0 MB');
+    expect(onClear).toHaveBeenCalled();
   });
 
   it('should render file upload drop zone in template', () => {
@@ -800,24 +778,18 @@ describe('Feature 5: File Upload Fields', () => {
     expect(FieldKind.FILE).toBe('file');
   });
 
-  it('should keep only one file when multiple is not set', () => {
-    type Model = { avatar: File[]; }
+  it('keeps only a single File when multiple is not set', () => {
+    type Model = { avatar: File | null; }
     const config = ModalBuilder.form<Model>()
-      .field({
-        kind: FieldKind.FILE,
-        key: 'avatar',
-        label: 'Avatar',
-        // multiple not set = single file
-      })
+      .field({kind: FieldKind.FILE, key: 'avatar', label: 'Avatar'})
       .build();
 
     setup(config);
+    pick([createMockFile('a.jpg', 10, 'image/jpeg'), createMockFile('b.jpg', 10, 'image/jpeg')]);
 
-    const files = [createMockFile('a.jpg', 10), createMockFile('b.jpg', 10)];
-    const event = {target: {files, value: ''}} as unknown as Event;
-    component.onFileChange(config.fields[0], event);
-
-    expect(component.getSelectedFiles('avatar').length).toBe(1);
+    const value = component.form.get('avatar')!.value;
+    expect(value instanceof File).toBeTrue();
+    expect(Array.isArray(value)).toBeFalse();
   });
 });
 
