@@ -299,57 +299,26 @@
       }
 
       @case (FieldKind.FILE) {
-        <div class="flex flex-col gap-1">
-          <label [for]="'field-' + asKey(rowField.field.key)"
-                 class="pl-2 pb-1 flex flex-row gap-0.5 text-base font-medium text-base-content">
-            {{ asField(rowField.field).label }}
-            @if (hasRequiredValidator(rowField.field)) {
-              <span class="text-red-500">*</span>
-            }
-          </label>
-          <div
-            class="relative border-2 border-dashed border-base-300 rounded-xl p-6 text-center transition-colors hover:border-blue-400 hover:bg-blue-50/30"
-            [class.border-red-300]="form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched"
-            [class.opacity-50]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
-          >
-            <input
-              type="file"
-              [id]="'field-' + asKey(rowField.field.key)"
-              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              [attr.accept]="asField(rowField.field).accept || null"
-              [attr.multiple]="asField(rowField.field).multiple || null"
-              [disabled]="isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)"
-              (change)="onFileChange(rowField.field, $event)"
-            />
-            <div class="flex flex-col items-center gap-2">
-              <svg class="w-8 h-8 text-base-content/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-              </svg>
-              <p class="text-sm text-base-content/50">{{ labels.fileUploadPrompt }}</p>
-              @if (asField(rowField.field).accept) {
-                <p class="text-xs text-base-content/40">{{ labels.accepted }} {{ asField(rowField.field).accept }}</p>
-              }
-              @if (asField(rowField.field).maxSize) {
-                <p class="text-xs text-base-content/40">{{ labels.maxSize }} {{ formatFileSize(asField(rowField.field).maxSize) }}</p>
-              }
-            </div>
-          </div>
-          <!-- Selected files list -->
-          @if (getSelectedFiles(asKey(rowField.field.key)).length > 0) {
-            <div class="flex flex-col gap-1 mt-2">
-              @for (file of getSelectedFiles(asKey(rowField.field.key)); track file.name; let i = $index) {
-                <div class="flex items-center justify-between px-3 py-1.5 bg-base-200 rounded-lg text-sm">
-                  <span class="text-base-content truncate">{{ file.name }} ({{ formatFileSize(file.size) }})</span>
-                  <button mnButton [data]="{ size: 'sm', variant: 'text', color: 'secondary' }" type="button" class="text-base-content/40 hover:text-red-500 ml-2 cursor-pointer" (click)="removeFile(asKey(rowField.field.key), i)">&times;</button>
-                </div>
-              }
-            </div>
-          }
-          @if (form.get(asKey(rowField.field.key))?.invalid && form.get(asKey(rowField.field.key))?.touched) {
-            <div class="text-red-500 text-xs pl-2 pt-1">
-              {{ getFileError(rowField.field) }}
-            </div>
-          }
+        <div>
+          <mn-lib-file-input
+            (cleared)="onFileCleared(rowField.field)"
+            [formControlName]="asKey(rowField.field.key)"
+            [props]="asAny({
+              id: asKey(rowField.field.key),
+              label: asField(rowField.field).label,
+              accept: asField(rowField.field).accept,
+              multiple: asField(rowField.field).multiple,
+              maxFiles: asField(rowField.field).maxFiles,
+              maxSize: asField(rowField.field).maxSize,
+              displayMode: asField(rowField.field).displayMode,
+              dropzoneHint: asField(rowField.field).dropzoneHint,
+              replaceLabel: asField(rowField.field).replaceLabel,
+              removeLabel: asField(rowField.field).removeLabel,
+              currentUrl: asField(rowField.field).currentUrl,
+              currentUrls: asField(rowField.field).currentUrls,
+              disabled: isFieldReadOnly(rowField.field) || isFieldDisabled(rowField.field)
+            })"
+          ></mn-lib-file-input>
         </div>
       }
 

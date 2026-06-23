@@ -49,6 +49,7 @@ import {MnCheckbox} from '../../../mn-checkbox';
 import {MnDatetime} from '../../../mn-datetime';
 import {MnMultiSelect} from '../../../mn-multi-select';
 import {MnTextarea} from '../../../mn-textarea';
+import {MnFileInput} from '../../../mn-file-input';
 import {MnSelect, MnSelectOption, MnSelectProps} from '../../../mn-select';
 import {MnCustomFieldHostDirective} from './mn-custom-field-host.directive';
 import {MnLanguageService} from '../../../../language';
@@ -93,6 +94,13 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
   unit?: string;
   accept?: string;
   multiple?: boolean;
+  displayMode?: 'dropzone' | 'thumbnail' | 'list' | 'compact';
+  dropzoneHint?: string;
+  replaceLabel?: string;
+  removeLabel?: string;
+  currentUrl?: string | null;
+  currentUrls?: string[] | null;
+  onClear?: () => void;
   // Non-optional in the view: the template only reads these inside the
   // matching @case/@if guards where the runtime value is always present.
   // Keeping them non-undefined avoids spurious template type errors that the
@@ -106,7 +114,7 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
 @Component({
   selector: 'mn-form-body',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnSelect, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent],
+  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnFileInput, MnSelect, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent],
   templateUrl: './mn-form-body.component.html',
   styleUrls: ['./mn-form-body.component.css'],
 })
@@ -794,73 +802,14 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
   // Feature: File Upload Fields
   // =========================
 
-  /** Store selected files keyed by field key */
-  fileSelections: Record<string, File[]> = {};
-
-  onFileChange(field: FormFieldConfig<TModel>, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const fileField = field as FileFieldConfig<TModel>;
-    const files = Array.from(input.files || []);
-    const key = field.key as string;
-
-    // Validate file size
-    if (fileField.maxSize) {
-      const oversized = files.filter(f => f.size > fileField.maxSize!);
-      if (oversized.length > 0) {
-        // Remove oversized files
-        const valid = files.filter(f => f.size <= fileField.maxSize!);
-        this.fileSelections[key] = fileField.multiple
-          ? [...(this.fileSelections[key] || []), ...valid]
-          : valid.slice(0, 1);
-      } else {
-        this.fileSelections[key] = fileField.multiple
-          ? [...(this.fileSelections[key] || []), ...files]
-          : files.slice(0, 1);
-      }
-    } else {
-      this.fileSelections[key] = fileField.multiple
-        ? [...(this.fileSelections[key] || []), ...files]
-        : files.slice(0, 1);
-    }
-
-    // Enforce maxFiles
-    if (fileField.maxFiles && this.fileSelections[key].length > fileField.maxFiles) {
-      this.fileSelections[key] = this.fileSelections[key].slice(0, fileField.maxFiles);
-    }
-
-    const control = this.form.get(key);
-    if (control) {
-      control.setValue(this.fileSelections[key]);
-      control.markAsTouched();
-    }
-
-    // Reset input so same file can be re-selected
-    input.value = '';
-  }
-
-  removeFile(key: string, index: number): void {
-    this.fileSelections[key] = (this.fileSelections[key] || []).filter((_, i) => i !== index);
-    const control = this.form.get(key);
-    if (control) {
-      control.setValue(this.fileSelections[key].length > 0 ? this.fileSelections[key] : null);
-    }
-  }
-
-  getSelectedFiles(key: string): File[] {
-    return this.fileSelections[key] || [];
-  }
-
-  formatFileSize(bytes: number): string {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  }
-
-  getFileError(field: FormFieldConfig<TModel>): string {
-    const control = this.form.get(field.key as string);
-    if (!control?.errors) return 'This field is required';
-    if (control.errors['required']) return 'Please select a file';
-    return 'Invalid file';
+  /**
+   * Invokes a FILE field's `onClear` callback when its existing image is removed.
+   * FILE fields render {@link MnFileInput}, which owns selection/validation and
+   * writes the value (`File | File[] | null`) straight to the form control.
+   * @param field The field whose existing image was cleared.
+   */
+  onFileCleared(field: FormFieldConfig<TModel>): void {
+    (field as FileFieldConfig<TModel>).onClear?.();
   }
 
   async submit(): Promise<void> {

@@ -590,6 +590,24 @@ export type FileFieldConfig<TModel = unknown> = {
   maxSize?: number;
   /** Maximum number of files (when multiple is true) */
   maxFiles?: number;
+  /** How the selection is displayed (default: 'dropzone') */
+  displayMode?: 'dropzone' | 'thumbnail' | 'list' | 'compact';
+  /** Hint shown inside the empty dropzone */
+  dropzoneHint?: string;
+  /** Label for the "choose/replace file" affordance */
+  replaceLabel?: string;
+  /** Accessible label for the per-file remove button */
+  removeLabel?: string;
+  /** URL of an already-saved image to preview when no new file is selected (single mode) */
+  currentUrl?: string | null;
+  /** URLs of already-saved images to preview when nothing is selected (multiple mode) */
+  currentUrls?: string[] | null;
+  /**
+   * Called when the user removes an already-saved image (`currentUrl`/`currentUrls`).
+   * The form value stays null; use this to record the removal intent (e.g. to send
+   * a "clear image" instruction to the API on submit).
+   */
+  onClear?: () => void;
   validators?: ValidatorFn[];
   asyncValidators?: AsyncValidatorFn[];
   readOnly?: boolean;

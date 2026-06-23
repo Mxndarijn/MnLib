@@ -51,6 +51,13 @@ export class DemoListComponent {
     { title: 'Checkbox',            path: '/demos/checkbox-demo',             abbr: 'CB', color: '#22c55e', description: 'Checkbox with standalone, forms, sizes, and disabled state.' },
     { title: 'Config',              path: '/demos/config',                    abbr: 'CF', color: '#6366f1', description: 'Section scoping, component defaults, and instance overrides.' },
     { title: 'Dual Horizontal Image', path: '/demos/dual-horizontal-image-demo', abbr: 'DI', color: '#8b5cf6', description: 'Two images shown side by side.' },
+    {
+      title: 'File Input',
+      path: '/demos/file-input-demo',
+      abbr: 'FI',
+      color: '#d97706',
+      description: 'Dropzone, thumbnail, list, and compact modes with accept/size/count limits.'
+    },
     { title: 'Information Card',    path: '/demos/information-card-demo',     abbr: 'IC', color: '#0ea5e9', description: 'Card with title, description and optional images.' },
     { title: 'Input Field',         path: '/demos/input-field-demo',          abbr: 'IF', color: '#0d9488', description: 'Text inputs with masking, validation, and error display.' },
     { title: 'Textarea',            path: '/demos/textarea-demo',             abbr: 'TX', color: '#059669', description: 'Configurable rows, cols, resize, and error handling.' },
