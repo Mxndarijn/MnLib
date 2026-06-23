@@ -29,8 +29,95 @@
         <ng-container [ngTemplateOutlet]="dataSource.toolbarRightTemplate"></ng-container>
       </div>
     }
+    <!-- Small-screen filter toggle: replaces the inline per-column filter row below 640px -->
+    @if (hasColumnFilters && filtersCollapsed) {
+      <button
+        type="button"
+        mnButton
+        [data]="{ variant: 'outline', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
+        class="w-full min-[375px]:w-auto gap-1.5"
+        [class.border-primary]="hasActiveFilters"
+        [class.text-primary]="hasActiveFilters"
+        [attr.aria-expanded]="filtersPanelOpen"
+        aria-controls="mn-table-filters-panel"
+        (click)="toggleFiltersPanel()"
+      >
+        <svg lucideFunnel [size]="15"></svg>
+        <span>{{ filtersButtonLabel }}</span>
+      </button>
+    }
   </div>
 </div>
+
+<!-- Small-screen filter panel: stacked, full-width fields decoupled from column widths -->
+@if (hasColumnFilters && filtersCollapsed) {
+  <div
+    id="mn-table-filters-panel"
+    class="grid transition-all duration-200 ease-out motion-reduce:transition-none"
+    [style.grid-template-rows]="filtersPanelOpen ? '1fr' : '0fr'"
+  >
+    <div class="overflow-hidden" [attr.inert]="filtersPanelOpen ? null : ''">
+      <div class="flex flex-col gap-3 rounded-md border border-base-300 bg-base-100 p-3 mb-3">
+        @for (column of dataSource.columns; track column.key) {
+          @if (column.filterable) {
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-xs font-medium text-base-content/70"
+                [attr.for]="'mn-table-filter-' + column.key"
+              >
+                @if (isTemplateRef(column.header)) {
+                  <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
+                } @else {
+                  {{ column.header }}
+                }
+              </label>
+              @if ((column.filterType ?? 'text') === 'text') {
+                <mn-lib-input-field
+                  [props]="{
+                    id: 'mn-table-filter-' + column.key,
+                    type: 'text',
+                    label: '',
+                    placeholder: column.filterPlaceholder ?? '',
+                    autocomplete: column.filterAutocomplete ?? undefined,
+                    size: 'sm',
+                    borderRadius: 'md',
+                    fullWidth: true,
+                    hover: true
+                  }"
+                  [ngModel]="columnFilters[column.key]"
+                  (ngModelChange)="onColumnFilter(column.key, $event)"
+                ></mn-lib-input-field>
+              } @else if (column.filterType === 'select') {
+                <mn-lib-select
+                  (ngModelChange)="onColumnFilter(column.key, $event)"
+                  [ngModel]="columnFilters[column.key] ?? ''"
+                  [props]="{
+                    id: 'mn-table-filter-' + column.key,
+                    options: getFilterSelectOptions(column),
+                    size: 'sm',
+                    fullWidth: true
+                  }"
+                ></mn-lib-select>
+              }
+            </div>
+          }
+        }
+        @if (hasActiveFilters) {
+          <button
+            type="button"
+            mnButton
+            [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
+            class="self-start gap-1"
+            (click)="clearAllFilters()"
+          >
+            <svg lucideX [size]="14"></svg>
+            <span>{{ clearFiltersButtonLabel }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
 
 <!-- Table wrapper with horizontal scroll -->
 <div #collectionBody [style.min-height.px]="bodyMinHeight" aria-label="Data table" class="overflow-x-auto"
@@ -81,8 +168,8 @@
 
       </tr>
 
-      <!-- Per-column filter row -->
-      @if (hasColumnFilters) {
+      <!-- Per-column filter row (wide screens only; collapses into a panel below 640px) -->
+      @if (hasColumnFilters && !filtersCollapsed) {
         <tr class="bg-base-100 border-b border-base-300">
           @if (hasSelection) {
             <th class="px-2 py-1 "></th>
