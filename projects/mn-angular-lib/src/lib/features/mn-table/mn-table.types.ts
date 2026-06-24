@@ -96,6 +96,22 @@ export type TableDataSource<T> = MnSelectableCollectionDataSource<T> & {
   toolbarLeftTemplate?: TemplateRef<unknown>;
   /** Template rendered on the right side of the toolbar (after the search field). */
   toolbarRightTemplate?: TemplateRef<unknown>;
+
+  // Responsive filters
+  /**
+   * Label for the toggle button that opens the stacked filter panel on small
+   * screens (below 640px). Defaults to "Filters".
+   */
+  filtersLabel?: string;
+  /** Translation key for {@link filtersLabel}. Resolved via MnLanguageService. */
+  filtersLabelKey?: string;
+  /**
+   * Label for the action that resets every column filter in the small-screen
+   * panel. Defaults to "Clear all".
+   */
+  clearFiltersLabel?: string;
+  /** Translation key for {@link clearFiltersLabel}. Resolved via MnLanguageService. */
+  clearFiltersLabelKey?: string;
 }
 
 /** @deprecated Use {@link MnCollectionLabels}. */

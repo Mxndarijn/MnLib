@@ -33,7 +33,7 @@
           [ngClass]="controlClasses"
           class="inline-flex items-center gap-2 cursor-pointer hover:bg-base-200"
           type="button">
-          <mn-icon [data]="{ size: 18 }" mnIconUpload></mn-icon>
+          <svg lucideUpload [size]="18"></svg>
           <span class="text-sm">{{ uiConfig.replaceLabel }}</span>
         </button>
         @for (item of displayItems(); track itemKey(item)) {
@@ -41,7 +41,7 @@
             @if (item.isImage && item.previewUrl) {
               <img [src]="item.previewUrl" alt="" class="h-6 w-6 rounded object-cover"/>
             } @else {
-              <mn-icon [data]="{ size: 16 }" class="text-base-content/50" mnIconFile></mn-icon>
+              <svg lucideFile [size]="16" class="text-base-content/50"></svg>
             }
             <span class="max-w-40 truncate">{{ item.name }}</span>
             <button
@@ -49,7 +49,7 @@
               [attr.aria-label]="uiConfig.removeLabel"
               class="text-base-content/50 hover:text-error cursor-pointer"
               type="button">
-              <mn-icon [data]="{ size: 14 }" mnIconX></mn-icon>
+              <svg lucideX [size]="14"></svg>
             </button>
           </span>
         }
@@ -64,14 +64,14 @@
         [ngClass]="controlClasses"
         class="flex flex-row items-center justify-center gap-2 cursor-pointer hover:bg-base-200"
         type="button">
-        <mn-icon [data]="{ size: 18 }" mnIconUpload></mn-icon>
+        <svg lucideUpload [size]="18"></svg>
         <span class="text-sm">{{ uiConfig.replaceLabel }}</span>
       </button>
       @if (displayItems().length > 0) {
         <div class="mt-2 flex flex-col gap-1">
           @for (item of displayItems(); track itemKey(item)) {
             <div class="flex items-center gap-2 rounded-lg bg-base-200 px-3 py-1.5 text-sm">
-              <mn-icon [data]="{ size: 16 }" class="text-base-content/50" mnIconFile></mn-icon>
+              <svg lucideFile [size]="16" class="text-base-content/50"></svg>
               <span class="flex-1 truncate text-base-content">{{ item.name }}</span>
               @if (item.sizeLabel) {
                 <span class="text-base-content/50">{{ item.sizeLabel }}</span>
@@ -81,7 +81,7 @@
                 [attr.aria-label]="uiConfig.removeLabel"
                 class="text-base-content/50 hover:text-error cursor-pointer"
                 type="button">
-                <mn-icon [data]="{ size: 16 }" mnIconX></mn-icon>
+                <svg lucideX [size]="16"></svg>
               </button>
             </div>
           }
@@ -98,7 +98,7 @@
               <img [src]="item.previewUrl" alt="" class="h-full w-full object-cover"/>
             } @else {
               <div class="flex h-full w-full flex-col items-center justify-center gap-1 p-1 text-center">
-                <mn-icon [data]="{ size: 22 }" class="text-base-content/50" mnIconFile></mn-icon>
+                <svg lucideFile [size]="22" class="text-base-content/50"></svg>
                 <span class="w-full truncate text-xs text-base-content/60">{{ item.name }}</span>
               </div>
             }
@@ -107,7 +107,7 @@
               [attr.aria-label]="uiConfig.removeLabel"
               class="btn btn-circle btn-xs absolute top-1 right-1 border-none bg-black/60 text-white hover:bg-black/80"
               type="button">
-              <mn-icon [data]="{ size: 14 }" mnIconX></mn-icon>
+              <svg lucideX [size]="14"></svg>
             </button>
           </div>
         }
@@ -117,7 +117,7 @@
             [disabled]="isDisabled"
             class="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-base-300 text-base-content/50 hover:border-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             type="button">
-            <mn-icon [data]="{ size: 22 }" mnIconImagePlus></mn-icon>
+            <svg lucideImagePlus [size]="22"></svg>
           </button>
         }
       </div>
@@ -130,7 +130,7 @@
         [disabled]="isDisabled"
         [ngClass]="controlClasses"
         type="button">
-        <mn-icon [data]="{ size: 28 }" class="text-base-content/40" mnIconImagePlus></mn-icon>
+        <svg lucideImagePlus [size]="28" class="text-base-content/40"></svg>
         <span class="text-sm text-base-content/60">{{ uiConfig.dropzoneHint }}</span>
       </button>
       @if (displayItems().length > 0) {
@@ -140,7 +140,7 @@
               @if (item.isImage && item.previewUrl) {
                 <img [src]="item.previewUrl" alt="" class="h-12 w-12 rounded-md object-cover"/>
               } @else {
-                <mn-icon [data]="{ size: 24 }" class="text-base-content/50" mnIconFile></mn-icon>
+                <svg lucideFile [size]="24" class="text-base-content/50"></svg>
               }
               <span class="flex-1 truncate text-sm text-base-content">{{ item.name }}</span>
               @if (item.sizeLabel) {
@@ -151,7 +151,7 @@
                 [attr.aria-label]="uiConfig.removeLabel"
                 class="btn btn-circle btn-sm btn-ghost text-base-content/60 hover:text-error"
                 type="button">
-                <mn-icon [data]="{ size: 16 }" mnIconTrash2></mn-icon>
+                <svg lucideTrash2 [size]="16"></svg>
               </button>
             </div>
           }

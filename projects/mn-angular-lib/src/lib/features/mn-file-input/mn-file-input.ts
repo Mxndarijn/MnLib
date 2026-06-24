@@ -10,7 +10,7 @@ import {
 } from './mn-file-inputTypes';
 import {mnFileInputVariants} from './mn-file-inputVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnIcon, MnIconAttributes} from '../mn-icon';
+import {LucideFile, LucideImagePlus, LucideTrash2, LucideUpload, LucideX} from '@lucide/angular';
 import {MnConfigService} from '../../config';
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from '../../context';
 import {MnLanguageService} from '../../language';
@@ -56,7 +56,7 @@ export type MnFileDisplayItem = {
 @Component({
   selector: 'mn-lib-file-input',
   standalone: true,
-  imports: [CommonModule, NgClass, MnErrorMessage, MnIcon, MnIconAttributes],
+  imports: [CommonModule, NgClass, MnErrorMessage, LucideFile, LucideImagePlus, LucideTrash2, LucideUpload, LucideX],
   templateUrl: './mn-file-input.html',
 })
 export class MnFileInput implements OnInit {
