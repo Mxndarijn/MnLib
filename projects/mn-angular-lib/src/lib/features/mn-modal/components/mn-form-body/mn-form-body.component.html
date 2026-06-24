@@ -21,7 +21,8 @@
               placeholder: asField(rowField.field).placeholder,
               mask: asField(rowField.field).mask,
               autocomplete: asField(rowField.field).autocomplete,
-              readonly: isFieldReadOnly(rowField.field)
+              readonly: isFieldReadOnly(rowField.field),
+              fullWidth: true
             })"
           ></mn-lib-input-field>
         </div>
@@ -36,7 +37,8 @@
               type: 'number',
               label: asField(rowField.field).label,
               placeholder: asField(rowField.field).placeholder,
-              readonly: isFieldReadOnly(rowField.field)
+              readonly: isFieldReadOnly(rowField.field),
+              fullWidth: true
             })"
           ></mn-lib-input-field>
         </div>
@@ -51,7 +53,8 @@
               type: 'password',
               label: asField(rowField.field).label,
               placeholder: asField(rowField.field).placeholder,
-              readonly: isFieldReadOnly(rowField.field)
+              readonly: isFieldReadOnly(rowField.field),
+              fullWidth: true
             })"
           ></mn-lib-input-field>
         </div>
@@ -100,7 +103,8 @@
               placeholder: asField(rowField.field).placeholder,
               startDate: asField(rowField.field).minDate,
               endDate: asField(rowField.field).maxDate,
-              readonly: isFieldReadOnly(rowField.field)
+              readonly: isFieldReadOnly(rowField.field),
+              fullWidth: true
             })"
           ></mn-lib-input-field>
         </div>
@@ -118,7 +122,8 @@
               min: asField(rowField.field).min,
               max: asField(rowField.field).max,
               step: asField(rowField.field).step,
-              readonly: isFieldReadOnly(rowField.field)
+              readonly: isFieldReadOnly(rowField.field),
+              fullWidth: true
             })"
           ></mn-lib-datetime>
         </div>
@@ -382,9 +387,10 @@
             }
           </div>
           @for (row of group.rows; track $index) {
-            <div class="grid gap-4" [style.grid-template-columns]="getGridColumns(row)">
+            <div [style.--mn-form-cols]="row.columns || 1" class="grid gap-4 mn-form-row">
               @for (rowField of row.fields; track rowField.field.key) {
-                <div class="flex flex-col gap-2" [style.grid-column]="getGridSpan(rowField)" [style.display]="isFieldVisible(rowField.field) ? '' : 'none'">
+                <div [style.--mn-form-span]="rowField.span || 1" [style.display]="isFieldVisible(rowField.field) ? '' : 'none'"
+                     class="flex flex-col gap-2 mn-form-cell">
                   <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: rowField }"></ng-container>
                 </div>
               }
@@ -399,9 +405,10 @@
   @if (rows.length > 0) {
     <div class="flex flex-col gap-4">
       @for (row of rows; track $index) {
-        <div class="grid gap-4" [style.grid-template-columns]="getGridColumns(row)">
+        <div [style.--mn-form-cols]="row.columns || 1" class="grid gap-4 mn-form-row">
           @for (rowField of row.fields; track rowField.field.key) {
-            <div class="flex flex-col gap-2" [style.grid-column]="getGridSpan(rowField)" [style.display]="isFieldVisible(rowField.field) ? '' : 'none'">
+            <div [style.--mn-form-span]="rowField.span || 1" [style.display]="isFieldVisible(rowField.field) ? '' : 'none'"
+                 class="flex flex-col gap-2 mn-form-cell">
               <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: rowField }"></ng-container>
             </div>
           }

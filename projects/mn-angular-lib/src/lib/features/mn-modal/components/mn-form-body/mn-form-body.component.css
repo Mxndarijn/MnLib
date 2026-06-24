@@ -3,3 +3,22 @@
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
 }
+
+.mn-form-row {
+  grid-template-columns: repeat(var(--mn-form-cols, 1), minmax(0, 1fr));
+}
+
+.mn-form-cell {
+  grid-column: span var(--mn-form-span, 1);
+}
+
+/* Collapse to a single column when the modal becomes a mobile bottom sheet */
+@media (max-width: 639.98px) {
+  .mn-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mn-form-cell {
+    grid-column: auto;
+  }
+}
