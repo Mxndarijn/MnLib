@@ -19,6 +19,8 @@ import {MnShowBelowDirective} from './mn-show-below.directive';
 import {MnInputField} from '../mn-input-field';
 import {FormsModule} from '@angular/forms';
 import {MnCollectionPagination, MnSelectableCollectionBase} from '../mn-collection';
+import {MnButton} from '../mn-button';
+import {LucideFilter, LucideFunnel, LucideX} from '@lucide/angular';
 
 /** Map of column key to its current filter value. */
 export type ColumnFilterState = Record<string, string | undefined>;
@@ -26,7 +28,7 @@ export type ColumnFilterState = Record<string, string | undefined>;
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnSkeleton, FormsModule, MnCollectionPagination],
+  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel],
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -39,6 +41,19 @@ export class MnTable<T = object>
 
   /** Per-column filter values keyed by column key. */
   columnFilters: ColumnFilterState = {};
+
+  /** Viewport width (px) below which the inline filter row collapses into a panel. */
+  private static readonly FILTER_COLLAPSE_WIDTH = 640;
+
+  /**
+   * True when the viewport is narrow enough that the per-column filter inputs no
+   * longer fit under their headers; the inline row is then replaced by a toggle
+   * button and a stacked filter panel.
+   */
+  protected filtersCollapsed = false;
+
+  /** Whether the small-screen filter panel is currently expanded. */
+  protected filtersPanelOpen = false;
 
   protected override readonly componentName = 'MnTable';
 
@@ -70,6 +85,54 @@ export class MnTable<T = object>
   /** Whether any column has filtering enabled. */
   get hasColumnFilters(): boolean {
     return this.dataSource.columns.some(c => c.filterable);
+  }
+
+  /** Whether at least one column filter is active. */
+  get hasActiveFilters(): boolean {
+    return this.dataSource.columns.some(col => col.filterable && !!this.columnFilters[col.key]);
+  }
+
+  /** Label for the small-screen filters toggle button. */
+  get filtersButtonLabel(): string {
+    return this.dataSource.filtersLabel ?? 'Filters';
+  }
+
+  /** Label for the "clear all filters" action in the small-screen panel. */
+  get clearFiltersButtonLabel(): string {
+    return this.dataSource.clearFiltersLabel ?? 'Clear all';
+  }
+
+  /** Opens/closes the stacked filter panel shown on small screens. */
+  toggleFiltersPanel(): void {
+    this.filtersPanelOpen = !this.filtersPanelOpen;
+  }
+
+  /** Resets every column filter and re-applies filtering. */
+  clearAllFilters(): void {
+    for (const col of this.dataSource.columns) {
+      if (col.filterable) this.columnFilters[col.key] = '';
+    }
+    this.currentPage = 1;
+    this.applyFilter(false);
+    this.cdr.markForCheck();
+  }
+
+  /** True when the viewport is below the filter-collapse breakpoint. */
+  private isFilterViewport(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth < MnTable.FILTER_COLLAPSE_WIDTH;
+  }
+
+  /**
+   * Recomputes whether the inline filter row should collapse into the panel.
+   * Closes the panel when returning to the wide layout so reopened state never
+   * leaks across the breakpoint. Marks for check only when the layout flips.
+   */
+  private updateFilterLayout(reflow: boolean): void {
+    const collapsed = this.isFilterViewport();
+    if (collapsed === this.filtersCollapsed) return;
+    this.filtersCollapsed = collapsed;
+    if (!collapsed) this.filtersPanelOpen = false;
+    if (reflow) this.cdr.markForCheck();
   }
 
   sort(column: ColumnDefinition<T>): void {
@@ -153,10 +216,11 @@ export class MnTable<T = object>
     if (reflow) this.cdr.markForCheck();
   }
 
-  /** Re-evaluate the responsive page size when the viewport crosses the breakpoint. */
+  /** Re-evaluate responsive page size and filter layout when the viewport changes. */
   @HostListener('window:resize')
   protected onWindowResize(): void {
     this.applyResponsivePageSize(true);
+    this.updateFilterLayout(true);
   }
 
   /** Tracks the desktop page size when the user picks one (selector only shows at >= md). */
@@ -172,6 +236,9 @@ export class MnTable<T = object>
     // Force the mobile row count below `md`; use the consumer's pageSize (or 10) above it.
     this.desktopPageSize = this.dataSource.pageSize ?? 10;
     this.applyResponsivePageSize(false);
+
+    // Seed the filter layout for the initial viewport (no markForCheck pre-render).
+    this.updateFilterLayout(false);
 
     this.currentSort = this.dataSource.defaultSort ?? null;
     for (const col of this.dataSource.columns) {
@@ -223,6 +290,12 @@ export class MnTable<T = object>
       if (col.filterPlaceholderKey) {
         col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
       }
+    }
+    if (this.dataSource.filtersLabelKey) {
+      this.dataSource.filtersLabel = this.lang.t(this.dataSource.filtersLabelKey);
+    }
+    if (this.dataSource.clearFiltersLabelKey) {
+      this.dataSource.clearFiltersLabel = this.lang.t(this.dataSource.clearFiltersLabelKey);
     }
   }
 
