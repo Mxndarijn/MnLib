@@ -32,7 +32,6 @@ import {
   FormFieldGroup,
   FormModalConfig,
   FormRow,
-  FormRowField,
   ModalCloseReason,
   ModalI18nLabels,
   ModalInputMap,
@@ -602,6 +601,7 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
       label: this.asField(field).label,
       placeholder: this.isFieldLoading(field.key as string) ? this.labels.loading : this.labels.selectPlaceholder,
       options: this.getSelectOptions(field),
+      fullWidth: true,
     };
   }
 
@@ -786,16 +786,6 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
       }
     });
     this.previousFormValue = { ...formValue };
-  }
-
-  getGridColumns(row: FormRow<TModel>): string {
-    const cols = row.columns || 1;
-    return `repeat(${cols}, 1fr)`;
-  }
-
-  getGridSpan(rowField: FormRowField<TModel>): string {
-    const span = rowField.span || 1;
-    return span > 1 ? `span ${span}` : '';
   }
 
   // =========================

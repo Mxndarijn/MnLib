@@ -16,6 +16,13 @@ export const MN_SELECT_CONFIG = new InjectionToken<MnSelectUIConfig>('MN_SELECT_
   standalone: true,
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-select.html',
+  host: {
+    // Without an explicit host width the inline host collapses to its content size, so
+    // the control's `w-full` (width:100%) resolves against a content-sized box and fails
+    // to fill the parent. Give the host a real width when fullWidth is requested.
+    '[style.display]': "props?.fullWidth ? 'block' : null",
+    '[style.width]': "props?.fullWidth ? '100%' : null",
+  },
 })
 export class MnSelect implements OnInit {
   ngControl = inject(NgControl, {optional: true, self: true});
