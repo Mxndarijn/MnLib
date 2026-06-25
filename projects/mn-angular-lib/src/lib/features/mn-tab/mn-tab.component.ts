@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, isSignal, OnInit, Output} from '@angular/core';
+import {Component, DoCheck, EventEmitter, Input, isSignal, Output} from '@angular/core';
 import {MnTranslatePipe} from '../../language';
 import {MnTabDataSource, MnTabItem} from './mn-tab.types';
 import {CommonModule} from '@angular/common';
@@ -18,7 +18,7 @@ const DEFAULT_SKELETON_TAB_COUNT = 3;
   imports: [MnTranslatePipe, CommonModule, MnBadge, MnSkeleton],
   templateUrl: './mn-tab.component.html',
 })
-export class MnTabComponent implements OnInit {
+export class MnTabComponent implements DoCheck {
   /** Data source containing tab items and default active index. */
   @Input() dataSource!: MnTabDataSource;
 
@@ -51,14 +51,31 @@ export class MnTabComponent implements OnInit {
     return Array.from({length: count}, (_, index) => index);
   }
 
-  /** Initializes the default active tab based on the data source configuration. */
-  ngOnInit(): void {
-    if (
-      this.dataSource &&
-      this.dataSource.items.length > this.dataSource.defaultActive
-    ) {
-      this.currentActive = this.dataSource.items[this.dataSource.defaultActive];
+  /**
+   * Re-resolves the active tab on every change-detection pass.
+   *
+   * The data source is often populated or rebuilt asynchronously (tabs that
+   * depend on fetched data or permissions). Resolving the active tab only once
+   * at init would leave {@link currentActive} pointing at a stale item — the
+   * tab bar would then highlight nothing and swallow the first click — so the
+   * selection is kept in sync with whatever the data source currently holds.
+   */
+  ngDoCheck(): void {
+    this.syncActiveTab();
+  }
+
+  /**
+   * Sets the given tab item as active, invoking deactivate/activate callbacks.
+   * @param item - The tab item to activate.
+   */
+  setActive(item: MnTabItem): void {
+    if (this.currentActive === item) {
+      return;
     }
+    this.currentActive?.onDeactivate?.();
+    item.onClick?.();
+    this.currentActive = item;
+    this.activeChange.emit(item);
   }
 
   /**
@@ -71,15 +88,22 @@ export class MnTabComponent implements OnInit {
   }
 
   /**
-   * Sets the given tab item as active, invoking deactivate/activate callbacks.
-   * @param item - The tab item to activate.
+   * Ensures {@link currentActive} references a tab that still exists in the data
+   * source, falling back to the configured default tab when the current
+   * selection is missing or stale (e.g. after the items array is replaced).
    */
-  setActive(item: MnTabItem): void {
-    if (this.currentActive && this.currentActive !== item) {
-      this.currentActive.onDeactivate?.();
-      item.onClick?.();
-      this.currentActive = item;
-      this.activeChange.emit(item);
+  private syncActiveTab(): void {
+    const items = this.dataSource?.items;
+    if (!items || items.length === 0) {
+      this.currentActive = undefined;
+      return;
     }
+    if (this.currentActive && items.includes(this.currentActive)) {
+      return;
+    }
+    const defaultIndex = this.dataSource.defaultActive;
+    const index =
+      defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0;
+    this.currentActive = items[index];
   }
 }
