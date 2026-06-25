@@ -20,18 +20,22 @@
 <!-- Pagination controls -->
 @if (showPagination) {
   <div class="flex items-center justify-center md:justify-between px-2 py-3 text-sm text-base-content">
-    <div class="hidden md:flex items-center gap-2">
-      <span>{{ labels?.rowsPerPage || 'Items per page:' }}</span>
-      <mn-lib-select
-        (ngModelChange)="pageSizeChange.emit($event)"
-        [ngModel]="pageSize"
-        [props]="{
-          id: idPrefix + '-page-size',
-          options: pageSizeSelectOptions,
-          size: 'sm'
-        }"
-      ></mn-lib-select>
-    </div>
+    @if (pageSizeSelectOptions.length > 1) {
+      <div class="hidden md:flex items-center gap-2">
+        <span>{{ labels?.rowsPerPage || 'Items per page:' }}</span>
+        <mn-lib-select
+          (ngModelChange)="pageSizeChange.emit($event)"
+          [ngModel]="pageSize"
+          [props]="{
+            id: idPrefix + '-page-size',
+            options: pageSizeSelectOptions,
+            size: 'sm'
+          }"
+        ></mn-lib-select>
+      </div>
+    } @else {
+      <div class="hidden md:block"></div>
+    }
 
     <div class="flex items-center gap-1">
       <span class="text-xs mr-2 hidden md:inline">{{ (currentPage - 1) * pageSize + 1 }}
