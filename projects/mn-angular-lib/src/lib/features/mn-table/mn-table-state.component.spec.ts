@@ -5,7 +5,7 @@ import {BehaviorSubject} from 'rxjs';
 import {MnCollectionState, MnTable, TableDataSource} from 'mn-angular-lib';
 
 /** Minimal row shape used by the state-rendering tests. */
-interface Row {
+type Row = {
   id: string;
   name: string;
 }
