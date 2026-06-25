@@ -9,7 +9,7 @@
       class="tabs flex flex-nowrap -mb-[1px] border-b border-base-300"
       [class.w-full]="justified"
     >
-      @if (dataSource.isDataLoading) {
+      @if (isLoadingState) {
         @for (i of skeletonTabs; track i) {
           <div
             [class.flex-1]="justified"

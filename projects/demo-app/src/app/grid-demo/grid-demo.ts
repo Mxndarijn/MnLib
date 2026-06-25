@@ -1,6 +1,6 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {GridDataSource, MnButton, MnGrid, MnSkeleton} from 'mn-angular-lib';
+import {GridDataSource, MnButton, MnCollectionState, MnGrid, MnSkeleton} from 'mn-angular-lib';
 
 type User = {
   id: string;
@@ -37,6 +37,8 @@ const ALL_USERS: User[] = [
   templateUrl: './grid-demo.html',
 })
 export class GridDemo implements OnInit {
+  protected readonly CollectionState = MnCollectionState;
+
   readonly cardTpl = viewChild.required<TemplateRef<unknown>>('cardTpl');
   readonly actionsCardTpl = viewChild.required<TemplateRef<unknown>>('actionsCardTpl');
   readonly skeletonTpl = viewChild.required<TemplateRef<unknown>>('skeletonTpl');
@@ -74,7 +76,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       layout: {cols: {base: 1, sm: 2, lg: 3}, gap: '1rem'},
@@ -86,7 +88,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       layout: {minCardWidth: '16rem', gap: '1rem'},
@@ -98,7 +100,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       toolbarTemplate: this.toolbarTpl(),
@@ -111,7 +113,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No users found.',
-      isDataLoading: true,
+      state: MnCollectionState.LOADING,
       skeletonRowCount: 6,
       canSearch: false,
       paginationMode: 'none',
@@ -124,7 +126,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No users found.',
-      isDataLoading: true,
+      state: MnCollectionState.LOADING,
       skeletonRowCount: 6,
       skeleton: this.skeletonTpl(),
       canSearch: false,
@@ -138,7 +140,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No users match your search.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: true,
       searchPlaceholder: 'Search users...',
       isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
@@ -154,7 +156,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       onItemClick: (user) => this.onCardClick(user),
@@ -167,7 +169,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: this.actionsCardTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       onItemClick: (user) => this.onCardClick(user),
@@ -180,7 +182,7 @@ export class GridDemo implements OnInit {
       getID: (row) => row.id,
       cardTemplate: card,
       emptyMessage: 'No data available. Try adding some users.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       layout: {cols: {base: 1, sm: 2, lg: 3}, gap: '1rem'},
@@ -188,10 +190,16 @@ export class GridDemo implements OnInit {
   }
 
   toggleSkeletonLoading(): void {
-    const loading = !this.defaultSkeletonDataSource.isDataLoading;
-    // mn-grid is OnPush: replace the dataSource reference so the new isDataLoading is detected.
-    this.defaultSkeletonDataSource = {...this.defaultSkeletonDataSource, isDataLoading: loading};
-    this.customSkeletonDataSource = {...this.customSkeletonDataSource, isDataLoading: loading};
+    const loading = this.defaultSkeletonDataSource.state !== MnCollectionState.LOADING;
+    // mn-grid is OnPush: replace the dataSource reference so the new state is detected.
+    this.defaultSkeletonDataSource = {
+      ...this.defaultSkeletonDataSource,
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+    };
+    this.customSkeletonDataSource = {
+      ...this.customSkeletonDataSource,
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+    };
   }
 
   onCardClick(user: User): void {

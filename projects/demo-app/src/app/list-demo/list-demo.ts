@@ -1,6 +1,6 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {ListDataSource, MnButton, MnList, MnSkeleton} from 'mn-angular-lib';
+import {ListDataSource, MnButton, MnCollectionState, MnList, MnSkeleton} from 'mn-angular-lib';
 
 type User = {
   id: string;
@@ -44,6 +44,8 @@ const ALL_USERS: User[] = [
   templateUrl: './list-demo.html',
 })
 export class ListDemo implements OnInit {
+  protected readonly CollectionState = MnCollectionState;
+
   selectedNames = 'none';
 
   readonly basicItemTpl = viewChild.required<TemplateRef<unknown>>('basicItemTpl');
@@ -86,7 +88,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.basicItemTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       appearance: {hover: true, dividers: true},
@@ -97,7 +99,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.selectionItemTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       selectionMode: 'multi',
@@ -110,7 +112,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.searchItemTpl(),
       emptyMessage: 'No users match your search.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: true,
       searchPlaceholder: 'Search users...',
       paginationMode: 'load-more',
@@ -129,7 +131,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.paginatedItemTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: true,
       searchPlaceholder: 'Search paginated users...',
       paginationMode: 'paginated',
@@ -158,7 +160,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.clientPaginatedItemTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: true,
       searchPlaceholder: 'Search client-side...',
       isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
@@ -173,7 +175,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.basicItemTpl(),
       emptyMessage: 'No data available. Try adding some users.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
     };
@@ -183,7 +185,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.basicItemTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: true,
+      state: MnCollectionState.LOADING,
       skeletonRowCount: 4,
       canSearch: false,
       paginationMode: 'none',
@@ -195,7 +197,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.basicItemTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: true,
+      state: MnCollectionState.LOADING,
       skeletonRowCount: 4,
       // Three stacked lines instead of the default two.
       skeleton: {
@@ -215,7 +217,7 @@ export class ListDemo implements OnInit {
       getID: (row) => row.id,
       itemTemplate: this.basicItemTpl(),
       emptyMessage: 'No users found.',
-      isDataLoading: true,
+      state: MnCollectionState.LOADING,
       skeletonRowCount: 4,
       // Fully custom placeholder: an avatar circle beside two text lines.
       skeleton: this.listSkeletonTpl(),
@@ -230,11 +232,20 @@ export class ListDemo implements OnInit {
   }
 
   toggleSkeletonLoading(): void {
-    const loading = !this.defaultSkeletonDataSource.isDataLoading;
-    // mn-list is OnPush: replace each dataSource reference so the new isDataLoading is detected.
-    this.defaultSkeletonDataSource = {...this.defaultSkeletonDataSource, isDataLoading: loading};
-    this.linesSkeletonDataSource = {...this.linesSkeletonDataSource, isDataLoading: loading};
-    this.templateSkeletonDataSource = {...this.templateSkeletonDataSource, isDataLoading: loading};
+    const loading = this.defaultSkeletonDataSource.state !== MnCollectionState.LOADING;
+    // mn-list is OnPush: replace each dataSource reference so the new state is detected.
+    this.defaultSkeletonDataSource = {
+      ...this.defaultSkeletonDataSource,
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+    };
+    this.linesSkeletonDataSource = {
+      ...this.linesSkeletonDataSource,
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+    };
+    this.templateSkeletonDataSource = {
+      ...this.templateSkeletonDataSource,
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+    };
   }
 
   onSelectionChange(selected: User[]): void {

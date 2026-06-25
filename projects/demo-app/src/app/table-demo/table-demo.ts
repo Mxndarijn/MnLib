@@ -1,6 +1,6 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {ColumnSortType, MnButton, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
+import {ColumnSortType, MnButton, MnCollectionState, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
 
 type User = {
   id: string;
@@ -47,18 +47,12 @@ const ALL_USERS: User[] = [
   templateUrl: './table-demo.html',
 })
 export class TableDemo implements OnInit {
-  selectedNames = 'none';
-
-  readonly actionsTpl = viewChild.required<TemplateRef<unknown>>('actionsTpl');
-  readonly toolbarRightTpl = viewChild.required<TemplateRef<unknown>>('toolbarRightTpl');
-  readonly avatarTpl = viewChild.required<TemplateRef<unknown>>('avatarTpl');
-  readonly roleBadgeTpl = viewChild.required<TemplateRef<unknown>>('roleBadgeTpl');
   // ── Loading skeleton: default (no per-column customization) ──
   defaultSkeletonDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
     getID: (row) => row.id,
     emptyMessage: 'No users found.',
-    isDataLoading: true,
+    state: MnCollectionState.LOADING,
     skeletonRowCount: 4,
     canSearch: false,
     paginationMode: 'none',
@@ -69,16 +63,19 @@ export class TableDemo implements OnInit {
       {key: 'role', header: 'Role', cell: (row) => row.role, width: '120px'},
     ],
   };
-  // ── Loading skeleton: custom user-profile skeletons (built in ngOnInit for the cell templates) ──
-  profileSkeletonDataSource!: TableDataSource<User>;
-  private readonly avatarColors = ['#0ea5e9', '#16a34a', '#7c3aed', '#db2777', '#ea580c', '#0d9488'];
 
+  selectedNames = 'none';
+
+  readonly actionsTpl = viewChild.required<TemplateRef<unknown>>('actionsTpl');
+  readonly toolbarRightTpl = viewChild.required<TemplateRef<unknown>>('toolbarRightTpl');
+  readonly avatarTpl = viewChild.required<TemplateRef<unknown>>('avatarTpl');
+  readonly roleBadgeTpl = viewChild.required<TemplateRef<unknown>>('roleBadgeTpl');
   // ── Basic table ──
   basicDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
     getID: (row) => row.id,
     emptyMessage: 'No users found.',
-    isDataLoading: false,
+    state: MnCollectionState.RETRIEVED,
     canSearch: false,
     paginationMode: 'none',
     appearance: {hover: true, striped: true},
@@ -91,22 +88,15 @@ export class TableDemo implements OnInit {
     ],
     defaultSort: {columnKey: 'name', direction: 'asc'},
   };
-
-  /** Deterministic avatar background color derived from the user id. */
-  avatarColor(user: User): string {
-    return this.avatarColors[Number(user.id) % this.avatarColors.length];
-  }
-
-  /** Uppercase initials for the avatar placeholder. */
-  initials(user: User): string {
-    return user.name.split(' ').map(part => part.charAt(0)).join('').slice(0, 2).toUpperCase();
-  }
+  // ── Loading skeleton: custom user-profile skeletons (built in ngOnInit for the cell templates) ──
+  profileSkeletonDataSource!: TableDataSource<User>;
+  private readonly avatarColors = ['#0ea5e9', '#16a34a', '#7c3aed', '#db2777', '#ea580c', '#0d9488'];
   // ── Selection table ──
   selectionDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
     getID: (row) => row.id,
     emptyMessage: 'No users found.',
-    isDataLoading: false,
+    state: MnCollectionState.RETRIEVED,
     canSearch: false,
     paginationMode: 'none',
     selectionMode: 'multi',
@@ -118,12 +108,22 @@ export class TableDemo implements OnInit {
       {key: 'role', header: 'Role', cell: (row) => row.role},
     ],
   };
+
+  /** Deterministic avatar background color derived from the user id. */
+  avatarColor(user: User): string {
+    return this.avatarColors[Number(user.id) % this.avatarColors.length];
+  }
+
+  /** Uppercase initials for the avatar placeholder. */
+  initials(user: User): string {
+    return user.name.split(' ').map(part => part.charAt(0)).join('').slice(0, 2).toUpperCase();
+  }
   // ── Column filters table ──
   filterDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
     getID: (row) => row.id,
     emptyMessage: 'No users match the filters.',
-    isDataLoading: false,
+    state: MnCollectionState.RETRIEVED,
     canSearch: false,
     paginationMode: 'none',
     appearance: {hover: true, striped: true},
@@ -171,7 +171,7 @@ export class TableDemo implements OnInit {
     dataRows: new BehaviorSubject<User[]>([...ALL_USERS]),
     getID: (row) => row.id,
     emptyMessage: 'No users found.',
-    isDataLoading: false,
+    state: MnCollectionState.RETRIEVED,
     canSearch: true,
     searchPlaceholder: 'Search client-side...',
     isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
@@ -198,7 +198,7 @@ export class TableDemo implements OnInit {
     dataRows: new BehaviorSubject<User[]>([]),
     getID: (row) => row.id,
     emptyMessage: 'No data available. Try adding some users.',
-    isDataLoading: false,
+    state: MnCollectionState.RETRIEVED,
     canSearch: false,
     paginationMode: 'none',
     columns: [
@@ -206,18 +206,12 @@ export class TableDemo implements OnInit {
       {key: 'email', header: 'Email', cell: (row) => row.email},
     ],
   };
-  // ── Actions table ──
-  actionsDataSource!: TableDataSource<User>;
-  // ── Server-side pagination state ──
-  private paginatedPage = 1;
-  private paginatedSize = 5;
-  private paginatedSearch = '';
   // ── Paginated table (server-side) ──
   paginatedDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([]),
     getID: (row) => row.id,
     emptyMessage: 'No users found.',
-    isDataLoading: false,
+    state: MnCollectionState.RETRIEVED,
     canSearch: true,
     searchPlaceholder: 'Search paginated users...',
     paginationMode: 'paginated',
@@ -248,14 +242,18 @@ export class TableDemo implements OnInit {
     ],
     defaultSort: {columnKey: 'name', direction: 'asc'},
   };
-  private loadMoreLoaded = 5;
-  private loadMoreSearch = '';
+  // ── Actions table ──
+  actionsDataSource!: TableDataSource<User>;
+  // ── Server-side pagination state ──
+  private paginatedPage = 1;
+  private paginatedSize = 5;
+  private paginatedSearch = '';
   // ── Searchable + load more table (server-side) ──
   searchDataSource: TableDataSource<User> = {
     dataRows: new BehaviorSubject<User[]>([]),
     getID: (row) => row.id,
     emptyMessage: 'No users match your search.',
-    isDataLoading: false,
+    state: MnCollectionState.RETRIEVED,
     canSearch: true,
     searchPlaceholder: 'Search users...',
     paginationMode: 'load-more',
@@ -274,6 +272,9 @@ export class TableDemo implements OnInit {
       {key: 'age', header: 'Age', cell: (row) => String(row.age), sortType: ColumnSortType.NUMERICAL, align: 'right'},
     ],
   };
+  private loadMoreLoaded = 5;
+  private loadMoreSearch = '';
+  protected readonly CollectionState = MnCollectionState;
 
   onToolbarAction(): void {
     alert('Toolbar button clicked!');
@@ -290,7 +291,7 @@ export class TableDemo implements OnInit {
       dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
       getID: (row) => row.id,
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: true,
       searchPlaceholder: 'Search users...',
       paginationMode: 'none',
@@ -307,7 +308,7 @@ export class TableDemo implements OnInit {
       dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
       getID: (row) => row.id,
       emptyMessage: 'No users found.',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
       appearance: {hover: true, bordered: true},
@@ -322,7 +323,7 @@ export class TableDemo implements OnInit {
       dataRows: new BehaviorSubject<User[]>([...SAMPLE_USERS]),
       getID: (row) => row.id,
       emptyMessage: 'No users found.',
-      isDataLoading: true,
+      state: MnCollectionState.LOADING,
       skeletonRowCount: 4,
       canSearch: false,
       paginationMode: 'none',
@@ -357,10 +358,16 @@ export class TableDemo implements OnInit {
   }
 
   toggleSkeletonLoading(): void {
-    const loading = !this.defaultSkeletonDataSource.isDataLoading;
-    // mn-table is OnPush: replace the dataSource reference so the new isDataLoading is detected.
-    this.defaultSkeletonDataSource = {...this.defaultSkeletonDataSource, isDataLoading: loading};
-    this.profileSkeletonDataSource = {...this.profileSkeletonDataSource, isDataLoading: loading};
+    const loading = this.defaultSkeletonDataSource.state !== MnCollectionState.LOADING;
+    // mn-table is OnPush: replace the dataSource reference so the new state is detected.
+    this.defaultSkeletonDataSource = {
+      ...this.defaultSkeletonDataSource,
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+    };
+    this.profileSkeletonDataSource = {
+      ...this.profileSkeletonDataSource,
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+    };
   }
 
   onSelectionChange(selected: User[]): void {
