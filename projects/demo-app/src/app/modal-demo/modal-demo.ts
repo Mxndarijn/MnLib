@@ -9,6 +9,7 @@ import {
   ConfirmationTone,
   FieldKind,
   MnButton,
+  MnCollectionState,
   MnModalService,
   ModalBuilder,
   ModalCloseReason,
@@ -506,7 +507,7 @@ export class ModalDemo {
       columns,
       getID: (r) => r.id,
       emptyMessage: 'No team members found',
-      isDataLoading: false,
+      state: MnCollectionState.RETRIEVED,
       canSearch: true,
       searchPlaceholder: 'Search members...',
       isInSearch: (row, term) =>

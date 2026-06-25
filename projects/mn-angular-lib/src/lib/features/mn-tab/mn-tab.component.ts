@@ -1,5 +1,6 @@
 import {Component, DoCheck, EventEmitter, Input, isSignal, Output} from '@angular/core';
 import {MnTranslatePipe} from '../../language';
+import {MnCollectionState} from '../mn-collection';
 import {MnTabDataSource, MnTabItem} from './mn-tab.types';
 import {CommonModule} from '@angular/common';
 import {MnBadge} from '../mn-badge';
@@ -39,6 +40,14 @@ export class MnTabComponent implements DoCheck {
 
   /** The currently active tab item. */
   currentActive?: MnTabItem;
+
+  /**
+   * Whether the tab bar is loading and should render skeleton tabs, from
+   * {@link MnTabDataSource.state}.
+   */
+  get isLoadingState(): boolean {
+    return this.dataSource.state === MnCollectionState.LOADING;
+  }
 
   /**
    * Index array sizing the loading skeleton: `skeletonCount` when provided,

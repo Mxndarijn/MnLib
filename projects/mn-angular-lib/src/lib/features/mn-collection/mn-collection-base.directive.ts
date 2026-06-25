@@ -45,7 +45,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
    * Measured pixel height of the body container, applied as a `min-height` floor
    * while a server reload is in flight so the container can't collapse when the
    * data rows are swapped for skeletons. Released in {@link ngDoCheck} the moment
-   * `isDataLoading` clears. `0` means no lock.
+   * the loading state clears. `0` means no lock.
    */
   lockedMinHeight = 0;
 
@@ -93,13 +93,11 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
 
   /**
    * Single source of truth for the data lifecycle: the explicit
-   * {@link MnCollectionDataSource.state} when provided, otherwise derived from the
-   * legacy {@link MnCollectionDataSource.isDataLoading} boolean. Every internal
-   * loading check routes through this so both APIs stay in lockstep.
+   * {@link MnCollectionDataSource.state}, defaulting to RETRIEVED when unset.
+   * Every internal loading check routes through this.
    */
   get collectionState(): MnCollectionState {
-    if (this.dataSource.state != null) return this.dataSource.state;
-    return this.dataSource.isDataLoading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED;
+    return this.dataSource.state ?? MnCollectionState.RETRIEVED;
   }
 
   /** Whether the collection is currently loading (skeleton placeholders shown). */

@@ -115,7 +115,7 @@
     <div style="margin-bottom: 16px;">
       <button (click)="toggleSkeletonLoading()" [data]="{ color: 'secondary', size: 'sm', variant: 'outline' }"
               mnButton>
-        {{ defaultSkeletonDataSource.isDataLoading ? 'Show loaded data' : 'Show loading state' }}
+        {{ defaultSkeletonDataSource.state === CollectionState.LOADING ? 'Show loaded data' : 'Show loading state' }}
       </button>
     </div>
 

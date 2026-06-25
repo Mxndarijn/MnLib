@@ -13,8 +13,7 @@ type Row = {
 /**
  * Verifies that {@link MnTable} renders the correct chrome for each
  * {@link MnCollectionState}: skeletons while LOADING, the error placeholder on
- * ERROR, the empty state on RETRIEVED-with-no-rows, and that the legacy
- * `isDataLoading` boolean still drives the skeleton. The ERROR test also proves
+ * ERROR, and the empty state on RETRIEVED-with-no-rows. The ERROR test also proves
  * the zoneless re-render contract: flipping `state` only repaints once the
  * consumer re-emits on `dataRows`.
  */
@@ -77,14 +76,5 @@ describe('MnTable data lifecycle state', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Could not load');
     expect(fixture.nativeElement.textContent).not.toContain('No items');
-  });
-
-  it('honours the legacy isDataLoading boolean when state is unset', () => {
-    const ds = makeDataSource();
-    ds.isDataLoading = true;
-    fixture.componentInstance.dataSource = ds;
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('mn-skeleton')).toBeTruthy();
   });
 });

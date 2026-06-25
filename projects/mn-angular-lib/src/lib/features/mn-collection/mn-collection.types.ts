@@ -24,10 +24,9 @@ export type OffsetPaginationStrategy = {
  * renders: skeleton placeholders ({@link LOADING}), the rows or empty state
  * ({@link RETRIEVED}), or an error placeholder ({@link ERROR}).
  *
- * Preferred over the legacy boolean {@link MnCollectionDataSource.isDataLoading}.
- * Because the components are zoneless, a consumer that flips `state` to `ERROR`
- * (or `RETRIEVED`) must also emit on `dataRows` (e.g. `dataRows.next([])`) so the
- * component runs change detection and re-reads the new state.
+ * Because the components are zoneless and OnPush, a consumer that flips `state`
+ * to `ERROR` (or `RETRIEVED`) must also emit on `dataRows` (e.g. `dataRows.next([])`)
+ * so the component runs change detection and re-reads the new state.
  */
 export enum MnCollectionState {
   /** Data is being (re)loaded; skeleton placeholders are shown. */
@@ -74,17 +73,10 @@ export type MnCollectionDataSource<T> = {
   emptyTemplate?: TemplateRef<unknown>;
 
   /**
-   * Lifecycle state of the data. Preferred over {@link isDataLoading}; when set it
-   * fully controls loading / error / empty rendering. Defaults to RETRIEVED when
-   * neither `state` nor `isDataLoading` is provided.
+   * Lifecycle state of the data, controlling loading / error / empty rendering.
+   * Defaults to {@link MnCollectionState.RETRIEVED} when not set.
    */
   state?: MnCollectionState;
-
-  /**
-   * @deprecated Use {@link state} instead. Legacy boolean loading flag, still
-   * honoured when {@link state} is not set (`true` ⇒ LOADING, `false` ⇒ RETRIEVED).
-   */
-  isDataLoading?: boolean;
   /** Number of placeholder rows rendered while data is loading. Defaults to 5. */
   skeletonRowCount?: number;
 

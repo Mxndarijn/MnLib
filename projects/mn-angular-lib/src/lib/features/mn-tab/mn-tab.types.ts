@@ -1,4 +1,5 @@
 import {Signal} from '@angular/core';
+import {MnCollectionState} from '../mn-collection';
 
 /**
  * Configuration for a single tab item.
@@ -22,10 +23,13 @@ export type MnTabDataSource = {
   items: MnTabItem[];
   /** Index of the tab that should be active by default. */
   defaultActive: number;
-  /** When true, the tab bar renders a loading skeleton instead of the real tabs. */
-  isDataLoading?: boolean;
   /**
-   * Number of placeholder tabs to render while {@link isDataLoading} is true.
+   * Lifecycle state of the tab set. When {@link MnCollectionState.LOADING} the tab
+   * bar renders a loading skeleton; any other state renders the real tabs.
+   */
+  state?: MnCollectionState;
+  /**
+   * Number of placeholder tabs to render while {@link state} is LOADING.
    * Defaults to the number of known `items`, falling back to 3 when no items are
    * known yet. Set this only when the real tabs are not yet known at load time
    * (e.g. tabs that depend on data being fetched) to predict the final count.

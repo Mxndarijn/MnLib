@@ -43,7 +43,6 @@ function createTestDataSource(rows?: TestRow[]): TableDataSource<TestRow> {
     ],
     getID: (r: TestRow) => r.id,
     emptyMessage: 'No rows',
-    isDataLoading: false,
     canSearch: false,
   };
 }
