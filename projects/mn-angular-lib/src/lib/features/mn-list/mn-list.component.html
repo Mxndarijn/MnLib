@@ -28,7 +28,7 @@
   aria-label="Data list"
 >
   <!-- Loading state -->
-  @if (dataSource.isDataLoading) {
+  @if (isLoadingState) {
     @for (_ of skeletonRows; track $index) {
       <div [class.py-2]="dataSource.appearance?.compact" class="px-4 py-3" role="listitem">
         @if (isTemplateRef(dataSource.skeleton)) {
@@ -45,6 +45,17 @@
         <div class="border-b border-base-300"></div>
       }
     }
+  } @else if (isErrorState) {
+    <!-- Error state -->
+    <div class="text-center text-xs py-8" role="listitem">
+      @if (dataSource.errorTemplate) {
+        <ng-container [ngTemplateOutlet]="dataSource.errorTemplate"></ng-container>
+      } @else {
+        <div class="flex flex-col items-center gap-2 text-error">
+          <p class="text-sm">{{ dataSource.errorMessage }}</p>
+        </div>
+      }
+    </div>
   } @else {
     <!-- Empty state -->
     @if (filteredItems.length === 0) {

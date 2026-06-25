@@ -218,7 +218,7 @@
 
     <tbody>
       <!-- Loading state -->
-      @if (dataSource.isDataLoading) {
+        @if (isLoadingState) {
         @for (_ of skeletonRows; track $index) {
           <tr>
             @if (hasSelection) {
@@ -240,6 +240,19 @@
             }
           </tr>
         }
+        } @else if (isErrorState) {
+          <!-- Error state -->
+          <tr class="bg-base-100">
+            <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
+              @if (dataSource.errorTemplate) {
+                <ng-container [ngTemplateOutlet]="dataSource.errorTemplate"></ng-container>
+              } @else {
+                <div class="flex flex-col items-center gap-2 text-error">
+                  <p class="text-sm">{{ dataSource.errorMessage }}</p>
+                </div>
+              }
+            </td>
+          </tr>
       } @else {
         <!-- Empty state -->
         @if (filteredItems.length === 0) {
