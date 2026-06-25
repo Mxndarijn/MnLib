@@ -13,7 +13,7 @@ import {
 import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {MnLanguageService} from '../../language';
 import {MnSelectOption} from '../mn-select';
-import {MnCollectionDataSource} from './mn-collection.types';
+import {MnCollectionDataSource, MnCollectionState} from './mn-collection.types';
 
 /**
  * Shared chrome for MnLib collection components (table, list, grid):
@@ -79,7 +79,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     // writing the bound field can't trigger `ExpressionChangedAfterItHasBeenChecked`); the
     // {@link pageHeightMeasured} guard limits the actual measurement to once per pageSize.
     afterEveryRender(() => {
-      if (this.pageHeightMeasured || !this.isPaginated || this.dataSource.isDataLoading) return;
+      if (this.pageHeightMeasured || !this.isPaginated || this.isLoadingState) return;
       if (this.paginatedItems.length !== this.pageSize) return;
       const el = this.collectionBody?.nativeElement;
       if (!el) return;
@@ -87,6 +87,29 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
       this.pageHeightMeasured = true;
       this.cdr.markForCheck();
     });
+  }
+
+  // ── Data lifecycle state ──
+
+  /**
+   * Single source of truth for the data lifecycle: the explicit
+   * {@link MnCollectionDataSource.state} when provided, otherwise derived from the
+   * legacy {@link MnCollectionDataSource.isDataLoading} boolean. Every internal
+   * loading check routes through this so both APIs stay in lockstep.
+   */
+  get collectionState(): MnCollectionState {
+    if (this.dataSource.state != null) return this.dataSource.state;
+    return this.dataSource.isDataLoading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED;
+  }
+
+  /** Whether the collection is currently loading (skeleton placeholders shown). */
+  get isLoadingState(): boolean {
+    return this.collectionState === MnCollectionState.LOADING;
+  }
+
+  /** Whether loading failed (the error placeholder is shown instead of rows/empty). */
+  get isErrorState(): boolean {
+    return this.collectionState === MnCollectionState.ERROR;
   }
 
   // ── Template-method hooks ──
@@ -126,7 +149,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
    * paginated, not loading, with rows present. Keeps a short page from collapsing the body.
    */
   get reservedPageHeight(): number {
-    if (this.isPaginated && !this.dataSource.isDataLoading && this.filteredItems.length > 0) {
+    if (this.isPaginated && !this.isLoadingState && this.filteredItems.length > 0) {
       return this.fullPageHeight;
     }
     return 0;
@@ -232,7 +255,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   ngDoCheck(): void {
     // Release the height lock as soon as loading ends — same CD cycle that clears
     // the skeleton, so the lock can never outlive the skeleton it protects.
-    if (this.lockedMinHeight && !this.dataSource.isDataLoading) {
+    if (this.lockedMinHeight && !this.isLoadingState) {
       this.lockedMinHeight = 0;
     }
     const currentTemplate = this.trackedToolbarTemplate;
@@ -331,6 +354,9 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   protected resolveTranslationKeys(): void {
     if (this.dataSource.emptyMessageKey) {
       this.dataSource.emptyMessage = this.lang.t(this.dataSource.emptyMessageKey);
+    }
+    if (this.dataSource.errorMessageKey) {
+      this.dataSource.errorMessage = this.lang.t(this.dataSource.errorMessageKey);
     }
     if (this.dataSource.searchPlaceholderKey) {
       this.dataSource.searchPlaceholder = this.lang.t(this.dataSource.searchPlaceholderKey);

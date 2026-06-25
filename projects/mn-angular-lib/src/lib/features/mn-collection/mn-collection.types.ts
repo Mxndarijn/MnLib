@@ -18,6 +18,26 @@ export type OffsetPaginationStrategy = {
   totalItems?: number;
 } & PaginationStrategy
 
+// ── Data lifecycle state ──
+/**
+ * Lifecycle state of a collection's data, driving which chrome the component
+ * renders: skeleton placeholders ({@link LOADING}), the rows or empty state
+ * ({@link RETRIEVED}), or an error placeholder ({@link ERROR}).
+ *
+ * Preferred over the legacy boolean {@link MnCollectionDataSource.isDataLoading}.
+ * Because the components are zoneless, a consumer that flips `state` to `ERROR`
+ * (or `RETRIEVED`) must also emit on `dataRows` (e.g. `dataRows.next([])`) so the
+ * component runs change detection and re-reads the new state.
+ */
+export enum MnCollectionState {
+  /** Data is being (re)loaded; skeleton placeholders are shown. */
+  LOADING = 'LOADING',
+  /** Data has loaded (possibly empty); rows or the empty state are shown. */
+  RETRIEVED = 'RETRIEVED',
+  /** Loading failed; the error placeholder is shown. */
+  ERROR = 'ERROR',
+}
+
 // ── Pagination Mode ──
 export type PaginationMode =
   | 'none'
@@ -53,9 +73,27 @@ export type MnCollectionDataSource<T> = {
   emptyMessageKey?: string;
   emptyTemplate?: TemplateRef<unknown>;
 
-  isDataLoading: boolean;
+  /**
+   * Lifecycle state of the data. Preferred over {@link isDataLoading}; when set it
+   * fully controls loading / error / empty rendering. Defaults to RETRIEVED when
+   * neither `state` nor `isDataLoading` is provided.
+   */
+  state?: MnCollectionState;
+
+  /**
+   * @deprecated Use {@link state} instead. Legacy boolean loading flag, still
+   * honoured when {@link state} is not set (`true` ⇒ LOADING, `false` ⇒ RETRIEVED).
+   */
+  isDataLoading?: boolean;
   /** Number of placeholder rows rendered while data is loading. Defaults to 5. */
   skeletonRowCount?: number;
+
+  /** Message shown in the error placeholder when {@link state} is ERROR. */
+  errorMessage?: string;
+  /** Translation key for {@link errorMessage}; resolved via MnLanguageService. */
+  errorMessageKey?: string;
+  /** Custom template rendered in place of the default error placeholder. */
+  errorTemplate?: TemplateRef<unknown>;
 
   // Search
   canSearch: boolean;
