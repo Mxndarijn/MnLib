@@ -1,6 +1,9 @@
 // Types
 export * from './mn-modal.types';
 
+// Haptics (optional native feedback hook)
+export * from './mn-modal-haptics';
+
 // Builders
 export * from './builder';
 

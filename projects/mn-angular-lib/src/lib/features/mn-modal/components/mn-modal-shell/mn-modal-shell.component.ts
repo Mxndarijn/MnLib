@@ -34,6 +34,7 @@ import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-h
 import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.component';
 import {MnButton} from '../../../mn-button';
 import {LucideX} from '@lucide/angular';
+import {MN_HAPTICS} from '../../mn-modal-haptics';
 
 @Component({
   selector: 'mn-modal-shell',
@@ -54,6 +55,9 @@ import {LucideX} from '@lucide/angular';
 export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterViewInit, OnDestroy {
   private el = inject<ElementRef<HTMLElement>>(ElementRef);
   private cdr = inject(ChangeDetectorRef);
+  /** Downward release speed (px/ms) above which a short drag still dismisses — a "flick".
+   *  Native sheets dismiss on a quick flick regardless of distance, not just a long drag. */
+  private static readonly FLICK_VELOCITY = 0.5;
 
   @Input() config!: ModalConfig<TResult>;
   @Input() modalRef!: MnModalRef<TResult>;
@@ -69,16 +73,9 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   ngOnInit(): void {
     this.startPollingIfConfigured();
   }
-
-  ngAfterViewInit(): void {
-    this.previouslyFocusedElement = document.activeElement as HTMLElement;
-    this.setupFocusTrap();
-    // Focus the modal container
-    const container = this.el.nativeElement.querySelector('.modal-container') as HTMLElement;
-    if (container) {
-      container.focus();
-    }
-  }
+  /** Minimum drag distance (px) that must accompany a flick, so an incidental fast tap
+   *  on the grabber never dismisses. Below the distance threshold, only a flick dismisses. */
+  private static readonly FLICK_MIN_DISTANCE = 32;
 
   ngOnDestroy(): void {
     this.removeFocusTrap();
@@ -137,6 +134,11 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   }
 
   private static readonly SWIPE_DISMISS_THRESHOLD = 150;
+  /** Optional native haptic engine. Absent on the web — every call is null-guarded. */
+  private haptics = inject(MN_HAPTICS, {optional: true});
+  /** The two most recent (y, timestamp) pointer samples, used to estimate the release
+   *  velocity for flick-to-dismiss. `t` uses the event timestamp (monotonic, no Date). */
+  private lastSample: { y: number; t: number } | null = null;
 
   /** Upper bound for the close wait if no animation/transition end event fires
    *  (e.g. an animation was suppressed). Must stay longer than the slowest close
@@ -241,6 +243,15 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   sheetDragY = 0;
   /** True while the user is actively dragging the grabber (disables snap transition). */
   isDraggingSheet = false;
+  private prevSample: { y: number; t: number } | null = null;
+
+  /** True when this modal is currently presented as a bottom sheet (mobile config AND a
+   *  mobile-width viewport). Gates the swipe gesture and the open/drag haptics. */
+  private get isSheetViewport(): boolean {
+    return this.isMobileSheet
+      && typeof window !== 'undefined'
+      && window.innerWidth <= MnModalShellComponent.SHEET_MAX_WIDTH;
+  }
 
   @HostBinding('class') get hostClasses(): string {
     const size = this.config.sizeWidth || ModalSize.MD;
@@ -264,6 +275,20 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   /** Tailwind's `sm` breakpoint — below this the modal renders as a bottom sheet. */
   private static readonly SHEET_MAX_WIDTH = 639.98;
 
+  ngAfterViewInit(): void {
+    this.previouslyFocusedElement = document.activeElement as HTMLElement;
+    this.setupFocusTrap();
+    // Focus the modal container
+    const container = this.el.nativeElement.querySelector('.modal-container') as HTMLElement;
+    if (container) {
+      container.focus();
+    }
+    // A light tick as the sheet slides up, matching native sheet presentation.
+    if (this.isSheetViewport) {
+      this.haptics?.impact('light');
+    }
+  }
+
   onSheetPointerDown(event: PointerEvent): void {
     if (!this.isMobileSheet || !this.canClose) return;
     // Only a bottom sheet (mobile-width viewport) can be swiped away.
@@ -272,6 +297,10 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     if ((event.target as HTMLElement).closest('button')) return;
     this.isDraggingSheet = true;
     this.dragStartY = event.clientY;
+    // Seed the velocity samples so a fast flick that releases on the first move still
+    // has a baseline to measure against.
+    this.lastSample = {y: event.clientY, t: event.timeStamp};
+    this.prevSample = this.lastSample;
     (event.target as HTMLElement).setPointerCapture(event.pointerId);
   }
 
@@ -279,26 +308,60 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     if (!this.isDraggingSheet) return;
     // Only track downward movement.
     this.sheetDragY = Math.max(0, event.clientY - this.dragStartY);
+    // Roll the sample window forward so pointer-up can read the latest instantaneous speed.
+    this.prevSample = this.lastSample;
+    this.lastSample = {y: event.clientY, t: event.timeStamp};
   }
 
   async onSheetPointerUp(): Promise<void> {
     if (!this.isDraggingSheet) return;
     this.isDraggingSheet = false;
 
-    if (this.sheetDragY > MnModalShellComponent.SWIPE_DISMISS_THRESHOLD) {
+    if (this.shouldDismissSheet()) {
       const closed = await this.handleClose(ModalCloseReason.DISMISSED);
       if (closed) {
+        // A confirmed dismissal gets a slightly firmer tick than the open tap.
+        this.haptics?.impact('medium');
         // Continue the gesture: glide the sheet the rest of the way down rather than
         // snapping back to 0 and replaying the slide-up keyframe (which looked un-animated).
         this.swipeDismissing = true;
         this.sheetDragY = window.innerHeight;
         this.cdr.detectChanges();
       } else {
-        this.sheetDragY = 0; // guard rejected — spring back
+        this.snapBack(); // guard rejected — spring back
       }
     } else {
-      this.sheetDragY = 0; // not far enough — spring back
+      this.snapBack(); // not far enough / not a flick — spring back
     }
+
+    this.lastSample = null;
+    this.prevSample = null;
+  }
+
+  /** Whether the release should dismiss: a long-enough drag OR a fast downward flick. */
+  private shouldDismissSheet(): boolean {
+    if (this.sheetDragY > MnModalShellComponent.SWIPE_DISMISS_THRESHOLD) {
+      return true;
+    }
+    return this.releaseVelocity() > MnModalShellComponent.FLICK_VELOCITY
+      && this.sheetDragY > MnModalShellComponent.FLICK_MIN_DISTANCE;
+  }
+
+  /** Downward release speed (px/ms) from the last two pointer samples. Positive means
+   *  moving down. Returns 0 when there is no usable sample window. */
+  private releaseVelocity(): number {
+    if (!this.lastSample || !this.prevSample) return 0;
+    const dt = this.lastSample.t - this.prevSample.t;
+    if (dt <= 0) return 0;
+    return (this.lastSample.y - this.prevSample.y) / dt;
+  }
+
+  /** Springs the sheet back to rest and gives a subtle tick acknowledging the snap-back. */
+  private snapBack(): void {
+    if (this.sheetDragY > 0) {
+      this.haptics?.impact('light');
+    }
+    this.sheetDragY = 0;
   }
 
   /** Attempts to dismiss the modal. Resolves true if it was actually dismissed,

@@ -123,6 +123,12 @@
     width: 100%;
     max-width: 100%;
     max-height: 92vh;
+    /* Keep the footer / last content clear of the iOS home indicator. The sheet
+       background extends into the inset so it reads as one continuous surface.
+       The container is border-box (Tailwind preflight), so this padding sits inside
+       max-height — no need to subtract the inset from the cap. env() is 0 on the
+       web, so this is a no-op outside the native shell. */
+    padding-bottom: env(safe-area-inset-bottom);
     border-radius: 1rem 1rem 0 0;
     animation: slideUpIn 0.45s var(--mn-sheet-ease);
   }
