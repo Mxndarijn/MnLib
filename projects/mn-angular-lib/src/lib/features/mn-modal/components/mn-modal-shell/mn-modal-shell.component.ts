@@ -245,14 +245,6 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   isDraggingSheet = false;
   private prevSample: { y: number; t: number } | null = null;
 
-  /** True when this modal is currently presented as a bottom sheet (mobile config AND a
-   *  mobile-width viewport). Gates the swipe gesture and the open/drag haptics. */
-  private get isSheetViewport(): boolean {
-    return this.isMobileSheet
-      && typeof window !== 'undefined'
-      && window.innerWidth <= MnModalShellComponent.SHEET_MAX_WIDTH;
-  }
-
   @HostBinding('class') get hostClasses(): string {
     const size = this.config.sizeWidth || ModalSize.MD;
     const closing = this.isClosing ? ' closing' : '';
@@ -282,10 +274,6 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     const container = this.el.nativeElement.querySelector('.modal-container') as HTMLElement;
     if (container) {
       container.focus();
-    }
-    // A light tick as the sheet slides up, matching native sheet presentation.
-    if (this.isSheetViewport) {
-      this.haptics?.impact('light');
     }
   }
 
@@ -356,11 +344,8 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     return (this.lastSample.y - this.prevSample.y) / dt;
   }
 
-  /** Springs the sheet back to rest and gives a subtle tick acknowledging the snap-back. */
+  /** Springs the sheet back to its resting position after a drag that didn't dismiss. */
   private snapBack(): void {
-    if (this.sheetDragY > 0) {
-      this.haptics?.impact('light');
-    }
     this.sheetDragY = 0;
   }
 

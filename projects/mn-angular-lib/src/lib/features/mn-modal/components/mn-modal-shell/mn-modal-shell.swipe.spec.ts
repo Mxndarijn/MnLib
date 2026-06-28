@@ -96,7 +96,7 @@ describe('MnModalShellComponent swipe-to-dismiss', () => {
 
     expect(dismiss).not.toHaveBeenCalled();
     expect(comp.sheetDragY).toBe(0);
-    expect(haptics.impact).toHaveBeenCalledWith('light'); // snap-back tick
+    expect(haptics.impact).not.toHaveBeenCalled(); // snap-back is silent — only dismiss ticks
   });
 
   it('does not flick-dismiss a fast move that never travelled far enough', async () => {
@@ -108,9 +108,9 @@ describe('MnModalShellComponent swipe-to-dismiss', () => {
     expect(comp.sheetDragY).toBe(0);
   });
 
-  it('emits a light haptic as the sheet opens on a mobile viewport', () => {
+  it('does not emit any haptic merely on opening (only dismissal ticks)', () => {
     comp.ngAfterViewInit();
-    expect(haptics.impact).toHaveBeenCalledWith('light');
+    expect(haptics.impact).not.toHaveBeenCalled();
   });
 });
 
