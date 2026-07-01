@@ -247,7 +247,13 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
 
   @HostBinding('class') get hostClasses(): string {
     const size = this.config.sizeWidth || ModalSize.MD;
-    const closing = this.isClosing ? ' closing' : '';
+    // `closing` is intentionally NOT derived here. startClosing() adds the
+    // `.closing` class imperatively (classList.add) for reliable, zoneless-safe
+    // application. Deriving it from `isClosing` in this getter as well makes the
+    // host class string flip value after the view has been checked, which throws
+    // NG0100 (ExpressionChangedAfterItHasBeenCheckedError) in dev. Angular's class
+    // binding only manages the tokens it emits, so it leaves the imperatively
+    // added `.closing` untouched.
     const animType = typeof this.config.animation === 'string'
       ? this.config.animation
       : this.config.animation?.type || 'slide';
@@ -255,7 +261,7 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     const stacked = this.isStacked ? ' is-stacked' : '';
     const mobileSheet = this.isMobileSheet ? ' mobile-sheet' : '';
     const swiping = this.swipeDismissing ? ' swipe-dismissing' : '';
-    return `modal-shell modal-${size}${closing}${animation}${stacked}${mobileSheet}${swiping}`;
+    return `modal-shell modal-${size}${animation}${stacked}${mobileSheet}${swiping}`;
   }
   private dragStartY = 0;
 
