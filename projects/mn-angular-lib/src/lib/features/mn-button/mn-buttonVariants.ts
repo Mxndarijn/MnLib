@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from 'tailwind-variants';
+import {tv, type VariantProps} from 'tailwind-variants';
 
 export const mnButtonVariants = tv({
   base: 'inline-flex items-center justify-center hover:cursor-pointer transition-all duration-300 ease-in-out',
@@ -40,6 +40,11 @@ export const mnButtonVariants = tv({
     },
     disabled: {
       true: 'opacity-50 pointer-events-none',
+    },
+    // Busy state: dim and block interaction like `disabled`, and hint the wait cursor.
+    // The spinner itself is rendered in the template (see mn-button.html).
+    loading: {
+      true: 'opacity-50 pointer-events-none cursor-wait',
     },
     wrap: {
       true: 'whitespace-normal',
@@ -123,6 +128,7 @@ export const mnButtonVariants = tv({
     color: 'primary',
     borderRadius: 'lg',
     disabled: false,
+    loading: false,
     wrap: false,
     hover: true,
   },

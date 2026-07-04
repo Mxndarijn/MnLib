@@ -6,6 +6,7 @@ export type MnButtonTypes = {
   borderRadius: MnButtonVariants['borderRadius'];
   color: MnButtonVariants['color'];
   disabled?: MnButtonVariants['disabled'];
+  loading?: MnButtonVariants['loading'];
   wrap?: MnButtonVariants['wrap'];
   hover?: MnButtonVariants['hover'];
 }

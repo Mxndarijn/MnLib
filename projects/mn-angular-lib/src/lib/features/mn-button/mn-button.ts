@@ -1,6 +1,6 @@
-import {Component,  HostBinding,  Input } from '@angular/core';
-import { MnButtonTypes } from './mn-buttonTypes';
-import { mnButtonVariants } from './mn-buttonVariants';
+import {Component, HostBinding, Input} from '@angular/core';
+import {MnButtonTypes} from './mn-buttonTypes';
+import {mnButtonVariants} from './mn-buttonVariants';
 
 @Component({
   selector: 'button[mnButton], a[mnButton]',
@@ -10,6 +10,7 @@ import { mnButtonVariants } from './mn-buttonVariants';
 export class MnButton {
   @Input() data: Partial<MnButtonTypes> = {};
 
+  // A loading button is treated as non-interactive: it blocks clicks and is unfocusable,
   // Bind the computed classes to the host element
   @HostBinding('class')
   get hostClasses(): string {
@@ -19,9 +20,16 @@ export class MnButton {
       color: this.data.color,
       borderRadius: this.data.borderRadius,
       disabled: this.data.disabled,
+      loading: this.data.loading,
       wrap: this.data.wrap,
       hover: this.data.hover,
     });
+  }
+
+  // Signals assistive tech that the control is busy while a loading action runs.
+  @HostBinding('attr.aria-busy')
+  get ariaBusy() {
+    return this.data.loading ? 'true' : null;
   }
   // For accessibility (works for both <button> and <a>)
   @HostBinding('attr.aria-disabled')
@@ -32,13 +40,18 @@ export class MnButton {
   // Only meaningful for <button>. For <a> it does nothing semantically.
   @HostBinding('attr.disabled')
   get disabledAttr() {
-    return this.data.disabled ? '' : null;
+    return this.isBlocked ? '' : null;
   }
 
-  // Make disabled anchors unfocusable + prevent activation
+  // Make disabled/loading anchors unfocusable + prevent activation
   @HostBinding('attr.tabindex')
   get tabIndex() {
-    return this.data.disabled ? '-1' : null;
+    return this.isBlocked ? '-1' : null;
+  }
+
+  // so an in-flight action cannot be triggered a second time.
+  private get isBlocked(): boolean {
+    return !!(this.data.disabled || this.data.loading);
   }
 
 }
