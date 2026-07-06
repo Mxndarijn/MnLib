@@ -8,7 +8,8 @@ import {
   inject,
   Input,
   OnDestroy,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MnModalRef} from '../../mn-modal-ref';
@@ -63,7 +64,14 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   @Input() modalRef!: MnModalRef<TResult>;
 
   isClosing = false;
-  isStacked = false;
+  /**
+   * Whether another modal is stacked on top of this one. Set imperatively by
+   * `MnModalService` on the already-rendered shell below the newly opened one, so it must
+   * be a signal: mutating a plain field there changes the host `[class]` after the view was
+   * checked (NG0100 ExpressionChangedAfterItHasBeenChecked) and does not schedule change
+   * detection in a zoneless app. A signal write both notifies the host binding and schedules CD.
+   */
+  readonly isStacked = signal(false);
   readonly ModalKind = ModalKind;
   private previouslyFocusedElement: HTMLElement | null = null;
   private focusTrapListener: ((e: KeyboardEvent) => void) | null = null;
@@ -258,7 +266,7 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
       ? this.config.animation
       : this.config.animation?.type || 'slide';
     const animation = ` anim-${animType}`;
-    const stacked = this.isStacked ? ' is-stacked' : '';
+    const stacked = this.isStacked() ? ' is-stacked' : '';
     const mobileSheet = this.isMobileSheet ? ' mobile-sheet' : '';
     const swiping = this.swipeDismissing ? ' swipe-dismissing' : '';
     return `modal-shell modal-${size}${animation}${stacked}${mobileSheet}${swiping}`;
