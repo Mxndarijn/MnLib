@@ -1,14 +1,7 @@
-import {
-  Injectable,
-  ApplicationRef,
-  ComponentRef,
-  createComponent,
-  EnvironmentInjector,
-  inject,
-} from '@angular/core';
-import { MnModalRef } from './mn-modal-ref';
-import { ModalConfig } from './mn-modal.types';
-import { MnModalShellComponent } from './components/mn-modal-shell/mn-modal-shell.component';
+import {ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, inject, Injectable,} from '@angular/core';
+import {MnModalRef} from './mn-modal-ref';
+import {ModalConfig} from './mn-modal.types';
+import {MnModalShellComponent} from './components/mn-modal-shell/mn-modal-shell.component';
 
 @Injectable({
   providedIn: 'root',
@@ -34,7 +27,7 @@ export class MnModalService {
     // Update stack and dim previous modal
     if (this.modalStack.length > 0) {
       const prevModal = this.modalStack[this.modalStack.length - 1];
-      (prevModal.component as MnModalShellComponent<unknown>).isStacked = true;
+      (prevModal.component as MnModalShellComponent<unknown>).isStacked.set(true);
     }
     this.modalStack.push(modalRef as unknown as MnModalRef<unknown>);
 
@@ -54,7 +47,7 @@ export class MnModalService {
         this.modalStack.splice(index, 1);
         if (this.modalStack.length > 0) {
           const topModal = this.modalStack[this.modalStack.length - 1];
-          (topModal.component as MnModalShellComponent<unknown>).isStacked = false;
+          (topModal.component as MnModalShellComponent<unknown>).isStacked.set(false);
         }
       }
     });
