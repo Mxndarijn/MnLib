@@ -1,25 +1,27 @@
 ﻿<div class="w-full h-full flex flex-col" role="application" aria-label="Calendar">
 
   @if (isMobileView) {
-    <!-- Mobile (<375px): two rows â€” Today+action / date-nav -->
+    <!-- Mobile (<475px): action button as a full-width CTA on top; Today folds into the date-nav row below. -->
     <div class="flex flex-col gap-2 py-3">
-      <div class="flex items-center justify-center gap-2">
-        <button mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
-          {{ config.todayLabel }}
-        </button>
+      @if (buttons.length || showButton) {
         <div class="flex items-center gap-2">
           @for (btn of buttons; track btn.label) {
-            <button mnButton [data]="btn.buttonData || {}" (click)="btn.onClick()">{{ btn.label }}</button>
+            <button class="flex-1" mnButton [data]="btn.buttonData || {}" (click)="btn.onClick()">{{ btn.label }}</button>
           }
           @if (showButton) {
-            <button mnButton [data]="{}" (click)="ButtonClickedEvent.emit()">{{ buttonTitle }}</button>
+            <button class="flex-1" mnButton [data]="{}" (click)="ButtonClickedEvent.emit()">{{ buttonTitle }}</button>
           }
         </div>
-      </div>
-      <div class="flex items-center justify-center gap-1">
-        <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
-        <mn-lib-datetime [props]="{ id: 'calendar-date-picker', mode: 'date', size: 'md' }" [ngModel]="dateInputValue" (ngModelChange)="onDateStringChange($event)"></mn-lib-datetime>
-        <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigateNext()" aria-label="Next">&#8250;</button>
+      }
+      <div class="flex items-center gap-1">
+        <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'primary' }" (click)="goToToday()">
+          {{ config.todayLabel }}
+        </button>
+        <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
+        <div class="min-w-0 flex-1">
+          <mn-lib-datetime [props]="{ id: 'calendar-date-picker', mode: 'date', size: 'md' }" [ngModel]="dateInputValue" (ngModelChange)="onDateStringChange($event)"></mn-lib-datetime>
+        </div>
+        <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigateNext()" aria-label="Next">&#8250;</button>
       </div>
     </div>
   } @else if (isTabletView) {
