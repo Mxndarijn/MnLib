@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  computed,
   ElementRef,
   HostBinding,
   HostListener,
@@ -9,7 +10,8 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  signal
+  signal,
+  viewChild
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MnModalRef} from '../../mn-modal-ref';
@@ -73,6 +75,14 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
    */
   readonly isStacked = signal(false);
   readonly ModalKind = ModalKind;
+  /** The rendered wizard body, when this modal is a wizard — used to read the active step title. */
+  private readonly wizardBody = viewChild(MnWizardBodyComponent);
+  /**
+   * Title of the wizard's current step, or undefined for non-wizard modals.
+   * The template appends it to the modal title on small screens, where the
+   * step labels under the progress circles are hidden.
+   */
+  readonly wizardStepTitle = computed(() => this.wizardBody()?.currentStepTitle());
   private previouslyFocusedElement: HTMLElement | null = null;
   private focusTrapListener: ((e: KeyboardEvent) => void) | null = null;
   private pollingTimer: ReturnType<typeof setInterval> | null = null;

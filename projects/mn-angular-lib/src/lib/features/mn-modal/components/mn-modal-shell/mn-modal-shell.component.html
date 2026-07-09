@@ -46,7 +46,12 @@
        class="flex items-center justify-between p-6">
     <div class="flex flex-col gap-0.5">
       @if (config.title) {
-        <h2 class="m-0 text-xl font-semibold text-base-content" id="mn-modal-title">{{ config.title }}</h2>
+        <!-- On small screens the wizard's step labels (under the progress circles) are hidden,
+             so surface the active step name here as "Title - Step" instead. -->
+        <h2 class="m-0 text-xl font-semibold text-base-content"
+            id="mn-modal-title">{{ config.title }}@if (config.kind === ModalKind.WIZARD && wizardStepTitle()) {
+          <span class="sm:hidden font-normal text-base-content/60"> - {{ wizardStepTitle() }}</span>
+        }</h2>
       }
       @if (config.subtitle) {
         <p class="m-0 text-sm text-base-content/60 font-normal">{{ config.subtitle }}</p>

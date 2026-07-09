@@ -8,6 +8,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   ViewChildren,
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
@@ -52,6 +53,14 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren('stepWrapper') stepWrappers!: QueryList<ElementRef<HTMLElement>>;
 
   currentStepId!: ModalStepId;
+  /**
+   * Title of the currently active step, mirrored into a signal so the modal
+   * shell can append it to the modal title on small screens (where the step
+   * labels under the progress circles are hidden). A signal — not a getter —
+   * because the shell lives outside this component's change-detection subtree,
+   * so a plain field mutation here would not update the shell in a zoneless app.
+   */
+  readonly currentStepTitle = signal<string | undefined>(undefined);
   visitedStepIds: ModalStepId[] = [];
   isCurrentStepValid = true;
   isCompleting = false;
@@ -121,7 +130,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    this.currentStepId = this.config.startStepId || this.config.steps[0]?.id;
+    this.setCurrentStep(this.config.startStepId || this.config.steps[0]?.id);
     if (this.currentStepId) {
       this.visitedStepIds.push(this.currentStepId);
     }
@@ -151,6 +160,28 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isTextBody(step: WizardStepConfig): boolean {
     return typeof step.body === 'string';
+  }
+
+  async goToStep(step: WizardStepConfig): Promise<void> {
+    if (!this.canNavigateToStep(step)) return;
+    if (step.id === this.currentStepId) return;
+
+    // Validate current step's form before allowing direct step navigation
+    const formBody = this.getCurrentFormBody();
+    if (formBody && formBody.form.invalid) {
+      formBody.form.markAllAsTouched();
+      return;
+    }
+
+    const previousStepId = this.currentStepId;
+    this.setCurrentStep(step.id);
+
+    if (!this.visitedStepIds.includes(this.currentStepId)) {
+      this.visitedStepIds.push(this.currentStepId);
+    }
+
+    await this.notifyStepChange(previousStepId, NavigationDirection.DIRECT);
+    this.trackCurrentStepValidity();
   }
 
   ngOnDestroy(): void {
@@ -235,59 +266,6 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.isStepVisible(step);
   }
 
-  async goToStep(step: WizardStepConfig): Promise<void> {
-    if (!this.canNavigateToStep(step)) return;
-    if (step.id === this.currentStepId) return;
-
-    // Validate current step's form before allowing direct step navigation
-    const formBody = this.getCurrentFormBody();
-    if (formBody && formBody.form.invalid) {
-      formBody.form.markAllAsTouched();
-      return;
-    }
-
-    const previousStepId = this.currentStepId;
-    this.currentStepId = step.id;
-
-    if (!this.visitedStepIds.includes(this.currentStepId)) {
-      this.visitedStepIds.push(this.currentStepId);
-    }
-
-    await this.notifyStepChange(previousStepId, NavigationDirection.DIRECT);
-    this.trackCurrentStepValidity();
-  }
-
-  /** Find the MnFormBodyComponent for the current step */
-  private getCurrentFormBody(): MnFormBodyComponent | undefined {
-    if (!this.formBodies) return undefined;
-    // formBodies only contains entries for steps that have stepFormConfigs
-    // We need to find which form body index corresponds to the current step
-    const formStepIds = this.config.steps
-      .filter(s => this.stepFormConfigs[s.id])
-      .map(s => s.id);
-    const formIndex = formStepIds.indexOf(this.currentStepId);
-    if (formIndex === -1) return undefined;
-    return this.formBodies.toArray()[formIndex];
-  }
-
-  private trackCurrentStepValidity(): void {
-    // Unsubscribe from previous
-    this.statusSubscription?.unsubscribe();
-    this.statusSubscription = undefined;
-
-    const formBody = this.getCurrentFormBody();
-    if (formBody && formBody.form) {
-      this.isCurrentStepValid = formBody.form.valid;
-      this.statusSubscription = formBody.form.statusChanges.subscribe(() => {
-        this.isCurrentStepValid = formBody.form.valid;
-        this.cdr.detectChanges();
-      });
-    } else {
-      this.isCurrentStepValid = true;
-    }
-    this.cdr.detectChanges();
-  }
-
   async next(): Promise<void> {
     if (!this.canGoNext) return;
 
@@ -322,7 +300,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const previousStepId = this.currentStepId;
-    this.currentStepId = nextStep.id;
+    this.setCurrentStep(nextStep.id);
 
     if (!this.visitedStepIds.includes(this.currentStepId)) {
       this.visitedStepIds.push(this.currentStepId);
@@ -330,6 +308,37 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     await this.notifyStepChange(previousStepId, NavigationDirection.FORWARD);
     this.trackCurrentStepValidity();
+  }
+
+  /** Find the MnFormBodyComponent for the current step */
+  private getCurrentFormBody(): MnFormBodyComponent | undefined {
+    if (!this.formBodies) return undefined;
+    // formBodies only contains entries for steps that have stepFormConfigs
+    // We need to find which form body index corresponds to the current step
+    const formStepIds = this.config.steps
+      .filter(s => this.stepFormConfigs[s.id])
+      .map(s => s.id);
+    const formIndex = formStepIds.indexOf(this.currentStepId);
+    if (formIndex === -1) return undefined;
+    return this.formBodies.toArray()[formIndex];
+  }
+
+  private trackCurrentStepValidity(): void {
+    // Unsubscribe from previous
+    this.statusSubscription?.unsubscribe();
+    this.statusSubscription = undefined;
+
+    const formBody = this.getCurrentFormBody();
+    if (formBody && formBody.form) {
+      this.isCurrentStepValid = formBody.form.valid;
+      this.statusSubscription = formBody.form.statusChanges.subscribe(() => {
+        this.isCurrentStepValid = formBody.form.valid;
+        this.cdr.detectChanges();
+      });
+    } else {
+      this.isCurrentStepValid = true;
+    }
+    this.cdr.detectChanges();
   }
 
   async back(): Promise<void> {
@@ -348,10 +357,20 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     // Remove current step from visited so the circle resets
     this.visitedStepIds = this.visitedStepIds.filter(id => id !== this.currentStepId);
 
-    this.currentStepId = prevStep.id;
+    this.setCurrentStep(prevStep.id);
 
     await this.notifyStepChange(previousStepId, NavigationDirection.BACKWARD);
     this.trackCurrentStepValidity();
+  }
+
+  /**
+   * Activates a step and mirrors its title into {@link currentStepTitle} so the
+   * shell can reflect the step name in the modal title on small screens.
+   * @param stepId Id of the step to make current.
+   */
+  private setCurrentStep(stepId: ModalStepId): void {
+    this.currentStepId = stepId;
+    this.currentStepTitle.set(this.config.steps.find(s => s.id === stepId)?.title);
   }
 
   async complete(): Promise<void> {
