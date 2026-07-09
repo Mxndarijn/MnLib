@@ -438,6 +438,37 @@ describe('Integration: WizardModalBuilder → MnWizardBodyComponent', () => {
     expect(component.isLastStep).toBeTrue();
   });
 
+  it('should expose the current step title and update it on navigation', async () => {
+    const config = ModalBuilder.wizard()
+      .title('Wizard')
+      .addStep('Step 1', (s) => s.body('First'))
+      .addStep('Step 2', (s) => s.body('Second'))
+      .build();
+
+    setup(config);
+
+    // Initial step title is mirrored into the signal read by the shell.
+    expect(component.currentStepTitle()).toBe('Step 1');
+
+    await component.next();
+    expect(component.currentStepTitle()).toBe('Step 2');
+
+    await component.back();
+    expect(component.currentStepTitle()).toBe('Step 1');
+  });
+
+  it('should reflect the startAt step title from builder config', () => {
+    const config = ModalBuilder.wizard()
+      .addStep('Step 1', (s) => s.body('A'), 'first')
+      .addStep('Step 2', (s) => s.body('B'), 'second')
+      .startAt('second')
+      .build();
+
+    setup(config);
+
+    expect(component.currentStepTitle()).toBe('Step 2');
+  });
+
   it('should navigate backward', async () => {
     const config = ModalBuilder.wizard()
       .addStep('Step 1', (s) => s.body('First'))

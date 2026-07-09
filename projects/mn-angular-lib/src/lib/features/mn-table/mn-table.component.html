@@ -34,10 +34,8 @@
       <button
         type="button"
         mnButton
-        [data]="{ variant: 'outline', color: 'gray', size: 'md', borderRadius: 'md', hover: true }"
+        [data]="{ variant: 'outline', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
         class="w-full min-[375px]:w-auto gap-1.5"
-        [class.border-primary]="hasActiveFilters"
-        [class.text-primary]="hasActiveFilters"
         [attr.aria-expanded]="filtersPanelOpen"
         aria-controls="mn-table-filters-panel"
         (click)="toggleFiltersPanel()"

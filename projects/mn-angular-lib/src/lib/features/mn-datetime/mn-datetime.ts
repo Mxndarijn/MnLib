@@ -16,7 +16,34 @@ export const MN_DATETIME_CONFIG = new InjectionToken<MnDatetimeUIConfig>('MN_DAT
   standalone: true,
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-datetime.html',
-  styles: `input::-webkit-calendar-picker-indicator { cursor: pointer; }`,
+  styles: `
+    input::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+    }
+
+    /*
+     * iOS Safari renders native date/time inputs with a large, fixed intrinsic
+     * width and largely ignores the CSS box model (width / flex shrinking) while
+     * the native appearance is active. In a fullWidth / flex layout this makes the
+     * control overflow narrow screens ("too big, doesn't fit") on iPhone, even
+     * though Android and desktop honour the width. Resetting the native appearance
+     * and clearing the intrinsic min-width lets width:100% take effect so the input
+     * shrinks to its container. Scoped to coarse pointers so mouse-driven desktop
+     * browsers keep their native calendar-picker indicator untouched.
+     */
+    @media (pointer: coarse) {
+      input[type='date'],
+      input[type='datetime-local'],
+      input[type='time'],
+      input[type='month'],
+      input[type='week'] {
+        -webkit-appearance: none;
+        appearance: none;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+    }
+  `,
   host: {
     // Native date/time inputs have a platform-specific intrinsic width. Without an
     // explicit host width the inline host collapses to that intrinsic size, so the

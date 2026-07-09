@@ -1,6 +1,6 @@
-﻿import { InjectionToken } from '@angular/core';
-import { CalendarEvent } from './calendar-event.model';
-import { provideMnComponentConfig } from '../../../config/mn-component-config.providers';
+﻿import {InjectionToken} from '@angular/core';
+import {CalendarEvent} from './calendar-event.model';
+import {provideMnComponentConfig} from '../../../config';
 
 /**
  * Available calendar view modes.
@@ -26,6 +26,8 @@ export type CalendarConfig = {
   locale: string;
   /** Label for the "Today" navigation button. Default: `'Today'`. */
   todayLabel: string;
+  /** Placeholder for the date-selector-bar date picker. Default: `'Pick a date'`. */
+  pickDateLabel: string;
   /** Title shown above the upcoming-events sidebar. Default: `'Upcoming events'`. */
   upcomingEventsTitle: string;
   /** Message shown when there are no upcoming events. Default: `'No upcoming events'`. */
@@ -66,6 +68,7 @@ export const DEFAULT_CALENDAR_CONFIG: CalendarConfig = (() => {
     endHour: 22,
     locale,
     todayLabel: 'Today',
+    pickDateLabel: 'Pick a date',
     upcomingEventsTitle: 'Upcoming events',
     noUpcomingEvents: 'No upcoming events',
     viewLabels: { MONTH: 'Month', WEEK: 'Week', DAY: 'Day' },

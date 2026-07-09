@@ -1,88 +1,57 @@
-﻿<div class="w-full h-full flex flex-col" role="application" aria-label="Calendar">
+<div class="w-full h-full flex flex-col" role="application" aria-label="Calendar">
 
-  @if (isMobileView) {
-    <!-- Mobile (<475px): action button as a full-width CTA on top; Today folds into the date-nav row below. -->
-    <div class="flex flex-col gap-2 py-3">
-      @if (buttons.length || showButton) {
-        <div class="flex items-center gap-2">
-          @for (btn of buttons; track btn.label) {
-            <button class="flex-1" mnButton [data]="btn.buttonData || {}" (click)="btn.onClick()">{{ btn.label }}</button>
-          }
-          @if (showButton) {
-            <button class="flex-1" mnButton [data]="{}" (click)="ButtonClickedEvent.emit()">{{ buttonTitle }}</button>
-          }
-        </div>
-      }
-      <div class="flex items-center gap-1">
-        <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'primary' }" (click)="goToToday()">
-          {{ config.todayLabel }}
-        </button>
-        <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
-        <div class="min-w-0 flex-1">
-          <mn-lib-datetime [props]="{ id: 'calendar-date-picker', mode: 'date', size: 'md' }" [ngModel]="dateInputValue" (ngModelChange)="onDateStringChange($event)"></mn-lib-datetime>
-        </div>
-        <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigateNext()" aria-label="Next">&#8250;</button>
-      </div>
-    </div>
-  } @else if (isTabletView) {
-    <!-- Tablet (375pxâ€“1023px): single row â€” Today / date-nav / action buttons -->
-    <div class="flex items-center gap-3 py-3">
-      <div class="flex items-center gap-3 min-w-0 flex-1">
-        <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
-          {{ config.todayLabel }}
-        </button>
-        <div class="flex items-center gap-1 min-w-0">
-          <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
-          <div class="min-w-0 flex-1">
-            <mn-lib-datetime [props]="{ id: 'calendar-date-picker', mode: 'date', size: 'md' }" [ngModel]="dateInputValue" (ngModelChange)="onDateStringChange($event)"></mn-lib-datetime>
+  <!-- Toolbar: date strip and calendar controls (view switcher + action buttons) share one row only on very
+       wide screens (≥1500px). The breakpoint matches the date-selector bar's own two-layer→single-row switch
+       so they flip in lockstep; a mismatched breakpoint left the controls inlined while the date bar was
+       still stacked, producing a mixed layout. -->
+  <div class="flex flex-col min-[1500px]:flex-row min-[1500px]:items-center gap-2 py-3">
+    <!-- Responsive date-selector bar: Today, day-window arrows, day tiles and a date picker. -->
+    <mn-date-selector-bar
+      (dateSelected)="onDateStripChange($event)"
+      [locale]="config.locale"
+      [pickDateLabel]="config.pickDateLabel"
+      [selectedDate]="focusDay"
+      [todayLabel]="config.todayLabel"
+      class="min-w-0 min-[1500px]:flex-1">
+    </mn-date-selector-bar>
+
+    @if (!isMobileView || buttons.length || showButton) {
+      <!-- order-first stacks the controls above the date strip when the toolbar wraps (below 1500px). -->
+      <div class="flex items-center justify-end gap-2 shrink-0 order-first min-[1500px]:order-none">
+        <!-- View switcher (month / week / day) — hidden on mobile, which is forced to day view. -->
+        @if (!isMobileView) {
+          <div aria-label="Calendar view" class="flex border border-base-300 rounded-md overflow-hidden" role="tablist">
+            @for (view of viewOptions; track view.value) {
+              <button
+                (click)="switchView(view.value)"
+                [attr.aria-selected]="currentView === view.value"
+                [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
+                mnButton
+                role="tab">
+                {{ view.label }}
+              </button>
+            }
           </div>
-          <button class="shrink-0" mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigateNext()" aria-label="Next">&#8250;</button>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        @for (btn of buttons; track btn.label) {
-          <button mnButton [data]="btn.buttonData || {}" (click)="btn.onClick()">{{ btn.label }}</button>
         }
-        @if (showButton) {
-          <button mnButton [data]="{}" (click)="ButtonClickedEvent.emit()">{{ buttonTitle }}</button>
-        }
-      </div>
-    </div>
-  } @else {
-    <!-- Desktop (â‰¥1024px): full row â€” Today / date-nav / view-switcher / action buttons -->
-    <div class="flex items-center justify-between gap-3 py-3">
-      <div class="flex items-center gap-3">
-        <button mnButton [data]="{ size: 'md', variant: 'fill', color: 'primary' }" (click)="goToToday()">
-          {{ config.todayLabel }}
-        </button>
-        <div class="flex items-center gap-1">
-          <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigatePrevious()" aria-label="Previous">&#8249;</button>
-          <mn-lib-datetime [props]="{ id: 'calendar-date-picker', mode: 'date', size: 'md' }" [ngModel]="dateInputValue" (ngModelChange)="onDateStringChange($event)"></mn-lib-datetime>
-          <button mnButton [data]="{ size: 'md', variant: 'outline', color: 'gray' }" (click)="navigateNext()" aria-label="Next">&#8250;</button>
-        </div>
-        <div class="flex border border-base-300 rounded-md overflow-hidden" role="tablist" aria-label="Calendar view">
-          @for (view of viewOptions; track view.value) {
-            <button
-              mnButton
-              [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
-              role="tab"
-              [attr.aria-selected]="currentView === view.value"
-              (click)="switchView(view.value)">
-              {{ view.label }}
-            </button>
-          }
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        @for (btn of buttons; track btn.label) {
-          <button mnButton [data]="btn.buttonData || {}" (click)="btn.onClick()">{{ btn.label }}</button>
-        }
-        @if (showButton) {
-          <button mnButton [data]="{}" (click)="ButtonClickedEvent.emit()">{{ buttonTitle }}</button>
+
+        <!-- Action buttons (custom buttons + optional showButton CTA). -->
+        @if (buttons.length || showButton) {
+          <div [class.flex-1]="isMobileView" class="flex items-center gap-2">
+            @for (btn of buttons; track btn.label) {
+              <button (click)="btn.onClick()" [class.flex-1]="isMobileView" [data]="btn.buttonData || {}"
+                      mnButton>{{ btn.label }}
+              </button>
+            }
+            @if (showButton) {
+              <button (click)="ButtonClickedEvent.emit()" [class.flex-1]="isMobileView" [data]="{}"
+                      mnButton>{{ buttonTitle }}
+              </button>
+            }
+          </div>
         }
       </div>
-    </div>
-  }
+    }
+  </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-3 flex-1 min-h-0">
     <div class="min-w-0 min-h-0 overflow-hidden overflow-y-auto">

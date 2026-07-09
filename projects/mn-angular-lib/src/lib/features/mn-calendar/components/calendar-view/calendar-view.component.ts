@@ -24,15 +24,12 @@ import {
   resolveCalendarConfig
 } from '../../models/calendar-config.model';
 import {MnLanguageService} from '../../../../language';
-import {CALENDAR_DATE_FORMATTER, CalendarDateFormatter} from '../../services/calendar-date-formatter';
-import {DefaultCalendarDateFormatter} from '../../services/default-calendar-date-formatter';
 import {CalendarMonthComponent} from '../calendar-month/calendar-month.component';
 import {CalendarWeekComponent} from '../calendar-week/calendar-week.component';
 import {CalendarDayComponent} from '../calendar-day/calendar-day.component';
 import {UpcomingEventsComponent} from '../upcoming-events/upcoming-events.component';
 import {MnButton} from '../../../mn-button';
-import {MnDatetime} from '../../../mn-datetime';
-import {FormsModule} from '@angular/forms';
+import {MnDateSelectorBar} from '../../../mn-date-selector-bar';
 
 /**
  * Main calendar orchestrator component.
@@ -68,8 +65,7 @@ import {FormsModule} from '@angular/forms';
     CalendarDayComponent,
     UpcomingEventsComponent,
     MnButton,
-    MnDatetime,
-    FormsModule
+    MnDateSelectorBar
   ],
   templateUrl: './calendar-view.component.html',
   providers: [
@@ -99,7 +95,6 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   readonly CalendarView = CalendarView;
   currentView = CalendarView.WEEK;
   focusDay = new Date();
-  dateInputValue = '';
   viewOptions: { value: CalendarView; label: string }[] = [];
   isMobileView = false;
   isTabletView = false;
@@ -110,7 +105,6 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   internalFocusDayChanged = new Subject<Date>();
 
   private destroy$ = new Subject<void>();
-  private formatter: CalendarDateFormatter;
   protected config: CalendarConfig;
   /** Reference to the injected mn-config object (mutated in-place on locale change). */
   private readonly mnConfigRef: CalendarConfig | null;
@@ -118,11 +112,9 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private readonly lang = inject(MnLanguageService);
 
   constructor() {
-    const formatter = inject<CalendarDateFormatter | null>(CALENDAR_DATE_FORMATTER, {optional: true});
     const mnConfig = inject<CalendarConfig | null>(MN_CALENDAR_CONFIG, {optional: true});
     const legacyConfig = inject<CalendarConfig | null>(CALENDAR_CONFIG, {optional: true});
 
-    this.formatter = formatter ?? new DefaultCalendarDateFormatter();
     // Keep a reference to the injected config so we can re-read it after locale changes.
     this.mnConfigRef = mnConfig;
     // Priority: mn-config system > legacy CALENDAR_CONFIG > built-in defaults
@@ -145,7 +137,6 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     this.destroyRef.onDestroy(() => sub.unsubscribe());
 
     this.checkMobileView();
-    this.updateDateInput();
     this.RequestNewCalendarItemsEvent.emit(this.focusDay);
 
     if (this.NewCalendarItemsEvent) {
@@ -169,46 +160,9 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     this.currentView = view;
   }
 
-  /** Navigates to the previous period (month / week / day). */
-  navigatePrevious() {
-    const d = new Date(this.focusDay);
-    switch (this.currentView) {
-      case CalendarView.MONTH: d.setMonth(d.getMonth() - 1); break;
-      case CalendarView.WEEK: d.setDate(d.getDate() - 7); break;
-      case CalendarView.DAY: d.setDate(d.getDate() - 1); break;
-    }
-    this.setFocusDay(d);
-  }
-
-  /** Navigates to the next period (month / week / day). */
-  navigateNext() {
-    const d = new Date(this.focusDay);
-    switch (this.currentView) {
-      case CalendarView.MONTH: d.setMonth(d.getMonth() + 1); break;
-      case CalendarView.WEEK: d.setDate(d.getDate() + 7); break;
-      case CalendarView.DAY: d.setDate(d.getDate() + 1); break;
-    }
-    this.setFocusDay(d);
-  }
-
-  /** Navigates to today. */
-  goToToday() {
-    this.setFocusDay(new Date());
-  }
-
-  /** Handles the date-picker input change. */
-  onDateInputChange(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    if (value) {
-      this.setFocusDay(new Date(value));
-    }
-  }
-
-  /** Handles the mn-lib-datetime ngModel change. */
-  onDateStringChange(value: string) {
-    if (value) {
-      this.setFocusDay(new Date(value));
-    }
+  /** Handles a day selection from the date-selector bar. */
+  onDateStripChange(date: Date) {
+    this.setFocusDay(date);
   }
 
   /** Handles a day click from the month view â€” switches to day view. */
@@ -252,12 +206,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
   private setFocusDay(date: Date) {
     this.focusDay = date;
-    this.updateDateInput();
     this.internalFocusDayChanged.next(date);
     this.RequestNewCalendarItemsEvent.emit(date);
-  }
-
-  private updateDateInput() {
-    this.dateInputValue = this.formatter.formatDateForFormControl(this.focusDay);
   }
 }
