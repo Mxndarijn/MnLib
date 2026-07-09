@@ -23,12 +23,12 @@ import {MnLanguageService} from '../../language';
  * A single step in the responsive day-tile ladder: at viewport widths of at least
  * {@link minWidth} pixels, render {@link tiles} day tiles.
  */
-interface TileBreakpoint {
+type TileBreakpoint = {
   /** Minimum viewport width (px) at which this step applies. */
   minWidth: number;
   /** Number of day tiles to render at or above {@link minWidth}. */
   tiles: number;
-}
+};
 
 /**
  * Custom day-tile breakpoint ladder, evaluated from widest to narrowest so the
@@ -55,7 +55,7 @@ const TILE_BREAKPOINTS: readonly TileBreakpoint[] = [
 ];
 
 /** Represents a single day tile in the date selector. */
-export interface DayTile {
+export type DayTile = {
   /** The full date object (at midnight). */
   date: Date;
   /** Short day name (e.g. 'ma', 'Mon'). */
@@ -68,7 +68,7 @@ export interface DayTile {
   isSelected: boolean;
   /** Whether this tile represents today. */
   isToday: boolean;
-}
+};
 
 /**
  * Reusable, responsive date selector bar.
