@@ -10,7 +10,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  /* `padding-bottom` is transitioned too so a mobile bottom sheet rides up smoothly in sync
+     with the soft keyboard (see the `--keyboard-height` handling in the mobile-sheet block). */
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out, opacity 0.3s ease-in-out,
+  padding-bottom 0.25s ease-out;
 }
 
 :host(.is-stacked) {
@@ -117,12 +120,24 @@
 @media (max-width: 639.98px) {
   :host(.mobile-sheet) {
     align-items: flex-end;
+    /* Lift the whole sheet above the on-screen keyboard so focused fields stay visible.
+       On iOS the WKWebView does NOT resize when the keyboard opens (Capacitor `resize: none`,
+       chosen to avoid a relayout black-flash), so a bottom-anchored sheet would sit behind the
+       keyboard and no amount of inner scrolling can raise a low/last field above it — the sheet
+       itself must move up. Insetting this flex container by `--keyboard-height` (which the host
+       app publishes on iOS; 0 on web/Android where the view resizes natively) pushes the
+       flex-end-aligned sheet up by exactly the keyboard height. It's read as a plain CSS var,
+       so the library keeps no dependency on Capacitor. */
+    padding-bottom: var(--keyboard-height, 0px);
   }
 
   :host(.mobile-sheet) .modal-container {
     width: 100%;
     max-width: 100%;
-    max-height: 92vh;
+    /* Cap the sheet to the space left above the keyboard so a tall form shrinks and scrolls
+       internally instead of running off the top of the screen. Falls back to 92vh when the
+       keyboard is closed (`--keyboard-height` is 0). */
+    max-height: calc(92vh - var(--keyboard-height, 0px));
     /* Keep the footer / last content clear of the iOS home indicator. The sheet
        background extends into the inset so it reads as one continuous surface.
        The container is border-box (Tailwind preflight), so this padding sits inside
@@ -163,6 +178,7 @@
    short-circuits its close wait when reduced motion is requested.
    ========================= */
 @media (prefers-reduced-motion: reduce) {
+  :host,
   :host .modal-backdrop,
   :host .modal-container {
     animation-duration: 0.01ms !important;
