@@ -78,6 +78,9 @@
       }"
       (click)="cancel()"
     >
+      @if (cancelIcon; as icon) {
+        <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+      }
       {{ cancelLabel }}
     </button>
 
@@ -93,6 +96,9 @@
       [disabled]="isConfirmDisabled"
       (click)="confirm()"
     >
+      @if (confirmIcon; as icon) {
+        <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+      }
       {{ confirmLabel }}
     </button>
   </div>

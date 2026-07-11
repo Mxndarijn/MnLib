@@ -35,11 +35,13 @@ import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
 import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
 import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.component';
 import {MnLanguageService} from '../../../../language';
+import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
+import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-action-icons';
 
 @Component({
   selector: 'mn-wizard-body',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, MnFooterActionsComponent],
+  imports: [CommonModule, ReactiveFormsModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, MnFooterActionsComponent, LucideDynamicIcon],
   templateUrl: './mn-wizard-body.component.html',
   styleUrls: ['./mn-wizard-body.component.css'],
 })
@@ -250,6 +252,34 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get isLastStep(): boolean {
     return this.currentVisibleIndex === this.visibleSteps.length - 1;
+  }
+
+  /** Icon size (px) for the wizard action buttons. */
+  readonly actionIconSize = MODAL_ACTION_ICON_SIZE;
+
+  /** Whether action-button icons should render on this wizard (defaults to true). */
+  get showActionIcons(): boolean {
+    return this.config.showActionIcons !== false;
+  }
+
+  /**
+   * The leading icon for the back button, or null when icons are disabled.
+   * Shows a back arrow when navigation is possible, otherwise a cross (the
+   * button acts as "Close" on the first step).
+   */
+  get backIcon(): LucideIconData | null {
+    if (!this.showActionIcons) return null;
+    return this.canGoBack ? MN_MODAL_ACTION_ICONS.back : MN_MODAL_ACTION_ICONS.cancel;
+  }
+
+  /** The trailing icon for the next button, or null when icons are disabled. */
+  get nextIcon(): LucideIconData | null {
+    return this.showActionIcons ? MN_MODAL_ACTION_ICONS.next : null;
+  }
+
+  /** The leading icon for the complete button, or null when icons are disabled. */
+  get completeIcon(): LucideIconData | null {
+    return this.showActionIcons ? MN_MODAL_ACTION_ICONS.confirm : null;
   }
 
   /** Index of the current step for the progress line */

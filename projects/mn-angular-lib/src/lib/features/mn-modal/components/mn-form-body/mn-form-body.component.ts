@@ -54,6 +54,8 @@ import {MnCustomFieldHostDirective} from './mn-custom-field-host.directive';
 import {MnLanguageService} from '../../../../language';
 import {MnTable, TableDataSource} from '../../../mn-table';
 import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
+import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
+import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-action-icons';
 
 /**
  * A structural "view" over the {@link FormFieldConfig} discriminated union that
@@ -113,7 +115,7 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
 @Component({
   selector: 'mn-form-body',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnFileInput, MnSelect, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent],
+  imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnFileInput, MnSelect, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent, LucideDynamicIcon],
   templateUrl: './mn-form-body.component.html',
   styleUrls: ['./mn-form-body.component.css'],
 })
@@ -800,6 +802,24 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
    */
   onFileCleared(field: FormFieldConfig<TModel>): void {
     (field as FileFieldConfig<TModel>).onClear?.();
+  }
+
+  /** Icon size (px) for the footer action buttons. */
+  readonly actionIconSize = MODAL_ACTION_ICON_SIZE;
+
+  /** Whether action-button icons should render on this modal (defaults to true). */
+  get showActionIcons(): boolean {
+    return this.config.showActionIcons !== false;
+  }
+
+  /** The leading icon for the submit button, or null when icons are disabled. */
+  get submitIcon(): LucideIconData | null {
+    return this.showActionIcons ? MN_MODAL_ACTION_ICONS.confirm : null;
+  }
+
+  /** The leading icon for the cancel button, or null when icons are disabled. */
+  get cancelIcon(): LucideIconData | null {
+    return this.showActionIcons ? MN_MODAL_ACTION_ICONS.cancel : null;
   }
 
   async submit(): Promise<void> {

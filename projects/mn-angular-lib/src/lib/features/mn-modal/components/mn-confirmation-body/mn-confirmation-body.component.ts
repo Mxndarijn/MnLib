@@ -1,22 +1,19 @@
-import {ChangeDetectorRef, Component, Input, OnInit, ViewChild, inject} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MnModalRef } from '../../mn-modal-ref';
-import {
-  ConfirmationModalConfig,
-  ConfirmationTone,
-  ActionStyle,
-  ModalCloseReason,
-} from '../../mn-modal.types';
-import { MnButton } from '../../../mn-button/mn-button';
-import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
-import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
-import { MnLanguageService } from '../../../../language/mn-language.service';
+import {ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MnModalRef} from '../../mn-modal-ref';
+import {ActionStyle, ConfirmationModalConfig, ConfirmationTone, ModalCloseReason,} from '../../mn-modal.types';
+import {MnButton} from '../../../mn-button';
+import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
+import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
+import {MnLanguageService} from '../../../../language';
+import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
+import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-action-icons';
 
 @Component({
   selector: 'mn-confirmation-body',
   standalone: true,
-  imports: [CommonModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, ReactiveFormsModule],
+  imports: [CommonModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, ReactiveFormsModule, LucideDynamicIcon],
   templateUrl: './mn-confirmation-body.component.html',
   styleUrls: ['./mn-confirmation-body.component.css'],
 })
@@ -129,5 +126,31 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
       return this.confirmButtonStatus !== 'VALID';
     }
     return false;
+  }
+
+  /** Icon size (px) for the action buttons. */
+  readonly actionIconSize = MODAL_ACTION_ICON_SIZE;
+
+  /** Whether action-button icons should render on this modal (defaults to true). */
+  get showActionIcons(): boolean {
+    return this.config.showActionIcons !== false;
+  }
+
+  /**
+   * The leading icon for the confirm button, or null when icons are disabled.
+   * Uses the per-action override, else defaults by style (DANGER → trash, else check).
+   */
+  get confirmIcon(): LucideIconData | null {
+    if (!this.showActionIcons) return null;
+    if (this.config.confirm?.icon) return this.config.confirm.icon;
+    return this.confirmStyle === ActionStyle.DANGER
+      ? MN_MODAL_ACTION_ICONS.danger
+      : MN_MODAL_ACTION_ICONS.confirm;
+  }
+
+  /** The leading icon for the cancel button, or null when icons are disabled. */
+  get cancelIcon(): LucideIconData | null {
+    if (!this.showActionIcons) return null;
+    return this.config.cancel?.icon ?? MN_MODAL_ACTION_ICONS.cancel;
   }
 }
