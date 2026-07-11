@@ -20,9 +20,11 @@
   opacity: 0.8;
 }
 
-/* Swipe-to-dismiss: animate the spring-back, but follow the finger 1:1 while dragging. */
+/* Swipe-to-dismiss: animate the spring-back, but follow the finger 1:1 while dragging.
+   `min-height` is transitioned too so the mobile sheet grows/shrinks smoothly (not instantly)
+   when the soft keyboard opens/closes — see the `.mn-keyboard-open` growth rule below. */
 .modal-container {
-  transition: transform 0.35s var(--mn-sheet-ease);
+  transition: transform 0.35s var(--mn-sheet-ease), min-height 0.25s var(--mn-sheet-ease);
 }
 
 .modal-container.sheet-dragging {
@@ -122,6 +124,9 @@
   :host(.mobile-sheet) .modal-container {
     width: 100%;
     max-width: 100%;
+    /* Explicit resting min-height so the keyboard-open growth (min-height: 92vh) can transition
+       from a defined value (`auto` would jump instead of animate). */
+    min-height: 0;
     /* Cap the sheet at 92vh. The soft keyboard OVERLAYS the lower part of the sheet rather
        than lifting it (on iOS the WKWebView does not resize — Capacitor `resize: none` — so
        there is nothing to lift into): the sheet stays anchored at the bottom and its inner
@@ -144,12 +149,14 @@
      focused field into view — pinning the height to 92vh guarantees content above the keyboard
      for the inner scroll (with its `--keyboard-height` scroll-padding) to reveal the field.
      Read as a plain class/var, so the library keeps no dependency on Capacitor.
-     `!important` is required to beat the inline `[style.height]` the shell binds for FULL-size or
-     explicit `sizeHeight` sheets (an inline style otherwise always wins over a stylesheet rule,
-     leaving a short fixed-height sheet stuck behind the overlaying keyboard). A FULL (95vh) sheet
-     is capped to 92vh while the keyboard is open, which is fine. */
+     Uses `min-height` (not `height`) so it beats the inline `[style.height]` the shell binds for
+     FULL-size / explicit `sizeHeight` sheets WITHOUT `!important` — a larger `min-height` wins over
+     `height`, and `max-height: 92vh` caps a taller inline height back down — AND so the growth can
+     be smoothly transitioned (see the `.modal-container` transition above). The app only adds
+     `.mn-keyboard-open` when the focused field would actually be behind the keyboard, so a modal
+     whose field is already visible never grows. */
   :host-context(.mn-keyboard-open).mobile-sheet .modal-container {
-    height: 92vh !important;
+    min-height: 92vh;
   }
 
   /* Override whichever anim-* open animation was selected */

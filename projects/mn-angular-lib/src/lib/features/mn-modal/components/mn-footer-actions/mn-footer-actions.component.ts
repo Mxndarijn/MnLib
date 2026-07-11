@@ -1,13 +1,19 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MnButton } from '../../../mn-button/mn-button';
-import {MnButtonTypes} from '../../../mn-button/mn-buttonTypes';
-import { ModalFooterAction, ActionStyle } from '../../mn-modal.types';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
+import {
+  ActionStyle,
+  defaultIconForStyle,
+  MnButton,
+  MnButtonTypes,
+  MODAL_ACTION_ICON_SIZE,
+  ModalFooterAction
+} from 'mn-angular-lib';
 
 @Component({
   selector: 'mn-footer-actions',
   standalone: true,
-  imports: [CommonModule, MnButton],
+  imports: [CommonModule, MnButton, LucideDynamicIcon],
   host: { class: 'contents' },
   template: `
     @for (action of leftActions; track action.label) {
@@ -17,6 +23,9 @@ import { ModalFooterAction, ActionStyle } from '../../mn-modal.types';
         [disabled]="action.disabled || false"
         (click)="actionClick.emit(action)"
       >
+        @if (iconFor(action); as icon) {
+          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        }
         {{ action.label }}
       </button>
     }
@@ -30,6 +39,9 @@ import { ModalFooterAction, ActionStyle } from '../../mn-modal.types';
         [disabled]="action.disabled || false"
         (click)="actionClick.emit(action)"
       >
+        @if (iconFor(action); as icon) {
+          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        }
         {{ action.label }}
       </button>
     }
@@ -37,7 +49,22 @@ import { ModalFooterAction, ActionStyle } from '../../mn-modal.types';
 })
 export class MnFooterActionsComponent<TResult = unknown> {
   @Input() actions: ModalFooterAction<TResult>[] = [];
+  /** Whether to render leading icons on the action buttons (defaults to true). */
+  @Input() showIcons = true;
   @Output() actionClick = new EventEmitter<ModalFooterAction<TResult>>();
+
+  /** Icon size (px) for the footer action buttons. */
+  readonly actionIconSize = MODAL_ACTION_ICON_SIZE;
+
+  /**
+   * Resolves the leading icon for a footer action, or null when icons are disabled.
+   * Uses the per-action override, else the default derived from its style.
+   * @param action The footer action to resolve an icon for.
+   */
+  iconFor(action: ModalFooterAction<TResult>): LucideIconData | null {
+    if (!this.showIcons) return null;
+    return action.icon ?? defaultIconForStyle(action.style);
+  }
 
   get leftActions(): ModalFooterAction<TResult>[] {
     return this.actions.filter(a => a.position === 'left');

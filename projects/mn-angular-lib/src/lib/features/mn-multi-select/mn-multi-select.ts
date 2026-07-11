@@ -7,10 +7,16 @@ import {
   InjectionToken,
   Input,
   OnInit,
+  Renderer2,
   ViewChild
 } from '@angular/core';
 import {NgClass} from '@angular/common';
-import {MnMultiSelectProps, MnMultiSelectOption, MnMultiSelectErrorMessageData, MnMultiSelectUIConfig} from './mn-multi-selectTypes';
+import {
+  MnMultiSelectErrorMessageData,
+  MnMultiSelectOption,
+  MnMultiSelectProps,
+  MnMultiSelectUIConfig
+} from './mn-multi-selectTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnMultiSelectVariants} from './mn-multi-selectVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
@@ -42,9 +48,25 @@ export class MnMultiSelect implements OnInit {
   private readonly elRef = inject(ElementRef);
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer = inject(Renderer2);
 
   /** Reference to the trigger element for positioning the dropdown */
   @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
+  /** The panel element currently moved into `document.body`, if any. */
+  private movedPanel: HTMLElement | null = null;
+
+  /**
+   * The dropdown panel element, queried while it is rendered by the `@if` block.
+   * The setter relocates the panel to `document.body` so that its `position: fixed`
+   * coordinates resolve against the viewport rather than any transformed/filtered
+   * ancestor (which would otherwise become the containing block and push the panel
+   * to the middle of the screen — the root cause of the mis-positioning bug, also
+   * broken on iOS). Cleanup is handled when the query clears on close/destroy.
+   */
+  @ViewChild('dropdown', {static: false})
+  set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
+    this.relocateDropdown(ref?.nativeElement ?? null);
+  }
 
   /** Currently selected values */
   selectedValues: unknown[] = [];
@@ -73,7 +95,26 @@ export class MnMultiSelect implements OnInit {
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
     });
-    this.destroyRef.onDestroy(() => sub.unsubscribe());
+    this.destroyRef.onDestroy(() => {
+      sub.unsubscribe();
+      // Guarantee the portalled panel never outlives the component.
+      this.relocateDropdown(null);
+    });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as Node | null;
+    // The panel lives at the body root once open, so it is not a descendant of the
+    // host element — treat clicks inside the portalled panel as "inside" too.
+    const insideHost = !!target && this.elRef.nativeElement.contains(target);
+    const insidePanel = !!target && !!this.movedPanel && this.movedPanel.contains(target);
+    if (!insideHost && !insidePanel) {
+      if (this.isOpen) {
+        this.isOpen = false;
+        this.searchTerm = '';
+      }
+    }
   }
 
   private resolveConfig() {
@@ -133,13 +174,35 @@ export class MnMultiSelect implements OnInit {
     };
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    if (!this.elRef.nativeElement.contains(event.target)) {
-      if (this.isOpen) {
-        this.isOpen = false;
-        this.searchTerm = '';
+  /** Closes the dropdown on Escape for keyboard accessibility. */
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.isOpen) {
+      this.isOpen = false;
+      this.searchTerm = '';
+    }
+  }
+
+  /**
+   * Move the dropdown panel to `document.body` when it appears, and detach it when
+   * the query clears. Appending to the body root makes the panel immune to ancestor
+   * `transform`/`filter`/`will-change`, so `position: fixed` anchors to the viewport
+   * and the panel stays under its trigger. Idempotent and safe to call with `null`.
+   */
+  private relocateDropdown(el: HTMLElement | null): void {
+    if (el) {
+      if (this.movedPanel === el) return;
+      this.renderer.appendChild(document.body, el);
+      this.movedPanel = el;
+      return;
+    }
+    if (this.movedPanel) {
+      // Angular's view teardown may already have removed it; only detach if still attached.
+      const parent = this.movedPanel.parentNode;
+      if (parent) {
+        this.renderer.removeChild(parent, this.movedPanel);
       }
+      this.movedPanel = null;
     }
   }
 
@@ -241,8 +304,8 @@ export class MnMultiSelect implements OnInit {
       return msgDef(errorArgs, errors);
     }
     // Interpolate {{placeholder}} tokens with validation error args
-    if (typeof msgDef === 'string' && errorArgs && typeof errorArgs === 'object') {
-      return msgDef.replace(/\{\{(\w+)\}\}/g, (_, key) => errorArgs[key] ?? _);
+    if (errorArgs && typeof errorArgs === 'object') {
+      return msgDef.replace(/\{\{(\w+)}}/g, (_, key) => errorArgs[key] ?? _);
     }
     return msgDef;
   }

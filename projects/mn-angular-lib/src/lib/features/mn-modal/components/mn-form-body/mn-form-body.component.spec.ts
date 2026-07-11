@@ -1,10 +1,12 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {Validators} from '@angular/forms';
+import {By} from '@angular/platform-browser';
 import {
   FieldKind,
   FormFieldConfig,
   FormFieldGroup,
   FormModalConfig,
+  MN_MODAL_ACTION_ICONS,
   MnFormBodyComponent,
   MnModalRef,
   ModalKind
@@ -257,5 +259,27 @@ describe('MnFormBodyComponent', () => {
     expect(component.isFieldReadOnly(component.config.fields[0])).toBeTrue();
     // form should also be disabled by default if readOnly is true in ngOnInit
     expect(component.form.disabled).toBeTrue();
+  });
+
+  describe('action icons', () => {
+    it('defaults the submit icon to check and the cancel icon to cross', () => {
+      setup(createFormConfig([{kind: FieldKind.TEXT, key: 'name', label: 'Name'}]));
+      expect(component.submitIcon).toBe(MN_MODAL_ACTION_ICONS.confirm);
+      expect(component.cancelIcon).toBe(MN_MODAL_ACTION_ICONS.cancel);
+      const icons = fixture.debugElement.queryAll(By.css('.mt-auto button svg'));
+      expect(icons.length).toBe(2);
+    });
+
+    it('renders no footer icons when showActionIcons is false', () => {
+      setup({
+        kind: ModalKind.FORM,
+        showActionIcons: false,
+        fields: [{kind: FieldKind.TEXT, key: 'name', label: 'Name'}],
+      } as FormModalConfig<Record<string, unknown>, Record<string, unknown>>);
+      expect(component.submitIcon).toBeNull();
+      expect(component.cancelIcon).toBeNull();
+      const icons = fixture.debugElement.queryAll(By.css('.mt-auto button svg'));
+      expect(icons.length).toBe(0);
+    });
   });
 });

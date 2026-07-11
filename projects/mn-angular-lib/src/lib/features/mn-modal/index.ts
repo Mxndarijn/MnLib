@@ -1,6 +1,9 @@
 // Types
 export * from './mn-modal.types';
 
+// Action-button icon defaults
+export * from './mn-modal-action-icons';
+
 // Haptics (optional native feedback hook)
 export * from './mn-modal-haptics';
 

@@ -2,11 +2,13 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {Validators} from '@angular/forms';
 import {By} from '@angular/platform-browser';
+import {LucideHeart, LucideTrash2} from '@lucide/angular';
 import {
   ActionStyle,
   ConfirmationModalConfig,
   ConfirmationTone,
   FieldKind,
+  MN_MODAL_ACTION_ICONS,
   MnConfirmationBodyComponent,
   MnModalRef,
   ModalCloseReason,
@@ -167,5 +169,41 @@ describe('MnConfirmationBodyComponent', () => {
     const confirmBtn = buttons[1];
     expect(confirmBtn.nativeElement.disabled).toBeFalse();
     expect(component.confirmButtonStatus).toBe('VALID');
+  });
+
+  describe('action icons', () => {
+    it('defaults the confirm icon to check and the cancel icon to cross', () => {
+      setup();
+      expect(component.confirmIcon).toBe(MN_MODAL_ACTION_ICONS.confirm);
+      expect(component.cancelIcon).toBe(MN_MODAL_ACTION_ICONS.cancel);
+    });
+
+    it('uses the trash icon for a DANGER-styled confirm button', () => {
+      setup({confirm: {label: 'Delete', style: ActionStyle.DANGER}});
+      expect(component.confirmIcon).toBe(MN_MODAL_ACTION_ICONS.danger);
+    });
+
+    it('lets a per-action icon override the default', () => {
+      setup({
+        confirm: {label: 'Yes', icon: LucideHeart.icon},
+        cancel: {label: 'No', icon: LucideTrash2.icon},
+      });
+      expect(component.confirmIcon).toBe(LucideHeart.icon);
+      expect(component.cancelIcon).toBe(LucideTrash2.icon);
+    });
+
+    it('renders a leading icon svg on each action button by default', () => {
+      setup();
+      const icons = fixture.debugElement.queryAll(By.css('button svg'));
+      expect(icons.length).toBe(2);
+    });
+
+    it('renders no icons when showActionIcons is false', () => {
+      setup({showActionIcons: false});
+      expect(component.confirmIcon).toBeNull();
+      expect(component.cancelIcon).toBeNull();
+      const icons = fixture.debugElement.queryAll(By.css('button svg'));
+      expect(icons.length).toBe(0);
+    });
   });
 });

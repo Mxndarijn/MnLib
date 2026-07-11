@@ -432,6 +432,9 @@
         [data]="{ variant: 'outline', color: 'secondary' }"
         (mousedown)="modalRef.dismiss(ModalCloseReason.CANCELLED)"
       >
+        @if (cancelIcon; as icon) {
+          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        }
         {{ labels.cancel }}
       </button>
 
@@ -443,6 +446,9 @@
         [data]="{ variant: 'fill', color: 'primary', disabled: form.invalid || isSubmitting }"
         [disabled]="form.invalid || isSubmitting"
       >
+        @if (submitIcon; as icon) {
+          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        }
         {{ isSubmitting ? labels.submitting : labels.submit }}
       </button>
     </div>

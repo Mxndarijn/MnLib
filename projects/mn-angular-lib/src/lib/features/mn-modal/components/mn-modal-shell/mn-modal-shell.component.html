@@ -118,6 +118,7 @@
     <div class="flex gap-3 p-6 border-t border-base-300">
       <mn-footer-actions
         [actions]="config.footerActions || []"
+        [showIcons]="config.showActionIcons !== false"
         (actionClick)="onFooterAction($event)"
       ></mn-footer-actions>
     </div>

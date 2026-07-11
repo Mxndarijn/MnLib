@@ -108,6 +108,9 @@
         [data]="{ variant: 'outline', color: 'secondary' }"
         (click)="back()"
       >
+        @if (backIcon; as icon) {
+          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        }
         {{ currentStep?.backLabel || (canGoBack ? labels.back : labels.close) }}
       </button>
     }
@@ -116,6 +119,7 @@
     @if (config.footerActions) {
       <mn-footer-actions
         [actions]="config.footerActions"
+        [showIcons]="showActionIcons"
         (actionClick)="handleFooterAction($any($event))"
       ></mn-footer-actions>
     } @else {
@@ -129,6 +133,9 @@
         (click)="next()"
       >
         {{ currentStep?.nextLabel || labels.next }}
+        @if (nextIcon; as icon) {
+          <svg [lucideIcon]="icon" [size]="actionIconSize" class="ml-2"></svg>
+        }
       </button>
     }
 
@@ -139,6 +146,9 @@
         [disabled]="!isCurrentStepValid || isCompleting"
         (click)="complete()"
       >
+        @if (completeIcon; as icon) {
+          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        }
         {{ currentStep?.nextLabel || (isCompleting ? labels.completing : labels.complete) }}
       </button>
     }

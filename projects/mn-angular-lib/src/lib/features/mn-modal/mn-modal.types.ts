@@ -1,9 +1,11 @@
 import {TemplateRef, Type} from '@angular/core';
 import {Observable} from 'rxjs';
 import {AsyncValidatorFn, ValidatorFn} from '@angular/forms';
+import {LucideIconData} from '@lucide/angular';
 import {TableDataSource} from '../mn-table';
 
 export { Type, TemplateRef };
+export type {LucideIconData};
 
 // =========================
 // Enums / Value Types
@@ -696,12 +698,24 @@ export type ConfirmationActionConfig<TResult = unknown> = {
   label: string;
   style?: ActionStyle;
   handler?: ModalResultHandler<TResult>;
+  /**
+   * Overrides the default leading icon for this action button. Pass a Lucide icon's
+   * static data (e.g. `LucideTrash2.icon`). Only rendered when the modal's
+   * `showActionIcons` is not explicitly `false`.
+   */
+  icon?: LucideIconData;
 }
 
 export type CancellationActionConfig = {
   label: string;
   style?: ActionStyle;
   reason?: ModalCloseReason;
+  /**
+   * Overrides the default leading icon for this action button. Pass a Lucide icon's
+   * static data (e.g. `LucideX.icon`). Only rendered when the modal's
+   * `showActionIcons` is not explicitly `false`.
+   */
+  icon?: LucideIconData;
 }
 
 // =========================
@@ -721,6 +735,12 @@ export type ModalFooterAction<TResult = unknown> = {
   handler?: (modalRef: ModalRef<TResult>) => Promise<void> | void;
   /** Whether the button is disabled */
   disabled?: boolean;
+  /**
+   * Overrides the default leading icon for this action button. Pass a Lucide icon's
+   * static data (e.g. `LucideCheck.icon`). Defaults are derived from `style` when
+   * omitted. Only rendered when the modal's `showActionIcons` is not explicitly `false`.
+   */
+  icon?: LucideIconData;
 }
 
 // =========================
@@ -796,6 +816,8 @@ export type BaseModalConfig<TResult = unknown> = {
   resultType?: TResult;
   /** Custom footer actions (overrides default footer) */
   footerActions?: ModalFooterAction<TResult>[];
+  /** Whether modal action buttons render their icons. Defaults to true. */
+  showActionIcons?: boolean;
   /** Polling configuration for periodic async operations */
   polling?: ModalPollingConfig<TResult>;
   /** Handler called when the modal is cancelled or dismissed */
