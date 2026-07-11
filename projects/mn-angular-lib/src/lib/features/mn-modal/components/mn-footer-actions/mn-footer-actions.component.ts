@@ -1,14 +1,9 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
-import {
-  ActionStyle,
-  defaultIconForStyle,
-  MnButton,
-  MnButtonTypes,
-  MODAL_ACTION_ICON_SIZE,
-  ModalFooterAction
-} from 'mn-angular-lib';
+import {MnButton, MnButtonTypes} from '../../../mn-button';
+import {ActionStyle, ModalFooterAction} from '../../mn-modal.types';
+import {defaultIconForStyle, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-action-icons';
 
 @Component({
   selector: 'mn-footer-actions',
