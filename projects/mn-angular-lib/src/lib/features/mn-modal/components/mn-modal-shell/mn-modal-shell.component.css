@@ -10,10 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* `padding-bottom` is transitioned too so a mobile bottom sheet rides up smoothly in sync
-     with the soft keyboard (see the `--keyboard-height` handling in the mobile-sheet block). */
-  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out, opacity 0.3s ease-in-out,
-  padding-bottom 0.25s ease-out;
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
 :host(.is-stacked) {
@@ -120,24 +117,17 @@
 @media (max-width: 639.98px) {
   :host(.mobile-sheet) {
     align-items: flex-end;
-    /* Lift the whole sheet above the on-screen keyboard so focused fields stay visible.
-       On iOS the WKWebView does NOT resize when the keyboard opens (Capacitor `resize: none`,
-       chosen to avoid a relayout black-flash), so a bottom-anchored sheet would sit behind the
-       keyboard and no amount of inner scrolling can raise a low/last field above it — the sheet
-       itself must move up. Insetting this flex container by `--keyboard-height` (which the host
-       app publishes on iOS; 0 on web/Android where the view resizes natively) pushes the
-       flex-end-aligned sheet up by exactly the keyboard height. It's read as a plain CSS var,
-       so the library keeps no dependency on Capacitor. */
-    padding-bottom: var(--keyboard-height, 0px);
   }
 
   :host(.mobile-sheet) .modal-container {
     width: 100%;
     max-width: 100%;
-    /* Cap the sheet to the space left above the keyboard so a tall form shrinks and scrolls
-       internally instead of running off the top of the screen. Falls back to 92vh when the
-       keyboard is closed (`--keyboard-height` is 0). */
-    max-height: calc(92vh - var(--keyboard-height, 0px));
+    /* Cap the sheet at 92vh. The soft keyboard OVERLAYS the lower part of the sheet rather
+       than lifting it (on iOS the WKWebView does not resize — Capacitor `resize: none` — so
+       there is nothing to lift into): the sheet stays anchored at the bottom and its inner
+       scroll area scrolls the focused field up above the keyboard (see the `.mn-keyboard-open`
+       growth rule below plus `scroll-padding-bottom` in the host app's styles.css). */
+    max-height: 92vh;
     /* Keep the footer / last content clear of the iOS home indicator. The sheet
        background extends into the inset so it reads as one continuous surface.
        The container is border-box (Tailwind preflight), so this padding sits inside
@@ -146,6 +136,20 @@
     padding-bottom: env(safe-area-inset-bottom);
     border-radius: 1rem 1rem 0 0;
     animation: slideUpIn 0.45s var(--mn-sheet-ease);
+  }
+
+  /* While the soft keyboard is open (the host app adds `.mn-keyboard-open` to <html> on iOS),
+     grow the sheet to the full capped height. The keyboard overlays the lower part, so a
+     SHORT form would otherwise sit entirely behind the keyboard with no room to scroll the
+     focused field into view — pinning the height to 92vh guarantees content above the keyboard
+     for the inner scroll (with its `--keyboard-height` scroll-padding) to reveal the field.
+     Read as a plain class/var, so the library keeps no dependency on Capacitor.
+     `!important` is required to beat the inline `[style.height]` the shell binds for FULL-size or
+     explicit `sizeHeight` sheets (an inline style otherwise always wins over a stylesheet rule,
+     leaving a short fixed-height sheet stuck behind the overlaying keyboard). A FULL (95vh) sheet
+     is capped to 92vh while the keyboard is open, which is fine. */
+  :host-context(.mn-keyboard-open).mobile-sheet .modal-container {
+    height: 92vh !important;
   }
 
   /* Override whichever anim-* open animation was selected */
