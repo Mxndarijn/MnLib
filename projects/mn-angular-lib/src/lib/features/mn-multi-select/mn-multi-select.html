@@ -29,6 +29,11 @@
     <div class="flex flex-row items-center gap-x-2 flex-wrap min-h-6">
       @if (selectedOptions.length === 0) {
         <span class="text-base-content/50">{{ uiConfig.placeholder || props.placeholder || 'Select...' }}</span>
+      } @else if (isCollapsed) {
+        <span
+          class="inline-flex items-center bg-base-200 border border-accent text-base-content text-xs px-2 py-0.5 rounded-md">
+          {{ collapseSummaryText }}
+        </span>
       } @else {
         @for (opt of selectedOptions; track opt.value) {
           <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->

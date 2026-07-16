@@ -180,3 +180,131 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     expect(panel()).toBeNull();
   });
 });
+
+/**
+ * Coverage for the opt-in "collapse selected to a count summary" feature: once the
+ * number of selected options passes a threshold, the trigger renders a single
+ * summary (e.g. "18 selected") instead of every chip.
+ */
+@Component({
+  standalone: true,
+  imports: [MnMultiSelect],
+  template: `
+    <mn-lib-multi-select [props]="props"></mn-lib-multi-select> `,
+})
+class CollapseHostComponent {
+  /** Six selectable options so tests can cross the default threshold of 5. */
+  props: MnMultiSelectProps = {
+    id: 'collapse-ms',
+    options: [
+      {label: 'One', value: 1},
+      {label: 'Two', value: 2},
+      {label: 'Three', value: 3},
+      {label: 'Four', value: 4},
+      {label: 'Five', value: 5},
+      {label: 'Six', value: 6},
+    ],
+  };
+}
+
+describe('MnMultiSelect (collapse to count summary)', () => {
+  let fixture: ComponentFixture<CollapseHostComponent>;
+  let host: CollapseHostComponent;
+  let component: MnMultiSelect;
+
+  /**
+   * The chip/summary elements rendered directly in the trigger's selected-values row.
+   * Selects only the row's direct `<span>` children so nested chip buttons (which also
+   * carry `inline-flex`) are not double-counted.
+   */
+  function chips(): HTMLElement[] {
+    return Array.from(
+      fixture.nativeElement.querySelectorAll('#collapse-ms > div > span'),
+    ) as HTMLElement[];
+  }
+
+  /** The visible text of the trigger's selected-values row. */
+  function triggerText(): string {
+    return (fixture.nativeElement.querySelector('#collapse-ms') as HTMLElement).textContent!.trim();
+  }
+
+  /** Rebuilds the fixture so per-test prop tweaks are picked up before first render. */
+  function build(props: Partial<MnMultiSelectProps>): void {
+    fixture = TestBed.createComponent(CollapseHostComponent);
+    host = fixture.componentInstance;
+    host.props = {...host.props, ...props};
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CollapseHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+  });
+
+  it('renders individual chips (feature off) by default when no collapse props are set', () => {
+    build({});
+    component.writeValue([1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+
+    expect(component.collapseEnabled).toBeFalse();
+    expect(component.isCollapsed).toBeFalse();
+    expect(chips().length).toBe(6);
+  });
+
+  it('renders individual chips at the threshold (count not greater than threshold)', () => {
+    build({collapsePlaceholder: '{count} selected'});
+    // Exactly 5 selected == default threshold; collapse only triggers when strictly greater.
+    component.writeValue([1, 2, 3, 4, 5]);
+    fixture.detectChanges();
+
+    expect(component.isCollapsed).toBeFalse();
+    expect(chips().length).toBe(5);
+  });
+
+  it('collapses to the summary with the custom placeholder above the threshold', () => {
+    build({collapsePlaceholder: '{count} selected'});
+    component.writeValue([1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+
+    expect(component.isCollapsed).toBeTrue();
+    expect(chips().length).toBe(1);
+    expect(component.collapseSummaryText).toBe('6 selected');
+    expect(triggerText()).toContain('6 selected');
+  });
+
+  it('substitutes every {count} token in the placeholder', () => {
+    build({collapsePlaceholder: '{count} of many ({count})'});
+    component.writeValue([1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+
+    expect(component.collapseSummaryText).toBe('6 of many (6)');
+  });
+
+  it('falls back to "{count} selected" when collapse is enabled via threshold only', () => {
+    build({collapseThreshold: 2});
+    component.writeValue([1, 2, 3]);
+    fixture.detectChanges();
+
+    expect(component.collapseEnabled).toBeTrue();
+    expect(component.isCollapsed).toBeTrue();
+    expect(component.collapseSummaryText).toBe('3 selected');
+  });
+
+  it('honours an explicit collapseThreshold instead of the default', () => {
+    build({collapseThreshold: 3, collapsePlaceholder: '{count} chosen'});
+    component.writeValue([1, 2, 3]);
+    fixture.detectChanges();
+    expect(component.isCollapsed).toBeFalse();
+
+    component.writeValue([1, 2, 3, 4]);
+    fixture.detectChanges();
+    expect(component.isCollapsed).toBeTrue();
+    expect(component.collapseSummaryText).toBe('4 chosen');
+  });
+});
