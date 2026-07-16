@@ -260,6 +260,44 @@ export class MnMultiSelect implements OnInit {
     return this.props.options.filter(o => this.selectedValues.includes(o.value));
   }
 
+  // ========== Collapse Summary ==========
+
+  /**
+   * Whether the collapse-to-summary feature is opted into. Active when either
+   * `collapsePlaceholder` or `collapseThreshold` is supplied; existing usages
+   * with neither prop are unaffected.
+   */
+  get collapseEnabled(): boolean {
+    return this.props.collapsePlaceholder !== undefined || this.props.collapseThreshold !== undefined;
+  }
+
+  /**
+   * The threshold above which the trigger collapses. Defaults to 5 when collapsing
+   * is enabled via `collapsePlaceholder` alone (no explicit `collapseThreshold`).
+   */
+  get effectiveCollapseThreshold(): number {
+    return this.props.collapseThreshold ?? 5;
+  }
+
+  /**
+   * Whether the trigger should currently render the count summary instead of the
+   * individual chips: only when collapsing is enabled and the number of selected
+   * options exceeds the effective threshold.
+   */
+  get isCollapsed(): boolean {
+    return this.collapseEnabled && this.selectedOptions.length > this.effectiveCollapseThreshold;
+  }
+
+  /**
+   * The summary text shown while collapsed, with the `{count}` token replaced by
+   * the number of selected options. Falls back to `"{count} selected"` when no
+   * `collapsePlaceholder` is provided.
+   */
+  get collapseSummaryText(): string {
+    const template = this.props.collapsePlaceholder ?? '{count} selected';
+    return template.replace(/\{count}/g, String(this.selectedOptions.length));
+  }
+
   handleBlur(): void {
     this.onTouched();
   }

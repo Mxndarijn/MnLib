@@ -41,6 +41,24 @@ export type MnMultiSelectProps<TValue = unknown> = {
   /** Maximum number of items that can be selected (undefined = unlimited) */
   maxSelections?: number;
 
+  // ========== Collapse Summary ==========
+
+  /**
+   * Once the number of selected options is strictly greater than this value, the
+   * trigger collapses to a single count summary instead of rendering every chip.
+   * Opt-in: collapsing is active when this or `collapsePlaceholder` is set. When
+   * collapsing is enabled but this is omitted, the effective threshold defaults to 5.
+   */
+  collapseThreshold?: number;
+
+  /**
+   * Summary text shown when the trigger is collapsed. The `{count}` token is
+   * replaced with the number of selected options (e.g. `"{count} selected"` →
+   * `"18 selected"`). Setting this enables collapsing on its own; when omitted
+   * while collapsing is active, `"{count} selected"` is used as the fallback.
+   */
+  collapsePlaceholder?: string;
+
   // ========== Styling/Variants ==========
 
   /** Size variant of the multi-select (default: 'md') */
