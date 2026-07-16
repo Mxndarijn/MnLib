@@ -81,8 +81,13 @@
             </div>
           }
 
-          <!-- Dynamic content container for component/template bodies -->
-          <ng-container #dynamicContainer></ng-container>
+          <!-- Component / template body -->
+          @if (stepBodyConfigs[step.id]) {
+            <mn-custom-body-host
+              [config]="stepBodyConfigs[step.id]"
+              [modalRef]="$any(modalRef)"
+            ></mn-custom-body-host>
+          }
         </div>
       </div>
     }

@@ -269,6 +269,14 @@ export type WizardStepConfig<TModel = unknown> = {
   title: string;
   state?: StepState;
   body?: StepBodyConfig;
+  /**
+   * Inputs passed to the step {@link body} when it is a component or template
+   * (ignored for a plain-string body). Each key is assigned to the matching
+   * `@Input()` on the rendered component; a `modalRef` property, if present, is
+   * populated automatically. Mirrors {@link CustomModalConfig.inputs} but scoped
+   * to a single wizard step.
+   */
+  bodyInputs?: ModalInputMap;
   fields?: FormFieldConfig<TModel>[];
   rows?: FormRow<TModel>[];
   fieldGroups?: FormFieldGroup<TModel>[];

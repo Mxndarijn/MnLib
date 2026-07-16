@@ -1,15 +1,16 @@
 import {
-  WizardStepConfig,
   FormFieldConfig,
   FormFieldGroup,
   FormValidator,
-  StepBodyConfig,
-  StepState,
-  StepGuard,
-  StepValidator,
+  ModalInputMap,
   ModalStepId,
+  StepBodyConfig,
+  StepGuard,
+  StepState,
+  StepValidator,
+  WizardStepConfig,
 } from '../mn-modal.types';
-import {FormLayoutBuilder, ChainableGroupBuilder} from './form-layout.builder';
+import {ChainableGroupBuilder, FormLayoutBuilder} from './form-layout.builder';
 import {ValidatorFn} from '@angular/forms';
 
 export class StepBuilder<TModel = unknown> {
@@ -26,8 +27,16 @@ export class StepBuilder<TModel = unknown> {
     this.layoutBuilder = new FormLayoutBuilder(this.config, this);
   }
 
-  body(body: StepBodyConfig): this {
+  /**
+   * Set the step body. Accepts plain text, a component, or a template.
+   * @param body The step body content (string, component `Type`, or `TemplateRef`).
+   * @param inputs Optional inputs for a component/template body (ignored for text).
+   */
+  body(body: StepBodyConfig, inputs?: ModalInputMap): this {
     this.config.body = body;
+    if (inputs !== undefined) {
+      this.config.bodyInputs = inputs;
+    }
     return this;
   }
 

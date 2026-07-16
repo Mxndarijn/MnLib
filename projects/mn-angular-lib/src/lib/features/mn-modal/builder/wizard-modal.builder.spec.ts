@@ -1,12 +1,5 @@
-import { ModalBuilder } from './modal.builder';
-import {
-  FieldKind,
-  ModalKind,
-  StepState,
-  ValidationStatus,
-  WizardFlowMode,
-  WizardModalConfig,
-} from '../mn-modal.types';
+import {ModalBuilder} from './modal.builder';
+import {FieldKind, ModalKind, StepState, ValidationStatus, WizardFlowMode, WizardModalConfig,} from '../mn-modal.types';
 
 describe('WizardModalBuilder', () => {
   it('should create a config with correct kind', () => {
@@ -54,6 +47,29 @@ describe('WizardModalBuilder', () => {
     expect(config.steps[0].fields![0].kind).toBe(FieldKind.TEXT);
     expect(config.steps[0].fields![1].kind).toBe(FieldKind.NUMBER);
     expect(config.steps[0].fields![2].kind).toBe(FieldKind.SELECT);
+  });
+
+  it('should set a component body without inputs', () => {
+    class DummyStepBody {
+    }
+
+    const config = ModalBuilder.wizard()
+      .addStep('Custom', (s) => s.body(DummyStepBody))
+      .build();
+    expect(config.steps[0].body).toBe(DummyStepBody);
+    expect(config.steps[0].bodyInputs).toBeUndefined();
+  });
+
+  it('should set a component body with inputs', () => {
+    class DummyStepBody {
+    }
+
+    const inputs = {associationId: 'assoc-1'};
+    const config = ModalBuilder.wizard()
+      .addStep('Custom', (s) => s.body(DummyStepBody, inputs))
+      .build();
+    expect(config.steps[0].body).toBe(DummyStepBody);
+    expect(config.steps[0].bodyInputs).toEqual(inputs);
   });
 
   it('should set guards on steps', () => {
