@@ -9,6 +9,8 @@ import {
   OnInit,
   QueryList,
   signal,
+  TemplateRef,
+  Type,
   ViewChildren,
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
@@ -17,6 +19,7 @@ import {Subscription} from 'rxjs';
 import {MnModalRef} from '../../mn-modal-ref';
 import {
   ActionStyle,
+  CustomModalConfig,
   FormModalConfig,
   ModalCloseReason,
   ModalFooterAction,
@@ -105,6 +108,13 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Pre-built form configs keyed by step id — only for steps that have fields */
   stepFormConfigs: Record<ModalStepId, FormModalConfig<unknown, unknown>> = {};
 
+  /**
+   * Pre-built host configs keyed by step id — only for steps whose body is a
+   * component or template (not a plain string) and that have no form fields.
+   * Drives the `mn-custom-body-host` rendered for those steps.
+   */
+  stepBodyConfigs: Record<ModalStepId, CustomModalConfig> = {};
+
   private statusSubscription?: Subscription;
   private formBodiesSubscription?: Subscription;
 
@@ -129,6 +139,14 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
           readOnly: this.config.readOnly,
           disabled: this.config.disabled
         } as FormModalConfig<unknown, unknown>;
+      } else {
+        // A component/template body (not a plain string) renders through the
+        // custom-body host. Pre-build its config once so the `@Input` identity
+        // stays stable across change detection and the body is not re-created.
+        const bodyConfig = this.buildStepBodyConfig(step);
+        if (bodyConfig) {
+          this.stepBodyConfigs[step.id] = bodyConfig;
+        }
       }
     }
 
@@ -162,6 +180,24 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isTextBody(step: WizardStepConfig): boolean {
     return typeof step.body === 'string';
+  }
+
+  /**
+   * Builds the {@link CustomModalConfig} used to render a step whose body is a
+   * component or template. Returns `undefined` for steps with no body or a
+   * plain-string body (those render through their own template branches).
+   * @param step The wizard step to inspect.
+   */
+  private buildStepBodyConfig(step: WizardStepConfig): CustomModalConfig | undefined {
+    const body = step.body;
+    if (!body || typeof body === 'string') return undefined;
+    const config: CustomModalConfig = {kind: ModalKind.CUSTOM, inputs: step.bodyInputs};
+    if (body instanceof TemplateRef) {
+      config.template = body;
+    } else {
+      config.component = body as Type<unknown>;
+    }
+    return config;
   }
 
   async goToStep(step: WizardStepConfig): Promise<void> {
