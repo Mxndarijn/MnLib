@@ -17,11 +17,19 @@ export class MnModalService {
       environmentInjector: this.injector,
     }) as unknown as ComponentRef<MnModalShellComponent<TResult>>;
 
+    // Work off a mutable shallow copy of the (frozen) builder config, shared by
+    // both the shell and the ref. `ModalBuilder.build()` returns a frozen object;
+    // `MnModalRef.update()` mutates the config in place (so the shell, which holds
+    // the same reference, sees the change), which would throw on a frozen object.
+    // Cloning here keeps the caller's built config immutable while giving the
+    // runtime an extensible object to update (e.g. footer actions set at runtime).
+    const workingConfig = {...(config as ModalConfig<TResult>)};
+
     // TModel is erased at the shell boundary — the shell only needs TResult
-    componentRef.instance.config = config as ModalConfig<TResult>;
+    componentRef.instance.config = workingConfig;
 
     // Create modal ref
-    const modalRef = new MnModalRef<TResult>(componentRef, config as ModalConfig<TResult>);
+    const modalRef = new MnModalRef<TResult>(componentRef, workingConfig);
     componentRef.instance.modalRef = modalRef;
 
     // Update stack and dim previous modal
