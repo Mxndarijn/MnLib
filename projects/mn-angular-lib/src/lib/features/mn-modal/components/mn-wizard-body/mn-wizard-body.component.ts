@@ -529,7 +529,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       case ActionStyle.SECONDARY:
         return { variant: 'outline', color: 'secondary' };
       case ActionStyle.GHOST:
-        return {variant: 'text', color: 'secondary'};
+        return {variant: 'text', color: 'gray'};
       default:
         return { variant: 'outline', color: 'secondary' };
     }
