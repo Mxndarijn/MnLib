@@ -1,20 +1,24 @@
-﻿<!-- Toolbar: search + custom toolbar template -->
-<div class="flex flex-row items-center justify-end gap-2 mb-3">
-  @if (dataSource.canSearch) {
-    <div>
+﻿<!-- Toolbar: search + custom toolbar template. Below 375px the search takes its
+     own full-width row and the toolbar template stacks beneath it; from 375px up
+     they share a row aligned to the right (matching mn-table). -->
+@if (dataSource.canSearch || dataSource.toolbarTemplate) {
+  <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center min-[375px]:justify-end gap-2 mb-3">
+    @if (dataSource.canSearch) {
       <input
         type="text"
-        class="input input-sm rounded border border-base-300 bg-base-200 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-primary-500 w-full max-w-xs"
+        class="input input-sm rounded border border-base-300 bg-base-200 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-primary-500 w-full min-[375px]:flex-1 min-[480px]:max-w-64"
         [placeholder]="dataSource.searchPlaceholder ?? 'Search...'"
         (input)="onSearch($any($event.target).value)"
         aria-label="Search list"
       />
-    </div>
-  }
-  @if (dataSource.toolbarTemplate) {
-    <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
-  }
-</div>
+    }
+    @if (dataSource.toolbarTemplate) {
+      <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
+        <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
+      </div>
+    }
+  </div>
+}
 
 <!-- List wrapper -->
 <div

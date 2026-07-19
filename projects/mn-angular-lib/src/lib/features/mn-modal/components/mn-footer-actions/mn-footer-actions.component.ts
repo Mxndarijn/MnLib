@@ -76,7 +76,7 @@ export class MnFooterActionsComponent<TResult = unknown> {
       case ActionStyle.DANGER:
         return { variant: 'fill', color: 'danger', disabled: action.disabled };
       case ActionStyle.GHOST:
-        return { variant: 'text', color: 'secondary', disabled: action.disabled };
+        return {variant: 'text', color: 'gray', disabled: action.disabled};
       case ActionStyle.SECONDARY:
       default:
         return { variant: 'outline', color: 'secondary', disabled: action.disabled };
