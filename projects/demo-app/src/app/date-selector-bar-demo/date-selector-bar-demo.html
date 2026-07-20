@@ -1,0 +1,194 @@
+<h2>Date Selector Bar Demo</h2>
+<p class="intro">
+  A day strip with a "Today" button, a month caption and arrows. Given room the strip runs Monday to
+  Sunday, so the weekday columns hold still as you page; as the bar narrows it shows fewer days
+  rather than adding a row. Selecting a day or pressing "Today" emits it; the arrows page the strip
+  and never change the selection. Where the strip crosses into a new month, the days either side of
+  the break move apart. Narrower still, and the days give way to a date picker beside Today.
+</p>
+
+<div class="demo-sections">
+
+  <!-- Default -->
+  <section>
+    <h3>Default</h3>
+    <p>Uncustomised, with the selection kept in the parent through <code>[selectedDate]</code> and
+      <code>(dateSelected)</code>.</p>
+
+    <div class="bar-frame">
+      <mn-date-selector-bar
+        [selectedDate]="basicDate()"
+        (dateSelected)="basicDate.set($event)">
+      </mn-date-selector-bar>
+    </div>
+
+    <div class="readout">
+      <span class="readout-label">Selected</span>
+      <span class="readout-value">{{ format(basicDate()) }}</span>
+    </div>
+  </section>
+
+  <!-- Driving content -->
+  <section>
+    <h3>Driving content below it</h3>
+    <p>The usual job of the bar: pick a day, and the panel underneath reloads for that day. Weekends
+      are empty here to show the empty state.</p>
+
+    <div class="bar-frame">
+      <mn-date-selector-bar
+        [selectedDate]="agendaDate()"
+        (dateSelected)="agendaDate.set($event)">
+      </mn-date-selector-bar>
+    </div>
+
+    <div class="agenda">
+      @for (item of agendaItems(); track item.time) {
+        <div class="agenda-row">
+          <span class="agenda-time">{{ item.time }}</span>
+          <span>{{ item.title }}</span>
+        </div>
+      } @empty {
+        <div class="agenda-empty">Nothing scheduled on {{ format(agendaDate()) }}.</div>
+      }
+    </div>
+  </section>
+
+  <!-- Locale -->
+  <section>
+    <h3>Locale and labels</h3>
+    <p>
+      <code>[locale]</code> formats the day and month names; <code>[todayLabel]</code> and
+      <code>[pickDateLabel]</code> supply the copy. The component ships no hardcoded text, so they
+      travel together. Leave <code>[locale]</code> empty to follow the app locale from
+      <code>MnLanguageService</code>.
+    </p>
+
+    <div class="locale-switch">
+      @for (preset of localePresets; track preset.locale) {
+        <button
+          mnButton
+          [data]="{ variant: activePreset().locale === preset.locale ? 'fill' : 'outline', color: activePreset().locale === preset.locale ? 'primary' : 'gray', size: 'sm' }"
+          (click)="selectPreset(preset)">
+          {{ preset.name }}
+        </button>
+      }
+    </div>
+
+    <div class="bar-frame">
+      <mn-date-selector-bar
+        [selectedDate]="localeDate()"
+        [locale]="activePreset().locale"
+        [pickDateLabel]="activePreset().pickDateLabel"
+        [todayLabel]="activePreset().todayLabel"
+        (dateSelected)="localeDate.set($event)">
+      </mn-date-selector-bar>
+    </div>
+
+    <div class="readout">
+      <span class="readout-label">Selected</span>
+      <span class="readout-value">{{ format(localeDate(), activePreset().locale) }}</span>
+    </div>
+  </section>
+
+  <!-- Container sizing -->
+  <section>
+    <h3>Sizes to its container</h3>
+    <p>
+      The bar measures itself, not the window. Drag the handle in the bottom-right corner of the
+      frame: days drop away one at a time, and the bar stays a single row throughout — it never
+      stacks. A full seven days is Monday-aligned; below that there is no week to align to, so the
+      strip slides to keep the selected day in view. Under 566px, where even three days won't fit,
+      it hands over to the date picker.
+    </p>
+
+    <div class="resizable" #resizableFrame>
+      <mn-date-selector-bar
+        [selectedDate]="responsiveDate()"
+        (dateSelected)="responsiveDate.set($event)">
+      </mn-date-selector-bar>
+    </div>
+
+    <div class="readout">
+      <span class="readout-label">Frame width</span>
+      <span class="readout-value">{{ frameWidth() }}px</span>
+    </div>
+  </section>
+
+  <!-- Window behaviour -->
+  <section>
+    <h3>The window stays put</h3>
+    <p>
+      Picking a day that's already on the strip leaves the tiles exactly where they are. These
+      buttons move <code>[selectedDate]</code> from outside the bar, the way a month view or a deep
+      link would: step a day at a time past the edge and the window slides by one, jump three weeks
+      and it gives up on scrolling and lands centred on the new day. Move the window with the arrows
+      instead and the selection stays behind — that's the one way to look around without committing
+      to a day.
+    </p>
+
+    <div class="jump-row">
+      <button mnButton [data]="{ variant: 'outline', color: 'gray', size: 'sm' }" (click)="jumpBy(-21)">
+        Back three weeks
+      </button>
+      <button mnButton [data]="{ variant: 'outline', color: 'gray', size: 'sm' }" (click)="jumpBy(-1)">
+        Back a day
+      </button>
+      <button mnButton [data]="{ variant: 'outline', color: 'gray', size: 'sm' }" (click)="jumpBy(1)">
+        Forward a day
+      </button>
+      <button mnButton [data]="{ variant: 'outline', color: 'gray', size: 'sm' }" (click)="jumpBy(21)">
+        Forward three weeks
+      </button>
+    </div>
+
+    <div class="bar-frame">
+      <mn-date-selector-bar
+        [selectedDate]="followDate()"
+        (dateSelected)="followDate.set($event)">
+      </mn-date-selector-bar>
+    </div>
+
+    <p class="note">
+      Focus a day tile and use the left and right arrow keys to walk the strip. At either end the
+      window steps one day at a time, so the days read as one continuous run rather than separate
+      pages. Home and End jump to the ends of the visible window.
+    </p>
+  </section>
+
+  <!-- Emit behaviour -->
+  <section>
+    <h3>What the bar emits</h3>
+    <p>
+      <code>(dateSelected)</code> fires only when the day actually changes. Re-selecting the current
+      tile, or pressing "Today" while today is already selected, stays silent so consumers don't
+      reload for nothing. The arrows never emit.
+    </p>
+
+    <div class="bar-frame">
+      <mn-date-selector-bar
+        [selectedDate]="logDate()"
+        (dateSelected)="recordEmit($event)">
+      </mn-date-selector-bar>
+    </div>
+
+    <div class="log">
+      @for (entry of emitLog(); track $index) {
+        <div class="log-row">
+          <span class="log-index">{{ emitLog().length - $index }}</span>
+          <span>{{ entry }}</span>
+        </div>
+      } @empty {
+        <div class="log-empty">Pick a day to see what the bar emits.</div>
+      }
+    </div>
+
+    @if (emitLog().length) {
+      <div class="locale-switch">
+        <button mnButton [data]="{ variant: 'outline', color: 'gray', size: 'sm' }" (click)="clearLog()">
+          Clear log
+        </button>
+      </div>
+    }
+  </section>
+
+</div>

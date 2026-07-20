@@ -50,6 +50,7 @@ export class DemoListComponent {
     { title: 'Button',              path: '/demos/button-demo',               abbr: 'BT', color: '#3b82f6', description: 'Buttons with sizes, variants, and colors.' },
     { title: 'Checkbox',            path: '/demos/checkbox-demo',             abbr: 'CB', color: '#22c55e', description: 'Checkbox with standalone, forms, sizes, and disabled state.' },
     { title: 'Config',              path: '/demos/config',                    abbr: 'CF', color: '#6366f1', description: 'Section scoping, component defaults, and instance overrides.' },
+    { title: 'Date Selector Bar',   path: '/demos/date-selector-bar-demo',    abbr: 'DS', color: '#e11d48', description: 'Day strip with Today, window arrows, and a date picker across locales and widths.' },
     { title: 'Dual Horizontal Image', path: '/demos/dual-horizontal-image-demo', abbr: 'DI', color: '#8b5cf6', description: 'Two images shown side by side.' },
     {
       title: 'File Input',

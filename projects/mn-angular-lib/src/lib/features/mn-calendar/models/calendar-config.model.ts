@@ -26,7 +26,7 @@ export type CalendarConfig = {
   locale: string;
   /** Label for the "Today" navigation button. Default: `'Today'`. */
   todayLabel: string;
-  /** Placeholder for the date-selector-bar date picker. Default: `'Pick a date'`. */
+  /** Placeholder for the date picker the selector bar shows on narrow screens. Default: `'Pick a date'`. */
   pickDateLabel: string;
   /** Title shown above the upcoming-events sidebar. Default: `'Upcoming events'`. */
   upcomingEventsTitle: string;
