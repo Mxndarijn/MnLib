@@ -1,22 +1,34 @@
 ﻿<!-- Toolbar: search + custom toolbar template. Below 375px the search takes its
      own full-width row and the toolbar template stacks beneath it; from 375px up
-     they share a row aligned to the right (matching mn-table). -->
+     they share a row aligned to the right. Structure and classes mirror mn-table's
+     right-hand toolbar group so all collections behave identically at every width. -->
 @if (dataSource.canSearch || dataSource.toolbarTemplate) {
   <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center min-[375px]:justify-end gap-2 mb-3">
-    @if (dataSource.canSearch) {
-      <input
-        type="text"
-        class="input input-sm rounded border border-base-300 bg-base-200 px-3 py-1.5 text-sm text-base-content placeholder-base-content/50 focus:outline-none focus:border-primary-500 w-full min-[375px]:flex-1 min-[480px]:max-w-64"
-        [placeholder]="dataSource.searchPlaceholder ?? 'Search...'"
-        (input)="onSearch($any($event.target).value)"
-        aria-label="Search list"
-      />
-    }
-    @if (dataSource.toolbarTemplate) {
-      <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
-        <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
-      </div>
-    }
+    <div
+      class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
+      @if (dataSource.canSearch) {
+        <mn-lib-input-field
+          (ngModelChange)="onSearch($event)"
+          [ngModel]="searchValue"
+          [props]="{
+            id: 'mn-list-search',
+            type: 'search',
+            label: '',
+            ariaLabel: dataSource.searchPlaceholder ?? 'Search...',
+            placeholder: dataSource.searchPlaceholder ?? 'Search...',
+            size: 'sm',
+            borderRadius: 'md',
+            fullWidth: true
+          }"
+          class="w-full min-[375px]:flex-1 min-[480px]:max-w-64"
+        ></mn-lib-input-field>
+      }
+      @if (dataSource.toolbarTemplate) {
+        <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
+          <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
+        </div>
+      }
+    </div>
   </div>
 }
 

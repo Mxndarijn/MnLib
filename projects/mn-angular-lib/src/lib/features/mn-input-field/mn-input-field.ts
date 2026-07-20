@@ -145,6 +145,9 @@ export class MnInputField implements OnInit {
     if (this.props) {
     this.uiConfig = { ...this.uiConfig, label: this.props.label };
       this.uiConfig = { ...this.uiConfig, placeholder: this.props.placeholder };
+      if (this.props.ariaLabel) {
+        this.uiConfig = {...this.uiConfig, ariaLabel: this.props.ariaLabel};
+      }
     }
   }
 

@@ -1,4 +1,6 @@
-<!-- Toolbar: custom toolbar template + search -->
+<!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
+     so an unsearchable table without toolbar templates emits no empty spacer. -->
+@if (dataSource.canSearch || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
 <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center justify-between gap-2 mb-3">
   <div class="flex items-center gap-2 w-full min-[375px]:w-auto">
     @if (dataSource.toolbarLeftTemplate) {
@@ -15,6 +17,7 @@
             id: 'mn-table-search',
             type: 'search',
             label: '',
+            ariaLabel: dataSource.searchPlaceholder ?? 'Search...',
             placeholder: dataSource.searchPlaceholder ?? 'Search...',
             size: 'sm',
             borderRadius: 'md',
@@ -34,7 +37,7 @@
       <button
         type="button"
         mnButton
-        [data]="{ variant: 'outline', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
+        [data]="{ variant: 'outline', color: 'primary', size: 'sm', borderRadius: 'md', hover: true }"
         class="w-full min-[375px]:w-auto gap-1.5"
         [attr.aria-expanded]="filtersPanelOpen"
         aria-controls="mn-table-filters-panel"
@@ -46,6 +49,7 @@
     }
   </div>
 </div>
+}
 
 <!-- Small-screen filter panel: stacked, full-width fields decoupled from column widths -->
 @if (hasColumnFilters && filtersCollapsed) {
