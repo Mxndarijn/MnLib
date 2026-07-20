@@ -1,9 +1,9 @@
 <div class="w-full h-full flex flex-col" role="application" aria-label="Calendar">
 
   <!-- Toolbar: date strip and calendar controls (view switcher + action buttons) share one row only on very
-       wide screens (≥1500px). The breakpoint matches the date-selector bar's own two-layer→single-row switch
-       so they flip in lockstep; a mismatched breakpoint left the controls inlined while the date bar was
-       still stacked, producing a mixed layout. -->
+       wide screens (≥1500px). This breakpoint is the toolbar's own concern — the date-selector bar now sizes
+       itself from its measured width, so it adapts to whatever column this layout hands it and the two no
+       longer have to be kept in sync. -->
   <div class="flex flex-col min-[1500px]:flex-row min-[1500px]:items-center gap-2 py-3">
     <!-- Responsive date-selector bar: Today, day-window arrows, day tiles and a date picker. -->
     <mn-date-selector-bar

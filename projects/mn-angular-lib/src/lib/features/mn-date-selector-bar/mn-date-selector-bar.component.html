@@ -1,65 +1,103 @@
-<!-- Date selector bar -->
-<div
-  class="flex flex-col min-[1500px]:flex-row min-[1500px]:items-center justify-center rounded-xl px-4 py-5 gap-x-6 gap-y-6 overflow-hidden">
-  <!-- Top row on mobile/tablet: Today + Date picker side by side -->
-  <div class="flex min-[1500px]:contents items-center gap-3">
-    <!-- Today button -->
-    <button (click)="goToToday()" [data]="{ variant: 'fill', color: 'primary', size: 'lg' }"
-            class="flex-1 min-[1500px]:flex-none"
-            mnButton>
-      {{ todayLabel() }}
-    </button>
+<!-- Date selector bar. Layout is driven by the bar's own measured width, so it
+     rearranges for the space the bar was given, not for the viewport. It never
+     stacks: as room runs out it shows fewer days, then hands over to the picker.
+     Nothing here is boxed — spacing does the grouping, not borders. -->
+<div class="flex items-center gap-4 px-4 py-3">
 
-    <!-- Date picker (visible on mobile/tablet in top row, moves to end on desktop).
-         Wrapped in a div that owns the responsive hide: with fullWidth the datetime sets an
-         inline `display:block` on its host, which would override `min-[1500px]:hidden` and leave it
-         visible on desktop (showing two pickers). Hiding the wrapper avoids that. -->
-    <div class="min-[1500px]:hidden flex-1 min-w-0">
-      <mn-lib-datetime (ngModelChange)="onDateModelChanged($event)"
-                       [ngModel]="selectedDateString()"
-                       [props]="{ id: 'mn-dsb-date-mobile', mode: 'date', placeholder: pickDateLabel(), size: 'lg', borderRadius: 'xl', hover: true, fullWidth: true }"
-                       class="block w-full"></mn-lib-datetime>
-    </div>
-  </div>
+  <!-- Today: returns the strip and the selection to the current day, and the
+       control people reach for most, so it carries the weight of a filled button. -->
+  <button (click)="goToToday()"
+          [data]="{ variant: 'fill', color: 'primary', size: 'md' }"
+          class="shrink-0"
+          mnButton
+          type="button">
+    {{ todayLabel() }}
+  </button>
 
-  <!-- Date navigation (arrows + day tiles). Hidden on very narrow screens
-       (< MIN_STRIP_WIDTH), where only the Today button and date picker remain. -->
+  <!-- Too narrow for a usable strip, so the picker takes its place beside Today.
+       Every date stays reachable on a phone, in one tap rather than by paging.
+       The caption comes along, so the compact bar is labelled like the wide one —
+       it names the selected day's month rather than a visible range. -->
+  @if (!showDayStrip()) {
+    <span aria-hidden="true"
+          class="shrink-0 text-xs font-semibold tracking-wide whitespace-nowrap uppercase opacity-55">
+      {{ monthCaption() }}
+    </span>
+
+    <mn-lib-datetime (ngModelChange)="onDateModelChanged($event)"
+                     [ngModel]="selectedDateString()"
+                     [props]="pickerProps()"
+                     class="block min-w-0 flex-1"></mn-lib-datetime>
+  }
+
+  <!-- The strip takes the room left over and centres its contents in it, so on a
+       wide bar the days sit in the middle rather than trailing off to one side. -->
   @if (showDayStrip()) {
-    <div class="flex items-center gap-4 overflow-x-auto mx-auto min-[1500px]:mx-0 pb-2 max-w-full">
-      <!-- Left arrow: shifts the visible day window backward -->
-      <button (click)="navigatePrevious()" [data]="{ variant: 'outline', size: 'md', color: 'gray' }" class="shrink-0"
-              mnButton>
+    <div [attr.aria-label]="dayStripLabel()"
+         class="flex min-w-0 flex-1 items-center justify-center gap-3"
+         role="group">
+      <!-- Names the month the strip is in, so the day numbers are never loose. -->
+      <span aria-hidden="true"
+            class="shrink-0 text-xs font-semibold tracking-wide whitespace-nowrap uppercase opacity-55">
+        {{ monthCaption() }}
+      </span>
+
+      <button (click)="navigatePrevious()"
+              [attr.aria-label]="previousLabel()"
+              [data]="{ variant: 'text', size: 'md', color: 'gray' }"
+              class="shrink-0"
+              mnButton
+              type="button">
         <svg [size]="18" lucideChevronLeft></svg>
       </button>
 
-      <!-- Day tiles -->
-      @for (tile of dayTiles(); track tile.date.getTime()) {
-        <button
-          (click)="selectDate(tile.date)"
-          [class.bg-primary]="tile.isSelected"
-          [class.hover:bg-base-200]="!tile.isSelected"
-          [class.text-primary-content]="tile.isSelected"
-          class="flex flex-col items-center min-w-12 min-[1500px]:min-w-16 px-2 min-[1500px]:px-3 py-2 rounded-lg transition-all cursor-pointer shrink-0"
-        >
-          <span class="text-xs font-medium uppercase">{{ tile.dayName }}</span>
-          <span class="text-base min-[1500px]:text-lg font-bold">{{ tile.dayNumber }}</span>
-        </button>
-      }
+      <!-- Days read on one line so each sits at the same height as the buttons
+           either side of it. Roving tabindex: one day is in the tab order, the
+           arrow keys move between the rest and page the strip at either end. -->
+      <div class="flex min-w-0 gap-1">
+        @for (tile of dayTiles(); track tile.date.getTime(); let i = $index) {
+          <!-- A month break is marked by extra breathing room rather than a rule,
+               so the run of days stays unbroken; the caption names both months. -->
+          <button #tileButton
+                  (click)="selectDate(tile.date)"
+                  (focus)="onTileFocus(i)"
+                  (keydown)="onTileKeydown($event, i)"
+                  [attr.aria-current]="tile.isToday ? 'date' : null"
+                  [attr.aria-label]="tile.accessibleLabel"
+                  [attr.aria-pressed]="tile.isSelected"
+                  [attr.tabindex]="isTabbable(i) ? 0 : -1"
+                  [class.bg-primary]="tile.isSelected"
+                  [class.hover:bg-base-200]="!tile.isSelected"
+                  [class.ml-3]="tile.startsNewMonth"
+                  [class.text-primary-content]="tile.isSelected"
+                  class="flex min-w-16 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none"
+                  type="button">
+            <span [class.opacity-60]="!tile.isSelected"
+                  [class.opacity-90]="tile.isSelected"
+                  aria-hidden="true"
+                  class="text-xs font-medium uppercase">
+              {{ tile.dayName }}
+            </span>
+            <span aria-hidden="true" class="font-bold tabular-nums">{{ tile.dayNumber }}</span>
+            <!-- Today's dot. Every day reserves the space so no tile changes
+                 width; only its colour says which one is today, and exactly one
+                 colour class applies at a time so they can't fight. -->
+            <span [class.bg-primary-content]="tile.isToday && tile.isSelected"
+                  [class.bg-primary]="tile.isToday && !tile.isSelected"
+                  aria-hidden="true"
+                  class="size-1 shrink-0 rounded-full"></span>
+          </button>
+        }
+      </div>
 
-      <!-- Right arrow: shifts the visible day window forward -->
-      <button (click)="navigateNext()" [data]="{ variant: 'outline', size: 'md', color: 'gray' }" class="shrink-0"
-              mnButton>
+      <button (click)="navigateNext()"
+              [attr.aria-label]="nextLabel()"
+              [data]="{ variant: 'text', size: 'md', color: 'gray' }"
+              class="shrink-0"
+              mnButton
+              type="button">
         <svg [size]="18" lucideChevronRight></svg>
       </button>
     </div>
   }
-
-  <!-- Vertical divider (hidden on mobile/tablet) -->
-  <div class="hidden min-[1500px]:block w-px h-10 bg-base-300"></div>
-
-  <!-- Date picker (desktop only, hidden on mobile/tablet since it's in the top row) -->
-  <mn-lib-datetime (ngModelChange)="onDateModelChanged($event)"
-                   [ngModel]="selectedDateString()"
-                   [props]="{ id: 'mn-dsb-date-desktop', mode: 'date', placeholder: pickDateLabel(), size: 'lg', borderRadius: 'xl', hover: true }"
-                   class="hidden min-[1500px]:block"></mn-lib-datetime>
 </div>
