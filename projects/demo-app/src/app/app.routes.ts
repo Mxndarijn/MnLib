@@ -22,6 +22,7 @@ import {TabDemo} from './tab-demo/tab-demo';
 import {CheckboxDemo} from './checkbox-demo/checkbox-demo';
 import {SkeletonDemo} from './skeleton-demo/skeleton-demo';
 import {FileInputDemo} from './file-input-demo/file-input-demo';
+import {DateSelectorBarDemo} from './date-selector-bar-demo/date-selector-bar-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -48,4 +49,5 @@ export const routes: Routes = [
   {path: 'demos/checkbox-demo', component: CheckboxDemo, title: 'Checkbox Demo'},
   {path: 'demos/skeleton-demo', component: SkeletonDemo, title: 'Skeleton Demo'},
   {path: 'demos/file-input-demo', component: FileInputDemo, title: 'File Input Demo'},
+  {path: 'demos/date-selector-bar-demo', component: DateSelectorBarDemo, title: 'Date Selector Bar Demo'},
 ];

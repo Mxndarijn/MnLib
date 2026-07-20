@@ -11,6 +11,8 @@
   Type
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {LucideChevronLeft, LucideChevronRight} from '@lucide/angular';
 import {BehaviorSubject, skip, Subject, takeUntil} from 'rxjs';
 import {CalendarButton, CalendarEvent} from '../../models/calendar-event.model';
 import {CalendarEventData} from '../../models/calendar-event-data.model';
@@ -29,7 +31,10 @@ import {CalendarWeekComponent} from '../calendar-week/calendar-week.component';
 import {CalendarDayComponent} from '../calendar-day/calendar-day.component';
 import {UpcomingEventsComponent} from '../upcoming-events/upcoming-events.component';
 import {MnButton} from '../../../mn-button';
-import {MnDateSelectorBar} from '../../../mn-date-selector-bar';
+import {MnDatetime} from '../../../mn-datetime';
+
+/** Gives each calendar instance a unique id to tie its tabs to its view panel. */
+let instanceCounter = 0;
 
 /**
  * Main calendar orchestrator component.
@@ -60,12 +65,15 @@ import {MnDateSelectorBar} from '../../../mn-date-selector-bar';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     CalendarMonthComponent,
     CalendarWeekComponent,
     CalendarDayComponent,
     UpcomingEventsComponent,
     MnButton,
-    MnDateSelectorBar
+    MnDatetime,
+    LucideChevronLeft,
+    LucideChevronRight
   ],
   templateUrl: './calendar-view.component.html',
   providers: [
@@ -93,6 +101,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   @Output() ButtonClickedEvent = new EventEmitter<void>();
 
   readonly CalendarView = CalendarView;
+  /** Ties the view tabs to the panel they control, uniquely per calendar. */
+  readonly panelId = `mn-calendar-panel-${++instanceCounter}`;
   currentView = CalendarView.WEEK;
   focusDay = new Date();
   viewOptions: { value: CalendarView; label: string }[] = [];
@@ -160,9 +170,86 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     this.currentView = view;
   }
 
-  /** Handles a day selection from the date-selector bar. */
-  onDateStripChange(date: Date) {
-    this.setFocusDay(date);
+  /**
+   * Names the stretch of time on screen — the day, the week, or the month. It is
+   * the toolbar's orientation: without it, navigating leaves you somewhere with
+   * no label. Announced politely, so stepping through says where you landed.
+   */
+  get periodLabel(): string {
+    const locale = this.config.locale;
+
+    if (this.currentView === CalendarView.MONTH) {
+      return this.focusDay.toLocaleDateString(locale, {month: 'long', year: 'numeric'});
+    }
+
+    if (this.currentView === CalendarView.DAY) {
+      // No weekday: the view's own column header already says which day it is,
+      // and the year only earns its place once it stops being the obvious one.
+      return this.focusDay.toLocaleDateString(locale, {
+        day: 'numeric',
+        month: 'long',
+        ...(this.focusDay.getFullYear() !== new Date().getFullYear() ? {year: 'numeric'} : {}),
+      });
+    }
+
+    const start = this.startOfWeek(this.focusDay);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    // Only repeat what actually changes across the week's two ends.
+    const from = start.getFullYear() !== end.getFullYear()
+      ? start.toLocaleDateString(locale, {day: 'numeric', month: 'short', year: 'numeric'})
+      : start.toLocaleDateString(locale, {
+        day: 'numeric',
+        ...(start.getMonth() !== end.getMonth() ? {month: 'short'} : {}),
+      });
+    const to = end.toLocaleDateString(locale, {day: 'numeric', month: 'short', year: 'numeric'});
+    return `${from} – ${to}`;
+  }
+
+  /** The focus day as YYYY-MM-DD, for the toolbar's date picker. */
+  get focusDayString(): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const d = this.focusDay;
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  /**
+   * Steps the calendar by one unit of whatever is on screen: a day in day view,
+   * a week in week view, a month in month view. Navigating by the visible unit is
+   * what makes one pair of arrows serve all three.
+   */
+  navigate(step: number) {
+    const next = new Date(this.focusDay);
+
+    switch (this.currentView) {
+      case CalendarView.DAY:
+        next.setDate(next.getDate() + step);
+        break;
+      case CalendarView.WEEK:
+        next.setDate(next.getDate() + step * 7);
+        break;
+      default:
+        this.setFocusDay(this.addMonths(this.focusDay, step));
+        return;
+    }
+
+    this.setFocusDay(next);
+  }
+
+  /** Returns the calendar to today. */
+  goToToday() {
+    this.setFocusDay(new Date());
+  }
+
+  /**
+   * Handles the toolbar date picker.
+   * @param value The date string in YYYY-MM-DD format.
+   */
+  onPickDate(value: string) {
+    if (!value) return;
+    const picked = new Date(value + 'T00:00:00');
+    if (isNaN(picked.getTime())) return;
+    this.setFocusDay(picked);
   }
 
   /** Handles a day click from the month view â€” switches to day view. */
@@ -202,6 +289,28 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     if (this.isMobileView && !wasMobile) {
       this.currentView = CalendarView.DAY;
     }
+  }
+
+  /**
+   * Adds months without the end-of-month overflow `setMonth` alone produces —
+   * 31 January plus one month is 28 February, not 3 March.
+   */
+  private addMonths(date: Date, months: number): Date {
+    const day = date.getDate();
+    const shifted = new Date(date);
+    shifted.setDate(1);
+    shifted.setMonth(shifted.getMonth() + months);
+    const lastDayOfMonth = new Date(shifted.getFullYear(), shifted.getMonth() + 1, 0).getDate();
+    shifted.setDate(Math.min(day, lastDayOfMonth));
+    return shifted;
+  }
+
+  /** Monday of the week containing `date`, matching the grid the views draw. */
+  private startOfWeek(date: Date): Date {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    return start;
   }
 
   private setFocusDay(date: Date) {
