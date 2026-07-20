@@ -53,6 +53,21 @@ export type MnCollectionLabels = {
   rowsPerPage?: string;
   /** Translation key for the "Rows per page" label. */
   rowsPerPageKey?: string;
+  /**
+   * Page position readout, shown on narrow viewports where the item range does
+   * not fit. Supports the `{{current}}` and `{{total}}` placeholders.
+   * Defaults to `Page {{current}} of {{total}}`.
+   */
+  pageIndicator?: string;
+  /** Translation key for the page position readout. */
+  pageIndicatorKey?: string;
+  /**
+   * Item range readout. Supports the `{{start}}`, `{{end}}` and `{{total}}`
+   * placeholders. Defaults to `{{start}}–{{end}} of {{total}}`.
+   */
+  itemRange?: string;
+  /** Translation key for the item range readout. */
+  itemRangeKey?: string;
 }
 
 /**
