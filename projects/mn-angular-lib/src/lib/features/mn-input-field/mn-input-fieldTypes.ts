@@ -47,6 +47,12 @@ export type MnInputBaseProps = {
   /** Placeholder text (overrides uiConfig.placeholder when provided) */
   placeholder?: string;
 
+  /**
+   * ARIA label for screen readers (overrides uiConfig.ariaLabel when provided).
+   * Use it to give an accessible name to an input rendered without a visible label.
+   */
+  ariaLabel?: string;
+
   /** Input mask (e.g., '(000) 000-0000') */
   mask?: string;
 

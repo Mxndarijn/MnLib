@@ -3,27 +3,31 @@
      they share a row aligned to the right (matching mn-table). -->
 @if (dataSource.canSearch || dataSource.toolbarTemplate) {
   <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center min-[375px]:justify-end gap-2 mb-3">
-    @if (dataSource.canSearch) {
-      <mn-lib-input-field
-        (ngModelChange)="onSearch($event)"
-        [ngModel]="searchValue"
-        [props]="{
-          id: 'mn-grid-search',
-          type: 'search',
-          label: '',
-          placeholder: dataSource.searchPlaceholder ?? 'Search...',
-          size: 'sm',
-          borderRadius: 'md',
-          fullWidth: true
-        }"
-        class="w-full min-[375px]:flex-1 min-[480px]:max-w-64"
-      ></mn-lib-input-field>
-    }
-    @if (dataSource.toolbarTemplate) {
-      <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
-        <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
-      </div>
-    }
+    <div
+      class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
+      @if (dataSource.canSearch) {
+        <mn-lib-input-field
+          (ngModelChange)="onSearch($event)"
+          [ngModel]="searchValue"
+          [props]="{
+            id: 'mn-grid-search',
+            type: 'search',
+            label: '',
+            ariaLabel: dataSource.searchPlaceholder ?? 'Search...',
+            placeholder: dataSource.searchPlaceholder ?? 'Search...',
+            size: 'sm',
+            borderRadius: 'md',
+            fullWidth: true
+          }"
+          class="w-full min-[375px]:flex-1 min-[480px]:max-w-64"
+        ></mn-lib-input-field>
+      }
+      @if (dataSource.toolbarTemplate) {
+        <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
+          <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
+        </div>
+      }
+    </div>
   </div>
 }
 
