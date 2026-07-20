@@ -26,8 +26,12 @@ export type CalendarConfig = {
   locale: string;
   /** Label for the "Today" navigation button. Default: `'Today'`. */
   todayLabel: string;
-  /** Placeholder for the date picker the selector bar shows on narrow screens. Default: `'Pick a date'`. */
+  /** Placeholder for the toolbar's date picker. Default: `'Pick a date'`. */
   pickDateLabel: string;
+  /** Accessible name for the toolbar's back arrow. Default: `'Previous'`. */
+  previousLabel: string;
+  /** Accessible name for the toolbar's forward arrow. Default: `'Next'`. */
+  nextLabel: string;
   /** Title shown above the upcoming-events sidebar. Default: `'Upcoming events'`. */
   upcomingEventsTitle: string;
   /** Message shown when there are no upcoming events. Default: `'No upcoming events'`. */
@@ -69,6 +73,8 @@ export const DEFAULT_CALENDAR_CONFIG: CalendarConfig = (() => {
     locale,
     todayLabel: 'Today',
     pickDateLabel: 'Pick a date',
+    previousLabel: 'Previous',
+    nextLabel: 'Next',
     upcomingEventsTitle: 'Upcoming events',
     noUpcomingEvents: 'No upcoming events',
     viewLabels: { MONTH: 'Month', WEEK: 'Week', DAY: 'Day' },
