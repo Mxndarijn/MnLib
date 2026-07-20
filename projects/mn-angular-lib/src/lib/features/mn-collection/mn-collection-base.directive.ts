@@ -366,6 +366,14 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
       if (this.dataSource.labels.rowsPerPageKey) {
         this.dataSource.labels.rowsPerPage = this.lang.t(this.dataSource.labels.rowsPerPageKey);
       }
+      // Resolved without params so the `{{current}}` / `{{start}}` placeholders
+      // survive; MnCollectionPagination fills them in per render.
+      if (this.dataSource.labels.pageIndicatorKey) {
+        this.dataSource.labels.pageIndicator = this.lang.t(this.dataSource.labels.pageIndicatorKey);
+      }
+      if (this.dataSource.labels.itemRangeKey) {
+        this.dataSource.labels.itemRange = this.lang.t(this.dataSource.labels.itemRangeKey);
+      }
     }
   }
 

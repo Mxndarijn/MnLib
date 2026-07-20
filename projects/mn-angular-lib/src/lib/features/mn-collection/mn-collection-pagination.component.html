@@ -19,7 +19,7 @@
 
 <!-- Pagination controls -->
 @if (showPagination) {
-  <div class="flex items-center justify-center md:justify-between px-2 py-3 text-sm text-base-content">
+  <div class="flex items-center justify-between gap-2 px-2 py-3 text-sm text-base-content">
     @if (pageSizeSelectOptions.length > 1) {
       <div class="hidden md:flex items-center gap-2">
         <span>{{ labels?.rowsPerPage || 'Items per page:' }}</span>
@@ -37,10 +37,13 @@
       <div class="hidden md:block"></div>
     }
 
-    <div class="flex items-center gap-1">
-      <span class="text-xs mr-2 hidden md:inline">{{ (currentPage - 1) * pageSize + 1 }}
-        – {{ currentPage * pageSize > totalItemCount ? totalItemCount : currentPage * pageSize }}
-        of {{ totalItemCount }}</span>
+    <!-- Narrow viewports state the page position outright: the strip's last-page
+         anchor only appears once the window stops reaching the end, so it can't
+         be relied on to carry the total. -->
+    <span aria-live="polite" class="md:hidden text-xs opacity-70 whitespace-nowrap">{{ pageIndicatorLabel }}</span>
+
+    <div class="flex flex-wrap items-center justify-center gap-0.5 md:gap-1">
+      <span class="text-xs mr-2 hidden md:inline">{{ itemRangeLabel }}</span>
 
       <button
         (click)="pageChange.emit(1)"
@@ -62,16 +65,22 @@
       >‹
       </button>
 
-      @for (page of visiblePages; track page) {
-        <button
-          (click)="pageChange.emit(page)"
-          [attr.aria-current]="page === currentPage ? 'page' : null"
-          [attr.aria-label]="'Page ' + page"
-          [data]="{ size: 'sm', variant: 'text', color: page === currentPage ? 'primary' : 'gray' }"
-          class="px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
-          mnButton
-        >{{ page }}
-        </button>
+      @for (slot of pageSlots; track $index) {
+        <span [class]="slotVisibility(slot)">
+          @if (slot.page !== null) {
+            <button
+              (click)="pageChange.emit(slot.page)"
+              [attr.aria-current]="slot.page === currentPage ? 'page' : null"
+              [attr.aria-label]="'Page ' + slot.page"
+              [data]="{ size: 'sm', variant: 'text', color: slot.page === currentPage ? 'primary' : 'gray' }"
+              class="px-1.5 md:px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
+              mnButton
+            >{{ slot.page }}
+            </button>
+          } @else {
+            <span aria-hidden="true" class="px-0.5 text-xs opacity-50 select-none">…</span>
+          }
+        </span>
       }
 
       <button
