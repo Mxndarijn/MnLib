@@ -8,8 +8,10 @@ import {
   ViewChild,
 } from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 import {ListDataSource} from './mn-list.types';
 import {MnCheckbox} from '../mn-checkbox';
+import {MnInputField} from '../mn-input-field';
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
 import {MnCollectionPagination, MnSelectableCollectionBase} from '../mn-collection';
 
@@ -22,7 +24,7 @@ const DEFAULT_LIST_SKELETON_LINES: Partial<MnSkeletonProps>[] = [
 @Component({
   selector: 'mn-list',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnSkeleton, MnCollectionPagination],
+  imports: [NgClass, NgTemplateOutlet, FormsModule, MnCheckbox, MnInputField, MnSkeleton, MnCollectionPagination],
   templateUrl: './mn-list.component.html',
   styleUrl: './mn-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
