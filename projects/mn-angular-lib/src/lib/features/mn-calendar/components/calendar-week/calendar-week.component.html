@@ -1,44 +1,47 @@
-﻿<div class="calendar-week" role="grid" aria-label="Week view">
-  <div class="week-header" [style.grid-template-columns]="'60px ' + gridTemplateColumns">
-    <div class="time-gutter-header"></div>
+<!-- Week grid. Hour rules are quiet hairlines; today's column header is a tinted
+     number (no fill); the current time is a line carrying a small time bubble.
+     Dynamic row/column placement stays inline — the layout maths lives in TS. -->
+<div class="w-full h-full flex flex-col overflow-hidden" role="grid" aria-label="Week view">
+  <div class="grid" [style.grid-template-columns]="'60px ' + gridTemplateColumns">
+    <div></div>
     @for (col of columns; track col.dayName; let i = $index) {
-      <div class="day-column-header"
-        [class.today]="col.isToday"
+      <div class="py-2 px-1 text-center"
         [style.grid-column]="getHeaderColumn(i)"
         role="columnheader">
-        <span class="day-name">{{ col.dayName }}</span>
-        <span class="day-number">{{ col.dayNumber }}</span>
+        <span class="block text-[11px] font-semibold uppercase tracking-wide opacity-50">{{ col.dayName }}</span>
+        <span class="text-lg font-bold tabular-nums" [class.text-primary]="col.isToday">{{ col.dayNumber }}</span>
       </div>
     }
   </div>
-  <div class="week-body">
-    <div class="time-gutter" [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'">
+  <div class="grid grid-cols-[60px_1fr] flex-1 min-h-0 overflow-hidden items-stretch">
+    <div class="grid h-full min-h-0" [style.grid-template-rows]="'repeat(' + totalRows + ', minmax(1.5rem, 1fr))'">
       @for (row of hourRows; track row.topRow) {
-        <div class="hour-label"
+        <div class="flex items-start justify-end min-h-0 overflow-hidden pr-2 text-[11px] tabular-nums opacity-50"
           [style.grid-row]="row.topRow + '/' + row.bottomRow">
           {{ row.hourLabel }}
         </div>
       }
     </div>
-    <div class="week-grid"
-      [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'"
+    <div class="grid relative auto-rows-fr h-full min-h-0"
+      [style.grid-template-rows]="'repeat(' + totalRows + ', minmax(1.5rem, 1fr))'"
       [style.grid-template-columns]="gridTemplateColumns">
       @for (row of hourRows; track row.topRow) {
-        <div class="hour-line"
+        <div class="border-t border-base-200 pointer-events-none min-h-0"
           [style.grid-row]="row.topRow + '/' + row.bottomRow"
           [style.grid-column]="'1 / -1'">
         </div>
       }
       @if (currentTimeRow > 0 && currentTimeCol) {
-        <div class="current-time-line"
+        <div class="relative z-[2] pointer-events-none"
           [style.grid-row]="currentTimeRow"
           [style.grid-column]="currentTimeCol">
-          <div class="current-time-dot"></div>
-          <div class="current-time-rule"></div>
+          <div class="absolute -left-1 -top-1 h-2 w-2 rounded-full bg-error"></div>
+          <div class="h-0.5 w-full bg-error"></div>
+          <div class="absolute left-0 top-0 -translate-x-2 -translate-y-1/2 rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-error-content shadow">{{ currentTimeLabel }}</div>
         </div>
       }
       @for (event of displayEvents; track $index) {
-        <div class="week-event"
+        <div class="z-[1] min-h-0 overflow-hidden rounded-lg p-0.5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           [style.grid-row]="getEventRow(event)"
           [style.grid-column]="getEventColumn(event)"
              (click)="onEventClick(event)"

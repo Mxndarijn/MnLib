@@ -1,24 +1,29 @@
 ﻿import {
   ChangeDetectorRef,
   Component,
+  EventEmitter,
+  inject,
   Input,
   OnDestroy,
   OnInit,
   Output,
-  EventEmitter,
-  Type,
-  inject
+  Type
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable, Subject, takeUntil } from 'rxjs';
-import { CalendarEvent } from '../../models/calendar-event.model';
-import { CalendarEventData } from '../../models/calendar-event-data.model';
-import { CalendarConfig, DEFAULT_CALENDAR_CONFIG, HourRow, resolveCalendarConfig } from '../../models/calendar-config.model';
-import { CalendarDateFormatter } from '../../services/calendar-date-formatter';
-import { DefaultCalendarDateFormatter } from '../../services/default-calendar-date-formatter';
-import { CalendarEventLayoutService } from '../../services/calendar-event-layout.service';
-import { CalendarUtility } from '../../utils/calendar-utils';
-import { CalendarEventComponent } from '../calendar-event/calendar-event.component';
+import {CommonModule} from '@angular/common';
+import {Observable, Subject, takeUntil} from 'rxjs';
+import {CalendarEvent} from '../../models/calendar-event.model';
+import {CalendarEventData} from '../../models/calendar-event-data.model';
+import {
+  CalendarConfig,
+  DEFAULT_CALENDAR_CONFIG,
+  HourRow,
+  resolveCalendarConfig
+} from '../../models/calendar-config.model';
+import {CalendarDateFormatter} from '../../services/calendar-date-formatter';
+import {DefaultCalendarDateFormatter} from '../../services/default-calendar-date-formatter';
+import {CalendarEventLayoutService} from '../../services/calendar-event-layout.service';
+import {CalendarUtility} from '../../utils/calendar-utils';
+import {CalendarEventComponent} from '../calendar-event/calendar-event.component';
 
 /** Extended hour row with a pre-resolved display label. */
 type DisplayHourRow = {
@@ -37,50 +42,6 @@ type DisplayHourRow = {
   imports: [CommonModule, CalendarEventComponent],
   templateUrl: './calendar-day.component.html',
   providers: [CalendarEventLayoutService],
-  styles: [`
-    .calendar-day { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-    .day-header {
-      display: grid;
-      grid-template-columns: 60px 1fr;
-      border-bottom: 1px solid var(--color-base-300);
-    }
-    .time-gutter-header { min-width: 60px; }
-    .day-column-header {
-      text-align: center;
-      padding: 8px 4px;
-      font-size: 13px;
-    }
-    .day-column-header.today { color: var(--color-primary); font-weight: 700; }
-    .day-name { display: block; font-size: 11px; text-transform: uppercase; color: var(--color-base-content, #6b7280); opacity: 0.7; }
-    .day-number { font-size: 18px; font-weight: 600; }
-    .day-body { display: grid; grid-template-columns: 60px 1fr; flex: 1; min-height: 0; overflow: hidden; align-items: stretch; }
-    .time-gutter { display: grid; height: 100%; min-height: 0; }
-    .hour-label {
-      font-size: 11px;
-      color: var(--color-base-content, #6b7280); opacity: 0.7;
-      text-align: right;
-      padding-right: 8px;
-      display: flex;
-      align-items: start;
-      min-height: 0;
-      overflow: hidden;
-    }
-    .day-grid {
-      display: grid;
-      position: relative;
-      grid-auto-rows: 1fr;
-      height: 100%;
-      min-height: 0;
-    }
-    .hour-line { border-top: 1px solid var(--color-base-200); pointer-events: none; min-height: 0; }
-    .day-event { z-index: 1; padding: 1px 2px; overflow: hidden; min-height: 0; }
-    .current-time-line { position: relative; z-index: 2; pointer-events: none; }
-    .current-time-dot {
-      width: 8px; height: 8px; background: var(--color-error, #ef4444); border-radius: 50%;
-      position: absolute; left: -4px; top: -4px;
-    }
-    .current-time-rule { height: 2px; background: var(--color-error, #ef4444); width: 100%; }
-  `]
 })
 export class CalendarDayComponent implements OnInit, OnDestroy {
   private layoutService = inject(CalendarEventLayoutService);
@@ -104,6 +65,8 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
   totalRows = 0;
   totalColumns = 1;
   currentTimeRow = 0;
+  /** The current time, formatted for the label riding the now-line. */
+  currentTimeLabel = '';
   isToday = false;
   dayName = '';
 
@@ -233,8 +196,7 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
     this.layoutService.assignColumnsToEvents(this.displayEvents);
     this.layoutService.assignWidthsToEvents(this.displayEvents, rangeStart, rangeEnd);
 
-    const maxCol = this.displayEvents.reduce((max, e) => Math.max(max, (e.column ?? 0) + (e.width ?? 1)), 1);
-    this.totalColumns = maxCol;
+    this.totalColumns = this.displayEvents.reduce((max, e) => Math.max(max, (e.column ?? 0) + (e.width ?? 1)), 1);
   }
 
   /** Updates the current-time red line position. */
@@ -243,9 +205,15 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
     if (this.focusDay && this.formatter.isSameDay(this.focusDay, now)) {
       this.currentTimeRow = CalendarUtility.getCorrectRow(now.getHours(), now.getMinutes(), this.resolvedConfig.startHour);
       this.isToday = true;
+      // formatTime is async; refresh the label and re-render when it resolves.
+      this.formatter.formatTime(now).then(label => {
+        this.currentTimeLabel = label;
+        this.cdr.markForCheck();
+      });
     } else {
       this.currentTimeRow = 0;
       this.isToday = false;
+      this.currentTimeLabel = '';
     }
   }
 }

@@ -1,5 +1,10 @@
-﻿<div class="upcoming-events" role="complementary" aria-label="Upcoming events">
-  <div class="upcoming-title">{{ title }}</div>
+<div class="p-4" role="complementary" aria-label="Upcoming events">
+  <div class="mb-3 flex items-center gap-2">
+    <h3 class="text-sm font-bold tracking-wide">{{ title }}</h3>
+    @if (upcomingEvents.length) {
+      <span class="text-xs font-semibold tabular-nums opacity-45">{{ upcomingEvents.length }}</span>
+    }
+  </div>
   @for (event of upcomingEvents; track $index) {
     <mn-upcoming-event-row
       [event]="event"
@@ -7,6 +12,6 @@
     </mn-upcoming-event-row>
   }
   @if (upcomingEvents.length === 0) {
-    <div class="no-events">{{ noEventsMessage }}</div>
+    <div class="text-sm opacity-50">{{ noEventsMessage }}</div>
   }
 </div>
