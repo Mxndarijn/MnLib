@@ -25,10 +25,11 @@ import {MnLanguageService} from '../../language';
 /**
  * How the bar arranges itself at its current width.
  *
- * - `inline` — the month, the day strip and Today all share one row. The bar
- *   never stacks: as space runs out it shows fewer days rather than adding a row.
+ * - `inline` — the day strip and Today share one row, under the month header. The
+ *   strip never stacks: as space runs out it shows fewer days rather than adding a
+ *   row.
  * - `compact` — too narrow even for a three-day strip, so the days give way to a
- *   date picker sitting beside Today.
+ *   date picker sitting beside Today, still under the month header.
  *
  * Resolved from the bar's own width — not the viewport — so a bar in a narrow
  * sidebar lays itself out like a phone even on a wide screen.
@@ -48,7 +49,7 @@ export type DayTile = {
   /**
    * Whether this tile is the first day of a month within the visible strip. The
    * days either side of it move apart, so the break is visible without a label —
-   * the month caption above the strip names both months.
+   * the month header above the strip names both months.
    */
   startsNewMonth: boolean;
   /** Whether this tile is the currently selected date. */
@@ -79,10 +80,12 @@ const ARROWS_ZONE_WIDTH = 88;
  * the gap beside it.
  */
 const CONTROLS_ZONE_WIDTH = 150;
-/** Space the month caption claims beside the strip. */
-const MONTH_CAPTION_WIDTH = 88;
-/** Everything on the row that isn't a day tile. */
-const RESERVED_WIDTH = ARROWS_ZONE_WIDTH + CONTROLS_ZONE_WIDTH + MONTH_CAPTION_WIDTH;
+/**
+ * Everything on the controls row that isn't a day tile. The month is a full-width
+ * header on its own line now, so it no longer competes with the days for room —
+ * which is why more of them fit at a given width than they used to.
+ */
+const RESERVED_WIDTH = ARROWS_ZONE_WIDTH + CONTROLS_ZONE_WIDTH;
 /** Below this the strip can't hold even {@link MIN_TILE_COUNT} days. */
 const COMPACT_MAX_WIDTH = MIN_TILE_COUNT * TILE_SLOT_WIDTH + RESERVED_WIDTH;
 /** Assumed width before the first measurement (and during server-side rendering). */
@@ -94,7 +97,7 @@ let instanceCounter = 0;
 /**
  * Reusable, responsive date selector bar.
  *
- * Renders a "Today" button, a month caption, previous/next arrows and a strip of
+ * Renders a "Today" button, a month header, previous/next arrows and a strip of
  * day tiles. Selecting a tile or pressing "Today" emits the chosen day via
  * {@link dateSelected}. The arrows only shift the visible days and never emit.
  *
@@ -292,36 +295,37 @@ export class MnDateSelectorBar implements OnInit {
   });
 
   /**
-   * Names the month the strip is currently in, so the days are never just loose
-   * numbers. Reads as a range when the strip straddles two months, and carries
-   * both years when it straddles two of those.
+   * The month the strip is currently in, spelled out for the header that titles
+   * the bar — so the days below are never just loose numbers. Reads as a range
+   * when the strip straddles two months, and carries both years when it straddles
+   * two of those.
    */
   readonly monthCaption = computed<string>(() => {
     const locale = this.effectiveLocale();
     const tiles = this.dayTiles();
 
-    // With no strip to describe — the compact layout — the caption names the
+    // With no strip to describe — the compact layout — the header names the
     // month the selection sits in, so the bar is never unlabelled.
     if (!tiles.length) {
-      return this.selectedDate().toLocaleDateString(locale, {month: 'short', year: 'numeric'});
+      return this.selectedDate().toLocaleDateString(locale, {month: 'long', year: 'numeric'});
     }
 
     const first = tiles[0].date;
     const last = tiles[tiles.length - 1].date;
 
     if (first.getFullYear() !== last.getFullYear()) {
-      const from = first.toLocaleDateString(locale, {month: 'short', year: 'numeric'});
-      const to = last.toLocaleDateString(locale, {month: 'short', year: 'numeric'});
+      const from = first.toLocaleDateString(locale, {month: 'long', year: 'numeric'});
+      const to = last.toLocaleDateString(locale, {month: 'long', year: 'numeric'});
       return `${from} – ${to}`;
     }
 
     if (first.getMonth() !== last.getMonth()) {
-      const from = first.toLocaleDateString(locale, {month: 'short'});
-      const to = last.toLocaleDateString(locale, {month: 'short', year: 'numeric'});
+      const from = first.toLocaleDateString(locale, {month: 'long'});
+      const to = last.toLocaleDateString(locale, {month: 'long', year: 'numeric'});
       return `${from} – ${to}`;
     }
 
-    return first.toLocaleDateString(locale, {month: 'short', year: 'numeric'});
+    return first.toLocaleDateString(locale, {month: 'long', year: 'numeric'});
   });
 
   /** The selected date formatted as YYYY-MM-DD for the date-picker input. */
