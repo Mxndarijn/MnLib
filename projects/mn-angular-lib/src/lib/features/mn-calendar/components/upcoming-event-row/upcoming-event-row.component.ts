@@ -13,20 +13,6 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
   standalone: true,
   imports: [CommonModule],
   templateUrl: './upcoming-event-row.component.html',
-  styles: [`
-    .upcoming-event-row {
-      padding: 8px 12px;
-      border-left: 3px solid var(--color-primary, #3b82f6);
-      margin-bottom: 8px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.15s;
-    }
-    .upcoming-event-row:hover { background: var(--color-base-200); }
-    .event-title { font-weight: 600; font-size: 13px; }
-    .event-time { font-size: 12px; color: var(--color-base-content, #6b7280); opacity: 0.7; }
-    .event-description { font-size: 12px; color: var(--color-base-content, #9ca3af); opacity: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  `]
 })
 export class UpcomingEventRowComponent implements OnInit {
   /** The event to display. */

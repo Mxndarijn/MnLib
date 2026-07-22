@@ -1,8 +1,15 @@
-<div (click)="eventClicked.emit(event)" (keyup.enter)="eventClicked.emit(event)" [style.border-left-color]="event.color.primaryColor" class="upcoming-event-row"
+<!-- Sidebar row in the shared chip language: a colored rail from the event's own
+     colour, a hover wash, and space-grouped content — no boxed borders. -->
+<div (click)="eventClicked.emit(event)"
+     (keyup.enter)="eventClicked.emit(event)"
+     class="grid grid-cols-[3px_1fr] items-stretch gap-2.5 mb-1.5 cursor-pointer rounded-lg p-2 transition-colors hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary motion-reduce:transition-none"
      tabindex="0">
-  <div class="event-title">{{ event.title }}</div>
-  <div class="event-time">{{ formattedDate }}</div>
-  @if (event.description) {
-    <div class="event-description">{{ event.description }}</div>
-  }
+  <div class="rounded-full" [style.background-color]="event.color.primaryColor"></div>
+  <div class="min-w-0">
+    <div class="truncate text-[13px] font-semibold">{{ event.title }}</div>
+    <div class="text-xs tabular-nums opacity-60">{{ formattedDate }}</div>
+    @if (event.description) {
+      <div class="truncate text-xs opacity-50">{{ event.description }}</div>
+    }
+  </div>
 </div>

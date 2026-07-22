@@ -16,37 +16,6 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-event-default.component.html',
-  styles: [`
-    .calendar-event-default {
-      padding: 4px 8px;
-      border-left: 3px solid var(--color-primary, #3b82f6);
-      border-radius: 4px;
-      font-size: 12px;
-      height: 100%;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .event-title {
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: inherit;
-    }
-    .event-time {
-      font-size: 11px;
-      opacity: 0.85;
-      color: inherit;
-    }
-    .event-description {
-      font-size: 11px;
-      opacity: 0.75;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: inherit;
-    }
-  `]
 })
 export class CalendarEventDefaultComponent implements CalendarEventData, OnInit {
   private cdr = inject(ChangeDetectorRef);

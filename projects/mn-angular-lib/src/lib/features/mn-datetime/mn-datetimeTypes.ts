@@ -55,6 +55,17 @@ export type MnDatetimeProps = {
   /** Whether to apply hover effect (cursor pointer and background change) */
   hover?: MnDatetimeVariants['hover'];
 
+  /**
+   * Render the control as an icon-only button — a calendar icon in a bordered box
+   * — instead of the full input that shows the value. The native picker still
+   * opens on click and the field stays a working form control; only the display
+   * collapses to the icon. Off by default.
+   *
+   * There is no visible text to name the control, so supply a `label`,
+   * `ariaLabel`, or `placeholder` for its accessible name.
+   */
+  iconOnly?: boolean;
+
   // ========== Error Message Configuration ==========
 
   /** Custom error messages mapped by validator error key */

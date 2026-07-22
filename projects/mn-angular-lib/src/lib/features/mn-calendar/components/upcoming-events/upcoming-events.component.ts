@@ -14,20 +14,6 @@ import {UpcomingEventRowComponent} from '../upcoming-event-row/upcoming-event-ro
   standalone: true,
   imports: [CommonModule, UpcomingEventRowComponent],
   templateUrl: './upcoming-events.component.html',
-  styles: [`
-    .upcoming-events {
-      padding: 16px;
-    }
-    .upcoming-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    .no-events {
-      color: var(--color-base-content, #9ca3af); opacity: 0.5;
-      font-size: 14px;
-    }
-  `]
 })
 export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
   /** Observable that emits the full event list whenever it changes. */

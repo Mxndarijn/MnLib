@@ -17,52 +17,6 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-month.component.html',
-  styles: [`
-    .calendar-month { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-    .month-header {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      font-weight: 600;
-      font-size: 13px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--color-base-300);
-    }
-    .month-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      flex: 1;
-      min-height: 0;
-    }
-    .month-cell {
-      min-height: 0;
-      padding: 4px 8px;
-      border: 1px solid var(--color-base-200);
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .month-cell:hover { background: var(--color-base-200); }
-    .month-cell.other-month { opacity: 0.4; }
-    .month-cell.today .day-number {
-      background: var(--color-primary);
-      color: var(--color-primary-content, white);
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .day-number { font-size: 13px; font-weight: 500; }
-    .month-events { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 4px; }
-    .month-event-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    .more-events { font-size: 10px; color: var(--color-base-content, #6b7280); opacity: 0.6; }
-  `]
 })
 export class CalendarMonthComponent implements OnInit, OnDestroy {
   /** The date whose month is displayed. */
@@ -77,7 +31,10 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
   @Output() dayClicked = new EventEmitter<Date>();
 
   monthItems: MonthItem[] = [];
-  longDayNames: string[];
+  /** Short weekday column headers (e.g. "Mon"), kept compact for the narrow columns. */
+  weekdayLabels: string[];
+  /** Word shown after the "+N" overflow count (e.g. "more"), from config. */
+  moreEventsLabel = DEFAULT_CALENDAR_CONFIG.moreEventsLabel;
 
   private events: CalendarEvent[] = [];
   private destroy$ = new Subject<void>();
@@ -85,12 +42,13 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.formatter = new DefaultCalendarDateFormatter();
-    this.longDayNames = DEFAULT_CALENDAR_CONFIG.longDayNames;
+    this.weekdayLabels = DEFAULT_CALENDAR_CONFIG.shortDayNames;
   }
 
   ngOnInit() {
     const resolved = this.config ? resolveCalendarConfig(this.config) : { ...DEFAULT_CALENDAR_CONFIG };
-    this.longDayNames = resolved.longDayNames;
+    this.weekdayLabels = resolved.shortDayNames;
+    this.moreEventsLabel = resolved.moreEventsLabel;
     this.buildMonth();
 
     if (this.eventsChanged) {

@@ -32,6 +32,14 @@ describe('CalendarViewComponent', () => {
     fixture.detectChanges();
   }
 
+  // These specs exercise the desktop view logic (month/week switching, period
+  // labels). Pin a desktop width so the responsive mobile breakpoint — which
+  // forces day view on a narrow window — doesn't override the view under test on
+  // whatever size the Karma browser happens to open at.
+  beforeEach(() => {
+    Object.defineProperty(window, 'innerWidth', {configurable: true, value: 1280});
+  });
+
   afterEach(() => TestBed.resetTestingModule());
 
   describe('navigating', () => {

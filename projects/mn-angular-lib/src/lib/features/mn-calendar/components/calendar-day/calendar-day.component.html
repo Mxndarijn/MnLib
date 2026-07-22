@@ -1,39 +1,43 @@
-﻿<div class="calendar-day" role="grid" aria-label="Day view">
-  <div class="day-header">
-    <div class="time-gutter-header"></div>
-    <div class="day-column-header" [class.today]="isToday" role="columnheader">
-      <span class="day-name">{{ dayName }}</span>
-      <span class="day-number">{{ focusDay.getDate() }}</span>
+<!-- Day grid. One column, its header centered over that column (the toolbar
+     already names the date). Today's number is tinted, not filled; the now-line
+     carries a time bubble that overhangs into the gutter. -->
+<div class="w-full h-full flex flex-col overflow-hidden" role="grid" aria-label="Day view">
+  <div class="grid grid-cols-[60px_1fr]">
+    <div></div>
+    <div class="flex items-center justify-center gap-2 py-2 px-1" role="columnheader">
+      <span class="text-[11px] font-semibold uppercase tracking-wide opacity-50">{{ dayName }}</span>
+      <span class="text-base font-bold tabular-nums" [class.text-primary]="isToday">{{ focusDay.getDate() }}</span>
     </div>
   </div>
-  <div class="day-body">
-    <div class="time-gutter" [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'">
+  <div class="grid grid-cols-[60px_1fr] flex-1 min-h-0 overflow-hidden items-stretch">
+    <div class="grid h-full min-h-0" [style.grid-template-rows]="'repeat(' + totalRows + ', minmax(1.5rem, 1fr))'">
       @for (row of hourRows; track row.topRow) {
-        <div class="hour-label"
+        <div class="flex items-start justify-end min-h-0 overflow-hidden pr-2 text-[11px] tabular-nums opacity-50"
           [style.grid-row]="row.topRow + '/' + row.bottomRow">
           {{ row.hourLabel }}
         </div>
       }
     </div>
-    <div class="day-grid"
-      [style.grid-template-rows]="'repeat(' + totalRows + ', 1fr)'"
+    <div class="grid relative auto-rows-fr h-full min-h-0"
+      [style.grid-template-rows]="'repeat(' + totalRows + ', minmax(1.5rem, 1fr))'"
       [style.grid-template-columns]="'repeat(' + totalColumns + ', 1fr)'">
       @for (row of hourRows; track row.topRow) {
-        <div class="hour-line"
+        <div class="border-t border-base-200 pointer-events-none min-h-0"
           [style.grid-row]="row.topRow + '/' + row.bottomRow"
           [style.grid-column]="'1 / -1'">
         </div>
       }
       @if (currentTimeRow > 0 && isToday) {
-        <div class="current-time-line"
+        <div class="relative z-[2] pointer-events-none"
           [style.grid-row]="currentTimeRow"
           [style.grid-column]="'1 / -1'">
-          <div class="current-time-dot"></div>
-          <div class="current-time-rule"></div>
+          <div class="absolute -left-1 -top-1 h-2 w-2 rounded-full bg-error"></div>
+          <div class="h-0.5 w-full bg-error"></div>
+          <div class="absolute left-0 top-0 -translate-x-2 -translate-y-1/2 rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-error-content shadow">{{ currentTimeLabel }}</div>
         </div>
       }
       @for (event of displayEvents; track $index) {
-        <div class="day-event"
+        <div class="z-[1] min-h-0 overflow-hidden rounded-lg p-0.5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           [style.grid-row]="getEventRow(event)"
           [style.grid-column]="getEventColumn(event)"
              (click)="onEventClick(event)"

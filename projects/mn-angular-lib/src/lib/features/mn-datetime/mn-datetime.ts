@@ -1,5 +1,6 @@
 import {Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
-import {NgClass} from '@angular/common';
+import {NgClass, NgTemplateOutlet} from '@angular/common';
+import {LucideCalendarDays} from '@lucide/angular';
 import {MnDatetimeErrorMessageData, MnDatetimeMode, MnDatetimeProps, MnDatetimeUIConfig} from './mn-datetimeTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnDatetimeVariants} from './mn-datetimeVariants';
@@ -14,7 +15,7 @@ export const MN_DATETIME_CONFIG = new InjectionToken<MnDatetimeUIConfig>('MN_DAT
 @Component({
   selector: 'mn-lib-datetime',
   standalone: true,
-  imports: [NgClass, MnErrorMessage],
+  imports: [NgClass, NgTemplateOutlet, MnErrorMessage, LucideCalendarDays],
   templateUrl: './mn-datetime.html',
   styles: `
     input::-webkit-calendar-picker-indicator {
@@ -229,7 +230,35 @@ export class MnDatetime implements OnInit {
     return this.props.mode ?? 'datetime-local';
   }
 
+  /** Whether the control renders as an icon-only button rather than a full input. */
+  get iconOnly(): boolean {
+    return this.props.iconOnly === true;
+  }
+
+  /**
+   * Accessible name for the input. Prefers an explicit ariaLabel/label; for the
+   * icon-only variant — which has no visible text — it falls back to the
+   * placeholder so the button is never left unnamed.
+   */
+  get resolvedAriaLabel(): string | null {
+    const explicit = this.uiConfig.ariaLabel || this.uiConfig.label || this.props.label;
+    if (explicit) return explicit;
+    return this.iconOnly ? (this.uiConfig.placeholder || this.props.placeholder || null) : null;
+  }
+
+  /** Lucide icon size (px) tracking the field size, used only in the icon-only variant. */
+  get iconSize(): number {
+    if (this.props.size === 'sm') return 16;
+    if (this.props.size === 'lg') return 20;
+    return 18;
+  }
+
   get inputClasses(): string {
+    // Icon-only: the input becomes a transparent click target filling the icon box,
+    // which carries the visible styling. `iconBoxClasses` provides the box itself.
+    if (this.iconOnly) {
+      return 'absolute inset-0 h-full w-full cursor-pointer opacity-0';
+    }
     return mnDatetimeVariants({
       size: this.props.size,
       borderRadius: this.props.borderRadius,
@@ -237,5 +266,24 @@ export class MnDatetime implements OnInit {
       fullWidth: this.props.fullWidth,
       hover: this.props.hover,
     });
+  }
+
+  /**
+   * Classes for the icon-only box: the same border/background/radius/hover the full
+   * input would wear (reused from the variant), made a positioning context for the
+   * overlaid input, with a `focus-within` ring standing in for the transparent
+   * input's own focus outline.
+   */
+  get iconBoxClasses(): string {
+    return [
+      mnDatetimeVariants({
+        size: this.props.size,
+        borderRadius: this.props.borderRadius,
+        shadow: this.props.shadow,
+        hover: this.props.hover,
+      }),
+      'relative inline-flex items-center justify-center text-base-content/70',
+      'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary',
+    ].join(' ');
   }
 }
