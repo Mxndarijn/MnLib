@@ -284,8 +284,12 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private checkMobileView() {
     const wasMobile = this.isMobileView;
     const width = window.innerWidth;
-    this.isMobileView = width < 475;
-    this.isTabletView = width >= 475 && width < 1024;
+    // Honour the configured mobile breakpoint (default 768) rather than a hard-coded
+    // width: a seven-column week is cramped well before a phone's width, so the day
+    // view takes over earlier — and consumers can tune where via `mobileBreakpoint`.
+    const breakpoint = this.config.mobileBreakpoint;
+    this.isMobileView = width < breakpoint;
+    this.isTabletView = width >= breakpoint && width < 1024;
     if (this.isMobileView && !wasMobile) {
       this.currentView = CalendarView.DAY;
     }

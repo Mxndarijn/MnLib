@@ -21,12 +21,6 @@ import { CalendarEventDefaultComponent } from '../calendar-event-default/calenda
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-event.component.html',
-  styles: [`
-    .calendar-event-wrapper {
-      height: 100%;
-      width: 100%;
-    }
-  `]
 })
 export class CalendarEventComponent implements AfterViewInit, OnChanges {
   /** The event data to render. */

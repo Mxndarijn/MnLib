@@ -37,75 +37,6 @@ type DisplayHourRow = {
   imports: [CommonModule, CalendarEventComponent],
   templateUrl: './calendar-week.component.html',
   providers: [CalendarEventLayoutService],
-  styles: [`
-    .calendar-week { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-    .week-header {
-      display: grid;
-      border-bottom: 1px solid var(--color-base-300);
-    }
-    .time-gutter-header { min-width: 60px; }
-    .day-column-header {
-      text-align: center;
-      padding: 8px 4px;
-      font-size: 13px;
-    }
-    .day-column-header.today { color: var(--color-primary); font-weight: 700; }
-    .day-name { display: block; font-size: 11px; text-transform: uppercase; color: var(--color-base-content, #6b7280); opacity: 0.7; }
-    .day-number { font-size: 18px; font-weight: 600; }
-    .week-body { display: grid; grid-template-columns: 60px 1fr; flex: 1; min-height: 0; overflow: hidden; align-items: stretch; }
-    .time-gutter {
-      display: grid;
-      height: 100%;
-      min-height: 0;
-    }
-    .hour-label {
-      font-size: 11px;
-      color: var(--color-base-content, #6b7280); opacity: 0.7;
-      text-align: right;
-      padding-right: 8px;
-      display: flex;
-      align-items: start;
-      min-height: 0;
-      overflow: hidden;
-    }
-    .week-grid {
-      display: grid;
-      position: relative;
-      grid-auto-rows: 1fr;
-      height: 100%;
-      min-height: 0;
-    }
-    .hour-line {
-      border-top: 1px solid var(--color-base-200);
-      pointer-events: none;
-      min-height: 0;
-    }
-    .week-event {
-      z-index: 1;
-      padding: 1px 2px;
-      overflow: hidden;
-      min-height: 0;
-    }
-    .current-time-line {
-      position: relative;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .current-time-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--color-error, #ef4444);
-      border-radius: 50%;
-      position: absolute;
-      left: -4px;
-      top: -4px;
-    }
-    .current-time-rule {
-      height: 2px;
-      background: var(--color-error, #ef4444);
-      width: 100%;
-    }
-  `]
 })
 export class CalendarWeekComponent implements OnInit, OnDestroy {
   private layoutService = inject(CalendarEventLayoutService);
@@ -130,6 +61,8 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
   totalRows = 0;
   currentTimeRow = 0;
   currentTimeCol = '';
+  /** The current time, formatted for the label riding the now-line. */
+  currentTimeLabel = '';
   gridTemplateColumns = 'repeat(7, 1fr)';
 
   private dayColumnMap: { subColumns: number; startCol: number }[] = [];
@@ -339,9 +272,15 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
       const dayInfo = this.dayColumnMap[dayIdx];
       this.currentTimeCol = `${dayInfo.startCol} / span ${dayInfo.subColumns}`;
       this.currentTimeRow = CalendarUtility.getCorrectRow(now.getHours(), now.getMinutes(), this.resolvedConfig.startHour);
+      // formatTime is async; refresh the label and re-render when it resolves.
+      this.formatter.formatTime(now).then(label => {
+        this.currentTimeLabel = label;
+        this.cdr.markForCheck();
+      });
     } else {
       this.currentTimeCol = '';
       this.currentTimeRow = 0;
+      this.currentTimeLabel = '';
     }
   }
 }
