@@ -1,103 +1,111 @@
 <!-- Date selector bar. Layout is driven by the bar's own measured width, so it
-     rearranges for the space the bar was given, not for the viewport. It never
-     stacks: as room runs out it shows fewer days, then hands over to the picker.
-     Nothing here is boxed — spacing does the grouping, not borders. -->
-<div class="flex items-center gap-4 px-4 py-3">
+     rearranges for the space the bar was given, not for the viewport. The strip
+     never stacks: as room runs out it shows fewer days, then hands over to the
+     picker. Nothing here is boxed — spacing does the grouping, not borders. -->
+<div class="flex flex-col gap-2 px-4 py-3">
 
-  <!-- Today: returns the strip and the selection to the current day, and the
-       control people reach for most, so it carries the weight of a filled button. -->
-  <button (click)="goToToday()"
-          [data]="{ variant: 'fill', color: 'primary', size: 'md' }"
-          class="shrink-0"
-          mnButton
-          type="button">
-    {{ todayLabel() }}
-  </button>
+  <!-- Month header. Titles the whole bar so the day numbers below are never loose:
+       it names the month the strip is in (or, when compact, the month the
+       selection sits in), reading as a range where the strip crosses a boundary.
+       On its own line it has room to be spelled out, and no longer steals width
+       from the days the way the old inline caption did. -->
+  <div aria-hidden="true"
+       class="text-center text-sm font-semibold tracking-wide whitespace-nowrap opacity-80">
+    {{ monthCaption() }}
+  </div>
 
-  <!-- Too narrow for a usable strip, so the picker takes its place beside Today.
-       Every date stays reachable on a phone, in one tap rather than by paging.
-       The caption comes along, so the compact bar is labelled like the wide one —
-       it names the selected day's month rather than a visible range. -->
-  @if (!showDayStrip()) {
-    <span aria-hidden="true"
-          class="shrink-0 text-xs font-semibold tracking-wide whitespace-nowrap uppercase opacity-55">
-      {{ monthCaption() }}
-    </span>
+  <!-- Controls row. Today and the strip travel together as one centred cluster, so
+       Today sits right beside the days instead of stranded against the far edge;
+       the gap between them matches the strip's own spacing. When the strip gives
+       way to the picker, the picker fills the row and Today anchors its left. -->
+  <div class="flex items-center justify-center gap-3">
 
-    <mn-lib-datetime (ngModelChange)="onDateModelChanged($event)"
-                     [ngModel]="selectedDateString()"
-                     [props]="pickerProps()"
-                     class="block min-w-0 flex-1"></mn-lib-datetime>
-  }
+    <!-- Today: returns the strip and the selection to the current day. Outlined
+         rather than filled, so the one filled-primary element on the bar is the
+         selected day — Today shares the primary accent without competing with it. -->
+    <button (click)="goToToday()"
+            [data]="{ variant: 'outline', color: 'primary', size: 'md' }"
+            class="shrink-0"
+            mnButton
+            type="button">
+      {{ todayLabel() }}
+    </button>
 
-  <!-- The strip takes the room left over and centres its contents in it, so on a
-       wide bar the days sit in the middle rather than trailing off to one side. -->
-  @if (showDayStrip()) {
-    <div [attr.aria-label]="dayStripLabel()"
-         class="flex min-w-0 flex-1 items-center justify-center gap-3"
-         role="group">
-      <!-- Names the month the strip is in, so the day numbers are never loose. -->
-      <span aria-hidden="true"
-            class="shrink-0 text-xs font-semibold tracking-wide whitespace-nowrap uppercase opacity-55">
-        {{ monthCaption() }}
-      </span>
+    <!-- Too narrow for a usable strip, so the picker takes its place beside Today.
+         Every date stays reachable on a phone, in one tap rather than by paging;
+         the month header above keeps the compact bar labelled like the wide one. -->
+    @if (!showDayStrip()) {
+      <mn-lib-datetime (ngModelChange)="onDateModelChanged($event)"
+                       [ngModel]="selectedDateString()"
+                       [props]="pickerProps()"
+                       class="block min-w-0 flex-1"></mn-lib-datetime>
+    }
 
-      <button (click)="navigatePrevious()"
-              [attr.aria-label]="previousLabel()"
-              [data]="{ variant: 'text', size: 'md', color: 'gray' }"
-              class="shrink-0"
-              mnButton
-              type="button">
-        <svg [size]="18" lucideChevronLeft></svg>
-      </button>
+    <!-- Arrows and days, sized to their own content so the row can centre them
+         together with Today as a single cluster — rather than the days drifting to
+         the middle of the leftover space, away from the button. -->
+    @if (showDayStrip()) {
+      <div [attr.aria-label]="dayStripLabel()"
+           class="flex min-w-0 items-center gap-3"
+           role="group">
+        <button (click)="navigatePrevious()"
+                [attr.aria-label]="previousLabel()"
+                [data]="{ variant: 'text', size: 'md', color: 'gray' }"
+                class="shrink-0"
+                mnButton
+                type="button">
+          <svg [size]="18" lucideChevronLeft></svg>
+        </button>
 
-      <!-- Days read on one line so each sits at the same height as the buttons
-           either side of it. Roving tabindex: one day is in the tab order, the
-           arrow keys move between the rest and page the strip at either end. -->
-      <div class="flex min-w-0 gap-1">
-        @for (tile of dayTiles(); track tile.date.getTime(); let i = $index) {
-          <!-- A month break is marked by extra breathing room rather than a rule,
-               so the run of days stays unbroken; the caption names both months. -->
-          <button #tileButton
-                  (click)="selectDate(tile.date)"
-                  (focus)="onTileFocus(i)"
-                  (keydown)="onTileKeydown($event, i)"
-                  [attr.aria-current]="tile.isToday ? 'date' : null"
-                  [attr.aria-label]="tile.accessibleLabel"
-                  [attr.aria-pressed]="tile.isSelected"
-                  [attr.tabindex]="isTabbable(i) ? 0 : -1"
-                  [class.bg-primary]="tile.isSelected"
-                  [class.hover:bg-base-200]="!tile.isSelected"
-                  [class.ml-3]="tile.startsNewMonth"
-                  [class.text-primary-content]="tile.isSelected"
-                  class="flex min-w-16 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none"
-                  type="button">
-            <span [class.opacity-60]="!tile.isSelected"
-                  [class.opacity-90]="tile.isSelected"
-                  aria-hidden="true"
-                  class="text-xs font-medium uppercase">
-              {{ tile.dayName }}
-            </span>
-            <span aria-hidden="true" class="font-bold tabular-nums">{{ tile.dayNumber }}</span>
-            <!-- Today's dot. Every day reserves the space so no tile changes
-                 width; only its colour says which one is today, and exactly one
-                 colour class applies at a time so they can't fight. -->
-            <span [class.bg-primary-content]="tile.isToday && tile.isSelected"
-                  [class.bg-primary]="tile.isToday && !tile.isSelected"
-                  aria-hidden="true"
-                  class="size-1 shrink-0 rounded-full"></span>
-          </button>
-        }
+        <!-- Days read on one line so each sits at the same height as the buttons
+             either side of it. Roving tabindex: one day is in the tab order, the
+             arrow keys move between the rest and page the strip at either end. -->
+        <div class="flex min-w-0 gap-1">
+          @for (tile of dayTiles(); track tile.date.getTime(); let i = $index) {
+            <!-- Selected is the filled pill; today is called out by its number
+                 alone, tinted primary — no box, in keeping with a bar that groups
+                 by spacing rather than borders. When today is also the selected
+                 day the fill takes over, since there is nothing left to tell apart.
+                 A month break is marked by extra breathing room rather than a rule,
+                 so the run of days stays unbroken; the header names both months. -->
+            <button #tileButton
+                    (click)="selectDate(tile.date)"
+                    (focus)="onTileFocus(i)"
+                    (keydown)="onTileKeydown($event, i)"
+                    [attr.aria-current]="tile.isToday ? 'date' : null"
+                    [attr.aria-label]="tile.accessibleLabel"
+                    [attr.aria-pressed]="tile.isSelected"
+                    [attr.tabindex]="isTabbable(i) ? 0 : -1"
+                    [class.bg-primary]="tile.isSelected"
+                    [class.hover:bg-base-200]="!tile.isSelected"
+                    [class.ml-3]="tile.startsNewMonth"
+                    [class.text-primary-content]="tile.isSelected"
+                    class="flex min-w-16 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none"
+                    type="button">
+              <span [class.opacity-60]="!tile.isSelected"
+                    [class.opacity-90]="tile.isSelected"
+                    aria-hidden="true"
+                    class="text-xs font-medium uppercase">
+                {{ tile.dayName }}
+              </span>
+              <!-- Today's number carries the primary tint, unless the tile is
+                   filled — then it wears the fill's own text colour instead. -->
+              <span [class.text-primary]="tile.isToday && !tile.isSelected"
+                    aria-hidden="true"
+                    class="font-bold tabular-nums">{{ tile.dayNumber }}</span>
+            </button>
+          }
+        </div>
+
+        <button (click)="navigateNext()"
+                [attr.aria-label]="nextLabel()"
+                [data]="{ variant: 'text', size: 'md', color: 'gray' }"
+                class="shrink-0"
+                mnButton
+                type="button">
+          <svg [size]="18" lucideChevronRight></svg>
+        </button>
       </div>
-
-      <button (click)="navigateNext()"
-              [attr.aria-label]="nextLabel()"
-              [data]="{ variant: 'text', size: 'md', color: 'gray' }"
-              class="shrink-0"
-              mnButton
-              type="button">
-        <svg [size]="18" lucideChevronRight></svg>
-      </button>
-    </div>
-  }
+    }
+  </div>
 </div>

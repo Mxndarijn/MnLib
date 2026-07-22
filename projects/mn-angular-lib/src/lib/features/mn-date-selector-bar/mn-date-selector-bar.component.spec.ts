@@ -17,14 +17,15 @@ const WEEK_MS = 7 * DAY_MS;
 const MONDAY = 1;
 
 /**
- * Widths that land in each state. Everything that isn't a day tile costs 326px
- * (Today, the arrows, the month caption), and each day 80px on top.
+ * Widths that land in each state. Everything that isn't a day tile costs 238px
+ * (Today and the arrows — the month is its own header line now), and each day
+ * 80px on top, so the picker takes over below 478px.
  */
 const INLINE_WIDTH = 900;
 /** Wide enough for a strip, too narrow for a whole week. */
 const PARTIAL_WIDTH = 700;
 /** Too narrow even for three days, so the picker takes over. */
-const COMPACT_WIDTH = 500;
+const COMPACT_WIDTH = 400;
 
 /** Saturday 15 June 2024. Its week runs Mon 10 – Sun 16 June. */
 const SATURDAY_15_JUNE = new Date(2024, 5, 15);
@@ -374,41 +375,41 @@ describe('MnDateSelectorBar', () => {
     });
   });
 
-  describe('the month caption', () => {
+  describe('the month header', () => {
     it('names the month the strip is sitting in', async () => {
       await createBar(INLINE_WIDTH, SATURDAY_15_JUNE);
-      expect(component.monthCaption()).toBe('Jun 2024');
+      expect(component.monthCaption()).toBe('June 2024');
     });
 
     it('reads as a range when the strip straddles two months', async () => {
       // Week of Mon 29 July – Sun 4 August 2024.
       await createBar(INLINE_WIDTH, new Date(2024, 6, 31));
-      expect(component.monthCaption()).toBe('Jul – Aug 2024');
+      expect(component.monthCaption()).toBe('July – August 2024');
     });
 
     it('carries both years when the strip straddles two of those', async () => {
       // Week of Mon 30 December 2024 – Sun 5 January 2025.
       await createBar(INLINE_WIDTH, new Date(2024, 11, 31));
-      expect(component.monthCaption()).toBe('Dec 2024 – Jan 2025');
+      expect(component.monthCaption()).toBe('December 2024 – January 2025');
     });
 
     it('names the selected month even when there is no strip to describe', async () => {
       // The compact bar has no visible range, but must still be labelled.
       await createBar(COMPACT_WIDTH, SATURDAY_15_JUNE);
       expect(component.showDayStrip()).toBe(false);
-      expect(component.monthCaption()).toBe('Jun 2024');
+      expect(component.monthCaption()).toBe('June 2024');
     });
 
     it('follows the strip as it pages', async () => {
       await createBar(INLINE_WIDTH, SATURDAY_15_JUNE);
-      expect(component.monthCaption()).toBe('Jun 2024');
+      expect(component.monthCaption()).toBe('June 2024');
 
       // Three weeks on lands in July.
       component.navigateNext();
       component.navigateNext();
       component.navigateNext();
       fixture.detectChanges();
-      expect(component.monthCaption()).toBe('Jul 2024');
+      expect(component.monthCaption()).toBe('July 2024');
     });
 
     it('marks the day a month changes so the break is visible without a label', async () => {
