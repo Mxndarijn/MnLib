@@ -1,4 +1,4 @@
-﻿<div class="flex flex-col h-full" [class.is-fullwidth]="props.fullWidth">
+<div class="flex flex-col h-full" [class.is-fullwidth]="props.fullWidth">
   @if (uiConfig.label || props.label) {
     <label class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!" [attr.for]="resolvedId">
       <p>{{ uiConfig.label || props.label }}</p>
@@ -8,25 +8,21 @@
     </label>
   }
 
-  <input
-    #dateInput
-    [id]="resolvedId"
-    [attr.name]="resolvedName"
-    [type]="resolvedMode"
-    [attr.placeholder]="uiConfig.placeholder || props.placeholder || null"
-    [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || props.label || null"
-    [attr.aria-invalid]="showError || null"
-    [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
-    [disabled]="isDisabled"
-    [attr.min]="props.min || null"
-    [attr.max]="props.max || null"
-    [attr.step]="props.step || null"
-    [value]="value ?? ''"
-    [ngClass]="inputClasses"
-    (click)="handleClick(dateInput)"
-    (input)="handleInput(($any($event.target)).value)"
-    (blur)="handleBlur()"
-  />
+  @if (iconOnly) {
+    <!--
+      Icon-only variant: a bordered box holding a calendar icon, with the native
+      input layered on top at zero opacity. The box carries the look (border,
+      background, radius, hover, focus ring); the input stays a real, focusable
+      form control that opens the picker on click. `focus-within` on the box
+      surfaces the keyboard focus ring, since the input itself is transparent.
+    -->
+    <div [ngClass]="iconBoxClasses">
+      <svg [size]="iconSize" lucideCalendarDays aria-hidden="true" class="pointer-events-none"></svg>
+      <ng-container [ngTemplateOutlet]="inputTemplate"></ng-container>
+    </div>
+  } @else {
+    <ng-container [ngTemplateOutlet]="inputTemplate"></ng-container>
+  }
 
   @if (showError) {
     @if (props.showAllErrors) {
@@ -42,3 +38,27 @@
     }
   }
 </div>
+
+<!-- Single input definition, rendered either bare or inside the icon box above,
+     so both variants share exactly the same bindings and behaviour. -->
+<ng-template #inputTemplate>
+  <input
+    #dateInput
+    [id]="resolvedId"
+    [attr.name]="resolvedName"
+    [type]="resolvedMode"
+    [attr.placeholder]="uiConfig.placeholder || props.placeholder || null"
+    [attr.aria-label]="resolvedAriaLabel"
+    [attr.aria-invalid]="showError || null"
+    [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
+    [disabled]="isDisabled"
+    [attr.min]="props.min || null"
+    [attr.max]="props.max || null"
+    [attr.step]="props.step || null"
+    [value]="value ?? ''"
+    [ngClass]="inputClasses"
+    (click)="handleClick(dateInput)"
+    (input)="handleInput(($any($event.target)).value)"
+    (blur)="handleBlur()"
+  />
+</ng-template>

@@ -1,3 +1,6 @@
-<div (click)="onEventClick()" (keyup.enter)="onEventClick()" class="calendar-event-wrapper" tabindex="0">
+<!-- Host for the dynamically-rendered event component. Click/keyboard handling and
+     the focus ring live on the week/day event wrapper, so this stays presentational
+     to avoid a second, redundant tab stop per event. -->
+<div class="h-full w-full">
   <ng-template #eventContainer></ng-template>
 </div>

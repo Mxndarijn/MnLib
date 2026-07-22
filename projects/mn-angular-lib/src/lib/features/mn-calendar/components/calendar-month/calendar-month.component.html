@@ -1,31 +1,44 @@
-<div class="calendar-month" role="grid" aria-label="Month view">
-  <div class="month-header">
-    @for (day of longDayNames; track day) {
-      <div class="day-header" role="columnheader">{{ day }}</div>
+<!-- Month grid. Cells are grouped by space rather than boxed by borders, in
+     keeping with the date-selector-bar: no rules, soft rounded cells, a hover
+     wash, and today marked by a tinted number alone (no circle). -->
+<!-- Rows are a compact fixed height rather than stretched to fill the container:
+     a month with few events shouldn't leave each cell mostly empty. The panel
+     scrolls if the grid is taller than the space it's given. -->
+<div class="w-full flex flex-col" role="grid" aria-label="Month view">
+  <div class="grid grid-cols-7 pb-2">
+    @for (day of weekdayLabels; track day) {
+      <div class="pl-2 text-left text-[11px] font-semibold uppercase tracking-wide opacity-45" role="columnheader">{{ day }}</div>
     }
   </div>
-  <div class="month-grid">
+  <div class="grid grid-cols-7 gap-1 auto-rows-[minmax(92px,auto)]">
     @for (item of monthItems; track item.date.getTime()) {
       <div
-        class="month-cell"
-        [class.other-month]="!item.isCurrentMonth"
-        [class.today]="item.isToday"
+        class="flex flex-col gap-1 min-h-0 overflow-hidden rounded-xl p-1.5 cursor-pointer transition-colors hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary motion-reduce:transition-none"
+        [class.opacity-40]="!item.isCurrentMonth"
         (keyup.enter)="onDayClick(item.date)"
         (click)="onDayClick(item.date)"
         tabindex="0"
         role="gridcell"
         [attr.aria-label]="item.date.toDateString()">
-        <span class="day-number">{{ item.dayNumber }}</span>
-        <div class="month-events">
+        <span class="text-[13px] font-bold leading-none tabular-nums" [class.text-primary]="item.isToday">{{ item.dayNumber }}</span>
+        <div class="flex flex-col gap-0.5 min-h-0">
           @for (event of item.events.slice(0, 3); track $index) {
             <div
-              class="month-event-dot"
-              [style.background-color]="event.color.primaryColor"
+              class="flex items-center overflow-hidden rounded-md border-l-[3px] px-1.5 py-0.5 text-[11px] leading-tight"
+              [style.background-color]="event.color.secondaryColor"
+              [style.border-left-color]="event.color.primaryColor"
+              [style.color]="event.color.primaryColor"
               [title]="event.title">
+              <span class="truncate font-semibold">{{ event.title }}</span>
             </div>
           }
+          <!-- Overflow indicator. Styled as a pill that lights up on hover so it
+               reads as actionable; the whole cell already navigates to the Day
+               view for this date on click / Enter, where every event is listed. -->
           @if (item.events.length > 3) {
-            <span class="more-events">+{{ item.events.length - 3 }}</span>
+            <span class="mt-0.5 inline-flex w-fit items-center rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold opacity-60 transition-colors hover:bg-base-300 hover:opacity-100 motion-reduce:transition-none">
+              +{{ item.events.length - 3 }} {{ moreEventsLabel }}
+            </span>
           }
         </div>
       </div>

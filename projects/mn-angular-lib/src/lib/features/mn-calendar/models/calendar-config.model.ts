@@ -36,6 +36,8 @@ export type CalendarConfig = {
   upcomingEventsTitle: string;
   /** Message shown when there are no upcoming events. Default: `'No upcoming events'`. */
   noUpcomingEvents: string;
+  /** Word after the "+N" overflow count in a month cell — "+3 more". Default: `'more'`. */
+  moreEventsLabel: string;
   /** Display labels for each calendar view mode. */
   viewLabels: Record<string, string>;
   /** Abbreviated day names starting from Monday (length 7). Derived from `locale` when not set. */
@@ -77,6 +79,7 @@ export const DEFAULT_CALENDAR_CONFIG: CalendarConfig = (() => {
     nextLabel: 'Next',
     upcomingEventsTitle: 'Upcoming events',
     noUpcomingEvents: 'No upcoming events',
+    moreEventsLabel: 'more',
     viewLabels: { MONTH: 'Month', WEEK: 'Week', DAY: 'Day' },
     shortDayNames: names.short,
     longDayNames: names.long,
