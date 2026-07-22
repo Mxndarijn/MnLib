@@ -105,7 +105,7 @@
             <button
               (click)="item.existing ? removeExisting(item.index) : removeFile(item.index)"
               [attr.aria-label]="uiConfig.removeLabel"
-              class="btn btn-circle btn-xs absolute top-1 right-1 border-none bg-black/60 text-white hover:bg-black/80"
+              class="inline-flex h-6 w-6 items-center justify-center rounded-full cursor-pointer transition-colors absolute top-1 right-1 border-none bg-black/60 text-white hover:bg-black/80"
               type="button">
               <svg lucideX [size]="14"></svg>
             </button>
@@ -149,7 +149,7 @@
               <button
                 (click)="item.existing ? removeExisting(item.index) : removeFile(item.index)"
                 [attr.aria-label]="uiConfig.removeLabel"
-                class="btn btn-circle btn-sm btn-ghost text-base-content/60 hover:text-error"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-full cursor-pointer transition-colors hover:bg-base-200 text-base-content/60 hover:text-error"
                 type="button">
                 <svg lucideTrash2 [size]="16"></svg>
               </button>
