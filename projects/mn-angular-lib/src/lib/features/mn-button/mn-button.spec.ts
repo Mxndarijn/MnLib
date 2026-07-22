@@ -72,4 +72,34 @@ describe('MnButton', () => {
     expect(button().getAttribute('disabled')).toBeNull();
     expect(button().getAttribute('aria-busy')).toBeNull();
   });
+
+  it('renders a circular icon button: square, padding-free, fully rounded', () => {
+    host.data = {shape: 'circle', size: 'md'};
+    fixture.detectChanges();
+
+    const cls = button().className;
+    expect(cls).toContain('rounded-full');
+    expect(cls).toContain('p-0');
+    expect(cls).toContain('h-10');
+    expect(cls).toContain('w-10');
+  });
+
+  it('sizes a square icon button off `size`', () => {
+    host.data = {shape: 'square', size: 'sm'};
+    fixture.detectChanges();
+
+    const cls = button().className;
+    expect(cls).toContain('rounded-md');
+    expect(cls).toContain('h-8');
+    expect(cls).toContain('w-8');
+  });
+
+  it('renders a ghost button transparent with a hover surface', () => {
+    host.data = {variant: 'ghost', color: 'gray'};
+    fixture.detectChanges();
+
+    const cls = button().className;
+    expect(cls).toContain('bg-transparent');
+    expect(cls).toContain('hover:bg-base-content/10');
+  });
 });

@@ -19,6 +19,7 @@ export class MnButton {
       variant: this.data.variant,
       color: this.data.color,
       borderRadius: this.data.borderRadius,
+      shape: this.data.shape,
       disabled: this.data.disabled,
       loading: this.data.loading,
       wrap: this.data.wrap,

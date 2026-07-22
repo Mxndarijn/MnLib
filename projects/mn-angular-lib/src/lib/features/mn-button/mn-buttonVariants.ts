@@ -14,6 +14,9 @@ export const mnButtonVariants = tv({
       outline: 'bg-transparent border',
       text: 'bg-transparent',
       textUnderline: 'bg-transparent underline underline-offset-2',
+      // Transparent button that only reveals a subtle surface on hover — the idiomatic
+      // icon-button look. Colors resolved via compoundVariants.
+      ghost: 'bg-transparent',
     },
 
     // Intentionally empty; resolved via compoundVariants
@@ -37,6 +40,14 @@ export const mnButtonVariants = tv({
       two_xl: 'rounded-2xl',
       three_xl: 'rounded-3xl',
       four_xl: 'rounded-4xl',
+    },
+    // Icon-button shape. `circle`/`square` drop the text padding and make the button a
+    // fixed square sized off `size` (see compoundVariants), overriding `borderRadius`.
+    // `default` leaves a normal text button untouched.
+    shape: {
+      default: '',
+      circle: 'p-0 shrink-0 rounded-full',
+      square: 'p-0 shrink-0 rounded-md',
     },
     disabled: {
       true: 'opacity-50 pointer-events-none',
@@ -120,6 +131,29 @@ export const mnButtonVariants = tv({
     { variant: 'textUnderline', color: 'success',   hover: true, class: 'hover:bg-success/10' },
     { variant: 'textUnderline', color: 'accent',    hover: true, class: 'hover:bg-accent/10' },
     { variant: 'textUnderline', color: 'gray',      hover: true, class: 'hover:bg-base-content/10' },
+    // Ghost — base (transparent, colored text/icon)
+    {variant: 'ghost', color: 'primary', class: 'text-primary'},
+    {variant: 'ghost', color: 'secondary', class: 'text-neutral'},
+    {variant: 'ghost', color: 'danger', class: 'text-error'},
+    {variant: 'ghost', color: 'warning', class: 'text-warning'},
+    {variant: 'ghost', color: 'success', class: 'text-success'},
+    {variant: 'ghost', color: 'accent', class: 'text-accent'},
+    {variant: 'ghost', color: 'gray', class: 'text-base-content'},
+    // Ghost — hover (reveal a subtle surface in the button's own hue)
+    {variant: 'ghost', color: 'primary', hover: true, class: 'hover:bg-primary/10'},
+    {variant: 'ghost', color: 'secondary', hover: true, class: 'hover:bg-neutral/10'},
+    {variant: 'ghost', color: 'danger', hover: true, class: 'hover:bg-error/10'},
+    {variant: 'ghost', color: 'warning', hover: true, class: 'hover:bg-warning/10'},
+    {variant: 'ghost', color: 'success', hover: true, class: 'hover:bg-success/10'},
+    {variant: 'ghost', color: 'accent', hover: true, class: 'hover:bg-accent/10'},
+    {variant: 'ghost', color: 'gray', hover: true, class: 'hover:bg-base-content/10'},
+    // Icon-button square sizing — applies to both circle and square shapes, sized off `size`.
+    {shape: 'circle', size: 'sm', class: 'h-8 w-8'},
+    {shape: 'circle', size: 'md', class: 'h-10 w-10'},
+    {shape: 'circle', size: 'lg', class: 'h-12 w-12'},
+    {shape: 'square', size: 'sm', class: 'h-8 w-8'},
+    {shape: 'square', size: 'md', class: 'h-10 w-10'},
+    {shape: 'square', size: 'lg', class: 'h-12 w-12'},
   ],
 
   defaultVariants: {
@@ -127,6 +161,7 @@ export const mnButtonVariants = tv({
     variant: 'fill',
     color: 'primary',
     borderRadius: 'lg',
+    shape: 'default',
     disabled: false,
     loading: false,
     wrap: false,
