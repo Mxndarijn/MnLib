@@ -1,5 +1,7 @@
 <div class="mb-10">
   <div
+    #scrollContainer
+    (scroll)="updateEdgeFades()"
     class="flex justify-start scrollbar-hide"
     [class.overflow-x-auto]="scrollable"
     [class.overflow-y-hidden]="scrollable"
