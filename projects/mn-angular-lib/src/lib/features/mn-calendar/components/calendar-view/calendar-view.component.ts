@@ -107,7 +107,6 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   focusDay = new Date();
   viewOptions: { value: CalendarView; label: string }[] = [];
   isMobileView = false;
-  isTabletView = false;
 
   /** BehaviorSubject so late-subscribing child views receive the last emitted events. */
   internalEventsChanged = new BehaviorSubject<CalendarEvent[]>([]);
@@ -289,7 +288,6 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     // view takes over earlier — and consumers can tune where via `mobileBreakpoint`.
     const breakpoint = this.config.mobileBreakpoint;
     this.isMobileView = width < breakpoint;
-    this.isTabletView = width >= breakpoint && width < 1024;
     if (this.isMobileView && !wasMobile) {
       this.currentView = CalendarView.DAY;
     }
