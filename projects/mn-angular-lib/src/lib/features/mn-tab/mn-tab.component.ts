@@ -1,4 +1,15 @@
-import {Component, DoCheck, EventEmitter, Input, isSignal, Output} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DoCheck,
+  ElementRef,
+  EventEmitter,
+  Input,
+  isSignal,
+  OnDestroy,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {MnTranslatePipe} from '../../language';
 import {MnCollectionState} from '../mn-collection';
 import {MnTabDataSource, MnTabItem} from './mn-tab.types';
@@ -19,15 +30,25 @@ const DEFAULT_SKELETON_TAB_COUNT = 3;
   imports: [MnTranslatePipe, CommonModule, MnBadge, MnSkeleton],
   templateUrl: './mn-tab.component.html',
 })
-export class MnTabComponent implements DoCheck {
+export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
+  /** The horizontally-scrolling wrapper the edge fade is painted onto. */
+  @ViewChild('scrollContainer') private scrollContainer?: ElementRef<HTMLElement>;
+
+  /** How far the fade reaches in from each overflowing edge. */
+  private static readonly FADE = '2rem';
   /** Data source containing tab items and default active index. */
   @Input() dataSource!: MnTabDataSource;
 
   /**
    * Whether to enable horizontal scrolling when items overflow.
-   * If true, tabs will scroll horizontally instead of shrinking too much.
+   * When true, tabs scroll horizontally instead of overflowing their container.
+   *
+   * Defaults to `true`: the tab bar never wraps (`flex-nowrap`), so without
+   * scrolling an overflowing bar would clip its last tabs or push the page width
+   * on narrow screens. When the tabs already fit, `overflow-x-auto` is a no-op,
+   * so this default only ever changes behaviour for the overflow case it fixes.
    */
-  @Input() scrollable = false;
+  @Input() scrollable = true;
 
   /**
    * Whether tabs should stretch to fill the available width.
@@ -40,6 +61,9 @@ export class MnTabComponent implements DoCheck {
 
   /** The currently active tab item. */
   currentActive?: MnTabItem;
+
+  /** Watches the wrapper and the tab row so the fade re-evaluates on width or content changes. */
+  private resizeObserver?: ResizeObserver;
 
   /**
    * Whether the tab bar is loading and should render skeleton tabs, from
@@ -71,6 +95,49 @@ export class MnTabComponent implements DoCheck {
    */
   ngDoCheck(): void {
     this.syncActiveTab();
+  }
+
+  /**
+   * Starts watching the scroll wrapper so the edge fade stays honest. A scroll
+   * moves the fade to whichever side now hides tabs; a resize (viewport change)
+   * or a change to the tab row's width (tabs added, relabelled, skeleton →
+   * loaded) re-checks whether either edge overflows at all.
+   */
+  ngAfterViewInit(): void {
+    const el = this.scrollContainer?.nativeElement;
+    if (!el) return;
+    this.resizeObserver = new ResizeObserver(() => this.updateEdgeFades());
+    this.resizeObserver.observe(el);
+    if (el.firstElementChild) this.resizeObserver.observe(el.firstElementChild);
+    this.updateEdgeFades();
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+  }
+
+  /**
+   * Paints a fade over whichever edge has tabs scrolled out of view — a soft
+   * dissolve that reads as "more this way", the affordance a hidden scrollbar
+   * otherwise costs us. Uses a mask (content → transparent) rather than a
+   * background-coloured overlay, so it needs no knowledge of the theme.
+   */
+  updateEdgeFades(): void {
+    const el = this.scrollContainer?.nativeElement;
+    if (!el) return;
+    const fadeStart = el.scrollLeft > 1;
+    const fadeEnd = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+    const f = MnTabComponent.FADE;
+    let mask = '';
+    if (this.scrollable && fadeStart && fadeEnd) {
+      mask = `linear-gradient(to right, transparent 0, #000 ${f}, #000 calc(100% - ${f}), transparent 100%)`;
+    } else if (this.scrollable && fadeStart) {
+      mask = `linear-gradient(to right, transparent 0, #000 ${f}, #000 100%)`;
+    } else if (this.scrollable && fadeEnd) {
+      mask = `linear-gradient(to right, #000 0, #000 calc(100% - ${f}), transparent 100%)`;
+    }
+    el.style.maskImage = mask;
+    el.style.setProperty('-webkit-mask-image', mask);
   }
 
   /**
