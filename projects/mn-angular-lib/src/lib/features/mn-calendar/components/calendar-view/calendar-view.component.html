@@ -1,71 +1,31 @@
 <div class="w-full h-full flex flex-col" role="application" aria-label="Calendar">
 
-  <!-- Toolbar spans the full width so the primary action can sit above the
-       upcoming-events sidebar, using that otherwise-empty space. On mobile it
-       reflows: Today and the controls share the top row, and the ‹ date › nav
-       drops to its own full-width row below. Responsive `order` does the reflow. -->
+  <!-- Toolbar has one layout below the desktop (`lg`) width and one at it. Below
+       `lg`: a controls row (Today anchored left, the right-hand cluster anchored
+       right) with the ‹ date › nav centred on its own row beneath — the same
+       shape from phone through tablet, so nothing wraps into a lopsided diagonal.
+       At `lg`, where the upcoming-events sidebar also appears, the nav folds up
+       inline after Today and the whole toolbar becomes a single row. The one JS
+       breakpoint (`mobileBreakpoint`) governs the phone controls — icon-only
+       picker, hidden view-switcher, forced day view — not the toolbar's shape. -->
   <div class="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
 
     <button (click)="goToToday()"
             [data]="{ variant: 'outline', size: 'md', color: 'primary' }"
-            class="order-1 shrink-0"
+            class="shrink-0"
             mnButton
             type="button">
       {{ config.todayLabel }}
     </button>
 
-    <!-- Jumping somewhere far off, which the arrows would take all day to reach.
-         On mobile the picker collapses to its icon-only variant. Its `ml-auto`
-         pulls the picker — and the switcher and action button that follow it — to
-         the right of the row on every width, leaving Today (and the nav) on the
-         left, so the controls align right consistently across devices. -->
-    <mn-lib-datetime (ngModelChange)="onPickDate($event)"
-                     [ngModel]="focusDayString"
-                     [props]="{ id: panelId + '-date', mode: 'date', placeholder: config.pickDateLabel, size: 'md', borderRadius: 'lg', hover: true, iconOnly: isMobileView }"
-                     class="order-2 ml-auto block lg:order-3"></mn-lib-datetime>
-
-    <!-- View switcher (month / week / day) — hidden on mobile, which is forced to day view. -->
-    @if (!isMobileView) {
-      <div aria-label="Calendar view" class="order-3 flex border border-base-300 rounded-md overflow-hidden lg:order-4" role="tablist">
-        @for (view of viewOptions; track view.value) {
-          <button
-            (click)="switchView(view.value)"
-            [attr.aria-controls]="panelId"
-            [attr.aria-selected]="currentView === view.value"
-            [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
-            mnButton
-            role="tab"
-            type="button">
-            {{ view.label }}
-          </button>
-        }
-      </div>
-    }
-
-    <!-- Action buttons (custom buttons + optional showButton CTA). They follow the
-         picker, so the picker's `ml-auto` carries them to the right of the row on
-         every width — on desktop that lands them above the upcoming-events sidebar. -->
-    @if (buttons.length || showButton) {
-      <div class="order-4 flex items-center gap-2 lg:order-5">
-        @for (btn of buttons; track btn.label) {
-          <button (click)="btn.onClick()" [data]="btn.buttonData || {}" mnButton type="button">
-            {{ btn.label }}
-          </button>
-        }
-        @if (showButton) {
-          <button (click)="ButtonClickedEvent.emit()" [data]="{}" mnButton type="button">
-            {{ buttonTitle }}
-          </button>
-        }
-      </div>
-    }
-
     <!-- Stepping through time. The arrows sit either side of the date they move,
-         so the control and the thing it controls read as one unit. On mobile this
-         nav takes its own full-width row (basis-full, ordered last) with the date
-         centred between the arrows at the row's edges; on desktop it sits inline
-         after Today. `aria-live` announces the new period after each step. -->
-    <div class="order-5 flex basis-full items-center justify-between gap-1 lg:order-2 lg:basis-auto lg:justify-start">
+         so the control and the thing it controls read as one unit. Below `lg` it
+         sits centred on its own row (basis-full, ordered last) — a period header
+         above the grid, tight rather than flinging the arrows to the row's edges.
+         At `lg` it folds inline right after Today, taking a stable min-width so
+         the arrows don't jitter as the label's length changes. -->
+    <div class="flex basis-full order-last justify-center items-center gap-1
+                lg:basis-auto lg:order-none lg:justify-start">
       <button (click)="navigate(-1)"
               [attr.aria-label]="config.previousLabel"
               [data]="{ variant: 'text', size: 'md', color: 'gray' }"
@@ -75,7 +35,8 @@
         <svg [size]="18" lucideChevronLeft></svg>
       </button>
 
-      <h2 aria-live="polite" class="text-center text-base font-semibold whitespace-nowrap px-1 lg:min-w-56">
+      <h2 aria-live="polite"
+          class="text-center text-base font-semibold whitespace-nowrap px-1 lg:min-w-56">
         {{ periodLabel }}
       </h2>
 
@@ -87,6 +48,51 @@
               type="button">
         <svg [size]="18" lucideChevronRight></svg>
       </button>
+    </div>
+
+    <!-- Right-hand controls travel together as one cluster with `ml-auto`, so they
+         hold to the right of the row on every width — and when space runs short the
+         whole group wraps to a new line as a unit rather than stranding a lone
+         button. On desktop the cluster lands above the upcoming-events sidebar,
+         using that otherwise-empty space. -->
+    <div class="ml-auto flex items-center gap-2">
+      <!-- On mobile the picker collapses to its icon-only variant. -->
+      <mn-lib-datetime (ngModelChange)="onPickDate($event)"
+                       [ngModel]="focusDayString"
+                       [props]="{ id: panelId + '-date', mode: 'date', placeholder: config.pickDateLabel, size: 'md', borderRadius: 'lg', hover: true, iconOnly: isMobileView }"
+                       class="block"></mn-lib-datetime>
+
+      <!-- View switcher (month / week / day) — hidden on mobile, which is forced to day view. -->
+      @if (!isMobileView) {
+        <div aria-label="Calendar view" class="flex border border-base-300 rounded-md overflow-hidden" role="tablist">
+          @for (view of viewOptions; track view.value) {
+            <button
+              (click)="switchView(view.value)"
+              [attr.aria-controls]="panelId"
+              [attr.aria-selected]="currentView === view.value"
+              [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
+              mnButton
+              role="tab"
+              type="button">
+              {{ view.label }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Action buttons (custom buttons + optional showButton CTA). -->
+      @if (buttons.length || showButton) {
+        @for (btn of buttons; track btn.label) {
+          <button (click)="btn.onClick()" [data]="btn.buttonData || {}" mnButton type="button">
+            {{ btn.label }}
+          </button>
+        }
+        @if (showButton) {
+          <button (click)="ButtonClickedEvent.emit()" [data]="{}" mnButton type="button">
+            {{ buttonTitle }}
+          </button>
+        }
+      }
     </div>
 
   </div>
