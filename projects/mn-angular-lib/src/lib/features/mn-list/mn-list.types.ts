@@ -40,6 +40,15 @@ export type ListDataSource<T> = MnSelectableCollectionDataSource<T> & {
   appearance?: ListAppearance;
 
   // Toolbar
+  /** Template rendered on the left of the toolbar, before the search field. */
+  toolbarLeftTemplate?: TemplateRef<unknown>;
+  /** Template rendered on the right of the toolbar, after the search field. */
+  toolbarRightTemplate?: TemplateRef<unknown>;
+  /**
+   * @deprecated Use {@link toolbarRightTemplate}, which names the slot it fills.
+   * Still honoured, and still rendered on the right, so existing callers keep
+   * working unchanged.
+   */
   toolbarTemplate?: TemplateRef<unknown>;
 }
 

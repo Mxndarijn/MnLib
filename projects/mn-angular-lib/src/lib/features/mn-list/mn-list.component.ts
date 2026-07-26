@@ -53,8 +53,17 @@ export class MnList<T = unknown>
 
   // ── Skeleton ──
 
+  /**
+   * The toolbar template the base class watches for identity changes. Prefers the
+   * left slot, then the right, then the deprecated `toolbarTemplate`, so a list
+   * using any single slot still re-renders when that template is swapped.
+   */
   protected get trackedToolbarTemplate(): TemplateRef<unknown> | undefined {
-    return this.dataSource?.toolbarTemplate;
+    return (
+      this.dataSource?.toolbarLeftTemplate ??
+      this.dataSource?.toolbarRightTemplate ??
+      this.dataSource?.toolbarTemplate
+    );
   }
 
   @ViewChild('collectionBody') protected collectionBody?: ElementRef<HTMLElement>;
