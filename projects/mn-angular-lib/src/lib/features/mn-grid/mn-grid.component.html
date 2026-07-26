@@ -1,8 +1,21 @@
-<!-- Toolbar: search + custom toolbar template. Below 375px the search takes its
-     own full-width row and the toolbar template stacks beneath it; from 375px up
-     they share a row aligned to the right (matching mn-table). -->
-@if (dataSource.canSearch || dataSource.toolbarTemplate) {
-  <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center min-[375px]:justify-end gap-2 mb-3">
+<!-- Toolbar: left template, then search + right template. Below 375px each group
+     takes its own full-width row; from 375px up the left group sits at the start
+     and the search group at the end. Structure and classes mirror mn-table so all
+     collections behave identically at every width. -->
+@if (
+  dataSource.canSearch ||
+  dataSource.toolbarLeftTemplate ||
+  dataSource.toolbarRightTemplate ||
+  dataSource.toolbarTemplate
+) {
+  <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center justify-between gap-2 mb-3">
+    <div class="flex items-center gap-2 w-full min-[375px]:w-auto">
+      @if (dataSource.toolbarLeftTemplate) {
+        <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
+          <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
+        </div>
+      }
+    </div>
     <div
       class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
       @if (dataSource.canSearch) {
@@ -22,9 +35,11 @@
           class="w-full min-[375px]:flex-1 min-[480px]:max-w-64"
         ></mn-lib-input-field>
       }
-      @if (dataSource.toolbarTemplate) {
+      <!-- `toolbarTemplate` is the deprecated name for this slot; honouring it here
+           keeps existing callers rendering exactly where they used to. -->
+      @if (dataSource.toolbarRightTemplate ?? dataSource.toolbarTemplate; as rightTemplate) {
         <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
-          <ng-container [ngTemplateOutlet]="dataSource.toolbarTemplate"></ng-container>
+          <ng-container [ngTemplateOutlet]="rightTemplate"></ng-container>
         </div>
       }
     </div>
