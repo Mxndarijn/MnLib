@@ -34,7 +34,7 @@ export const mnBadgeVariants = tv({
   compoundVariants: [
     // Default (light/transparent)
     { variant: 'default', color: 'primary',   class: 'bg-primary/20 border-primary text-primary' },
-    { variant: 'default', color: 'secondary', class: 'bg-neutral/20 border-neutral text-neutral' },
+    { variant: 'default', color: 'secondary', class: 'bg-secondary/20 border-secondary text-secondary' },
     { variant: 'default', color: 'danger',    class: 'bg-error/20 border-error text-error' },
     { variant: 'default', color: 'warning',   class: 'bg-warning/20 border-warning text-warning' },
     { variant: 'default', color: 'success',   class: 'bg-success/20 border-success text-success' },
@@ -42,7 +42,7 @@ export const mnBadgeVariants = tv({
     { variant: 'default', color: 'lightgray', class: 'bg-base-content/10 border-base-content/70 text-base-content/70' },
     // Fill (solid)
     { variant: 'fill', color: 'primary',   class: 'bg-primary border-primary text-primary-content' },
-    { variant: 'fill', color: 'secondary', class: 'bg-neutral border-neutral text-neutral-content' },
+    { variant: 'fill', color: 'secondary', class: 'bg-secondary border-secondary text-secondary-content' },
     { variant: 'fill', color: 'danger',    class: 'bg-error border-error text-error-content' },
     { variant: 'fill', color: 'warning',   class: 'bg-warning border-warning text-warning-content' },
     { variant: 'fill', color: 'success',   class: 'bg-success border-success text-success-content' },

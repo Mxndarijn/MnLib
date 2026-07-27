@@ -6,7 +6,7 @@ export const mnIconVariants = tv({
     color: {
       current: 'text-current',
       primary: 'text-primary',
-      secondary: 'text-neutral',
+      secondary: 'text-secondary',
       danger: 'text-error',
       warning: 'text-warning',
       success: 'text-success',
