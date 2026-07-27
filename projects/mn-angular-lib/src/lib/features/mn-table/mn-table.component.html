@@ -73,34 +73,10 @@
                   {{ column.header }}
                 }
               </label>
-              @if ((column.filterType ?? 'text') === 'text') {
-                <mn-lib-input-field
-                  [props]="{
-                    id: 'mn-table-filter-' + column.key,
-                    type: 'text',
-                    label: '',
-                    placeholder: column.filterPlaceholder ?? '',
-                    autocomplete: column.filterAutocomplete ?? undefined,
-                    size: 'sm',
-                    borderRadius: 'md',
-                    fullWidth: true,
-                    hover: true
-                  }"
-                  [ngModel]="columnFilters[column.key]"
-                  (ngModelChange)="onColumnFilter(column.key, $event)"
-                ></mn-lib-input-field>
-              } @else if (column.filterType === 'select') {
-                <mn-lib-select
-                  (ngModelChange)="onColumnFilter(column.key, $event)"
-                  [ngModel]="columnFilters[column.key] ?? ''"
-                  [props]="{
-                    id: 'mn-table-filter-' + column.key,
-                    options: getFilterSelectOptions(column),
-                    size: 'sm',
-                    fullWidth: true
-                  }"
-                ></mn-lib-select>
-              }
+              <ng-container
+                [ngTemplateOutletContext]="{ $implicit: column, idScope: 'panel' }"
+                [ngTemplateOutlet]="filterField"
+              ></ng-container>
             </div>
           }
         }
@@ -122,7 +98,8 @@
 }
 
 <!-- Table wrapper with horizontal scroll -->
-<div #collectionBody [style.min-height.px]="bodyMinHeight" aria-label="Data table" class="overflow-x-auto"
+<div #collectionBody (scroll)="closeFilterPopover()" [style.min-height.px]="bodyMinHeight" aria-label="Data table"
+     class="overflow-x-auto"
      role="region">
   <table [class]="tableClasses">
     <thead>
@@ -182,34 +159,28 @@
               [mnHiddenBelow]="column.hiddenBelow"
             >
               @if (column.filterable) {
-                @if ((column.filterType ?? 'text') === 'text') {
-                  <mn-lib-input-field
-                    [props]="{
-                      id: 'mn-table-filter-' + column.key,
-                      type: 'text',
-                      label: '',
-                      placeholder: column.filterPlaceholder ?? '',
-                      autocomplete: column.filterAutocomplete ?? undefined,
-                      size: 'sm',
-                      borderRadius: 'md',
-                      fullWidth: true,
-                      hover: true
-                    }"
-                    [ngModel]="columnFilters[column.key]"
-                    (ngModelChange)="onColumnFilter(column.key, $event)"
-                  ></mn-lib-input-field>
-                } @else if (column.filterType === 'select') {
-                  <mn-lib-select
-                    (ngModelChange)="onColumnFilter(column.key, $event)"
-                    [ngModel]="columnFilters[column.key] ?? ''"
-                    [props]="{
-                      id: 'mn-table-filter-' + column.key,
-                      options: getFilterSelectOptions(column),
-                      size: 'sm',
-                      fullWidth: true
-                    }"
-                    (click)="$event.stopPropagation()"
-                  ></mn-lib-select>
+                @if (isInlineFilter(column)) {
+                  <!-- Compact types render directly under the header -->
+                  <ng-container
+                    [ngTemplateOutletContext]="{ $implicit: column, idScope: 'inline' }"
+                    [ngTemplateOutlet]="filterField"
+                  ></ng-container>
+                } @else {
+                  <!-- Ranges and multi-select don't fit a column width: trigger a popover -->
+                  <button
+                    (click)="$event.stopPropagation(); toggleFilterPopover(column, $event)"
+                    [attr.aria-expanded]="openFilterKey === column.key"
+                    [attr.aria-label]="column.filterPlaceholder ?? filtersButtonLabel"
+                    [data]="{ variant: isColumnFilterActive(column) ? 'fill' : 'outline', color: 'primary', size: 'sm', borderRadius: 'md', hover: true }"
+                    class="w-full gap-1.5"
+                    mnButton
+                    type="button"
+                  >
+                    <svg [size]="14" lucideFilter></svg>
+                    @if (isColumnFilterActive(column)) {
+                      <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                    }
+                  </button>
                 }
               }
             </th>
@@ -365,3 +336,147 @@
   [visiblePages]="visiblePages"
   idPrefix="mn-table"
 ></mn-collection-pagination>
+
+<!-- Filter popover for the rich filter types. Rendered outside the table's
+     overflow-x-auto wrapper and positioned fixed, so it can't be clipped or
+     scrolled away by it. -->
+@if (openFilterColumn(); as popoverColumn) {
+  <div
+    #filterPopover
+    [style.left.px]="popoverPosition.left"
+    [style.top.px]="popoverPosition.top"
+    class="fixed z-30 w-64 rounded-md border border-base-300 bg-base-100 p-3 shadow-lg"
+    role="dialog"
+  >
+    <p class="mb-2 text-xs font-medium text-base-content/70">
+      @if (isTemplateRef(popoverColumn.header)) {
+        <ng-container [ngTemplateOutlet]="$any(popoverColumn.header)"></ng-container>
+      } @else {
+        {{ popoverColumn.header }}
+      }
+    </p>
+    <ng-container
+      [ngTemplateOutletContext]="{ $implicit: popoverColumn, idScope: 'popover' }"
+      [ngTemplateOutlet]="filterField"
+    ></ng-container>
+    @if (isColumnFilterActive(popoverColumn)) {
+      <button
+        (click)="clearColumnFilter(popoverColumn)"
+        [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
+        class="mt-2 gap-1"
+        mnButton
+        type="button"
+      >
+        <svg [size]="14" lucideX></svg>
+        <span>{{ clearFiltersButtonLabel }}</span>
+      </button>
+    }
+  </div>
+}
+
+<!-- Single source of truth for every filter control, reused by the inline header
+     row, the popover and the small-screen panel. `idScope` keeps element ids
+     unique across the three placements. -->
+<ng-template #filterField let-column let-idScope="idScope">
+  @switch (filterTypeOf(column)) {
+    @case ('select') {
+      <mn-lib-select
+        (ngModelChange)="onColumnFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="textFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          options: getFilterSelectOptions(column),
+          size: 'sm',
+          fullWidth: true
+        }"
+      ></mn-lib-select>
+    }
+    @case ('multi-select') {
+      <mn-lib-multi-select
+        (ngModelChange)="onColumnFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="multiFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          options: getFilterMultiSelectOptions(column),
+          placeholder: column.filterPlaceholder ?? '',
+          collapseThreshold: 2,
+          size: 'sm',
+          fullWidth: true
+        }"
+      ></mn-lib-multi-select>
+    }
+    @case ('boolean') {
+      <mn-lib-select
+        (ngModelChange)="onBooleanFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="booleanFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          options: getBooleanFilterOptions(column),
+          size: 'sm',
+          fullWidth: true
+        }"
+      ></mn-lib-select>
+    }
+    @case ('number-range') {
+      <div class="flex items-end gap-2">
+        @for (bound of numberBounds; track bound) {
+          <mn-lib-input-field
+            (ngModelChange)="onRangeFilter(column, bound, $event)"
+            [disabled]="column.filterDisabled ?? false"
+            [ngModel]="rangeFilterValue(column, bound)"
+            [props]="{
+              id: 'mn-table-filter-' + idScope + '-' + column.key + '-' + bound,
+              type: 'number',
+              label: rangeBoundLabel(bound),
+                  size: 'sm',
+              borderRadius: 'md',
+              fullWidth: true
+            }"
+            class="flex-1"
+          ></mn-lib-input-field>
+        }
+      </div>
+    }
+    @case ('date-range') {
+      <div class="flex flex-col gap-2">
+        @for (bound of dateBounds; track bound) {
+          <mn-lib-datetime
+            (ngModelChange)="onRangeFilter(column, bound, $event)"
+            [disabled]="column.filterDisabled ?? false"
+            [ngModel]="rangeFilterValue(column, bound)"
+            [props]="{
+              id: 'mn-table-filter-' + idScope + '-' + column.key + '-' + bound,
+              mode: 'date',
+              label: rangeBoundLabel(bound),
+              size: 'sm',
+              borderRadius: 'md',
+              fullWidth: true
+            }"
+          ></mn-lib-datetime>
+        }
+      </div>
+    }
+    @default {
+      <mn-lib-input-field
+        (ngModelChange)="onColumnFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="textFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          type: 'text',
+          label: '',
+          placeholder: column.filterPlaceholder ?? '',
+          ariaLabel: column.filterPlaceholder ?? '',
+          autocomplete: column.filterAutocomplete ?? undefined,
+          size: 'sm',
+          borderRadius: 'md',
+          fullWidth: true,
+          hover: true
+        }"
+      ></mn-lib-input-field>
+    }
+  }
+</ng-template>
