@@ -69,7 +69,7 @@ export const mnButtonVariants = tv({
   compoundVariants: [
     // Fill — base
     { variant: 'fill', color: 'primary',   class: 'bg-primary text-primary-content border border-primary' },
-    { variant: 'fill', color: 'secondary', class: 'bg-neutral text-neutral-content border border-neutral' },
+    { variant: 'fill', color: 'secondary', class: 'bg-secondary text-secondary-content border border-secondary' },
     { variant: 'fill', color: 'danger',    class: 'bg-error text-error-content border border-error' },
     { variant: 'fill', color: 'warning',   class: 'bg-warning text-warning-content border border-warning' },
     { variant: 'fill', color: 'success',   class: 'bg-success text-success-content border border-success' },
@@ -85,7 +85,7 @@ export const mnButtonVariants = tv({
     { variant: 'fill', color: 'gray',      hover: true, class: 'hover:bg-base-content/20' },
     // Outline — base
     { variant: 'outline', color: 'primary',   class: 'border-primary text-primary' },
-    { variant: 'outline', color: 'secondary', class: 'border-neutral text-neutral' },
+    { variant: 'outline', color: 'secondary', class: 'border-secondary text-secondary' },
     { variant: 'outline', color: 'danger',    class: 'border-error text-error' },
     { variant: 'outline', color: 'warning',   class: 'border-warning text-warning' },
     { variant: 'outline', color: 'success',   class: 'border-success text-success' },
@@ -93,7 +93,7 @@ export const mnButtonVariants = tv({
     { variant: 'outline', color: 'gray',      class: 'border-base-content/70 text-base-content/70' },
     // Outline — hover
     { variant: 'outline', color: 'primary',   hover: true, class: 'hover:bg-primary/10' },
-    { variant: 'outline', color: 'secondary', hover: true, class: 'hover:bg-neutral/10' },
+    { variant: 'outline', color: 'secondary', hover: true, class: 'hover:bg-secondary/10' },
     { variant: 'outline', color: 'danger',    hover: true, class: 'hover:bg-error/10' },
     { variant: 'outline', color: 'warning',   hover: true, class: 'hover:bg-warning/10' },
     { variant: 'outline', color: 'success',   hover: true, class: 'hover:bg-success/10' },
@@ -101,7 +101,7 @@ export const mnButtonVariants = tv({
     { variant: 'outline', color: 'gray',      hover: true, class: 'hover:bg-base-content/10' },
     // Text — base
     { variant: 'text', color: 'primary',   class: 'text-primary' },
-    { variant: 'text', color: 'secondary', class: 'text-neutral' },
+    { variant: 'text', color: 'secondary', class: 'text-secondary' },
     { variant: 'text', color: 'danger',    class: 'text-error' },
     { variant: 'text', color: 'warning',   class: 'text-warning' },
     { variant: 'text', color: 'success',   class: 'text-success' },
@@ -109,7 +109,7 @@ export const mnButtonVariants = tv({
     { variant: 'text', color: 'gray',      class: 'text-base-content/70' },
     // Text — hover
     { variant: 'text', color: 'primary',   hover: true, class: 'hover:bg-primary/10' },
-    { variant: 'text', color: 'secondary', hover: true, class: 'hover:bg-neutral/10' },
+    { variant: 'text', color: 'secondary', hover: true, class: 'hover:bg-secondary/10' },
     { variant: 'text', color: 'danger',    hover: true, class: 'hover:bg-error/10' },
     { variant: 'text', color: 'warning',   hover: true, class: 'hover:bg-warning/10' },
     { variant: 'text', color: 'success',   hover: true, class: 'hover:bg-success/10' },
@@ -117,7 +117,7 @@ export const mnButtonVariants = tv({
     { variant: 'text', color: 'gray',      hover: true, class: 'hover:bg-base-content/10' },
     // Text Underline — base
     { variant: 'textUnderline', color: 'primary',   class: 'text-primary underline underline-offset-2' },
-    { variant: 'textUnderline', color: 'secondary', class: 'text-neutral underline underline-offset-2' },
+    { variant: 'textUnderline', color: 'secondary', class: 'text-secondary underline underline-offset-2' },
     { variant: 'textUnderline', color: 'danger',    class: 'text-error underline underline-offset-2' },
     { variant: 'textUnderline', color: 'warning',   class: 'text-warning underline underline-offset-2' },
     { variant: 'textUnderline', color: 'success',   class: 'text-success underline underline-offset-2' },
@@ -125,7 +125,7 @@ export const mnButtonVariants = tv({
     { variant: 'textUnderline', color: 'gray',      class: 'text-base-content/70 underline underline-offset-2' },
     // Text Underline — hover
     { variant: 'textUnderline', color: 'primary',   hover: true, class: 'hover:bg-primary/10' },
-    { variant: 'textUnderline', color: 'secondary', hover: true, class: 'hover:bg-neutral/10' },
+    { variant: 'textUnderline', color: 'secondary', hover: true, class: 'hover:bg-secondary/10' },
     { variant: 'textUnderline', color: 'danger',    hover: true, class: 'hover:bg-error/10' },
     { variant: 'textUnderline', color: 'warning',   hover: true, class: 'hover:bg-warning/10' },
     { variant: 'textUnderline', color: 'success',   hover: true, class: 'hover:bg-success/10' },
@@ -133,7 +133,7 @@ export const mnButtonVariants = tv({
     { variant: 'textUnderline', color: 'gray',      hover: true, class: 'hover:bg-base-content/10' },
     // Ghost — base (transparent, colored text/icon)
     {variant: 'ghost', color: 'primary', class: 'text-primary'},
-    {variant: 'ghost', color: 'secondary', class: 'text-neutral'},
+    {variant: 'ghost', color: 'secondary', class: 'text-secondary'},
     {variant: 'ghost', color: 'danger', class: 'text-error'},
     {variant: 'ghost', color: 'warning', class: 'text-warning'},
     {variant: 'ghost', color: 'success', class: 'text-success'},
@@ -141,7 +141,7 @@ export const mnButtonVariants = tv({
     {variant: 'ghost', color: 'gray', class: 'text-base-content'},
     // Ghost — hover (reveal a subtle surface in the button's own hue)
     {variant: 'ghost', color: 'primary', hover: true, class: 'hover:bg-primary/10'},
-    {variant: 'ghost', color: 'secondary', hover: true, class: 'hover:bg-neutral/10'},
+    {variant: 'ghost', color: 'secondary', hover: true, class: 'hover:bg-secondary/10'},
     {variant: 'ghost', color: 'danger', hover: true, class: 'hover:bg-error/10'},
     {variant: 'ghost', color: 'warning', hover: true, class: 'hover:bg-warning/10'},
     {variant: 'ghost', color: 'success', hover: true, class: 'hover:bg-success/10'},
