@@ -29,11 +29,12 @@
             [attr.aria-selected]="currentActive === item"
             [class.border-primary]="currentActive === item"
             [class.border-transparent]="currentActive !== item"
+            [class.hover:after:scale-x-100]="currentActive !== item"
             [class.flex-1]="justified"
             [class.font-bold]="currentActive === item"
             [class.text-base-content]="currentActive !== item"
             [class.text-primary]="currentActive === item"
-            class="tab px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2"
+            class="tab relative px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2 after:content-[''] after:absolute after:inset-x-0 after:-bottom-[2px] after:h-[2px] after:bg-primary/60 after:origin-center after:scale-x-0 after:transition-transform after:duration-300 after:ease-out"
             role="tab"
             tabindex="0"
           >
