@@ -25,12 +25,65 @@ export type TableAppearance = {
 }
 
 // ── Column Filter Type ──
-export type ColumnFilterType = 'text' | 'select';
+/**
+ * The control rendered for a column filter, and the shape of the value it produces:
+ * - `text` → `string` (free-text, debounced)
+ * - `select` → `string` (single choice; empty string means "no filter")
+ * - `multi-select` → `string[]` (OR semantics across the chosen values)
+ * - `boolean` → `boolean` (tri-state: any / true / false)
+ * - `number-range` → {@link NumberRangeFilterValue}
+ * - `date-range` → {@link DateRangeFilterValue}
+ */
+export type ColumnFilterType =
+  | 'text'
+  | 'select'
+  | 'multi-select'
+  | 'boolean'
+  | 'number-range'
+  | 'date-range';
 
 // ── Column Filter Option ──
 export type ColumnFilterOption = {
   label: string;
   value: string;
+}
+
+// ── Column Filter Values ──
+/** Inclusive numeric bounds; either side may be omitted for an open-ended range. */
+export type NumberRangeFilterValue = {
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Inclusive date bounds as `YYYY-MM-DD` strings (the format the underlying
+ * date control emits); either side may be omitted for an open-ended range.
+ */
+export type DateRangeFilterValue = {
+  from?: string;
+  to?: string;
+}
+
+/** Every value shape a column filter can hold, discriminated by {@link ColumnFilterType}. */
+export type ColumnFilterValue =
+  | string
+  | string[]
+  | boolean
+  | NumberRangeFilterValue
+  | DateRangeFilterValue;
+
+/** Map of column key to its current filter value. */
+export type ColumnFilterState = Record<string, ColumnFilterValue | undefined>;
+
+/**
+ * One active column filter, as handed to
+ * {@link TableDataSource.onColumnFilterChange}. Only columns whose filter is
+ * actually set are included, so the array maps straight onto query params.
+ */
+export type MnColumnFilter = {
+  key: string;
+  type: ColumnFilterType;
+  value: ColumnFilterValue;
 }
 
 // ── Column Skeleton ──
@@ -43,7 +96,8 @@ export type ColumnFilterOption = {
 export type ColumnSkeleton = Partial<MnSkeletonProps> | TemplateRef<unknown>;
 
 // ── Column Definition ──
-export type ColumnDefinition<T> = {
+/** Everything about a column that is independent of filtering. */
+export type ColumnBase<T> = {
   key: string;
   header: string | TemplateRef<unknown>;
   /** Translation key for the column header. When set, mn-table resolves it via MnLanguageService and keeps it updated on locale change. */
@@ -56,13 +110,15 @@ export type ColumnDefinition<T> = {
   width?: string;
   align?: 'left' | 'center' | 'right';
   hiddenBelow?: 'sm' | 'md' | 'lg';
+  /** Customizes the loading-skeleton placeholder shown in this column's cells while data loads. */
+  skeleton?: ColumnSkeleton;
+}
+
+/** Filter presentation props shared by every filterable column. */
+type ColumnFilterCommon = {
   /** Whether this column supports per-column filtering. */
-  filterable?: boolean;
-  /** Type of filter input: 'text' for free-text, 'select' for dropdown. Defaults to 'text'. */
-  filterType?: ColumnFilterType;
-  /** Options for 'select' filter type. */
-  filterOptions?: ColumnFilterOption[];
-  /** Placeholder text for the filter input. */
+  filterable: true;
+  /** Placeholder text for the filter input. For `select`, it also labels the "no filter" option. */
   filterPlaceholder?: string;
   /** Translation key for the filter placeholder. When set, mn-table resolves it via MnLanguageService. */
   filterPlaceholderKey?: string;
@@ -70,13 +126,66 @@ export type ColumnDefinition<T> = {
   filterDisabled?: boolean;
   /** Autocomplete attribute for the filter input. */
   filterAutocomplete?: string;
-  /** Maximum character length for text filter inputs. */
-  filterMaxLength?: number;
-  /** Custom filter function. Receives the row and the current filter value. */
-  filterFn?: (row: T, filterValue: string) => boolean;
-  /** Customizes the loading-skeleton placeholder shown in this column's cells while data loads. */
-  skeleton?: ColumnSkeleton;
 }
+
+/**
+ * The filter half of a {@link ColumnDefinition}, discriminated on `filterType` so
+ * `filterOptions` is required exactly where it applies and `filterFn` receives the
+ * value shape that filter type actually produces.
+ *
+ * Every branch declares every filter key (inapplicable ones as `never`) so a column
+ * can be read and written generically — e.g. mn-table resolving `filterPlaceholderKey`
+ * across all columns — without narrowing first.
+ */
+type ColumnFilterConfig<T> =
+  | (ColumnFilterCommon & {
+  filterType?: 'text';
+  filterOptions?: never;
+  /** Custom predicate. Receives the row and the trimmed text the user typed. */
+  filterFn?: (row: T, filterValue: string) => boolean;
+})
+  | (ColumnFilterCommon & {
+  filterType: 'select';
+  filterOptions: ColumnFilterOption[];
+  /** Custom predicate. Receives the row and the selected option value. */
+  filterFn?: (row: T, filterValue: string) => boolean;
+})
+  | (ColumnFilterCommon & {
+  filterType: 'multi-select';
+  filterOptions: ColumnFilterOption[];
+  /** Custom predicate. Receives the row and every selected option value. */
+  filterFn?: (row: T, filterValue: string[]) => boolean;
+})
+  | (ColumnFilterCommon & {
+  filterType: 'boolean';
+  filterOptions?: never;
+  /** Custom predicate. Receives the row and the chosen true/false state. */
+  filterFn?: (row: T, filterValue: boolean) => boolean;
+})
+  | (ColumnFilterCommon & {
+  filterType: 'number-range';
+  filterOptions?: never;
+  /** Custom predicate. Receives the row and the inclusive numeric bounds. */
+  filterFn?: (row: T, filterValue: NumberRangeFilterValue) => boolean;
+})
+  | (ColumnFilterCommon & {
+  filterType: 'date-range';
+  filterOptions?: never;
+  /** Custom predicate. Receives the row and the inclusive `YYYY-MM-DD` bounds. */
+  filterFn?: (row: T, filterValue: DateRangeFilterValue) => boolean;
+})
+  | {
+  filterable?: false;
+  filterType?: never;
+  filterOptions?: never;
+  filterFn?: never;
+  filterPlaceholder?: string;
+  filterPlaceholderKey?: string;
+  filterDisabled?: never;
+  filterAutocomplete?: never;
+};
+
+export type ColumnDefinition<T> = ColumnBase<T> & ColumnFilterConfig<T>;
 
 // ── Table Data Source ──
 export type TableDataSource<T> = MnSelectableCollectionDataSource<T> & {
@@ -112,6 +221,54 @@ export type TableDataSource<T> = MnSelectableCollectionDataSource<T> & {
   clearFiltersLabel?: string;
   /** Translation key for {@link clearFiltersLabel}. Resolved via MnLanguageService. */
   clearFiltersLabelKey?: string;
+  /** Labels for the range / boolean filter controls. */
+  filterLabels?: MnTableFilterLabels;
+
+  // Server-side filtering
+  /**
+   * Callback invoked when a column filter changes (server-side filtering).
+   * When provided, mn-table skips client-side column filtering entirely and
+   * delegates to the consumer, exactly as {@link MnCollectionDataSource.onServerSearch}
+   * does for search: the table resets to page 1 and hands over every active filter.
+   *
+   * Required whenever filterable columns are combined with
+   * `paginationMode: 'paginated'` — client-side filtering would otherwise only
+   * filter the page the server already returned, while the paginator kept
+   * reporting the unfiltered `totalItems`.
+   *
+   * Text filters are debounced (300ms); every other filter type fires immediately.
+   */
+  onColumnFilterChange?: (filters: MnColumnFilter[]) => void;
+}
+
+// ── Filter control labels ──
+/**
+ * User-facing labels for the filter controls that need more than a placeholder.
+ * Each has a `*Key` counterpart resolved via MnLanguageService on init and on
+ * every locale change.
+ */
+export type MnTableFilterLabels = {
+  /** Lower bound of a number range. Defaults to "Min". */
+  min?: string;
+  minKey?: string;
+  /** Upper bound of a number range. Defaults to "Max". */
+  max?: string;
+  maxKey?: string;
+  /** Start of a date range. Defaults to "From". */
+  from?: string;
+  fromKey?: string;
+  /** End of a date range. Defaults to "To". */
+  to?: string;
+  toKey?: string;
+  /** Unset option of a boolean filter. Defaults to "Any". */
+  any?: string;
+  anyKey?: string;
+  /** True option of a boolean filter. Defaults to "Yes". */
+  yes?: string;
+  yesKey?: string;
+  /** False option of a boolean filter. Defaults to "No". */
+  no?: string;
+  noKey?: string;
 }
 
 /** @deprecated Use {@link MnCollectionLabels}. */

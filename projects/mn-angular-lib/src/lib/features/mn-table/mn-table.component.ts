@@ -8,10 +8,26 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
-import {ColumnDefinition, ColumnSortType, SortState, TableDataSource} from './mn-table.types';
+import {debounceTime, Subject} from 'rxjs';
+import {
+  ColumnDefinition,
+  ColumnFilterState,
+  ColumnFilterType,
+  ColumnFilterValue,
+  ColumnSortType,
+  DateRangeFilterValue,
+  MnColumnFilter,
+  NumberRangeFilterValue,
+  SortState,
+  TableDataSource,
+} from './mn-table.types';
+import {emptyFilterValue, isFilterValueActive, matchesColumnFilter} from './mn-table-filter.util';
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
 import {MnSelect, MnSelectOption} from '../mn-select';
+import {MnMultiSelect, MnMultiSelectOption} from '../mn-multi-select';
+import {MnDatetime} from '../mn-datetime';
 import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnShowAboveDirective} from './mn-show-above.directive';
@@ -22,13 +38,13 @@ import {MnCollectionPagination, MnSelectableCollectionBase} from '../mn-collecti
 import {MnButton} from '../mn-button';
 import {LucideDynamicIcon, LucideFilter, LucideFunnel, LucideX} from '@lucide/angular';
 
-/** Map of column key to its current filter value. */
-export type ColumnFilterState = Record<string, string | undefined>;
+/** Which bound of a range filter an input edits. */
+type RangeBound = 'min' | 'max' | 'from' | 'to';
 
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
+  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnDatetime, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,8 +58,20 @@ export class MnTable<T = object>
   /** Per-column filter values keyed by column key. */
   columnFilters: ColumnFilterState = {};
 
+  /** Filter types compact enough to render directly inside the header cell. */
+  private static readonly INLINE_FILTER_TYPES: ColumnFilterType[] = ['text', 'select', 'boolean'];
+  /** Width (px) of the filter popover, mirrored from its `w-64` class for clamping. */
+  private static readonly POPOVER_WIDTH = 256;
+
   /** Viewport width (px) below which the inline filter row collapses into a panel. */
   private static readonly FILTER_COLLAPSE_WIDTH = 640;
+  /**
+   * Key of the column whose filter popover is open, or `null` when none is.
+   * Only the rich filter types ({@link isPopoverFilter}) use a popover.
+   */
+  protected openFilterKey: string | null = null;
+  /** Bounds rendered by a number-range filter, in input order. */
+  protected readonly numberBounds: RangeBound[] = ['min', 'max'];
 
   /**
    * True when the viewport is narrow enough that the per-column filter inputs no
@@ -63,12 +91,162 @@ export class MnTable<T = object>
 
   @ViewChild('collectionBody') protected collectionBody?: ElementRef<HTMLElement>;
 
-  /** Updates a column filter value and re-applies filtering. */
-  onColumnFilter(columnKey: string, value: string): void {
-    this.columnFilters[columnKey] = value;
+  // ── Column Filters ──
+  /** Bounds rendered by a date-range filter, in input order. */
+  protected readonly dateBounds: RangeBound[] = ['from', 'to'];
+  /** Viewport coordinates of the open filter popover. */
+  protected popoverPosition = {top: 0, left: 0};
+  /** Debounces server-side text filters so typing doesn't fire a request per keystroke. */
+  private readonly filterDebounce = new Subject<void>();
+  /** The open filter popover, used to tell inside clicks from outside ones. */
+  @ViewChild('filterPopover') private filterPopover?: ElementRef<HTMLElement>;
+
+  constructor() {
+    super();
+    // Server-side text filtering only: client-side filtering stays instant per keystroke.
+    this.filterDebounce
+      .pipe(debounceTime(300), takeUntilDestroyed())
+      .subscribe(() => {
+        this.emitServerFilters();
+        this.cdr.markForCheck();
+      });
+  }
+
+  /** Whether the consumer owns filtering (server-side), mirroring {@link isServerSearched}. */
+  get isServerFiltered(): boolean {
+    return !!this.dataSource.onColumnFilterChange;
+  }
+
+  /** Every column filter that is actually set, in column order. */
+  get activeColumnFilters(): MnColumnFilter[] {
+    return this.dataSource.columns
+      .filter(col => col.filterable && isFilterValueActive(this.columnFilters[col.key]))
+      .map(col => ({
+        key: col.key,
+        type: this.filterTypeOf(col),
+        value: this.columnFilters[col.key] as ColumnFilterValue,
+      }));
+  }
+
+  /** Whether at least one column filter is active. */
+  get hasActiveFilters(): boolean {
+    return this.dataSource.columns.some(
+      col => col.filterable && isFilterValueActive(this.columnFilters[col.key]),
+    );
+  }
+
+  /**
+   * Updates a column filter value and either re-filters locally or hands the
+   * active filters to the consumer. Server-side text filters are debounced;
+   * every other type commits immediately.
+   */
+  onColumnFilter(column: ColumnDefinition<T>, value: ColumnFilterValue): void {
+    this.columnFilters[column.key] = value;
     this.currentPage = 1;
-    this.applyFilter(false);
+
+    if (this.isServerFiltered) {
+      if (this.filterTypeOf(column) === 'text') {
+        this.filterDebounce.next();
+      } else {
+        this.emitServerFilters();
+      }
+    } else {
+      this.applyFilter(false);
+    }
     this.cdr.markForCheck();
+  }
+
+  /** Updates one bound of a range filter, leaving the other side untouched. */
+  onRangeFilter(column: ColumnDefinition<T>, bound: RangeBound, raw: string): void {
+    const current = {...(this.columnFilters[column.key] as object ?? {})} as NumberRangeFilterValue & DateRangeFilterValue;
+    if (bound === 'min' || bound === 'max') {
+      const parsed = Number(raw);
+      // An emptied input clears that bound rather than pinning it to 0.
+      if (raw === '' || Number.isNaN(parsed)) delete current[bound];
+      else current[bound] = parsed;
+    } else {
+      if (raw === '') delete current[bound];
+      else current[bound] = raw;
+    }
+    this.onColumnFilter(column, current);
+  }
+
+  /** Updates a tri-state boolean filter from its select ('' = any). */
+  onBooleanFilter(column: ColumnDefinition<T>, raw: string): void {
+    this.onColumnFilter(column, raw === '' ? '' : raw === 'true');
+  }
+
+  /** The effective filter type of a column, defaulting to text. */
+  filterTypeOf(column: ColumnDefinition<T>): ColumnFilterType {
+    return column.filterType ?? 'text';
+  }
+
+  /** Whether a column's filter renders inline in the header cell (vs. in a popover). */
+  isInlineFilter(column: ColumnDefinition<T>): boolean {
+    return MnTable.INLINE_FILTER_TYPES.includes(this.filterTypeOf(column));
+  }
+
+  /** Whether a column's filter is rich enough to need the popover panel. */
+  isPopoverFilter(column: ColumnDefinition<T>): boolean {
+    return !!column.filterable && !this.isInlineFilter(column);
+  }
+
+  /** Whether a specific column's filter currently narrows the rows. */
+  isColumnFilterActive(column: ColumnDefinition<T>): boolean {
+    return isFilterValueActive(this.columnFilters[column.key]);
+  }
+
+  /** The column whose filter popover is open, or `null`. */
+  openFilterColumn(): ColumnDefinition<T> | null {
+    if (this.openFilterKey === null) return null;
+    return this.dataSource.columns.find(col => col.key === this.openFilterKey) ?? null;
+  }
+
+  /**
+   * Opens/closes a column's filter popover, closing any other that was open, and
+   * anchors it under the trigger. The popover is positioned `fixed` from the
+   * trigger's viewport rect because it renders outside the table's
+   * `overflow-x-auto` wrapper, which would otherwise clip it.
+   */
+  toggleFilterPopover(column: ColumnDefinition<T>, event: Event): void {
+    if (this.openFilterKey === column.key) {
+      this.openFilterKey = null;
+      return;
+    }
+    const trigger = event.currentTarget as HTMLElement | null;
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
+      const maxLeft = window.innerWidth - MnTable.POPOVER_WIDTH - 8;
+      this.popoverPosition = {top: rect.bottom + 4, left: Math.max(8, Math.min(rect.left, maxLeft))};
+    }
+    this.openFilterKey = column.key;
+  }
+
+  /** Resets a single column's filter (from its popover) and re-applies filtering. */
+  clearColumnFilter(column: ColumnDefinition<T>): void {
+    this.onColumnFilter(column, emptyFilterValue(this.filterTypeOf(column)));
+  }
+
+  /** Closes the filter popover, if one is open. */
+  closeFilterPopover(): void {
+    if (this.openFilterKey === null) return;
+    this.openFilterKey = null;
+    this.cdr.markForCheck();
+  }
+
+  /** Filter options formatted for mn-multi-select for a given column. */
+  getFilterMultiSelectOptions(column: ColumnDefinition<T>): MnMultiSelectOption<string>[] {
+    return (column.filterOptions ?? []).map(opt => ({label: opt.label, value: String(opt.value)}));
+  }
+
+  /** Any / Yes / No options for a boolean column filter. */
+  getBooleanFilterOptions(column: ColumnDefinition<T>): MnSelectOption<string>[] {
+    const labels = this.dataSource.filterLabels;
+    return [
+      {label: column.filterPlaceholder ?? labels?.any ?? 'Any', value: ''},
+      {label: labels?.yes ?? 'Yes', value: 'true'},
+      {label: labels?.no ?? 'No', value: 'false'},
+    ];
   }
 
   /** Filter options formatted for mn-select for a given column. */
@@ -80,16 +258,80 @@ export class MnTable<T = object>
     ];
   }
 
-  // ── Column Filters ──
+  /** Current text/select filter value for a column. */
+  textFilterValue(column: ColumnDefinition<T>): string {
+    const value = this.columnFilters[column.key];
+    return typeof value === 'string' ? value : '';
+  }
+
+  /** Current multi-select filter value for a column. */
+  multiFilterValue(column: ColumnDefinition<T>): string[] {
+    const value = this.columnFilters[column.key];
+    return Array.isArray(value) ? value : [];
+  }
+
+  /** Current boolean filter value for a column, as the select's string value. */
+  booleanFilterValue(column: ColumnDefinition<T>): string {
+    const value = this.columnFilters[column.key];
+    return typeof value === 'boolean' ? String(value) : '';
+  }
+
+  /** Current value of one bound of a range filter, as an input-ready string. */
+  rangeFilterValue(column: ColumnDefinition<T>, bound: RangeBound): string {
+    const value = this.columnFilters[column.key] as NumberRangeFilterValue & DateRangeFilterValue | undefined;
+    const bounded = value?.[bound];
+    return bounded === undefined || bounded === null ? '' : String(bounded);
+  }
+
+  /** Label for a range filter bound, falling back to the English default. */
+  rangeBoundLabel(bound: RangeBound): string {
+    const labels = this.dataSource.filterLabels;
+    switch (bound) {
+      case 'min':
+        return labels?.min ?? 'Min';
+      case 'max':
+        return labels?.max ?? 'Max';
+      case 'from':
+        return labels?.from ?? 'From';
+      case 'to':
+        return labels?.to ?? 'To';
+    }
+  }
+
+  /** Resets every column filter and re-applies (or re-requests) filtering. */
+  clearAllFilters(): void {
+    this.seedFilterValues();
+    this.currentPage = 1;
+    if (this.isServerFiltered) {
+      this.emitServerFilters();
+    } else {
+      this.applyFilter(false);
+    }
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Closes the filter popover when the click landed outside it. Membership is
+   * tested against the popover element rather than stopping propagation inside
+   * it, so the popover's own controls stay ordinary, focusable elements.
+   */
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    if (this.openFilterKey === null) return;
+    const target = event.target as Node | null;
+    if (target && this.filterPopover?.nativeElement.contains(target)) return;
+    this.closeFilterPopover();
+  }
 
   /** Whether any column has filtering enabled. */
   get hasColumnFilters(): boolean {
     return this.dataSource.columns.some(c => c.filterable);
   }
 
-  /** Whether at least one column filter is active. */
-  get hasActiveFilters(): boolean {
-    return this.dataSource.columns.some(col => col.filterable && !!this.columnFilters[col.key]);
+  /** Closes the filter popover on Escape. */
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    this.closeFilterPopover();
   }
 
   /** Label for the small-screen filters toggle button. */
@@ -107,14 +349,28 @@ export class MnTable<T = object>
     this.filtersPanelOpen = !this.filtersPanelOpen;
   }
 
-  /** Resets every column filter and re-applies filtering. */
-  clearAllFilters(): void {
-    for (const col of this.dataSource.columns) {
-      if (col.filterable) this.columnFilters[col.key] = '';
-    }
-    this.currentPage = 1;
-    this.applyFilter(false);
-    this.cdr.markForCheck();
+  /** Re-evaluate responsive page size and filter layout when the viewport changes. */
+  @HostListener('window:resize')
+  protected onWindowResize(): void {
+    this.applyResponsivePageSize(true);
+    this.updateFilterLayout(true);
+    // The popover is anchored to a viewport rect that a resize invalidates.
+    this.closeFilterPopover();
+  }
+
+  /** Sets sort/filter state seeded from the data source before the first filter pass. */
+  protected override beforeInitialFilter(): void {
+    super.beforeInitialFilter();
+
+    // Force the mobile row count below `md`; use the consumer's pageSize (or 10) above it.
+    this.desktopPageSize = this.dataSource.pageSize ?? 10;
+    this.applyResponsivePageSize(false);
+
+    // Seed the filter layout for the initial viewport (no markForCheck pre-render).
+    this.updateFilterLayout(false);
+
+    this.currentSort = this.dataSource.defaultSort ?? null;
+    this.seedFilterValues();
   }
 
   /** True when the viewport is below the filter-collapse breakpoint. */
@@ -216,11 +472,27 @@ export class MnTable<T = object>
     if (reflow) this.cdr.markForCheck();
   }
 
-  /** Re-evaluate responsive page size and filter layout when the viewport changes. */
-  @HostListener('window:resize')
-  protected onWindowResize(): void {
-    this.applyResponsivePageSize(true);
-    this.updateFilterLayout(true);
+  /**
+   * Resolves table-specific translation keys (column headers/filters) plus the
+   * shared keys handled by the base.
+   */
+  protected override resolveTranslationKeys(): void {
+    super.resolveTranslationKeys();
+    for (const col of this.dataSource.columns) {
+      if (col.headerKey) {
+        col.header = this.lang.t(col.headerKey);
+      }
+      if (col.filterPlaceholderKey) {
+        col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
+      }
+    }
+    if (this.dataSource.filtersLabelKey) {
+      this.dataSource.filtersLabel = this.lang.t(this.dataSource.filtersLabelKey);
+    }
+    if (this.dataSource.clearFiltersLabelKey) {
+      this.dataSource.clearFiltersLabel = this.lang.t(this.dataSource.clearFiltersLabelKey);
+    }
+    this.resolveFilterLabelKeys();
   }
 
   /** Tracks the desktop page size when the user picks one (selector only shows at >= md). */
@@ -229,22 +501,26 @@ export class MnTable<T = object>
     super.onPageSizeChange(newSize);
   }
 
-  /** Sets sort/filter state seeded from the data source before the first filter pass. */
-  protected override beforeInitialFilter(): void {
-    super.beforeInitialFilter();
+  protected applyFilter(searchForItems: boolean): void {
+    let items = this.applySearchFilter(this.dataSource.dataRows.value ?? []);
 
-    // Force the mobile row count below `md`; use the consumer's pageSize (or 10) above it.
-    this.desktopPageSize = this.dataSource.pageSize ?? 10;
-    this.applyResponsivePageSize(false);
-
-    // Seed the filter layout for the initial viewport (no markForCheck pre-render).
-    this.updateFilterLayout(false);
-
-    this.currentSort = this.dataSource.defaultSort ?? null;
-    for (const col of this.dataSource.columns) {
-      if (col.filterable) {
-        this.columnFilters[col.key] = '';
+    // Per-column filters. Skipped entirely when the consumer owns filtering: the
+    // rows already are the filtered set, and re-filtering them locally would
+    // narrow the current page a second time.
+    if (!this.isServerFiltered) {
+      for (const col of this.dataSource.columns) {
+        const filterValue = this.columnFilters[col.key];
+        if (!col.filterable || !isFilterValueActive(filterValue)) continue;
+        items = items.filter(row => matchesColumnFilter(col, row, filterValue as ColumnFilterValue));
       }
+    }
+
+    items = this.applySorting(items);
+    this.filteredItems = items;
+    this.applyPagination();
+
+    if (searchForItems) {
+      this.loadMoreRows();
     }
   }
 
@@ -278,54 +554,37 @@ export class MnTable<T = object>
   // ── Skeleton ──
 
   /**
-   * Resolves table-specific translation keys (column headers/filters) plus the
-   * shared keys handled by the base.
+   * Hands the active filters to the consumer. Locks the body height first so the
+   * skeleton swap during the refetch can't collapse the layout, matching
+   * {@link goToPage} and {@link onSearch}.
    */
-  protected override resolveTranslationKeys(): void {
-    super.resolveTranslationKeys();
+  private emitServerFilters(): void {
+    this.lockBodyHeight();
+    this.dataSource.onColumnFilterChange?.(this.activeColumnFilters);
+  }
+
+  /** Resets every filterable column to its type's empty value. */
+  private seedFilterValues(): void {
     for (const col of this.dataSource.columns) {
-      if (col.headerKey) {
-        col.header = this.lang.t(col.headerKey);
+      if (col.filterable) {
+        this.columnFilters[col.key] = emptyFilterValue(this.filterTypeOf(col));
       }
-      if (col.filterPlaceholderKey) {
-        col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
-      }
-    }
-    if (this.dataSource.filtersLabelKey) {
-      this.dataSource.filtersLabel = this.lang.t(this.dataSource.filtersLabelKey);
-    }
-    if (this.dataSource.clearFiltersLabelKey) {
-      this.dataSource.clearFiltersLabel = this.lang.t(this.dataSource.clearFiltersLabelKey);
     }
   }
 
   // ── Filtering & sorting ──
 
-  protected applyFilter(searchForItems: boolean): void {
-    let items = this.applySearchFilter(this.dataSource.dataRows.value ?? []);
-
-    // Per-column filters
-    for (const col of this.dataSource.columns) {
-      const filterValue = this.columnFilters[col.key];
-      if (!col.filterable || !filterValue) continue;
-
-      if (col.filterFn) {
-        items = items.filter(row => col.filterFn!(row, filterValue));
-      } else {
-        const term = filterValue.toLowerCase();
-        items = items.filter(row => {
-          const cellValue = typeof col.cell === 'function' ? col.cell(row) : '';
-          return (cellValue ?? '').toLowerCase().includes(term);
-        });
-      }
-    }
-
-    items = this.applySorting(items);
-    this.filteredItems = items;
-    this.applyPagination();
-
-    if (searchForItems) {
-      this.loadMoreRows();
+  /** Resolves the range / boolean filter control labels from their translation keys. */
+  private resolveFilterLabelKeys(): void {
+    const labels = this.dataSource.filterLabels;
+    if (!labels) return;
+    const pairs = [
+      ['minKey', 'min'], ['maxKey', 'max'], ['fromKey', 'from'], ['toKey', 'to'],
+      ['anyKey', 'any'], ['yesKey', 'yes'], ['noKey', 'no'],
+    ] as const;
+    for (const [keyProp, labelProp] of pairs) {
+      const key = labels[keyProp];
+      if (key) labels[labelProp] = this.lang.t(key);
     }
   }
 
