@@ -20,7 +20,7 @@ import {MnInputField} from '../mn-input-field';
 import {FormsModule} from '@angular/forms';
 import {MnCollectionPagination, MnSelectableCollectionBase} from '../mn-collection';
 import {MnButton} from '../mn-button';
-import {LucideFilter, LucideFunnel, LucideX} from '@lucide/angular';
+import {LucideDynamicIcon, LucideFilter, LucideFunnel, LucideX} from '@lucide/angular';
 
 /** Map of column key to its current filter value. */
 export type ColumnFilterState = Record<string, string | undefined>;
@@ -28,7 +28,7 @@ export type ColumnFilterState = Record<string, string | undefined>;
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel],
+  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

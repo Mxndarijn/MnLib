@@ -264,6 +264,9 @@
                 <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
               } @else {
                 <div class="flex flex-col items-center gap-2 text-base-content/50">
+                  @if (dataSource.emptyIcon !== null) {
+                    <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="32" [strokeWidth]="1.5"></svg>
+                  }
                   <p class="text-sm">{{ dataSource.emptyMessage }}</p>
                 </div>
               }
