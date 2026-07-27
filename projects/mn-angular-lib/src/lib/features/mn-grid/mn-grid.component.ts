@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {LucideDynamicIcon} from '@lucide/angular';
 import {GridDataSource} from './mn-grid.types';
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
 import {MnInputField} from '../mn-input-field';
@@ -31,7 +32,7 @@ const DEFAULT_GRID_SKELETON_LINES: Partial<MnSkeletonProps>[] = [
 @Component({
   selector: 'mn-grid',
   standalone: true,
-  imports: [NgTemplateOutlet, FormsModule, MnSkeleton, MnInputField, MnCollectionPagination],
+  imports: [NgTemplateOutlet, FormsModule, MnSkeleton, MnInputField, MnCollectionPagination, LucideDynamicIcon],
   templateUrl: './mn-grid.component.html',
   styleUrl: './mn-grid.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -10,6 +10,7 @@ import {
   OnInit,
   TemplateRef,
 } from '@angular/core';
+import {LucideInbox} from '@lucide/angular';
 import {debounceTime, skip, Subject, Subscription} from 'rxjs';
 import {MnLanguageService} from '../../language';
 import {MnSelectOption} from '../mn-select';
@@ -37,6 +38,9 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   paginatedItems: T[] = [];
   searchValue = '';
   loadingMoreRows = false;
+
+  /** Fallback empty-state icon used when a data source doesn't set `emptyIcon`. */
+  protected readonly defaultEmptyIcon = LucideInbox.icon;
 
   currentPage = 1;
   pageSize = 10;

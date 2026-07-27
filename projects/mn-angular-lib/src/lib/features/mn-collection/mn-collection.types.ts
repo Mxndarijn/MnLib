@@ -1,4 +1,5 @@
 import {TemplateRef} from '@angular/core';
+import {LucideIconData} from '@lucide/angular';
 import {BehaviorSubject} from 'rxjs';
 
 // ── Pagination Strategy ──
@@ -86,6 +87,13 @@ export type MnCollectionDataSource<T> = {
   /** Translation key for the empty message. When set, the component resolves it via MnLanguageService. */
   emptyMessageKey?: string;
   emptyTemplate?: TemplateRef<unknown>;
+  /**
+   * Icon rendered above {@link emptyMessage} in the default empty state. Pass any
+   * lucide icon's static `.icon` data (e.g. `LucideSearchX.icon`). Defaults to an
+   * inbox icon when omitted; set to `null` to render the message with no icon.
+   * Ignored when {@link emptyTemplate} is provided.
+   */
+  emptyIcon?: LucideIconData | null;
 
   /**
    * Lifecycle state of the data, controlling loading / error / empty rendering.
