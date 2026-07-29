@@ -22,6 +22,23 @@ export type TableAppearance = {
   hover?: boolean;
   compact?: boolean;
   bordered?: boolean;
+  /**
+   * How column widths are computed.
+   *
+   * - `auto` (default): the browser sizes each column to its widest cell, so the
+   *   columns shift every time the content changes — a new page, a filter, a
+   *   search. Fine for a static table.
+   * - `fixed`: widths come from the header row and each column's {@link ColumnBase.width}
+   *   only, never from the cell content, so they stay put across pages and
+   *   filters. Columns without a `width` split the remaining space evenly.
+   *   Overlong cell text is truncated with an ellipsis (and exposed as a
+   *   `title` tooltip) instead of widening the column.
+   *
+   * Prefer `fixed` for any table whose rows change under the user — server-side
+   * paginated, filtered or searched tables, and tables inside a modal, where a
+   * width change is most visible.
+   */
+  layout?: 'auto' | 'fixed';
 }
 
 // ── Column Filter Type ──

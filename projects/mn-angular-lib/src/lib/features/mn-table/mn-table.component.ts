@@ -1,9 +1,12 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
+  inject,
   Output,
   TemplateRef,
   ViewChild,
@@ -47,6 +50,8 @@ type RangeBound = 'min' | 'max' | 'from' | 'to';
   imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnDatetime, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Block-level so the host has a definite width for the @container chrome inside it.
+  host: {class: 'block'},
 })
 export class MnTable<T = object>
   extends MnSelectableCollectionBase<T, TableDataSource<T>> {
@@ -101,16 +106,16 @@ export class MnTable<T = object>
   /** The open filter popover, used to tell inside clicks from outside ones. */
   @ViewChild('filterPopover') private filterPopover?: ElementRef<HTMLElement>;
 
-  constructor() {
-    super();
-    // Server-side text filtering only: client-side filtering stays instant per keystroke.
-    this.filterDebounce
-      .pipe(debounceTime(300), takeUntilDestroyed())
-      .subscribe(() => {
-        this.emitServerFilters();
-        this.cdr.markForCheck();
-      });
-  }
+  /**
+   * Most rows shown per page on mobile (< md). A **cap**, not an override: a data
+   * source asking for fewer rows keeps its own size. Raising a small page size on
+   * a phone is the opposite of what it is for — it pushes the paginator below the
+   * fold, which is most damaging inside a modal, where the sheet is already short
+   * and its footer is pinned over the bottom of the table.
+   */
+  private static readonly MOBILE_PAGE_SIZE = 10;
+  /** The component's own element, measured for every responsive decision. */
+  private readonly host = inject(ElementRef<HTMLElement>);
 
   /** Whether the consumer owns filtering (server-side), mirroring {@link isServerSearched}. */
   get isServerFiltered(): boolean {
@@ -348,14 +353,32 @@ export class MnTable<T = object>
   toggleFiltersPanel(): void {
     this.filtersPanelOpen = !this.filtersPanelOpen;
   }
+  private readonly baseTableClasses = 'w-full border-collapse overflow-y-hidden';
 
-  /** Re-evaluate responsive page size and filter layout when the viewport changes. */
-  @HostListener('window:resize')
-  protected onWindowResize(): void {
-    this.applyResponsivePageSize(true);
-    this.updateFilterLayout(true);
-    // The popover is anchored to a viewport rect that a resize invalidates.
-    this.closeFilterPopover();
+  constructor() {
+    super();
+    // Server-side text filtering only: client-side filtering stays instant per keystroke.
+    this.filterDebounce
+      .pipe(debounceTime(300), takeUntilDestroyed())
+      .subscribe(() => {
+        this.emitServerFilters();
+        this.cdr.markForCheck();
+      });
+
+    // Watch the table's own box rather than the window: inside a modal, a sidebar
+    // or a narrow grid cell the table resizes without the window ever changing,
+    // and the window resizes without the table's share of it changing.
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => this.onHostResize());
+      observer.observe(this.host.nativeElement);
+      inject(DestroyRef).onDestroy(() => observer.disconnect());
+    }
+
+    // `beforeInitialFilter` runs while the host may not be attached or laid out
+    // yet, so its width reads 0 and {@link measuredWidth} has to guess from the
+    // window — the one guess that is wrong for a table in a modal. Re-evaluate
+    // once after the first render, when the real width is available.
+    afterNextRender(() => this.onHostResize());
   }
 
   /** Sets sort/filter state seeded from the data source before the first filter pass. */
@@ -373,9 +396,13 @@ export class MnTable<T = object>
     this.seedFilterValues();
   }
 
-  /** True when the viewport is below the filter-collapse breakpoint. */
-  private isFilterViewport(): boolean {
-    return typeof window !== 'undefined' && window.innerWidth < MnTable.FILTER_COLLAPSE_WIDTH;
+  /**
+   * Classes for the `<table>` element. `table-fixed` is added for the `fixed`
+   * layout so column widths come from the header row and the declared widths
+   * only, keeping them stable as the rows change.
+   */
+  get tableClasses(): string {
+    return this.isFixedLayout ? `${this.baseTableClasses} table-fixed` : this.baseTableClasses;
   }
 
   /**
@@ -438,38 +465,44 @@ export class MnTable<T = object>
 
   // ── Row interaction ──
 
-  /** Rows shown per page on mobile (< md). Forced regardless of any configured pageSize. */
-  private static readonly MOBILE_PAGE_SIZE = 10;
+  /** Whether column widths are content-independent (see {@link TableAppearance.layout}). */
+  get isFixedLayout(): boolean {
+    return this.dataSource.appearance?.layout === 'fixed';
+  }
 
   /** Page size to use at/above the `md` breakpoint (consumer's pageSize, or the user's selection). */
   private desktopPageSize = 10;
 
-  /** True when the viewport is below the `md` (768px) breakpoint. */
-  private isMobileViewport(): boolean {
-    return typeof window !== 'undefined' && window.innerWidth < 768;
+  /**
+   * The `title` tooltip for a cell, so text truncated by the fixed layout stays
+   * readable. Only string cells have text to expose; template cells render their
+   * own markup and are left alone.
+   * @param column The column being rendered.
+   * @param row The row being rendered.
+   * @returns The full cell text, or `null` when there is nothing to expose.
+   */
+  cellTitle(column: ColumnDefinition<T>, row: T): string | null {
+    if (!this.isFixedLayout || typeof column.cell !== 'function') return null;
+    return column.cell(row) || null;
   }
 
   /**
-   * Applies the breakpoint-appropriate page size: {@link MOBILE_PAGE_SIZE} below `md`,
-   * the desktop size at/above it. When the size actually changes, client-side tables
-   * re-slice locally and server-side tables ask the consumer to refetch, so the
-   * rendered rows update in every pagination mode (used at init and on window resize).
+   * Re-evaluate on a window resize too. The ResizeObserver covers every change to
+   * the table's own box, but {@link isMobileViewport} reads the window, which can
+   * change without the table's width following it (a fixed-width table, a modal
+   * pinned to a max width).
    */
-  private applyResponsivePageSize(reflow: boolean): void {
-    const target = this.isMobileViewport() ? MnTable.MOBILE_PAGE_SIZE : this.desktopPageSize;
-    if (target === this.pageSize) return;
-    this.invalidatePageHeight();
-    this.pageSize = target;
-    this.currentPage = 1;
+  @HostListener('window:resize')
+  protected onWindowResize(): void {
+    this.onHostResize();
+  }
 
-    if (this.dataSource.paginationMode === 'client-side-pagination') {
-      this.applyPagination();
-    } else if (this.isServerPaginated) {
-      // Server owns the slice — tell the consumer to refetch with the new size.
-      this.dataSource.onPageSizeChange?.(target);
-    }
-
-    if (reflow) this.cdr.markForCheck();
+  /** Re-evaluate responsive page size and filter layout when the table is resized. */
+  private onHostResize(): void {
+    this.applyResponsivePageSize(true);
+    this.updateFilterLayout(true);
+    // The popover is anchored to a viewport rect that a resize invalidates.
+    this.closeFilterPopover();
   }
 
   /**
@@ -543,7 +576,64 @@ export class MnTable<T = object>
 
   // ── Table CSS classes ──
 
-  readonly tableClasses = 'w-full border-collapse overflow-y-hidden';
+  /** True when the table is narrower than the filter-collapse breakpoint. */
+  private isFilterViewport(): boolean {
+    return this.measuredWidth() < MnTable.FILTER_COLLAPSE_WIDTH;
+  }
+
+  /**
+   * True when the **window** is below the `md` (768px) breakpoint.
+   *
+   * Deliberately viewport-based, unlike {@link isFilterViewport}: the forced
+   * mobile page size exists to keep a phone screen scrollable, and it is paired
+   * with the rows-per-page selector that mn-collection-pagination hides at the
+   * same viewport breakpoint. Measuring the table's own width instead would let
+   * the two disagree — a 700px table on a desktop would be pinned to the mobile
+   * row count while still offering the selector that overrides it.
+   */
+  private isMobileViewport(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  }
+
+  /**
+   * The table's own rendered width, which every responsive decision is made
+   * against — the same width the `@container` queries in the template use, so
+   * the TS and CSS halves of the responsive layout can never disagree.
+   *
+   * Falls back to the window width before the host has been laid out (and in
+   * SSR), which is the closest available approximation at that point.
+   * @returns The width in CSS pixels.
+   */
+  private measuredWidth(): number {
+    const width = this.host.nativeElement.getBoundingClientRect().width;
+    if (width > 0) return width;
+    return typeof window === 'undefined' ? Number.MAX_SAFE_INTEGER : window.innerWidth;
+  }
+
+  /**
+   * Applies the breakpoint-appropriate page size: capped at {@link MOBILE_PAGE_SIZE}
+   * below `md`, the desktop size at/above it. When the size actually changes, client-side tables
+   * re-slice locally and server-side tables ask the consumer to refetch, so the
+   * rendered rows update in every pagination mode (used at init and on window resize).
+   */
+  private applyResponsivePageSize(reflow: boolean): void {
+    const target = this.isMobileViewport()
+      ? Math.min(this.desktopPageSize, MnTable.MOBILE_PAGE_SIZE)
+      : this.desktopPageSize;
+    if (target === this.pageSize) return;
+    this.invalidatePageHeight();
+    this.pageSize = target;
+    this.currentPage = 1;
+
+    if (this.dataSource.paginationMode === 'client-side-pagination') {
+      this.applyPagination();
+    } else if (this.isServerPaginated) {
+      // Server owns the slice — tell the consumer to refetch with the new size.
+      this.dataSource.onPageSizeChange?.(target);
+    }
+
+    if (reflow) this.cdr.markForCheck();
+  }
 
   get totalColumnCount(): number {
     let count = this.dataSource.columns.length;

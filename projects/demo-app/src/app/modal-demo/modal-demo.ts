@@ -725,6 +725,143 @@ export class ModalDemo {
     this.modalService.open(config);
   }
 
+  // Server-side paginated + filterable table inside a modal
+  openServerTableModal() {
+    type Employee = {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+      department: string;
+    };
+
+    const ROLES = ['Developer', 'Designer', 'Manager', 'QA Engineer'];
+    const DEPARTMENTS = ['Engineering', 'Design', 'Quality', 'Operations'];
+    // Deliberately mixes very short and very long values so column widths would
+    // otherwise change from page to page.
+    const ALL: Employee[] = Array.from({length: 43}, (_, i) => ({
+      id: String(i + 1),
+      name: i % 4 === 0 ? `Al ${i + 1}` : `Alexandra Bartholomew-Fitzgerald ${i + 1}`,
+      email:
+        i % 4 === 0
+          ? `al${i + 1}@x.io`
+          : `alexandra.bartholomew.fitzgerald${i + 1}@example-company.com`,
+      role: ROLES[i % ROLES.length],
+      department: DEPARTMENTS[i % DEPARTMENTS.length],
+    }));
+
+    const rows = new BehaviorSubject<Employee[]>([]);
+    let page = 1;
+    let size = 5;
+    let search = '';
+    let roleFilter = '';
+    let departmentFilter: string[] = [];
+
+    /** Simulates the server: filters, then slices the requested page. */
+    const fetch = (): void => {
+      const term = search.toLowerCase();
+      const filtered = ALL.filter(
+        (e) =>
+          (!term || e.name.toLowerCase().includes(term) || e.email.toLowerCase().includes(term)) &&
+          (!roleFilter || e.role === roleFilter) &&
+          (departmentFilter.length === 0 || departmentFilter.includes(e.department)),
+      );
+      dataSource.totalItems = filtered.length;
+      const start = (page - 1) * size;
+      rows.next(filtered.slice(start, start + size));
+    };
+
+    const dataSource: TableDataSource<Employee> = {
+      dataRows: rows,
+      getID: (r) => r.id,
+      emptyMessage: 'No employees found',
+      state: MnCollectionState.RETRIEVED,
+      canSearch: true,
+      searchPlaceholder: 'Search employees...',
+      selectionMode: 'multi',
+      appearance: {striped: true, hover: true, layout: 'fixed'},
+      paginationMode: 'paginated',
+      pageSize: 5,
+      pageSizeOptions: [5, 10, 25],
+      totalItems: ALL.length,
+      onPageChange: (next) => {
+        page = next;
+        fetch();
+      },
+      onPageSizeChange: (next) => {
+        size = next;
+        page = 1;
+        fetch();
+      },
+      onServerSearch: (term) => {
+        search = term;
+        page = 1;
+        fetch();
+      },
+      onColumnFilterChange: (filters) => {
+        roleFilter = (filters.find((f) => f.key === 'role')?.value as string) ?? '';
+        departmentFilter = (filters.find((f) => f.key === 'department')?.value as string[]) ?? [];
+        page = 1;
+        fetch();
+      },
+      columns: [
+        {
+          key: 'name',
+          header: 'Name',
+          cell: (r) => r.name,
+          filterable: true,
+          filterPlaceholder: 'Filter name…',
+        },
+        {key: 'email', header: 'Email', cell: (r) => r.email, hiddenBelow: 'sm'},
+        {
+          key: 'role',
+          header: 'Role',
+          cell: (r) => r.role,
+          width: '140px',
+          filterable: true,
+          filterType: 'select',
+          filterPlaceholder: 'All roles',
+          filterOptions: ROLES.map((r) => ({label: r, value: r})),
+        },
+        {
+          key: 'department',
+          header: 'Department',
+          cell: (r) => r.department,
+          width: '160px',
+          hiddenBelow: 'md',
+          filterable: true,
+          filterType: 'multi-select',
+          filterPlaceholder: 'Departments',
+          filterOptions: DEPARTMENTS.map((d) => ({label: d, value: d})),
+        },
+      ],
+    };
+
+    // The consumer owns the first load, exactly as it owns every later one.
+    fetch();
+
+    const config = ModalBuilder.form<{ employees: string[] }, { employees: string[] }>()
+      .title('Assign Employees')
+      .subtitle('Server-side paginated + filtered table')
+      .sizeWidth(ModalSize.LG)
+      .field({
+        kind: FieldKind.MULTI_SELECT_TABLE,
+        key: 'employees',
+        label: 'Employees',
+        tableDataSource: dataSource as unknown as TableDataSource<unknown>,
+        getRowValue: (row: unknown) => (row as Employee).id,
+        validators: [Validators.required],
+      })
+      .onComplete({
+        handle: async (result) => {
+          this.lastResult = `Assigned ${result.employees.length} employees`;
+        },
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
   // Full Screen Modal Demo
   openFullScreenModal() {
     const config = ModalBuilder.confirmation()
