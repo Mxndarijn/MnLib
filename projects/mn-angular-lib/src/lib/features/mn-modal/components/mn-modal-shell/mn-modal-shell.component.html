@@ -4,7 +4,14 @@
   <div class="modal-backdrop absolute inset-0 bg-black/50 animate-[fadeIn_0.2s_ease-in-out]" (click)="onBackdropClick()"></div>
 }
 
-<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+<!--
+  The container deliberately does NOT stop click propagation. The backdrop is a
+  *sibling* element (absolutely positioned behind this one), never an ancestor, so
+  clicks in here can't reach `onBackdropClick()` anyway. Swallowing them instead
+  broke every "click outside me" handler inside a modal — component-level
+  `document:click` listeners (the multi-select panel, the table filter popover)
+  never fired, so those overlays stayed open.
+-->
 <div
   class="modal-container relative bg-base-100 rounded-lg shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
   [class.sheet-dragging]="isDraggingSheet"
@@ -16,7 +23,6 @@
   [attr.aria-labelledby]="config.title ? 'mn-modal-title' : null"
   [attr.aria-describedby]="config.description ? 'mn-modal-description' : null"
   tabindex="-1"
-  (click)="$event.stopPropagation()"
 >
   @if (isMobileSheet) {
     <!-- Drag handle for swipe-to-dismiss, visible only on mobile bottom sheets -->

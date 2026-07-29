@@ -179,7 +179,65 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     expect(component.isOpen).toBeFalse();
     expect(panel()).toBeNull();
   });
+
+  it('closes the dropdown when an inner scroll container scrolls', () => {
+    component.toggle();
+    fixture.detectChanges();
+    expect(component.isOpen).toBeTrue();
+
+    // `window:scroll` never fires for a nested scroller (a modal body, a scrollable
+    // card), which used to leave the portalled panel floating at stale coordinates.
+    const scroller = fixture.nativeElement.querySelector('.transformed-ancestor') as HTMLElement;
+    scroller.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+
+    expect(component.isOpen).toBeFalse();
+    expect(panel()).toBeNull();
+  });
+
+  it('keeps the dropdown open when the panel\'s own option list is scrolled', () => {
+    component.toggle();
+    fixture.detectChanges();
+
+    panel()!.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+
+    expect(component.isOpen).toBeTrue();
+    expect(panel()).not.toBeNull();
+  });
+
+  it('closes the dropdown when the trigger is hidden instead of destroyed', async () => {
+    component.toggle();
+    fixture.detectChanges();
+    expect(panel()).not.toBeNull();
+
+    // Guard against a vacuous pass: a visible trigger must survive the observer's
+    // first (initial-state) delivery, otherwise the assertion below proves nothing.
+    await waitForIntersectionObserver();
+    expect(component.isOpen).withContext('visible trigger must stay open').toBeTrue();
+
+    // Exactly what a wizard step switch does: the step wrapper is display:none'd, so the
+    // multi-select is never destroyed and the body-portalled panel would otherwise stay
+    // on screen with no visible trigger behind it.
+    const wrapper = fixture.nativeElement.querySelector('.transformed-ancestor') as HTMLElement;
+    wrapper.style.display = 'none';
+
+    await waitForIntersectionObserver();
+    fixture.detectChanges();
+
+    expect(component.isOpen).withContext('hidden trigger must close its panel').toBeFalse();
+    expect(panel()).toBeNull();
+  });
 });
+
+/**
+ * IntersectionObserver callbacks are delivered asynchronously, after layout. Two
+ * animation frames plus a macrotask is comfortably past the first delivery.
+ */
+async function waitForIntersectionObserver(): Promise<void> {
+  await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  await new Promise<void>(resolve => setTimeout(resolve, 50));
+}
 
 /**
  * Coverage for the opt-in "collapse selected to a count summary" feature: once the

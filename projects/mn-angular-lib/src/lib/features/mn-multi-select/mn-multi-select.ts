@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   ElementRef,
@@ -49,11 +50,27 @@ export class MnMultiSelect implements OnInit {
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly renderer = inject(Renderer2);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /** Reference to the trigger element for positioning the dropdown */
   @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
   /** The panel element currently moved into `document.body`, if any. */
   private movedPanel: HTMLElement | null = null;
+
+  /**
+   * Watches the trigger while the panel is open. The panel lives in `document.body`,
+   * so it survives its own trigger being hidden by an ancestor — e.g. a wizard step
+   * or a tab that is switched away with `display: none` instead of being destroyed.
+   * When the trigger stops being visible the panel must go with it.
+   */
+  private visibilityObserver: IntersectionObserver | null = null;
+
+  /**
+   * Capture-phase scroll listener installed while open. `window:scroll` only fires for
+   * the document scroller, so scrolling an inner container (a modal body, a scrollable
+   * card) used to leave the portalled panel floating at its stale coordinates.
+   */
+  private scrollCapture: ((event: Event) => void) | null = null;
 
   /**
    * The dropdown panel element, queried while it is rendered by the `@if` block.
@@ -97,6 +114,7 @@ export class MnMultiSelect implements OnInit {
     });
     this.destroyRef.onDestroy(() => {
       sub.unsubscribe();
+      this.stopWatchingTrigger();
       // Guarantee the portalled panel never outlives the component.
       this.relocateDropdown(null);
     });
@@ -110,10 +128,7 @@ export class MnMultiSelect implements OnInit {
     const insideHost = !!target && this.elRef.nativeElement.contains(target);
     const insidePanel = !!target && !!this.movedPanel && this.movedPanel.contains(target);
     if (!insideHost && !insidePanel) {
-      if (this.isOpen) {
-        this.isOpen = false;
-        this.searchTerm = '';
-      }
+      this.close();
     }
   }
 
@@ -155,12 +170,38 @@ export class MnMultiSelect implements OnInit {
 
   toggle(): void {
     if (this.isDisabled) return;
-    this.isOpen = !this.isOpen;
     if (this.isOpen) {
-      this.updateDropdownPosition();
-    } else {
-      this.searchTerm = '';
+      this.close();
+      return;
     }
+    this.isOpen = true;
+    this.updateDropdownPosition();
+    this.startWatchingTrigger();
+  }
+
+  /** Closes the dropdown on Escape for keyboard accessibility. */
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.close();
+  }
+
+  /** Closes the dropdown when the page or a scrollable parent is scrolled */
+  @HostListener('window:scroll', [])
+  @HostListener('window:resize', [])
+  onWindowScrollOrResize(): void {
+    this.close();
+  }
+
+  /**
+   * The single close path. Every trigger (outside click, Escape, scroll, resize, the
+   * trigger being hidden) funnels through here so the open-only listeners are always
+   * torn down with the panel and never leak.
+   */
+  private close(): void {
+    if (!this.isOpen) return;
+    this.isOpen = false;
+    this.searchTerm = '';
+    this.stopWatchingTrigger();
   }
 
   /** Calculates the fixed position for the dropdown based on the trigger element */
@@ -174,13 +215,35 @@ export class MnMultiSelect implements OnInit {
     };
   }
 
-  /** Closes the dropdown on Escape for keyboard accessibility. */
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.isOpen) {
-      this.isOpen = false;
-      this.searchTerm = '';
+  /**
+   * Starts the open-only watchers: an `IntersectionObserver` on the trigger (closes the
+   * panel as soon as the trigger stops being rendered/visible) and a capture-phase
+   * `scroll` listener (closes it when any ancestor scroller moves under it). Scrolls
+   * that originate inside the panel's own option list are ignored.
+   */
+  private startWatchingTrigger(): void {
+    this.stopWatchingTrigger();
+
+    const trigger = this.triggerRef?.nativeElement;
+    if (trigger && typeof IntersectionObserver !== 'undefined') {
+      this.visibilityObserver = new IntersectionObserver(entries => {
+        if (!entries.some(entry => !entry.isIntersecting)) return;
+        this.close();
+        // The observer fires outside Angular, so a zoneless app needs an explicit nudge.
+        this.cdr.markForCheck();
+      });
+      this.visibilityObserver.observe(trigger);
     }
+
+    this.scrollCapture = (event: Event) => {
+      const target = event.target as Node | null;
+      if (target && this.movedPanel && (this.movedPanel === target || this.movedPanel.contains(target))) {
+        return;
+      }
+      this.close();
+      this.cdr.markForCheck();
+    };
+    document.addEventListener('scroll', this.scrollCapture, true);
   }
 
   /**
@@ -206,13 +269,13 @@ export class MnMultiSelect implements OnInit {
     }
   }
 
-  /** Closes the dropdown when the page or a scrollable parent is scrolled */
-  @HostListener('window:scroll', [])
-  @HostListener('window:resize', [])
-  onWindowScrollOrResize(): void {
-    if (this.isOpen) {
-      this.isOpen = false;
-      this.searchTerm = '';
+  /** Tears down the watchers installed by `startWatchingTrigger`. Idempotent. */
+  private stopWatchingTrigger(): void {
+    this.visibilityObserver?.disconnect();
+    this.visibilityObserver = null;
+    if (this.scrollCapture) {
+      document.removeEventListener('scroll', this.scrollCapture, true);
+      this.scrollCapture = null;
     }
   }
 

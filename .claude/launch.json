@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mnlib-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "ng",
+        "serve",
+        "demo-app",
+        "--port",
+        "4400"
+      ],
+      "port": 4400
+    }
+  ]
+}
