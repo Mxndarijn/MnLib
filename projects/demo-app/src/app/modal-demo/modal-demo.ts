@@ -38,7 +38,7 @@ type UserFormModel = {
   confirmPassword: string;
   country: string;
   city: string;
-}
+};
 
 @Component({
   selector: 'app-modal-demo',
@@ -147,20 +147,20 @@ export class ModalDemo {
       })
       // Password + Confirm Password (cross-field validation demo) — uses FieldKind.PASSWORD
       .row(2)
-        .addToRow({
-          kind: FieldKind.PASSWORD,
-          key: 'password',
-          label: 'Password',
-          placeholder: '********',
-          validators: [Validators.required, Validators.minLength(8)],
-        })
-        .addToRow({
-          kind: FieldKind.PASSWORD,
-          key: 'confirmPassword',
-          label: 'Confirm Password',
-          placeholder: '********',
-          validators: [Validators.required],
-        })
+      .addToRow({
+        kind: FieldKind.PASSWORD,
+        key: 'password',
+        label: 'Password',
+        placeholder: '********',
+        validators: [Validators.required, Validators.minLength(8)],
+      })
+      .addToRow({
+        kind: FieldKind.PASSWORD,
+        key: 'confirmPassword',
+        label: 'Confirm Password',
+        placeholder: '********',
+        validators: [Validators.required],
+      })
       // Role select — conditional field demo: permissions only visible when role=admin
       .field({
         kind: FieldKind.SELECT,
@@ -197,7 +197,7 @@ export class ModalDemo {
         dataSource: {
           load: async () => {
             // Simulate API call
-            await new Promise(r => setTimeout(r, 800));
+            await new Promise((r) => setTimeout(r, 800));
             return [
               { label: 'Netherlands', value: 'nl' },
               { label: 'Germany', value: 'de' },
@@ -216,11 +216,23 @@ export class ModalDemo {
           dependsOn: ['country'],
           load: async (formValue) => {
             if (!formValue?.country) return [];
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise((r) => setTimeout(r, 500));
             const cities: Record<string, { label: string; value: string }[]> = {
-              nl: [{ label: 'Amsterdam', value: 'ams' }, { label: 'Rotterdam', value: 'rtd' }, { label: 'Utrecht', value: 'utr' }],
-              de: [{ label: 'Berlin', value: 'ber' }, { label: 'Munich', value: 'muc' }, { label: 'Hamburg', value: 'ham' }],
-              be: [{ label: 'Brussels', value: 'bru' }, { label: 'Antwerp', value: 'ant' }, { label: 'Ghent', value: 'gnt' }],
+              nl: [
+                {label: 'Amsterdam', value: 'ams'},
+                {label: 'Rotterdam', value: 'rtd'},
+                {label: 'Utrecht', value: 'utr'},
+              ],
+              de: [
+                {label: 'Berlin', value: 'ber'},
+                {label: 'Munich', value: 'muc'},
+                {label: 'Hamburg', value: 'ham'},
+              ],
+              be: [
+                {label: 'Brussels', value: 'bru'},
+                {label: 'Antwerp', value: 'ant'},
+                {label: 'Ghent', value: 'gnt'},
+              ],
             };
             return cities[formValue.country as string] || [];
           },
@@ -267,40 +279,76 @@ export class ModalDemo {
       .subtitle('Complete all steps to create your account')
       .sizeWidth(ModalSize.LG)
       .flow(WizardFlowMode.LINEAR)
-      .addStep('Account Information', (s) => {
-        s.field({ kind: FieldKind.TEXT, key: 'email', label: 'Email Address', placeholder: 'user@example.com', validators: [Validators.required, Validators.email] })
-        .field({ kind: FieldKind.PASSWORD, key: 'password', label: 'Password', placeholder: '********', validators: [Validators.required, Validators.minLength(8)] });
-      }, 'account')
-      .addStep('Profile Details', (s) => {
-        s.row(2)
-          .addToRow({ kind: FieldKind.TEXT, key: 'firstName', label: 'First Name', validators: [Validators.required] })
-          .addToRow({ kind: FieldKind.TEXT, key: 'lastName', label: 'Last Name', validators: [Validators.required] })
-        .guard({
-          canEnter: () => {
-            console.log('Checking if can enter Profile Step...');
-            return true;
-          },
-          canExit: () => {
-            console.log('Checking if can exit Profile Step...');
-            return true;
-          }
-        });
-      }, 'profile')
-      .addStep('Verification', (s) => {
-        s.body('Verify your email address. (Step 3)')
-        .validators([
-          {
-            validate: async () => {
-              console.log('Simulating Async Verification...');
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              return { status: ValidationStatus.VALID };
-            }
-          }
-        ]);
-      }, 'verification')
-      .addStep('Complete', (s) => {
-        s.body('Thank you for registering! You can now finish the wizard.');
-      }, 'complete')
+      .addStep(
+        'Account Information',
+        (s) => {
+          s.field({
+            kind: FieldKind.TEXT,
+            key: 'email',
+            label: 'Email Address',
+            placeholder: 'user@example.com',
+            validators: [Validators.required, Validators.email],
+          }).field({
+            kind: FieldKind.PASSWORD,
+            key: 'password',
+            label: 'Password',
+            placeholder: '********',
+            validators: [Validators.required, Validators.minLength(8)],
+          });
+        },
+        'account',
+      )
+      .addStep(
+        'Profile Details',
+        (s) => {
+          s.row(2)
+            .addToRow({
+              kind: FieldKind.TEXT,
+              key: 'firstName',
+              label: 'First Name',
+              validators: [Validators.required],
+            })
+            .addToRow({
+              kind: FieldKind.TEXT,
+              key: 'lastName',
+              label: 'Last Name',
+              validators: [Validators.required],
+            })
+            .guard({
+              canEnter: () => {
+                console.log('Checking if can enter Profile Step...');
+                return true;
+              },
+              canExit: () => {
+                console.log('Checking if can exit Profile Step...');
+                return true;
+              },
+            });
+        },
+        'profile',
+      )
+      .addStep(
+        'Verification',
+        (s) => {
+          s.body('Verify your email address. (Step 3)').validators([
+            {
+              validate: async () => {
+                console.log('Simulating Async Verification...');
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                return {status: ValidationStatus.VALID};
+              },
+            },
+          ]);
+        },
+        'verification',
+      )
+      .addStep(
+        'Complete',
+        (s) => {
+          s.body('Thank you for registering! You can now finish the wizard.');
+        },
+        'complete',
+      )
       .onStepChange({
         handle: async (event) => {
           console.log('Step changed:', event);
@@ -310,6 +358,72 @@ export class ModalDemo {
         handle: async (result) => {
           console.log('Wizard completed:', result);
           this.lastResult = `Wizard Completed: visited ${result.visitedStepIds.join(', ')}`;
+        },
+      })
+      .build();
+
+    this.modalService.open(config);
+  }
+
+  /**
+   * Regression playground for the multi-select dropdown inside a modal.
+   *
+   * The panel is portalled to `document.body`, so it used to outlive its own trigger:
+   * a wizard hides inactive steps with `display: none` rather than destroying them, so
+   * stepping forward with the panel open left it floating over the modal. Clicking
+   * elsewhere did not dismiss it either, because the modal container swallowed the
+   * click before any `document:click` listener saw it.
+   *
+   * To exercise it: open the panel on step 1, then (a) press Next without closing it,
+   * (b) reopen it and click the text field beside it, (c) reopen it and scroll the
+   * modal body. In each case the panel must disappear.
+   */
+  openMultiSelectInWizardModal() {
+    const config = ModalBuilder.wizard()
+      .title('Multi-Select in a Wizard')
+      .subtitle('Open the dropdown, then press Next / click away / scroll')
+      .sizeWidth(ModalSize.MD)
+      .sizeHeight(ModalSize.SM)
+      .flow(WizardFlowMode.LINEAR)
+      .addStep(
+        'Pick Tags',
+        (s) => {
+          s.field({
+            kind: FieldKind.MULTI_SELECT,
+            key: 'tags',
+            label: 'Tags',
+            options: [
+              {label: 'Accessibility', value: 'a11y'},
+              {label: 'Backend', value: 'backend'},
+              {label: 'Design', value: 'design'},
+              {label: 'Documentation', value: 'docs'},
+              {label: 'Frontend', value: 'frontend'},
+              {label: 'Performance', value: 'perf'},
+              {label: 'Security', value: 'security'},
+              {label: 'Tooling', value: 'tooling'},
+            ],
+            searchable: true,
+          })
+            // A neighbouring field to click on — the click-away case.
+            .field({
+              kind: FieldKind.TEXT,
+              key: 'note',
+              label: 'Note',
+              placeholder: 'Click here while the dropdown is open',
+            });
+        },
+        'tags',
+      )
+      .addStep(
+        'Next Step',
+        (s) => {
+          s.body('If a dropdown panel is still floating over this step, the bug is back.');
+        },
+        'next',
+      )
+      .onComplete({
+        handle: async (result) => {
+          this.lastResult = `Multi-select wizard completed: visited ${result.visitedStepIds.join(', ')}`;
         },
       })
       .build();
@@ -338,7 +452,9 @@ export class ModalDemo {
     const config = ModalBuilder.confirmation()
       .title('Large Modal Example')
       .sizeWidth(ModalSize.XL)
-      .message('This is a large modal that takes up more screen space. It can be useful for displaying more content or complex forms.')
+      .message(
+        'This is a large modal that takes up more screen space. It can be useful for displaying more content or complex forms.',
+      )
       .confirmAction({
         label: 'Got it',
         style: ActionStyle.PRIMARY,
@@ -437,7 +553,7 @@ export class ModalDemo {
       status: string;
       lastMaintenance: string;
       notes: string;
-    }
+    };
 
     const config = ModalBuilder.form<WeaponInfo, WeaponInfo>()
       .title('Weapon Information')
@@ -446,7 +562,12 @@ export class ModalDemo {
       .fieldGroup('General Information', 'Basic weapon identification details', (g) => {
         g.addRow(2, (row) => {
           row.add({ kind: FieldKind.TEXT, key: 'name', label: 'Weapon Name', readOnly: true });
-          row.add({ kind: FieldKind.TEXT, key: 'serialNumber', label: 'Serial Number', readOnly: true });
+          row.add({
+            kind: FieldKind.TEXT,
+            key: 'serialNumber',
+            label: 'Serial Number',
+            readOnly: true,
+          });
         });
       })
       .fieldGroup('Specifications', (g) => {
@@ -458,8 +579,19 @@ export class ModalDemo {
       })
       .fieldGroup('Status & Maintenance', 'Current status and maintenance notes', (g) => {
         g.field({ kind: FieldKind.TEXT, key: 'status', label: 'Status', disabled: true })
-         .field({ kind: FieldKind.TEXT, key: 'lastMaintenance', label: 'Last Maintenance', readOnly: true })
-         .field({ kind: FieldKind.TEXTAREA, key: 'notes', label: 'Notes', readOnly: true, rows: 3 });
+          .field({
+            kind: FieldKind.TEXT,
+            key: 'lastMaintenance',
+            label: 'Last Maintenance',
+            readOnly: true,
+          })
+          .field({
+            kind: FieldKind.TEXTAREA,
+            key: 'notes',
+            label: 'Notes',
+            readOnly: true,
+            rows: 3,
+          });
       })
       .initialValue({
         name: 'Glock 17 Gen5',
@@ -484,22 +616,63 @@ export class ModalDemo {
       email: string;
       role: string;
       department: string;
-    }
+    };
 
     const members: TeamMember[] = [
-      { id: '1', name: 'John Doe', email: 'john@example.com', role: 'Developer', department: 'Engineering' },
-      { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'Designer', department: 'Design' },
-      { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'Manager', department: 'Engineering' },
-      { id: '4', name: 'Alice Brown', email: 'alice@example.com', role: 'Developer', department: 'Engineering' },
-      { id: '5', name: 'Charlie Davis', email: 'charlie@example.com', role: 'QA Engineer', department: 'Quality' },
-      { id: '6', name: 'Diana Prince', email: 'diana@example.com', role: 'Designer', department: 'Design' },
+      {
+        id: '1',
+        name: 'John Doe',
+        email: 'john@example.com',
+        role: 'Developer',
+        department: 'Engineering',
+      },
+      {
+        id: '2',
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        role: 'Designer',
+        department: 'Design',
+      },
+      {
+        id: '3',
+        name: 'Bob Wilson',
+        email: 'bob@example.com',
+        role: 'Manager',
+        department: 'Engineering',
+      },
+      {
+        id: '4',
+        name: 'Alice Brown',
+        email: 'alice@example.com',
+        role: 'Developer',
+        department: 'Engineering',
+      },
+      {
+        id: '5',
+        name: 'Charlie Davis',
+        email: 'charlie@example.com',
+        role: 'QA Engineer',
+        department: 'Quality',
+      },
+      {
+        id: '6',
+        name: 'Diana Prince',
+        email: 'diana@example.com',
+        role: 'Designer',
+        department: 'Design',
+      },
     ];
 
     const columns: ColumnDefinition<TeamMember>[] = [
       { key: 'name', header: 'Name', cell: (r) => r.name, sortType: ColumnSortType.ALPHABETICAL },
       { key: 'email', header: 'Email', cell: (r) => r.email },
       { key: 'role', header: 'Role', cell: (r) => r.role, sortType: ColumnSortType.ALPHABETICAL },
-      { key: 'department', header: 'Department', cell: (r) => r.department, sortType: ColumnSortType.ALPHABETICAL },
+      {
+        key: 'department',
+        header: 'Department',
+        cell: (r) => r.department,
+        sortType: ColumnSortType.ALPHABETICAL,
+      },
     ];
 
     const dataSource: TableDataSource<TeamMember> = {
@@ -520,7 +693,7 @@ export class ModalDemo {
     type AssignModel = {
       teamName: string;
       members: string[];
-    }
+    };
 
     const config = ModalBuilder.form<AssignModel, AssignModel>()
       .title('Assign Team Members')
@@ -557,7 +730,9 @@ export class ModalDemo {
     const config = ModalBuilder.confirmation()
       .title('Full Screen Modal')
       .sizeWidth(ModalSize.FULL)
-      .message('This modal takes up 95% of the screen, useful for immersive experiences or complex workflows.')
+      .message(
+        'This modal takes up 95% of the screen, useful for immersive experiences or complex workflows.',
+      )
       .confirmAction({
         label: 'Close',
         style: ActionStyle.PRIMARY,
@@ -574,7 +749,7 @@ export class ModalDemo {
   openHybridModal() {
     type HybridModel = {
       email: string;
-    }
+    };
     const config = ModalBuilder.form<HybridModel>()
       .title('Hybrid Modal')
       .sizeWidth(ModalSize.MD)
@@ -584,12 +759,12 @@ export class ModalDemo {
         key: 'email',
         label: 'Email Address',
         placeholder: 'Enter your email',
-        validators: [Validators.required, Validators.email]
+        validators: [Validators.required, Validators.email],
       })
       .onComplete({
         handle: async (result) => {
           this.lastResult = `Hybrid Form Result: ${JSON.stringify(result)}`;
-        }
+        },
       })
       .build();
 
@@ -601,33 +776,37 @@ export class ModalDemo {
       .title('Confirm with details')
       .sizeWidth(ModalSize.MD)
       .template(this.confirmationDetail)
-      .fieldGroup('Verification Details', 'Please provide additional context for this action', (g) => {
-        g.addRow(2, (row) => {
-          row.add({
-            kind: FieldKind.TEXT,
-            key: 'reason',
-            label: 'Reason',
-            placeholder: 'Why are you doing this?',
-            validators: [Validators.required]
+      .fieldGroup(
+        'Verification Details',
+        'Please provide additional context for this action',
+        (g) => {
+          g.addRow(2, (row) => {
+            row.add({
+              kind: FieldKind.TEXT,
+              key: 'reason',
+              label: 'Reason',
+              placeholder: 'Why are you doing this?',
+              validators: [Validators.required],
+            });
+            row.add({
+              kind: FieldKind.SELECT,
+              key: 'priority',
+              label: 'Priority',
+              options: [
+                {label: 'Low', value: 'low'},
+                {label: 'Medium', value: 'medium'},
+                {label: 'High', value: 'high'},
+              ],
+              validators: [Validators.required],
+            });
           });
-          row.add({
-            kind: FieldKind.SELECT,
-            key: 'priority',
-            label: 'Priority',
-            options: [
-              { label: 'Low', value: 'low' },
-              { label: 'Medium', value: 'medium' },
-              { label: 'High', value: 'high' }
-            ],
-            validators: [Validators.required]
-          });
-        });
-      })
+        },
+      )
       .field({
         kind: FieldKind.CHECKBOX,
         key: 'acknowledged',
         label: 'I acknowledge that I have read and understood the implications of this action',
-        validators: [Validators.requiredTrue]
+        validators: [Validators.requiredTrue],
       })
       .confirmAction({
         label: 'Confirm All',
@@ -642,20 +821,20 @@ export class ModalDemo {
     type WizardHeaderModel = {
       data1: string;
       data2: string;
-    }
+    };
     const config = ModalBuilder.wizard<WizardHeaderModel>()
       .title('Wizard with Custom Visualization')
       .template(this.wizardHeader)
       .addStep<WizardHeaderModel>('Step 1', (s) => {
         s.body('This wizard has a custom header visualization across all steps.')
-         .field({ kind: FieldKind.TEXT, key: 'data1', label: 'Field 1' })
-         .nextLabel('Go to Step 2');
+          .field({kind: FieldKind.TEXT, key: 'data1', label: 'Field 1'})
+          .nextLabel('Go to Step 2');
       })
       .addStep<WizardHeaderModel>('Step 2', (s) => {
         s.body('Still here!')
-         .field({ kind: FieldKind.TEXT, key: 'data2', label: 'Field 2' })
-         .backLabel('Go back to 1')
-         .nextLabel('Finish');
+          .field({kind: FieldKind.TEXT, key: 'data2', label: 'Field 2'})
+          .backLabel('Go back to 1')
+          .nextLabel('Finish');
       })
       .build();
 
@@ -668,7 +847,7 @@ export class ModalDemo {
       taxId: string;
       deferred: string;
       autoFocused: string;
-    }
+    };
 
     const config = ModalBuilder.form<AdvancedModel>()
       .title('Advanced Form Features')
@@ -679,7 +858,7 @@ export class ModalDemo {
         key: 'autoFocused',
         label: 'Auto-Focused Field',
         placeholder: 'I should be focused on open',
-        autoFocus: true
+        autoFocus: true,
       })
       .field({
         kind: FieldKind.TEXT,
@@ -687,7 +866,7 @@ export class ModalDemo {
         label: 'Phone Number (Masked)',
         placeholder: '(000) 000-0000',
         mask: '(000) 000-0000',
-        validators: [Validators.required, Validators.pattern(/^\(\d{3}\) \d{3}-\d{4}$/)]
+        validators: [Validators.required, Validators.pattern(/^\(\d{3}\) \d{3}-\d{4}$/)],
       })
       .field({
         kind: FieldKind.TEXT,
@@ -695,7 +874,7 @@ export class ModalDemo {
         label: 'Tax ID (Mixed Mask)',
         placeholder: 'AA-000-**',
         mask: 'AA-000-**',
-        validators: [Validators.required, Validators.pattern(/^[a-zA-Z]{2}-\d{3}-.{2}$/)]
+        validators: [Validators.required, Validators.pattern(/^[a-zA-Z]{2}-\d{3}-.{2}$/)],
       })
       .field({
         kind: FieldKind.TEXT,
@@ -703,12 +882,12 @@ export class ModalDemo {
         label: 'Deferred Validation (updateOn: blur)',
         placeholder: 'Validation runs only on blur',
         updateOn: 'blur',
-        validators: [Validators.required, Validators.minLength(5)]
+        validators: [Validators.required, Validators.minLength(5)],
       })
       .onComplete({
         handle: async (result) => {
           this.lastResult = `Advanced Form Result: ${JSON.stringify(result)}`;
-        }
+        },
       })
       .build();
 
@@ -719,7 +898,7 @@ export class ModalDemo {
     const openSecond = () => {
       type SecondModel = {
         note: string;
-      }
+      };
       const config2 = ModalBuilder.form<SecondModel>()
         .title('Second Modal')
         .subtitle('This modal is stacked on top of the first one.')
@@ -729,10 +908,10 @@ export class ModalDemo {
           kind: FieldKind.TEXT,
           key: 'note',
           label: 'A note in the second modal',
-          placeholder: 'Type something...'
+          placeholder: 'Type something...',
         })
         .onComplete({
-          handle: async (res) => console.log('Second modal complete', res)
+          handle: async (res) => console.log('Second modal complete', res),
         })
         .build();
       this.modalService.open(config2);
@@ -740,7 +919,7 @@ export class ModalDemo {
 
     type FirstModel = {
       input1: string;
-    }
+    };
     const config = ModalBuilder.form<FirstModel>()
       .title('First Modal')
       .subtitle('Click the button below to open another modal on top.')
@@ -750,20 +929,20 @@ export class ModalDemo {
         kind: FieldKind.TEXT,
         key: 'input1',
         label: 'Input in first modal',
-        placeholder: 'First modal input'
+        placeholder: 'First modal input',
       })
       .footerActions([
         {
           label: 'Cancel',
           style: ActionStyle.SECONDARY,
           closesModal: true,
-          closeReason: ModalCloseReason.CANCELLED
+          closeReason: ModalCloseReason.CANCELLED,
         },
         {
           label: 'Open Second Modal',
           style: ActionStyle.PRIMARY,
-          handler: () => openSecond()
-        }
+          handler: () => openSecond(),
+        },
       ])
       .build();
 
@@ -777,26 +956,72 @@ export class ModalDemo {
       .subtitle('Complete all steps to create your account')
       .sizeWidth(ModalSize.LG)
       .flow(WizardFlowMode.LINEAR)
-      .addStep('Account Information', (s) => {
-        s.field({ kind: FieldKind.TEXT, key: 'email', label: 'Email Address', placeholder: 'user@example.com', validators: [Validators.required, Validators.email] })
-        .field({ kind: FieldKind.PASSWORD, key: 'password', label: 'Password', placeholder: '********', validators: [Validators.required, Validators.minLength(8)] });
-      }, 'account')
-      .addStep('Profile Details', (s) => {
-        s.row(2)
-          .addToRow({ kind: FieldKind.TEXT, key: 'firstName', label: 'First Name', validators: [Validators.required] })
-          .addToRow({ kind: FieldKind.TEXT, key: 'lastName', label: 'Last Name', validators: [Validators.required] });
-      }, 'profile')
-      .addStep('Preferences', (s) => {
-        s.field({ kind: FieldKind.SELECT, key: 'role', label: 'Role', options: [
-          { label: 'User', value: 'user' },
-          { label: 'Editor', value: 'editor' },
-          { label: 'Admin', value: 'admin' },
-        ], validators: [Validators.required] })
-        .field({ kind: FieldKind.CHECKBOX, key: 'newsletter', label: 'Subscribe to newsletter' });
-      }, 'preferences')
-      .addStep('Complete', (s) => {
-        s.body('Thank you for registering! Review your information and finish.');
-      }, 'complete')
+      .addStep(
+        'Account Information',
+        (s) => {
+          s.field({
+            kind: FieldKind.TEXT,
+            key: 'email',
+            label: 'Email Address',
+            placeholder: 'user@example.com',
+            validators: [Validators.required, Validators.email],
+          }).field({
+            kind: FieldKind.PASSWORD,
+            key: 'password',
+            label: 'Password',
+            placeholder: '********',
+            validators: [Validators.required, Validators.minLength(8)],
+          });
+        },
+        'account',
+      )
+      .addStep(
+        'Profile Details',
+        (s) => {
+          s.row(2)
+            .addToRow({
+              kind: FieldKind.TEXT,
+              key: 'firstName',
+              label: 'First Name',
+              validators: [Validators.required],
+            })
+            .addToRow({
+              kind: FieldKind.TEXT,
+              key: 'lastName',
+              label: 'Last Name',
+              validators: [Validators.required],
+            });
+        },
+        'profile',
+      )
+      .addStep(
+        'Preferences',
+        (s) => {
+          s.field({
+            kind: FieldKind.SELECT,
+            key: 'role',
+            label: 'Role',
+            options: [
+              {label: 'User', value: 'user'},
+              {label: 'Editor', value: 'editor'},
+              {label: 'Admin', value: 'admin'},
+            ],
+            validators: [Validators.required],
+          }).field({
+            kind: FieldKind.CHECKBOX,
+            key: 'newsletter',
+            label: 'Subscribe to newsletter',
+          });
+        },
+        'preferences',
+      )
+      .addStep(
+        'Complete',
+        (s) => {
+          s.body('Thank you for registering! Review your information and finish.');
+        },
+        'complete',
+      )
       .footerActions([
         {
           label: 'Save Draft',
@@ -832,7 +1057,7 @@ export class ModalDemo {
   openFixedHeightFormModal() {
     type SimpleModel = {
       name: string;
-    }
+    };
 
     const config = ModalBuilder.form<SimpleModel>()
       .title('Fixed Height Form')
@@ -864,12 +1089,27 @@ export class ModalDemo {
       .sizeWidth(ModalSize.MD)
       .sizeHeight(ModalSize.LG)
       .flow(WizardFlowMode.LINEAR)
-      .addStep('Step One', (s) => {
-        s.body('This step has very little content, but the buttons should still be at the bottom.');
-      }, 'one')
-      .addStep('Step Two', (s) => {
-        s.field({kind: FieldKind.TEXT, key: 'note', label: 'A Note', placeholder: 'Type something...'});
-      }, 'two')
+      .addStep(
+        'Step One',
+        (s) => {
+          s.body(
+            'This step has very little content, but the buttons should still be at the bottom.',
+          );
+        },
+        'one',
+      )
+      .addStep(
+        'Step Two',
+        (s) => {
+          s.field({
+            kind: FieldKind.TEXT,
+            key: 'note',
+            label: 'A Note',
+            placeholder: 'Type something...',
+          });
+        },
+        'two',
+      )
       .onComplete({
         handle: async (result) => {
           this.lastResult = `Fixed Height Wizard completed: visited ${result.visitedStepIds.join(', ')}`;
@@ -884,26 +1124,26 @@ export class ModalDemo {
     type FluentModel = {
       email: string;
       password: string;
-    }
+    };
     const config = ModalBuilder.form<FluentModel>()
       .title('Fluent Validation Demo')
       .sizeWidth(ModalSize.MD)
       .fieldWithValidators({
         kind: FieldKind.TEXT,
         key: 'email',
-        label: 'Email Address'
+        label: 'Email Address',
       })
-        .required()
-        .email()
-        .done()
+      .required()
+      .email()
+      .done()
       .fieldWithValidators({
         kind: FieldKind.PASSWORD,
         key: 'password',
-        label: 'Password'
+        label: 'Password',
       })
-        .required()
-        .minLength(8)
-        .done()
+      .required()
+      .minLength(8)
+      .done()
       .build();
 
     this.modalService.open(config);

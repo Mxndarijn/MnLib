@@ -11,6 +11,7 @@ import {
   signal,
   TemplateRef,
   Type,
+  ViewChild,
   ViewChildren,
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
@@ -56,6 +57,13 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChildren(MnFormBodyComponent) formBodies!: QueryList<MnFormBodyComponent>;
   @ViewChildren('stepWrapper') stepWrappers!: QueryList<ElementRef<HTMLElement>>;
+  /**
+   * The step body's scroll container. Every step renders into this one element
+   * (inactive steps are hidden, not destroyed), so its scroll offset is shared —
+   * without an explicit reset, arriving on a new step lands you wherever the
+   * previous step was scrolled to. See {@link setCurrentStep}.
+   */
+  @ViewChild('stepScroller') stepScroller?: ElementRef<HTMLElement>;
 
   currentStepId!: ModalStepId;
   /**
@@ -437,6 +445,12 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   private setCurrentStep(stepId: ModalStepId): void {
     this.currentStepId = stepId;
     this.currentStepTitle.set(this.config.steps.find(s => s.id === stepId)?.title);
+    // A new step always starts at its top — the shared scroller would otherwise
+    // keep the previous step's offset. Instant, not smooth: a scroll animation
+    // during a step swap reads as a glitch. Absent before the view is created.
+    if (this.stepScroller) {
+      this.stepScroller.nativeElement.scrollTop = 0;
+    }
   }
 
   async complete(): Promise<void> {

@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MnModalRef, MnWizardBodyComponent, ModalKind, WizardModalConfig, WizardResult,} from '../..';
+import {MnModalRef, MnWizardBodyComponent, ModalKind, WizardFlowMode, WizardModalConfig, WizardResult,} from '../..';
 
 /** Minimal step-body component used to assert input + modalRef wiring. */
 @Component({
@@ -100,4 +100,72 @@ describe('MnWizardBodyComponent', () => {
     expect(instance.associationId).toBe('assoc-42');
     expect(instance.modalRef).toBe(component.modalRef as unknown as MnModalRef<unknown>);
   }));
+
+  /**
+   * Every step renders into one shared scroll container (inactive steps are hidden,
+   * not destroyed), so navigating used to drop the user halfway down the new step —
+   * wherever the previous one happened to be scrolled to.
+   */
+  describe('step body scroll position', () => {
+    /**
+     * A three-step wizard whose scroller is forced to overflow. FREE flow so the
+     * direct-jump case is reachable — `goToStep` is a no-op under LINEAR by design.
+     */
+    function setupScrollable(): HTMLElement {
+      setup({
+        kind: ModalKind.WIZARD,
+        flow: WizardFlowMode.FREE,
+        steps: [
+          {id: 'one', title: 'One', body: 'First step'},
+          {id: 'two', title: 'Two', body: 'Second step'},
+          {id: 'three', title: 'Three', body: 'Third step'},
+        ],
+      } as WizardModalConfig);
+
+      const scroller = component.stepScroller!.nativeElement;
+      // The harness has no layout constraints, so give the scroller a real overflow.
+      scroller.style.height = '50px';
+      scroller.style.overflowY = 'auto';
+      const filler = document.createElement('div');
+      filler.style.height = '500px';
+      scroller.appendChild(filler);
+      return scroller;
+    }
+
+    it('scrolls back to the top when advancing to the next step', async () => {
+      const scroller = setupScrollable();
+      scroller.scrollTop = 200;
+      expect(scroller.scrollTop).withContext('harness must actually be scrollable').toBeGreaterThan(0);
+
+      await component.next();
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('two');
+      expect(scroller.scrollTop).toBe(0);
+    });
+
+    it('scrolls back to the top when going back a step', async () => {
+      const scroller = setupScrollable();
+      await component.next();
+      scroller.scrollTop = 200;
+      expect(scroller.scrollTop).toBeGreaterThan(0);
+
+      await component.back();
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('one');
+      expect(scroller.scrollTop).toBe(0);
+    });
+
+    it('scrolls back to the top when jumping straight to a step', async () => {
+      const scroller = setupScrollable();
+      scroller.scrollTop = 200;
+
+      await component.goToStep(component.config.steps[2]);
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('three');
+      expect(scroller.scrollTop).toBe(0);
+    });
+  });
 });
