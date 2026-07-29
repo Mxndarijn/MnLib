@@ -129,8 +129,8 @@
         <!-- Data columns -->
         @for (column of dataSource.columns; track column.key) {
           <th
-            [class.truncate]="isFixedLayout"
-            class="text-sm px-2 py-1 @min-[768px]:px-4 @min-[768px]:py-2 whitespace-nowrap"
+            [attr.data-column-key]="column.key"
+            [class.truncate]="widthsArePinned"
             [class.cursor-pointer]="isSortable(column)"
             [class.select-none]="isSortable(column)"
             [class.hover:bg-base-200]="isSortable(column)"
@@ -138,8 +138,9 @@
             [class.text-center]="column.align === 'center'"
             [class.text-right]="column.align === 'right'"
             [mnHiddenBelow]="column.hiddenBelow"
-            [style.width]="column.width ?? null"
+            [style.width]="columnWidth(column)"
             [attr.aria-sort]="currentSort?.columnKey === column.key ? (currentSort!.direction === 'asc' ? 'ascending' : 'descending') : null"
+            class="text-sm px-2 py-1 @min-[640px]:px-4 @min-[640px]:py-2 whitespace-nowrap"
             (click)="sort(column)"
           >
             <span class="inline-flex items-center gap-1">
@@ -212,7 +213,7 @@
             @for (column of dataSource.columns; track column.key) {
               <td class="px-4 py-3"
                 [mnHiddenBelow]="column.hiddenBelow"
-                  [style.width]="column.width ?? null"
+                  [style.width]="columnWidth(column)"
               >
                 @if (isTemplateRef(column.skeleton)) {
                   <ng-container [ngTemplateOutlet]="$any(column.skeleton)"></ng-container>
@@ -288,10 +289,10 @@
                 [class.text-left]="(column.align ?? 'left') === 'left'"
                 [class.text-center]="column.align === 'center'"
                 [class.text-right]="column.align === 'right'"
-                [class.truncate]="isFixedLayout"
+                [class.truncate]="widthsArePinned"
                 [mnHiddenBelow]="column.hiddenBelow"
-                [style.width]="column.width ?? null"
-                class="text-xs px-2 py-1 @min-[768px]:px-4 @min-[768px]:py-2"
+                [style.width]="columnWidth(column)"
+                class="text-xs px-2 py-1 @min-[640px]:px-4 @min-[640px]:py-2"
               >
                 @if (column.cellSm) {
                   <!-- Default cell: hidden below the cellSm breakpoint -->

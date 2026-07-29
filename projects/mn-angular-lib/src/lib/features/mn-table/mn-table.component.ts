@@ -1,4 +1,5 @@
 import {
+  afterEveryRender,
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
@@ -114,8 +115,12 @@ export class MnTable<T = object>
    * and its footer is pinned over the bottom of the table.
    */
   private static readonly MOBILE_PAGE_SIZE = 10;
-  /** The component's own element, measured for every responsive decision. */
-  private readonly host = inject(ElementRef<HTMLElement>);
+  /**
+   * The component's own element, measured for every responsive decision. Typed via
+   * the annotation, not `inject(ElementRef<HTMLElement>)` — that form is a generic
+   * call on the token and leaves `nativeElement` untyped.
+   */
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
   /** Whether the consumer owns filtering (server-side), mirroring {@link isServerSearched}. */
   get isServerFiltered(): boolean {
@@ -354,32 +359,12 @@ export class MnTable<T = object>
     this.filtersPanelOpen = !this.filtersPanelOpen;
   }
   private readonly baseTableClasses = 'w-full border-collapse overflow-y-hidden';
-
-  constructor() {
-    super();
-    // Server-side text filtering only: client-side filtering stays instant per keystroke.
-    this.filterDebounce
-      .pipe(debounceTime(300), takeUntilDestroyed())
-      .subscribe(() => {
-        this.emitServerFilters();
-        this.cdr.markForCheck();
-      });
-
-    // Watch the table's own box rather than the window: inside a modal, a sidebar
-    // or a narrow grid cell the table resizes without the window ever changing,
-    // and the window resizes without the table's share of it changing.
-    if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver(() => this.onHostResize());
-      observer.observe(this.host.nativeElement);
-      inject(DestroyRef).onDestroy(() => observer.disconnect());
-    }
-
-    // `beforeInitialFilter` runs while the host may not be attached or laid out
-    // yet, so its width reads 0 and {@link measuredWidth} has to guess from the
-    // window — the one guess that is wrong for a table in a modal. Re-evaluate
-    // once after the first render, when the real width is available.
-    afterNextRender(() => this.onHostResize());
-  }
+  /**
+   * Column widths measured from the automatic layout and pinned, keyed by column
+   * key, for `stable`. Empty until the first render that has real rows on screen,
+   * and cleared whenever the table is resized so the next render re-measures.
+   */
+  private pinnedWidths = new Map<string, string>();
 
   /** Sets sort/filter state seeded from the data source before the first filter pass. */
   protected override beforeInitialFilter(): void {
@@ -395,15 +380,12 @@ export class MnTable<T = object>
     this.currentSort = this.dataSource.defaultSort ?? null;
     this.seedFilterValues();
   }
-
   /**
-   * Classes for the `<table>` element. `table-fixed` is added for the `fixed`
-   * layout so column widths come from the header row and the declared widths
-   * only, keeping them stable as the rows change.
+   * Whether {@link pinColumnWidths} has run. Tracked separately from
+   * {@link pinnedWidths} being non-empty, because the widest column is deliberately
+   * left unpinned and a table with a single flexible column therefore pins nothing.
    */
-  get tableClasses(): string {
-    return this.isFixedLayout ? `${this.baseTableClasses} table-fixed` : this.baseTableClasses;
-  }
+  private widthsPinned = false;
 
   /**
    * Recomputes whether the inline filter row should collapse into the panel.
@@ -465,16 +447,83 @@ export class MnTable<T = object>
 
   // ── Row interaction ──
 
-  /** Whether column widths are content-independent (see {@link TableAppearance.layout}). */
-  get isFixedLayout(): boolean {
-    return this.dataSource.appearance?.layout === 'fixed';
+  constructor() {
+    super();
+    // Server-side text filtering only: client-side filtering stays instant per keystroke.
+    this.filterDebounce
+      .pipe(debounceTime(300), takeUntilDestroyed())
+      .subscribe(() => {
+        this.emitServerFilters();
+        this.cdr.markForCheck();
+      });
+
+    // Watch the table's own box rather than the window: inside a modal, a sidebar
+    // or a narrow grid cell the table resizes without the window ever changing,
+    // and the window resizes without the table's share of it changing.
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => this.onHostResize());
+      observer.observe(this.host.nativeElement);
+      inject(DestroyRef).onDestroy(() => observer.disconnect());
+    }
+
+    // `beforeInitialFilter` runs while the host may not be attached or laid out
+    // yet, so its width reads 0 and {@link measuredWidth} has to guess from the
+    // window — the one guess that is wrong for a table in a modal. Re-evaluate
+    // once after the first render, when the real width is available.
+    afterNextRender(() => this.onHostResize());
+
+    // The `stable` layout has to let the browser lay the table out automatically
+    // once before it can capture the result. This runs after every render because
+    // the first render usually has no rows yet (a server fetch is still in flight);
+    // the guards below make it a no-op until real rows are on screen, and the
+    // pinned widths then stop it from measuring again.
+    afterEveryRender(() => {
+      if (this.layoutMode !== 'stable') return;
+      if (this.widthsPinned || this.isLoadingState) return;
+      if (this.paginatedItems.length === 0) return;
+      this.pinColumnWidths();
+    });
+  }
+
+  /**
+   * Classes for the `<table>` element. `table-fixed` is added once column widths
+   * are no longer allowed to follow the content: always for the `fixed` layout, and
+   * for `stable` from the moment its widths have been measured and pinned.
+   */
+  get tableClasses(): string {
+    return this.widthsArePinned ? `${this.baseTableClasses} table-fixed` : this.baseTableClasses;
   }
 
   /** Page size to use at/above the `md` breakpoint (consumer's pageSize, or the user's selection). */
   private desktopPageSize = 10;
 
+  /** The effective column-width strategy, defaulting to `stable`. */
+  get layoutMode(): 'auto' | 'fixed' | 'stable' {
+    return this.dataSource.appearance?.layout ?? 'stable';
+  }
+
   /**
-   * The `title` tooltip for a cell, so text truncated by the fixed layout stays
+   * Whether column widths have stopped following the cell content — `fixed` always,
+   * `stable` once {@link pinColumnWidths} has captured them. Drives `table-fixed`
+   * and the cell truncation together, so a cell is never clipped while the column
+   * it sits in could still have grown to fit it.
+   */
+  get widthsArePinned(): boolean {
+    return this.layoutMode === 'fixed' || (this.layoutMode === 'stable' && this.widthsPinned);
+  }
+
+  /**
+   * The width to render for a column: the consumer's own declared width always
+   * wins, then a width pinned by the `stable` layout, otherwise none.
+   * @param column The column being rendered.
+   * @returns A CSS width, or `null` to leave it to the layout algorithm.
+   */
+  columnWidth(column: ColumnDefinition<T>): string | null {
+    return column.width ?? this.pinnedWidths.get(column.key) ?? null;
+  }
+
+  /**
+   * The `title` tooltip for a cell, so text truncated by a pinned column stays
    * readable. Only string cells have text to expose; template cells render their
    * own markup and are left alone.
    * @param column The column being rendered.
@@ -482,8 +531,61 @@ export class MnTable<T = object>
    * @returns The full cell text, or `null` when there is nothing to expose.
    */
   cellTitle(column: ColumnDefinition<T>, row: T): string | null {
-    if (!this.isFixedLayout || typeof column.cell !== 'function') return null;
+    if (!this.widthsArePinned || typeof column.cell !== 'function') return null;
     return column.cell(row) || null;
+  }
+
+  /**
+   * Captures the current, automatically-derived width of every visible column and
+   * pins it, which flips the table to `table-fixed` on the next render.
+   *
+   * Runs only with real rows on screen: measuring the loading skeletons would pin
+   * the placeholder bars' widths rather than the data's. Hidden columns
+   * ({@link ColumnBase.hiddenBelow}) measure 0 and are skipped, so they are free to
+   * size themselves if a resize later reveals them.
+   *
+   * The **widest** column is measured but deliberately left unpinned, so it absorbs
+   * whatever space the pinned ones leave over. Pinning every column instead makes the
+   * widths sum to slightly more than the container — `border-collapse` shares borders
+   * between neighbours, so rounding each cell's measured width over-counts them — and
+   * the table then overflows into a spurious horizontal scrollbar. Leaving one column
+   * elastic also means a later resize squeezes the widest column first instead of
+   * clipping every column equally.
+   */
+  private pinColumnWidths(): void {
+    const headerCells = this.host.nativeElement.querySelectorAll('thead tr:first-child th[data-column-key]');
+    const measured: { key: string; width: number }[] = [];
+    for (const cell of Array.from(headerCells) as HTMLElement[]) {
+      const key = cell.dataset['columnKey'];
+      const width = cell.getBoundingClientRect().width;
+      // A width of 0 means the column is hidden at this container width.
+      if (!key || width <= 0) continue;
+      measured.push({key, width});
+    }
+    if (measured.length === 0) return;
+
+    const widest = measured.reduce((a, b) => (b.width > a.width ? b : a));
+    const pinned = new Map<string, string>();
+    for (const {key, width} of measured) {
+      if (key === widest.key) continue;
+      pinned.set(key, `${Math.round(width)}px`);
+    }
+
+    this.pinnedWidths = pinned;
+    this.widthsPinned = true;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Drops the pinned widths so the next render with rows re-measures them. Called
+   * when the table is resized: the old pixel widths were shares of a box that no
+   * longer exists, and a resize is also what makes `hiddenBelow` columns come and
+   * go, changing which columns need a share at all.
+   */
+  private unpinColumnWidths(): void {
+    if (!this.widthsPinned) return;
+    this.pinnedWidths = new Map();
+    this.widthsPinned = false;
   }
 
   /**
@@ -499,6 +601,8 @@ export class MnTable<T = object>
 
   /** Re-evaluate responsive page size and filter layout when the table is resized. */
   private onHostResize(): void {
+    // Pixel widths captured for the old box are meaningless in the new one.
+    this.unpinColumnWidths();
     this.applyResponsivePageSize(true);
     this.updateFilterLayout(true);
     // The popover is anchored to a viewport rect that a resize invalidates.

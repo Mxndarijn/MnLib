@@ -23,22 +23,30 @@ export type TableAppearance = {
   compact?: boolean;
   bordered?: boolean;
   /**
-   * How column widths are computed.
+   * How column widths are computed. Defaults to `stable`.
    *
-   * - `auto` (default): the browser sizes each column to its widest cell, so the
-   *   columns shift every time the content changes — a new page, a filter, a
-   *   search. Fine for a static table.
-   * - `fixed`: widths come from the header row and each column's {@link ColumnBase.width}
-   *   only, never from the cell content, so they stay put across pages and
-   *   filters. Columns without a `width` split the remaining space evenly.
-   *   Overlong cell text is truncated with an ellipsis (and exposed as a
-   *   `title` tooltip) instead of widening the column.
-   *
-   * Prefer `fixed` for any table whose rows change under the user — server-side
-   * paginated, filtered or searched tables, and tables inside a modal, where a
-   * width change is most visible.
+   * - `stable` (default): the best of both. The first render with rows on screen
+   *   uses the browser's automatic layout, so each column is sized in proportion to
+   *   its real content; those measured widths are then pinned and the table switches
+   *   to a fixed layout. Columns therefore keep sensible, content-derived
+   *   proportions **and** stop moving when the rows change underneath — a new page,
+   *   a filter or a search cannot resize them. Widths are re-measured only when the
+   *   table itself is resized (or a {@link ColumnBase.hiddenBelow} column appears or
+   *   disappears), never when the rows change. Content that no longer fits is
+   *   truncated with an ellipsis and exposed as a `title` tooltip.
+   * - `auto`: the plain browser layout. Every column is re-sized to its widest cell
+   *   on every change, so the columns shift on each new page, filter and search.
+   *   Use it for a static table, or when a cell must never be truncated.
+   * - `fixed`: widths are **data-independent**. Nothing is measured — not the cell
+   *   content, and not the header text either. Each column is either its declared
+   *   {@link ColumnBase.width} or an even share of whatever is left over:
+   *   `(table width − Σ declared widths) ÷ number of undeclared visible columns`.
+   *   Only worth choosing over `stable` when every column declares a `width`, or
+   *   when a deliberate even split is what you want: with widths undeclared, a
+   *   two-character status column is handed exactly as much room as a long
+   *   description.
    */
-  layout?: 'auto' | 'fixed';
+  layout?: 'auto' | 'fixed' | 'stable';
 }
 
 // ── Column Filter Type ──
