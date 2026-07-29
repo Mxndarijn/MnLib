@@ -779,7 +779,8 @@ export class ModalDemo {
       canSearch: true,
       searchPlaceholder: 'Search employees...',
       selectionMode: 'multi',
-      appearance: {striped: true, hover: true, layout: 'fixed'},
+      // No `layout` set: exercises the default `stable` mode.
+      appearance: {striped: true, hover: true},
       paginationMode: 'paginated',
       pageSize: 5,
       pageSizeOptions: [5, 10, 25],
