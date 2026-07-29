@@ -47,6 +47,29 @@ describe('MnTable column filters', () => {
     return {key: 'name', header: 'Name', cell: (row) => row.name, filterable: true};
   }
 
+  /**
+   * The inline filter controls live inside `th` cells, which the browser renders
+   * bold — the controls inherit that unless the row resets it. They are form
+   * fields, not headings, so bold is wrong; this pins the reset in place.
+   */
+  it('renders the inline filter controls at normal weight, not the header bold', () => {
+    fixture.componentInstance.dataSource = makeDataSource([nameColumn()]);
+    fixture.detectChanges();
+
+    const filterRow: HTMLTableRowElement =
+      fixture.nativeElement.querySelector('thead tr:nth-child(2)');
+    expect(filterRow).withContext('inline filter row should be rendered').toBeTruthy();
+
+    for (const cell of Array.from(filterRow.cells)) {
+      expect(cell.classList).toContain('font-normal');
+    }
+
+    // The heading row itself must stay bold.
+    const header: HTMLTableCellElement =
+      fixture.nativeElement.querySelector('thead tr:first-child th[data-column-key]');
+    expect(header.classList).not.toContain('font-normal');
+  });
+
   /** A number-range-filterable age column. */
   function ageColumn(): ColumnDefinition<Row> {
     return {

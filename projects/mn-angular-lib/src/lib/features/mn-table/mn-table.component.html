@@ -158,15 +158,19 @@
 
       </tr>
 
-      <!-- Per-column filter row (wide screens only; collapses into a panel below 640px) -->
+      <!-- Per-column filter row (wide screens only; collapses into a panel below 640px).
+           `font-normal` on the cells is load-bearing: these are `th` elements, which the
+           browser renders bold, and the filter inputs and selects inside them inherit
+           that. Filter controls are form fields, not headings, and must not look bold.
+           The stacked panel and the popover render outside any `th`, so they are fine. -->
       @if (hasColumnFilters && !filtersCollapsed) {
-        <tr class="bg-base-100 border-b border-base-300">
+        <tr class="bg-base-100 border-b border-base-300 font-normal">
           @if (hasSelection) {
-            <th class="px-2 py-1 "></th>
+            <th class="px-2 py-1 font-normal"></th>
           }
           @for (column of dataSource.columns; track column.key) {
             <th
-              class="px-4 py-2"
+              class="px-4 py-2 font-normal"
               [mnHiddenBelow]="column.hiddenBelow"
             >
               @if (column.filterable) {
