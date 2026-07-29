@@ -1,18 +1,27 @@
+<!-- Everything that reflows lives inside a @container, so the breakpoints below
+     measure the table's own width rather than the window's. A table in a modal,
+     a sidebar or a narrow grid cell is far narrower than the viewport, and
+     viewport breakpoints would hand it a desktop layout it has no room for.
+     The filter popover is deliberately left outside: `container-type` makes an
+     element the containing block for `position: fixed` descendants, which would
+     re-anchor the popover away from its trigger. -->
+<div class="@container">
 <!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
      so an unsearchable table without toolbar templates emits no empty spacer. -->
 @if (dataSource.canSearch || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
-<div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center justify-between gap-2 mb-3">
-  <div class="flex items-center gap-2 w-full min-[375px]:w-auto">
+  <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
+    <div class="flex items-center gap-2 w-full @min-[420px]:w-auto">
     @if (dataSource.toolbarLeftTemplate) {
-      <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
+      <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
         <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
       </div>
     }
   </div>
-  <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
+    <div
+      class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none @min-[560px]:w-auto">
     @if (dataSource.canSearch) {
       <mn-lib-input-field
-        class="w-full min-[375px]:flex-1 min-[480px]:max-w-64"
+        class="w-full @min-[420px]:flex-1 @min-[560px]:max-w-64"
         [props]="{
             id: 'mn-table-search',
             type: 'search',
@@ -28,7 +37,7 @@
       ></mn-lib-input-field>
     }
     @if (dataSource.toolbarRightTemplate) {
-      <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
+      <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
         <ng-container [ngTemplateOutlet]="dataSource.toolbarRightTemplate"></ng-container>
       </div>
     }
@@ -38,7 +47,7 @@
         type="button"
         mnButton
         [data]="{ variant: 'outline', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
-        class="w-full min-[375px]:w-auto gap-1.5"
+        class="w-full @min-[420px]:w-auto gap-1.5"
         [attr.aria-expanded]="filtersPanelOpen"
         aria-controls="mn-table-filters-panel"
         (click)="toggleFiltersPanel()"
@@ -120,7 +129,8 @@
         <!-- Data columns -->
         @for (column of dataSource.columns; track column.key) {
           <th
-            class="text-sm px-2 py-1 md:px-4 md:py-2 whitespace-nowrap"
+            [class.truncate]="isFixedLayout"
+            class="text-sm px-2 py-1 @min-[768px]:px-4 @min-[768px]:py-2 whitespace-nowrap"
             [class.cursor-pointer]="isSortable(column)"
             [class.select-none]="isSortable(column)"
             [class.hover:bg-base-200]="isSortable(column)"
@@ -274,12 +284,14 @@
             <!-- Data cells -->
             @for (column of dataSource.columns; track column.key) {
               <td
-                class="text-xs px-2 py-1 md:px-4 md:py-2"
+                [attr.title]="cellTitle(column, row)"
                 [class.text-left]="(column.align ?? 'left') === 'left'"
                 [class.text-center]="column.align === 'center'"
                 [class.text-right]="column.align === 'right'"
+                [class.truncate]="isFixedLayout"
                 [mnHiddenBelow]="column.hiddenBelow"
                 [style.width]="column.width ?? null"
+                class="text-xs px-2 py-1 @min-[768px]:px-4 @min-[768px]:py-2"
               >
                 @if (column.cellSm) {
                   <!-- Default cell: hidden below the cellSm breakpoint -->
@@ -336,6 +348,7 @@
   [visiblePages]="visiblePages"
   idPrefix="mn-table"
 ></mn-collection-pagination>
+</div>
 
 <!-- Filter popover for the rich filter types. Rendered outside the table's
      overflow-x-auto wrapper and positioned fixed, so it can't be clipped or

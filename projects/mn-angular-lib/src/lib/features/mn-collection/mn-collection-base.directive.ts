@@ -226,7 +226,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   }
 
   ngOnInit(): void {
-    this.validateDataSource();
+    this.normalizeDataSource();
     this.resolveTranslationKeys();
     this.pageSize = this.dataSource.pageSize ?? 10;
     this.beforeInitialFilter();
@@ -433,28 +433,66 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     this.applyFilter(false);
   }
 
-  protected validateDataSource(): void {
+  /**
+   * Reports every misconfigured pagination setting and repairs it in place.
+   *
+   * This deliberately does **not** throw. It runs first in {@link ngOnInit}, and a
+   * throw there aborts the rest of init — the data subscription is never made and
+   * {@link applyFilter} never runs, so the component renders a permanently empty
+   * body that only "heals" once some later interaction happens to call
+   * {@link applyFilter}. That failure mode reads as "the table is broken" rather
+   * than "the data source is misconfigured", and inside a modal the thrown error
+   * is easy to miss entirely. Logging loudly and degrading to the nearest working
+   * mode keeps the misconfiguration visible while still rendering the rows.
+   */
+  protected normalizeDataSource(): void {
     const mode = this.dataSource.paginationMode;
+
+    // Server-side pagination without the server half of the contract: there is no
+    // way to fetch another page, so paginate the rows we were handed instead.
     if (mode === 'paginated') {
-      if (!this.dataSource.onPageChange) {
-        throw new Error(`[${this.componentName}] paginationMode is 'paginated' but 'onPageChange' callback is missing. Server-side pagination requires 'onPageChange'.`);
-      }
-      if (this.dataSource.totalItems == null) {
-        throw new Error(`[${this.componentName}] paginationMode is 'paginated' but 'totalItems' is missing. Server-side pagination requires 'totalItems'.`);
+      const missing: string[] = [];
+      if (!this.dataSource.onPageChange) missing.push('onPageChange');
+      if (this.dataSource.totalItems == null) missing.push('totalItems');
+      if (missing.length > 0) {
+        this.reportConfigError(
+          `paginationMode is 'paginated' but ${missing.join(' and ')} ${missing.length === 1 ? 'is' : 'are'} missing. ` +
+          `Server-side pagination requires both; falling back to 'client-side-pagination'.`,
+        );
+        this.dataSource.paginationMode = 'client-side-pagination';
       }
     }
+
     if (mode === 'load-more' || mode === 'infinite-scroll') {
       if (!this.dataSource.onLoadMore && !this.dataSource.loadAdditionalRows && !this.dataSource.paginationStrategy) {
-        throw new Error(`[${this.componentName}] paginationMode is '${mode}' but no load-more mechanism is provided. Provide 'onLoadMore', 'loadAdditionalRows', or 'paginationStrategy'.`);
+        this.reportConfigError(
+          `paginationMode is '${mode}' but no load-more mechanism is provided. ` +
+          `Provide 'onLoadMore', 'loadAdditionalRows', or 'paginationStrategy'; falling back to 'none'.`,
+        );
+        this.dataSource.paginationMode = 'none';
       }
     }
-    // Validate pageSize is one of pageSizeOptions when pagination is active
-    if (mode && mode !== 'none') {
-      const options = this.dataSource.pageSizeOptions ?? [5, 10, 25, 50];
+
+    // A pageSize outside the selector's options would leave the dropdown with no
+    // matching entry; widen the options rather than override the consumer's size.
+    if (this.dataSource.paginationMode && this.dataSource.paginationMode !== 'none') {
+      const options = this.resolvedPageSizeOptions;
       const size = this.dataSource.pageSize ?? 10;
       if (!options.includes(size)) {
-        throw new Error(`[${this.componentName}] pageSize '${size}' is not one of the allowed pageSizeOptions [${options.join(', ')}]. pageSize must be one of pageSizeOptions.`);
+        this.reportConfigError(
+          `pageSize '${size}' is not one of pageSizeOptions [${options.join(', ')}]. ` +
+          `Adding it so the rows-per-page selector can show it.`,
+        );
+        this.dataSource.pageSizeOptions = [...options, size].sort((a, b) => a - b);
       }
     }
+  }
+
+  /**
+   * Logs a data-source configuration problem, prefixed with the component name.
+   * @param message What is wrong and how it was compensated for.
+   */
+  private reportConfigError(message: string): void {
+    console.error(`[${this.componentName}] ${message}`);
   }
 }

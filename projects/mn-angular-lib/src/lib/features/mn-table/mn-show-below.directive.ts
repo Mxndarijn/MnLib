@@ -21,9 +21,9 @@ export class MnShowBelowDirective implements OnChanges {
 
   /** Static mapping of breakpoints to their full Tailwind class names. */
   private readonly classMap: Record<string, string[]> = {
-    sm: ['inline', 'sm:hidden'],
-    md: ['inline', 'md:hidden'],
-    lg: ['inline', 'lg:hidden'],
+    sm: ['inline', '@min-[640px]:hidden'],
+    md: ['inline', '@min-[768px]:hidden'],
+    lg: ['inline', '@min-[1024px]:hidden'],
   };
 
   ngOnChanges(): void {

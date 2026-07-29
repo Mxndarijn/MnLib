@@ -177,7 +177,16 @@
         >
           Open Table Select Modal
         </button>
+        <button
+          (click)="openServerTableModal()"
+          [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
+          mnButton
+        >
+          Open Server-Paginated Table Modal
+        </button>
       </div>
+      <p class="text-base-content/60 text-sm -mt-2">The second modal is server-side paginated, searched and
+        filtered, with a fixed column layout so widths stay put across pages and filters.</p>
     </div>
 
     <!-- Fixed Height (Bottom-Pinned Buttons) -->
