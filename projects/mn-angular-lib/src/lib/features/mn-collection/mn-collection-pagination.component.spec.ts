@@ -133,4 +133,28 @@ describe('MnCollectionPagination', () => {
       expect(component.itemRangeLabel).toBe('1 tot 5 van 20');
     });
   });
+
+  /**
+   * A paginator is routinely rendered inside a modal's `<form>` (any
+   * MULTI_SELECT_TABLE field puts one there). A `<button>` with no `type`
+   * defaults to `submit`, so paging would submit the form and close the modal
+   * instead of turning the page.
+   */
+  it('declares every control as type="button" so paging cannot submit a form', () => {
+    fixture.componentInstance.isPaginated = true;
+    fixture.componentInstance.totalPages = 5;
+    fixture.componentInstance.totalItemCount = 50;
+    fixture.componentInstance.visiblePages = [1, 2, 3];
+    fixture.componentInstance.showLoadMore = true;
+    fixture.detectChanges();
+
+    const buttons: HTMLButtonElement[] =
+      Array.from(fixture.nativeElement.querySelectorAll('button'));
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const button of buttons) {
+      expect(button.type)
+        .withContext(`"${button.getAttribute('aria-label') ?? button.textContent?.trim()}" must not submit`)
+        .toBe('button');
+    }
+  });
 });

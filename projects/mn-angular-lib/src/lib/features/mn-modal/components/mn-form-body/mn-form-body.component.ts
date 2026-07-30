@@ -631,6 +631,13 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
         // Force multi selection mode
         ds.selectionMode = 'multi';
 
+        // Default the selection summary on. A table used as a form field is always
+        // inside a modal, where it is short, paged and searched — so the rows the
+        // user has already picked are the ones most likely to be scrolled out of
+        // sight, which is exactly what the summary exists to prevent. Set
+        // `selectionSummary: false` on the data source to opt a field out.
+        ds.selectionSummary ??= true;
+
         // Pre-select rows from the form's initial value
         const control = this.form.get(field.key as string);
         if (control && Array.isArray(control.value) && control.value.length > 0) {

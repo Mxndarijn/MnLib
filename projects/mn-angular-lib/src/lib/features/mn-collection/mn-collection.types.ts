@@ -169,4 +169,69 @@ export type MnSelectableCollectionDataSource<T> = MnCollectionDataSource<T> & {
   selectedRows?: BehaviorSubject<T[]>;
   /** IDs to pre-select when the component initializes. */
   initialSelectedIds?: string[];
+
+  /**
+   * Rows behind {@link initialSelectedIds}, for collections whose rows are paged in
+   * from a server. The component can only recognise a selected row once it has been
+   * loaded, so on page 1 of a server-paginated table it knows the *ids* that are
+   * selected but not what they are called — which is exactly what
+   * {@link selectionSummary} needs to render. Supplying the rows here fills that
+   * gap. Unnecessary when every row is client-side: the ids resolve against
+   * `dataRows` on their own.
+   */
+  initialSelectedRows?: T[];
+
+  /**
+   * Renders an always-visible summary of the current selection above the
+   * collection: a count and one removable tag per selected row.
+   *
+   * It exists because a selection and a paginated list answer different questions.
+   * The list is for *finding* rows and is therefore filtered, searched and paged;
+   * the selection is the answer the user is assembling, and hiding it on page 40
+   * makes people re-pick rows they already had. The summary never pages, filters or
+   * sorts — it always shows the whole selection.
+   */
+  selectionSummary?: boolean;
+
+  /**
+   * Label for a row inside {@link selectionSummary}. Defaults to the first column
+   * that renders a plain string, falling back to the row's id.
+   */
+  selectionLabel?: (row: T) => string;
+
+  /**
+   * How many tags {@link selectionSummary} shows before collapsing the rest behind
+   * a "+N more" control. Defaults to 8.
+   *
+   * A summary exists to be taken in at a glance, so it must not grow without bound:
+   * left uncapped, selecting a few hundred rows turns the header into the page and
+   * pushes the table — the thing being worked in — off screen entirely. The count in
+   * the heading always states the true total, so collapsing hides tags, never
+   * information.
+   */
+  selectionSummaryLimit?: number;
+
+  /** Labels for the {@link selectionSummary} chrome. */
+  selectionSummaryLabels?: {
+    /** Heading, supporting a `{{count}}` placeholder. Defaults to `Selected ({{count}})`. */
+    title?: string;
+    /** Translation key for {@link title}. */
+    titleKey?: string;
+    /** Label for the clear-everything action. Defaults to `Clear all`. */
+    clearAll?: string;
+    /** Translation key for {@link clearAll}. */
+    clearAllKey?: string;
+    /** Accessible label for a tag's remove button, supporting `{{label}}`. */
+    remove?: string;
+    /** Translation key for {@link remove}. */
+    removeKey?: string;
+    /** Expand action, supporting a `{{count}}` placeholder. Defaults to `+{{count}} more`. */
+    showMore?: string;
+    /** Translation key for {@link showMore}. */
+    showMoreKey?: string;
+    /** Collapse action. Defaults to `Show less`. */
+    showLess?: string;
+    /** Translation key for {@link showLess}. */
+    showLessKey?: string;
+  };
 }

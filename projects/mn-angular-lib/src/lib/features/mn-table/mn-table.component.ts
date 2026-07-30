@@ -64,18 +64,8 @@ export class MnTable<T = object>
   /** Per-column filter values keyed by column key. */
   columnFilters: ColumnFilterState = {};
 
-  /** Filter types compact enough to render directly inside the header cell. */
-  private static readonly INLINE_FILTER_TYPES: ColumnFilterType[] = ['text', 'select', 'boolean'];
-  /** Width (px) of the filter popover, mirrored from its `w-64` class for clamping. */
-  private static readonly POPOVER_WIDTH = 256;
-
   /** Viewport width (px) below which the inline filter row collapses into a panel. */
   private static readonly FILTER_COLLAPSE_WIDTH = 640;
-  /**
-   * Key of the column whose filter popover is open, or `null` when none is.
-   * Only the rich filter types ({@link isPopoverFilter}) use a popover.
-   */
-  protected openFilterKey: string | null = null;
   /** Bounds rendered by a number-range filter, in input order. */
   protected readonly numberBounds: RangeBound[] = ['min', 'max'];
 
@@ -100,13 +90,8 @@ export class MnTable<T = object>
   // ── Column Filters ──
   /** Bounds rendered by a date-range filter, in input order. */
   protected readonly dateBounds: RangeBound[] = ['from', 'to'];
-  /** Viewport coordinates of the open filter popover. */
-  protected popoverPosition = {top: 0, left: 0};
   /** Debounces server-side text filters so typing doesn't fire a request per keystroke. */
   private readonly filterDebounce = new Subject<void>();
-  /** The open filter popover, used to tell inside clicks from outside ones. */
-  @ViewChild('filterPopover') private filterPopover?: ElementRef<HTMLElement>;
-
   /**
    * Most rows shown per page on mobile (< md). A **cap**, not an override: a data
    * source asking for fewer rows keeps its own size. Raising a small page size on
@@ -191,57 +176,9 @@ export class MnTable<T = object>
     return column.filterType ?? 'text';
   }
 
-  /** Whether a column's filter renders inline in the header cell (vs. in a popover). */
-  isInlineFilter(column: ColumnDefinition<T>): boolean {
-    return MnTable.INLINE_FILTER_TYPES.includes(this.filterTypeOf(column));
-  }
-
-  /** Whether a column's filter is rich enough to need the popover panel. */
-  isPopoverFilter(column: ColumnDefinition<T>): boolean {
-    return !!column.filterable && !this.isInlineFilter(column);
-  }
-
   /** Whether a specific column's filter currently narrows the rows. */
   isColumnFilterActive(column: ColumnDefinition<T>): boolean {
     return isFilterValueActive(this.columnFilters[column.key]);
-  }
-
-  /** The column whose filter popover is open, or `null`. */
-  openFilterColumn(): ColumnDefinition<T> | null {
-    if (this.openFilterKey === null) return null;
-    return this.dataSource.columns.find(col => col.key === this.openFilterKey) ?? null;
-  }
-
-  /**
-   * Opens/closes a column's filter popover, closing any other that was open, and
-   * anchors it under the trigger. The popover is positioned `fixed` from the
-   * trigger's viewport rect because it renders outside the table's
-   * `overflow-x-auto` wrapper, which would otherwise clip it.
-   */
-  toggleFilterPopover(column: ColumnDefinition<T>, event: Event): void {
-    if (this.openFilterKey === column.key) {
-      this.openFilterKey = null;
-      return;
-    }
-    const trigger = event.currentTarget as HTMLElement | null;
-    if (trigger) {
-      const rect = trigger.getBoundingClientRect();
-      const maxLeft = window.innerWidth - MnTable.POPOVER_WIDTH - 8;
-      this.popoverPosition = {top: rect.bottom + 4, left: Math.max(8, Math.min(rect.left, maxLeft))};
-    }
-    this.openFilterKey = column.key;
-  }
-
-  /** Resets a single column's filter (from its popover) and re-applies filtering. */
-  clearColumnFilter(column: ColumnDefinition<T>): void {
-    this.onColumnFilter(column, emptyFilterValue(this.filterTypeOf(column)));
-  }
-
-  /** Closes the filter popover, if one is open. */
-  closeFilterPopover(): void {
-    if (this.openFilterKey === null) return;
-    this.openFilterKey = null;
-    this.cdr.markForCheck();
   }
 
   /** Filter options formatted for mn-multi-select for a given column. */
@@ -320,33 +257,22 @@ export class MnTable<T = object>
     this.cdr.markForCheck();
   }
 
-  /**
-   * Closes the filter popover when the click landed outside it. Membership is
-   * tested against the popover element rather than stopping propagation inside
-   * it, so the popover's own controls stay ordinary, focusable elements.
-   */
-  @HostListener('document:click', ['$event'])
-  protected onDocumentClick(event: MouseEvent): void {
-    if (this.openFilterKey === null) return;
-    const target = event.target as Node | null;
-    if (target && this.filterPopover?.nativeElement.contains(target)) return;
-    this.closeFilterPopover();
-  }
-
   /** Whether any column has filtering enabled. */
   get hasColumnFilters(): boolean {
     return this.dataSource.columns.some(c => c.filterable);
   }
 
-  /** Closes the filter popover on Escape. */
-  @HostListener('document:keydown.escape')
-  protected onEscape(): void {
-    this.closeFilterPopover();
-  }
-
   /** Label for the small-screen filters toggle button. */
   get filtersButtonLabel(): string {
     return this.dataSource.filtersLabel ?? 'Filters';
+  }
+
+  /**
+   * Summary a multi-select filter collapses to once more than one option is picked.
+   * Resolved with the `{count}` token intact for mn-multi-select to fill in.
+   */
+  get filterSelectedLabel(): string {
+    return this.dataSource.filterLabels?.selected ?? '{count} selected';
   }
 
   /** Label for the "clear all filters" action in the small-screen panel. */
@@ -497,6 +423,41 @@ export class MnTable<T = object>
   /** Page size to use at/above the `md` breakpoint (consumer's pageSize, or the user's selection). */
   private desktopPageSize = 10;
 
+  /** Heading for the selection summary, with the count filled in. */
+  get selectionSummaryTitle(): string {
+    const template = this.dataSource.selectionSummaryLabels?.title ?? 'Selected ({{count}})';
+    return template.replace('{{count}}', String(this.selectedIds.size));
+  }
+
+  /** Label for the summary's clear-everything action. */
+  get selectionClearAllLabel(): string {
+    return this.dataSource.selectionSummaryLabels?.clearAll ?? 'Clear all';
+  }
+
+  /** Label for the summary's expand/collapse control. */
+  get selectionSummaryToggleLabel(): string {
+    const labels = this.dataSource.selectionSummaryLabels;
+    if (this.selectionSummaryExpanded) return labels?.showLess ?? 'Show less';
+    const template = labels?.showMore ?? '+{{count}} more';
+    return template.replace('{{count}}', String(this.hiddenSelectionCount));
+  }
+
+  /**
+   * Accessible label for a tag's remove button.
+   * @param row The row the tag stands for.
+   * @returns The label, naming the row so screen readers announce which one goes.
+   */
+  selectionRemoveLabel(row: T): string {
+    const template = this.dataSource.selectionSummaryLabels?.remove ?? 'Remove {{label}}';
+    return template.replace('{{label}}', this.selectionLabelFor(row));
+  }
+
+  /** Tracks the desktop page size when the user picks one (selector only shows at >= md). */
+  override onPageSizeChange(newSize: number): void {
+    this.desktopPageSize = newSize;
+    super.onPageSizeChange(newSize);
+  }
+
   /** The effective column-width strategy, defaulting to `stable`. */
   get layoutMode(): 'auto' | 'fixed' | 'stable' {
     return this.dataSource.appearance?.layout ?? 'stable';
@@ -533,6 +494,95 @@ export class MnTable<T = object>
   cellTitle(column: ColumnDefinition<T>, row: T): string | null {
     if (!this.widthsArePinned || typeof column.cell !== 'function') return null;
     return column.cell(row) || null;
+  }
+
+  /**
+   * Falls back to the first column that renders a plain string, which is almost
+   * always the name-like column a person would use to identify the row. Template
+   * columns are skipped: they render markup this cannot flatten to a tag label.
+   * @param row The selected row.
+   * @returns The label, or null when every column renders a template.
+   */
+  protected override defaultSelectionLabel(row: T): string | null {
+    for (const column of this.dataSource.columns) {
+      if (typeof column.cell !== 'function') continue;
+      const value = column.cell(row);
+      if (value) return value;
+    }
+    return null;
+  }
+
+  /**
+   * Resolves table-specific translation keys (column headers/filters) plus the
+   * shared keys handled by the base.
+   */
+  protected override resolveTranslationKeys(): void {
+    super.resolveTranslationKeys();
+    for (const col of this.dataSource.columns) {
+      if (col.headerKey) {
+        col.header = this.lang.t(col.headerKey);
+      }
+      if (col.filterPlaceholderKey) {
+        col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
+      }
+    }
+    if (this.dataSource.filtersLabelKey) {
+      this.dataSource.filtersLabel = this.lang.t(this.dataSource.filtersLabelKey);
+    }
+    if (this.dataSource.clearFiltersLabelKey) {
+      this.dataSource.clearFiltersLabel = this.lang.t(this.dataSource.clearFiltersLabelKey);
+    }
+    this.resolveFilterLabelKeys();
+    this.resolveSelectionSummaryKeys();
+  }
+
+  protected applyFilter(searchForItems: boolean): void {
+    let items = this.applySearchFilter(this.dataSource.dataRows.value ?? []);
+
+    // Per-column filters. Skipped entirely when the consumer owns filtering: the
+    // rows already are the filtered set, and re-filtering them locally would
+    // narrow the current page a second time.
+    if (!this.isServerFiltered) {
+      for (const col of this.dataSource.columns) {
+        const filterValue = this.columnFilters[col.key];
+        if (!col.filterable || !isFilterValueActive(filterValue)) continue;
+        items = items.filter(row => matchesColumnFilter(col, row, filterValue as ColumnFilterValue));
+      }
+    }
+
+    items = this.applySorting(items);
+
+    // With no column sorted, the order carries no meaning the user chose, so spend
+    // it on showing what is already selected. A sorted column always wins.
+    if (!this.currentSort) {
+      items = this.prioritizeInitialSelection(items);
+    }
+
+    this.filteredItems = items;
+    this.applyPagination();
+
+    if (searchForItems) {
+      this.loadMoreRows();
+    }
+  }
+
+  /**
+   * Re-evaluate on a window resize too. The ResizeObserver covers every change to
+   * the table's own box, but {@link isMobileViewport} reads the window, which can
+   * change without the table's width following it (a fixed-width table, a modal
+   * pinned to a max width).
+   */
+  @HostListener('window:resize')
+  protected onWindowResize(): void {
+    this.onHostResize();
+  }
+
+  /** Re-evaluate responsive page size and filter layout when the table is resized. */
+  private onHostResize(): void {
+    // Pixel widths captured for the old box are meaningless in the new one.
+    this.unpinColumnWidths();
+    this.applyResponsivePageSize(true);
+    this.updateFilterLayout(true);
   }
 
   /**
@@ -573,6 +623,11 @@ export class MnTable<T = object>
 
     this.pinnedWidths = pinned;
     this.widthsPinned = true;
+    // Pinning changes row heights: cells stop wrapping and start truncating, so a
+    // full page becomes shorter than it was during the automatic pass. The reserved
+    // full-page floor was measured against those taller rows and would otherwise
+    // hold the body open, leaving dead space between the last row and the paginator.
+    this.invalidatePageHeight();
     this.cdr.markForCheck();
   }
 
@@ -586,79 +641,9 @@ export class MnTable<T = object>
     if (!this.widthsPinned) return;
     this.pinnedWidths = new Map();
     this.widthsPinned = false;
-  }
-
-  /**
-   * Re-evaluate on a window resize too. The ResizeObserver covers every change to
-   * the table's own box, but {@link isMobileViewport} reads the window, which can
-   * change without the table's width following it (a fixed-width table, a modal
-   * pinned to a max width).
-   */
-  @HostListener('window:resize')
-  protected onWindowResize(): void {
-    this.onHostResize();
-  }
-
-  /** Re-evaluate responsive page size and filter layout when the table is resized. */
-  private onHostResize(): void {
-    // Pixel widths captured for the old box are meaningless in the new one.
-    this.unpinColumnWidths();
-    this.applyResponsivePageSize(true);
-    this.updateFilterLayout(true);
-    // The popover is anchored to a viewport rect that a resize invalidates.
-    this.closeFilterPopover();
-  }
-
-  /**
-   * Resolves table-specific translation keys (column headers/filters) plus the
-   * shared keys handled by the base.
-   */
-  protected override resolveTranslationKeys(): void {
-    super.resolveTranslationKeys();
-    for (const col of this.dataSource.columns) {
-      if (col.headerKey) {
-        col.header = this.lang.t(col.headerKey);
-      }
-      if (col.filterPlaceholderKey) {
-        col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
-      }
-    }
-    if (this.dataSource.filtersLabelKey) {
-      this.dataSource.filtersLabel = this.lang.t(this.dataSource.filtersLabelKey);
-    }
-    if (this.dataSource.clearFiltersLabelKey) {
-      this.dataSource.clearFiltersLabel = this.lang.t(this.dataSource.clearFiltersLabelKey);
-    }
-    this.resolveFilterLabelKeys();
-  }
-
-  /** Tracks the desktop page size when the user picks one (selector only shows at >= md). */
-  override onPageSizeChange(newSize: number): void {
-    this.desktopPageSize = newSize;
-    super.onPageSizeChange(newSize);
-  }
-
-  protected applyFilter(searchForItems: boolean): void {
-    let items = this.applySearchFilter(this.dataSource.dataRows.value ?? []);
-
-    // Per-column filters. Skipped entirely when the consumer owns filtering: the
-    // rows already are the filtered set, and re-filtering them locally would
-    // narrow the current page a second time.
-    if (!this.isServerFiltered) {
-      for (const col of this.dataSource.columns) {
-        const filterValue = this.columnFilters[col.key];
-        if (!col.filterable || !isFilterValueActive(filterValue)) continue;
-        items = items.filter(row => matchesColumnFilter(col, row, filterValue as ColumnFilterValue));
-      }
-    }
-
-    items = this.applySorting(items);
-    this.filteredItems = items;
-    this.applyPagination();
-
-    if (searchForItems) {
-      this.loadMoreRows();
-    }
+    // Row heights are about to change back; the floor measured for the pinned
+    // layout does not describe the automatic one.
+    this.invalidatePageHeight();
   }
 
   // ── Template helpers ──
@@ -768,13 +753,28 @@ export class MnTable<T = object>
 
   // ── Filtering & sorting ──
 
+  /**
+   * Resolves the selection-summary labels from their translation keys. Resolved
+   * without params so the `{{count}}` / `{{label}}` placeholders survive for the
+   * getters to fill in per render.
+   */
+  private resolveSelectionSummaryKeys(): void {
+    const labels = this.dataSource.selectionSummaryLabels;
+    if (!labels) return;
+    if (labels.titleKey) labels.title = this.lang.t(labels.titleKey);
+    if (labels.clearAllKey) labels.clearAll = this.lang.t(labels.clearAllKey);
+    if (labels.removeKey) labels.remove = this.lang.t(labels.removeKey);
+    if (labels.showMoreKey) labels.showMore = this.lang.t(labels.showMoreKey);
+    if (labels.showLessKey) labels.showLess = this.lang.t(labels.showLessKey);
+  }
+
   /** Resolves the range / boolean filter control labels from their translation keys. */
   private resolveFilterLabelKeys(): void {
     const labels = this.dataSource.filterLabels;
     if (!labels) return;
     const pairs = [
       ['minKey', 'min'], ['maxKey', 'max'], ['fromKey', 'from'], ['toKey', 'to'],
-      ['anyKey', 'any'], ['yesKey', 'yes'], ['noKey', 'no'],
+      ['anyKey', 'any'], ['yesKey', 'yes'], ['noKey', 'no'], ['selectedKey', 'selected'],
     ] as const;
     for (const [keyProp, labelProp] of pairs) {
       const key = labels[keyProp];

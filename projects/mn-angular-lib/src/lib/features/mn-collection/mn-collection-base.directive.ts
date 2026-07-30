@@ -236,6 +236,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     // Skip the initial BehaviorSubject emission (already handled above).
     this.dataSubscription = this.dataSource.dataRows.pipe(skip(1)).subscribe(() => {
       this.applyFilter(false);
+      this.onRowsChanged();
       this.cdr.markForCheck();
     });
 
@@ -346,6 +347,15 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
 
   /** Runs after pageSize is set but before the first {@link applyFilter}. */
   protected beforeInitialFilter(): void {
+    // no-op by default
+  }
+
+  /**
+   * Runs after a fresh batch of rows has been filtered in, for work that needs the
+   * rows to exist. Subclasses override to react to data arriving late; call `super`
+   * to keep the default (currently nothing).
+   */
+  protected onRowsChanged(): void {
     // no-op by default
   }
 
