@@ -21,9 +21,7 @@ import {
   ColumnFilterType,
   ColumnFilterValue,
   ColumnSortType,
-  DateRangeFilterValue,
   MnColumnFilter,
-  NumberRangeFilterValue,
   SortState,
   TableDataSource,
 } from './mn-table.types';
@@ -31,7 +29,6 @@ import {emptyFilterValue, isFilterValueActive, matchesColumnFilter} from './mn-t
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
 import {MnSelect, MnSelectOption} from '../mn-select';
 import {MnMultiSelect, MnMultiSelectOption} from '../mn-multi-select';
-import {MnDatetime} from '../mn-datetime';
 import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnShowAboveDirective} from './mn-show-above.directive';
@@ -42,13 +39,10 @@ import {MnCollectionPagination, MnSelectableCollectionBase} from '../mn-collecti
 import {MnButton} from '../mn-button';
 import {LucideDynamicIcon, LucideFilter, LucideFunnel, LucideX} from '@lucide/angular';
 
-/** Which bound of a range filter an input edits. */
-type RangeBound = 'min' | 'max' | 'from' | 'to';
-
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnDatetime, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
+  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Block-level so the host has a definite width for the @container chrome inside it.
@@ -66,8 +60,6 @@ export class MnTable<T = object>
 
   /** Viewport width (px) below which the inline filter row collapses into a panel. */
   private static readonly FILTER_COLLAPSE_WIDTH = 640;
-  /** Bounds rendered by a number-range filter, in input order. */
-  protected readonly numberBounds: RangeBound[] = ['min', 'max'];
 
   /**
    * True when the viewport is narrow enough that the per-column filter inputs no
@@ -88,8 +80,6 @@ export class MnTable<T = object>
   @ViewChild('collectionBody') protected collectionBody?: ElementRef<HTMLElement>;
 
   // ── Column Filters ──
-  /** Bounds rendered by a date-range filter, in input order. */
-  protected readonly dateBounds: RangeBound[] = ['from', 'to'];
   /** Debounces server-side text filters so typing doesn't fire a request per keystroke. */
   private readonly filterDebounce = new Subject<void>();
   /**
@@ -151,21 +141,6 @@ export class MnTable<T = object>
     this.cdr.markForCheck();
   }
 
-  /** Updates one bound of a range filter, leaving the other side untouched. */
-  onRangeFilter(column: ColumnDefinition<T>, bound: RangeBound, raw: string): void {
-    const current = {...(this.columnFilters[column.key] as object ?? {})} as NumberRangeFilterValue & DateRangeFilterValue;
-    if (bound === 'min' || bound === 'max') {
-      const parsed = Number(raw);
-      // An emptied input clears that bound rather than pinning it to 0.
-      if (raw === '' || Number.isNaN(parsed)) delete current[bound];
-      else current[bound] = parsed;
-    } else {
-      if (raw === '') delete current[bound];
-      else current[bound] = raw;
-    }
-    this.onColumnFilter(column, current);
-  }
-
   /** Updates a tri-state boolean filter from its select ('' = any). */
   onBooleanFilter(column: ColumnDefinition<T>, raw: string): void {
     this.onColumnFilter(column, raw === '' ? '' : raw === 'true');
@@ -221,28 +196,6 @@ export class MnTable<T = object>
   booleanFilterValue(column: ColumnDefinition<T>): string {
     const value = this.columnFilters[column.key];
     return typeof value === 'boolean' ? String(value) : '';
-  }
-
-  /** Current value of one bound of a range filter, as an input-ready string. */
-  rangeFilterValue(column: ColumnDefinition<T>, bound: RangeBound): string {
-    const value = this.columnFilters[column.key] as NumberRangeFilterValue & DateRangeFilterValue | undefined;
-    const bounded = value?.[bound];
-    return bounded === undefined || bounded === null ? '' : String(bounded);
-  }
-
-  /** Label for a range filter bound, falling back to the English default. */
-  rangeBoundLabel(bound: RangeBound): string {
-    const labels = this.dataSource.filterLabels;
-    switch (bound) {
-      case 'min':
-        return labels?.min ?? 'Min';
-      case 'max':
-        return labels?.max ?? 'Max';
-      case 'from':
-        return labels?.from ?? 'From';
-      case 'to':
-        return labels?.to ?? 'To';
-    }
   }
 
   /** Resets every column filter and re-applies (or re-requests) filtering. */
@@ -773,7 +726,6 @@ export class MnTable<T = object>
     const labels = this.dataSource.filterLabels;
     if (!labels) return;
     const pairs = [
-      ['minKey', 'min'], ['maxKey', 'max'], ['fromKey', 'from'], ['toKey', 'to'],
       ['anyKey', 'any'], ['yesKey', 'yes'], ['noKey', 'no'], ['selectedKey', 'selected'],
     ] as const;
     for (const [keyProp, labelProp] of pairs) {

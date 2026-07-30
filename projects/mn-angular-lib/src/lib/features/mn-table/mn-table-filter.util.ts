@@ -1,10 +1,4 @@
-import {
-  ColumnDefinition,
-  ColumnFilterType,
-  ColumnFilterValue,
-  DateRangeFilterValue,
-  NumberRangeFilterValue,
-} from './mn-table.types';
+import {ColumnDefinition, ColumnFilterType, ColumnFilterValue} from './mn-table.types';
 
 /**
  * Pure helpers backing mn-table's per-column filters: the empty value and
@@ -19,10 +13,6 @@ export function emptyFilterValue(type: ColumnFilterType): ColumnFilterValue {
   switch (type) {
     case 'multi-select':
       return [];
-    case 'number-range':
-      return {} as NumberRangeFilterValue;
-    case 'date-range':
-      return {} as DateRangeFilterValue;
     case 'boolean':
     case 'text':
     case 'select':
@@ -32,20 +22,16 @@ export function emptyFilterValue(type: ColumnFilterType): ColumnFilterValue {
 }
 
 /**
- * Whether a filter value should actually narrow the rows. Empty strings, empty
- * arrays and ranges with neither bound set are inactive; `false` on a boolean
- * filter is active (it means "show only the false rows"), which is why a plain
- * truthiness check is not enough.
+ * Whether a filter value should actually narrow the rows. Empty strings and
+ * empty arrays are inactive; `false` on a boolean filter is active (it means
+ * "show only the false rows"), which is why a plain truthiness check is not
+ * enough.
  */
 export function isFilterValueActive(value: ColumnFilterValue | undefined): boolean {
   if (value === undefined || value === null) return false;
   if (typeof value === 'boolean') return true;
   if (typeof value === 'string') return value.trim().length > 0;
-  if (Array.isArray(value)) return value.length > 0;
-  const range = value as NumberRangeFilterValue & DateRangeFilterValue;
-  return [range.min, range.max, range.from, range.to].some(
-    bound => bound !== undefined && bound !== null && bound !== '' && !Number.isNaN(bound as number),
-  );
+  return Array.isArray(value) && value.length > 0;
 }
 
 /**
@@ -59,20 +45,6 @@ export function resolveFilterableValue<T>(column: ColumnDefinition<T>, row: T): 
   return '';
 }
 
-/** Parses a `YYYY-MM-DD` bound to a timestamp; `endOfDay` makes the upper bound inclusive. */
-function parseDateBound(bound: string | undefined, endOfDay: boolean): number | undefined {
-  if (!bound) return undefined;
-  const time = new Date(endOfDay ? `${bound}T23:59:59.999` : `${bound}T00:00:00.000`).getTime();
-  return Number.isNaN(time) ? undefined : time;
-}
-
-/** Coerces a raw cell value to a timestamp for date-range comparison. */
-function toTimestamp(raw: unknown): number {
-  if (raw instanceof Date) return raw.getTime();
-  if (typeof raw === 'number') return raw;
-  return new Date(String(raw)).getTime();
-}
-
 /**
  * The default predicate for a filter type, used when the column supplies no
  * `filterFn`. Semantics per type:
@@ -80,11 +52,6 @@ function toTimestamp(raw: unknown): number {
  * - `select` — exact string equality
  * - `multi-select` — equality against any selected value (OR)
  * - `boolean` — truthiness of the raw value equals the chosen state
- * - `number-range` / `date-range` — inclusive bounds, each side optional
- *
- * A row whose raw value cannot be interpreted for the type (a non-numeric value
- * under a number range, an unparsable date) is excluded rather than kept, so an
- * active filter never silently passes rows it cannot evaluate.
  */
 export function defaultFilterPredicate(
   type: ColumnFilterType,
@@ -102,24 +69,6 @@ export function defaultFilterPredicate(
 
     case 'boolean':
       return Boolean(raw) === value;
-
-    case 'number-range': {
-      const {min, max} = value as NumberRangeFilterValue;
-      const numeric = typeof raw === 'number' ? raw : Number(raw);
-      if (Number.isNaN(numeric)) return false;
-      if (min !== undefined && numeric < min) return false;
-      return !(max !== undefined && numeric > max);
-    }
-
-    case 'date-range': {
-      const {from, to} = value as DateRangeFilterValue;
-      const time = toTimestamp(raw);
-      if (Number.isNaN(time)) return false;
-      const start = parseDateBound(from, false);
-      const end = parseDateBound(to, true);
-      if (start !== undefined && time < start) return false;
-      return !(end !== undefined && time > end);
-    }
 
     case 'text':
     default:

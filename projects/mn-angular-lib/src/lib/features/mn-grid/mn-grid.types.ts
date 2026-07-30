@@ -11,7 +11,10 @@ import {MnCollectionDataSource} from '../mn-collection';
  * Breakpoints match Tailwind defaults: sm 640px, md 768px, lg 1024px, xl 1280px.
  */
 export type GridLayout = {
-  /** Explicit column count per breakpoint. Each falls back to the next-smaller one. */
+  /**
+   * Explicit column count per breakpoint. Each falls back to the next-smaller one.
+   * Counts are clamped to 1–12, the range Tailwind's `grid-cols-*` utilities cover.
+   */
   cols?: { base?: number; sm?: number; md?: number; lg?: number; xl?: number };
   /** Minimum card width, e.g. '18rem'. Enables auto-fit layout; ignores `cols`. */
   minCardWidth?: string;

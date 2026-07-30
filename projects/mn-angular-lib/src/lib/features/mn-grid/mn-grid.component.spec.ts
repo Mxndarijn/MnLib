@@ -1,10 +1,10 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
+import {Component, TemplateRef, ViewChild} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {BehaviorSubject} from 'rxjs';
 
-import { MnGrid } from './mn-grid.component';
-import { GridDataSource } from './mn-grid.types';
-import { MnCollectionState } from '../mn-collection';
+import {MnGrid} from './mn-grid.component';
+import {GridDataSource} from './mn-grid.types';
+import {MnCollectionState} from '../mn-collection';
 
 /** One row of test data. */
 type Row = { id: string; name: string };
@@ -35,7 +35,7 @@ class HostComponent {
   dataSource!: GridDataSource<Row>;
 }
 
-describe('MnGrid toolbar slots', () => {
+describe('MnGrid', () => {
   let fixture: ComponentFixture<HostComponent>;
   let host: HostComponent;
 
@@ -129,5 +129,64 @@ describe('MnGrid toolbar slots', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('.left-slot')).not.toBeNull();
     expect(el.querySelector('.right-slot')).not.toBeNull();
+  });
+
+  describe('layout', () => {
+    /**
+     * Renders the grid with the given layout and returns the card container.
+     * @param layout The `layout` passed on the data source.
+     * @returns The element carrying the grid classes/styles.
+     */
+    function renderGrid(layout: GridDataSource<Row>['layout']): HTMLElement {
+      host.dataSource = makeDataSource({layout});
+      fixture.detectChanges();
+      return fixture.nativeElement.querySelector('[aria-label="Card grid"]') as HTMLElement;
+    }
+
+    it('emits one column utility per configured breakpoint, and none for the others', () => {
+      const grid = renderGrid({cols: {base: 1, md: 2, lg: 3}});
+
+      expect(grid.className.split(' ')).toEqual(
+        jasmine.arrayWithExactContents(['grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3']),
+      );
+      // Unset breakpoints inherit the next-smaller class rather than getting their own.
+      expect(grid.className).not.toContain('sm:grid-cols');
+      expect(grid.className).not.toContain('xl:grid-cols');
+    });
+
+    it('defaults to a single base column and a 1rem gap when no layout is given', () => {
+      const grid = renderGrid(undefined);
+
+      expect(grid.classList).toContain('grid-cols-1');
+      expect(grid.style.gap).toBe('1rem');
+      expect(grid.style.gridTemplateColumns).toBe('');
+    });
+
+    it('clamps a column count above the generated range', () => {
+      const grid = renderGrid({cols: {base: 99}});
+
+      expect(grid.classList).toContain('grid-cols-12');
+    });
+
+    it('drives the auto-fit layout from an inline style and drops the column utilities', () => {
+      const grid = renderGrid({cols: {base: 1, md: 2}, minCardWidth: '16rem', gap: '2rem'});
+
+      expect(grid.style.gridTemplateColumns).toBe('repeat(auto-fit, minmax(16rem, 1fr))');
+      expect(grid.style.gap).toBe('2rem');
+      // `cols` is ignored when `minCardWidth` is set; no utility may fight the inline style.
+      expect(grid.className).not.toContain('grid-cols');
+    });
+
+    it('applies the same layout to the loading skeleton', () => {
+      host.dataSource = makeDataSource({
+        state: MnCollectionState.LOADING,
+        layout: {cols: {base: 2}, gap: '0.5rem'},
+      });
+      fixture.detectChanges();
+
+      const skeleton = fixture.nativeElement.querySelector('[aria-label="Loading"]') as HTMLElement;
+      expect(skeleton.classList).toContain('grid-cols-2');
+      expect(skeleton.style.gap).toBe('0.5rem');
+    });
   });
 });

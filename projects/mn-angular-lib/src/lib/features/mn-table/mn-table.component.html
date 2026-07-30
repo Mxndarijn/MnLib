@@ -444,45 +444,6 @@
         }"
       ></mn-lib-select>
     }
-    @case ('number-range') {
-      <div class="flex items-end gap-2">
-        @for (bound of numberBounds; track bound) {
-          <mn-lib-input-field
-            (ngModelChange)="onRangeFilter(column, bound, $event)"
-            [disabled]="column.filterDisabled ?? false"
-            [ngModel]="rangeFilterValue(column, bound)"
-            [props]="{
-              id: 'mn-table-filter-' + idScope + '-' + column.key + '-' + bound,
-              type: 'number',
-              label: rangeBoundLabel(bound),
-                  size: 'sm',
-              borderRadius: 'md',
-              fullWidth: true
-            }"
-            class="flex-1"
-          ></mn-lib-input-field>
-        }
-      </div>
-    }
-    @case ('date-range') {
-      <div class="flex flex-col gap-2">
-        @for (bound of dateBounds; track bound) {
-          <mn-lib-datetime
-            (ngModelChange)="onRangeFilter(column, bound, $event)"
-            [disabled]="column.filterDisabled ?? false"
-            [ngModel]="rangeFilterValue(column, bound)"
-            [props]="{
-              id: 'mn-table-filter-' + idScope + '-' + column.key + '-' + bound,
-              mode: 'date',
-              label: rangeBoundLabel(bound),
-              size: 'sm',
-              borderRadius: 'md',
-              fullWidth: true
-            }"
-          ></mn-lib-datetime>
-        }
-      </div>
-    }
     @default {
       <mn-lib-input-field
         (ngModelChange)="onColumnFilter(column, $event)"
