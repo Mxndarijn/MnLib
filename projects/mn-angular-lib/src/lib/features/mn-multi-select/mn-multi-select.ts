@@ -26,14 +26,14 @@ import {MnConfigService} from "../../config";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
 import {MnLanguageService} from "../../language";
 import {skip} from "rxjs";
-import {LucideX} from "@lucide/angular";
+import {LucideChevronDown, LucideX} from "@lucide/angular";
 
 export const MN_MULTI_SELECT_CONFIG = new InjectionToken<MnMultiSelectUIConfig>('MN_MULTI_SELECT_CONFIG');
 
 @Component({
   selector: 'mn-lib-multi-select',
   standalone: true,
-  imports: [NgClass, MnErrorMessage, MnButton, LucideX],
+  imports: [NgClass, MnErrorMessage, MnButton, LucideX, LucideChevronDown],
   templateUrl: './mn-multi-select.html',
 })
 export class MnMultiSelect implements OnInit {

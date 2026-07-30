@@ -160,6 +160,192 @@ describe('Feature: Multi-Select Table Field', () => {
     expect(component.tableDataSources['items']).toBe(ds);
   });
 
+  /**
+   * Editing an existing record must open with the rows it already references
+   * ticked. Exercises the whole path: the field's initial value seeds
+   * `initialSelectedIds` on the data source, which mn-table turns into checked
+   * checkboxes and re-emits as the control's value.
+   */
+  it('pre-selects the rows named by the field initial value', () => {
+    const dataSource = createTestDataSource();
+    setup<ItemsModel>(
+      ModalBuilder.form<ItemsModel, ItemsModel>()
+        .title('Edit')
+        .initialValue({items: ['1', '3']})
+        .field({
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: dataSource as unknown as TableDataSource<unknown>,
+          getRowValue: (row: unknown) => (row as TestRow).id,
+        })
+        .build(),
+    );
+
+    // The data source carries the ids through to the table...
+    expect(dataSource.initialSelectedIds).toEqual(['1', '3']);
+
+    // ...the table ticks exactly those rows. Asserted by row name rather than by
+    // position, because the selected rows are also hoisted to the top.
+    const boxes: HTMLInputElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('tbody input[type="checkbox"]'),
+    );
+    expect(boxes.length).toBe(3);
+    const checkedNames = Array.from(
+      fixture.nativeElement.querySelectorAll('tbody tr') as NodeListOf<HTMLElement>,
+    )
+      .filter((row) => row.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked)
+      .map((row) => row.querySelector('td:nth-child(2)')?.textContent?.trim());
+    expect(checkedNames).toEqual(['Alice', 'Charlie']);
+
+    // ...and the control still holds them, so submitting without touching the
+    // table keeps the existing selection rather than clearing it.
+    expect(component.form.get('items')?.value).toEqual(['1', '3']);
+  });
+
+  /**
+   * The rows often arrive after the table initialises (any server fetch). The
+   * initial value must survive that: seeding selection while `dataRows` is still
+   * empty must not report "nothing selected" back into the form and wipe it.
+   */
+  it('keeps the initial value when the rows load after init', async () => {
+    const rows = new BehaviorSubject<TestRow[]>([]);
+    const dataSource: TableDataSource<TestRow> = {
+      ...createTestDataSource(),
+      dataRows: rows,
+    };
+    setup<ItemsModel>(
+      ModalBuilder.form<ItemsModel, ItemsModel>()
+        .title('Edit')
+        .initialValue({items: ['1', '3']})
+        .field({
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: dataSource as unknown as TableDataSource<unknown>,
+          getRowValue: (row: unknown) => (row as TestRow).id,
+        })
+        .build(),
+    );
+
+    // Rows land later, exactly as a fetch would deliver them.
+    rows.next([
+      {id: '1', name: 'Alice', email: 'alice@test.com'},
+      {id: '2', name: 'Bob', email: 'bob@test.com'},
+      {id: '3', name: 'Charlie', email: 'charlie@test.com'},
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const checkedNames = Array.from(
+      fixture.nativeElement.querySelectorAll('tbody tr') as NodeListOf<HTMLElement>,
+    )
+      .filter((row) => row.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked)
+      .map((row) => row.querySelector('td:nth-child(2)')?.textContent?.trim());
+    expect(checkedNames).toEqual(['Alice', 'Charlie']);
+    expect(component.form.get('items')?.value).toEqual(['1', '3']);
+  });
+
+  /**
+   * An already-selected row buried on page 3 is invisible, so the user re-picks it
+   * or assumes nothing was chosen. The rows that arrived selected are hoisted to
+   * the top, but only while no column is sorted.
+   */
+  it('hoists the initially-selected rows to the top', () => {
+    setup<ItemsModel>(
+      ModalBuilder.form<ItemsModel, ItemsModel>()
+        .title('Edit')
+        .initialValue({items: ['3']})
+        .field({
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: createTestDataSource() as unknown as TableDataSource<unknown>,
+          getRowValue: (row: unknown) => (row as TestRow).id,
+        })
+        .build(),
+    );
+
+    const names = (): string[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll('tbody tr td:nth-child(2)') as NodeListOf<HTMLElement>,
+      ).map((cell) => cell.textContent?.trim() ?? '');
+
+    // Charlie is id 3, last in the source order, and is hoisted above the rest.
+    expect(names()).toEqual(['Charlie', 'Alice', 'Bob']);
+
+    // Ticking another row must NOT re-order the list: a row leaping to the top
+    // mid-click drags the next row under the pointer.
+    const boxes: HTMLInputElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('tbody input[type="checkbox"]'),
+    );
+    boxes[2].click();
+    fixture.detectChanges();
+    expect(names()).toEqual(['Charlie', 'Alice', 'Bob']);
+  });
+
+  it('leaves the order alone when nothing arrived selected', () => {
+    setup<ItemsModel>(
+      ModalBuilder.form<ItemsModel, ItemsModel>()
+        .title('Create')
+        .field({
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: createTestDataSource() as unknown as TableDataSource<unknown>,
+          getRowValue: (row: unknown) => (row as TestRow).id,
+        })
+        .build(),
+    );
+
+    const names = Array.from(
+      fixture.nativeElement.querySelectorAll('tbody tr td:nth-child(2)') as NodeListOf<HTMLElement>,
+    ).map((cell) => cell.textContent?.trim());
+    expect(names).toEqual(['Alice', 'Bob', 'Charlie']);
+  });
+
+  /**
+   * A table used as a form field is always inside a modal, where it is short, paged
+   * and searched — so its selection is the thing most likely to scroll out of view.
+   * The summary is therefore on unless a field opts out.
+   */
+  it('turns the selection summary on by default for a table field', () => {
+    const dataSource = createTestDataSource();
+    setup<ItemsModel>(
+      ModalBuilder.form<ItemsModel, ItemsModel>()
+        .title('Pick')
+        .field({
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: dataSource as unknown as TableDataSource<unknown>,
+          getRowValue: (row: unknown) => (row as TestRow).id,
+        })
+        .build(),
+    );
+
+    expect(dataSource.selectionSummary).toBeTrue();
+  });
+
+  it('lets a field opt out of the selection summary', () => {
+    const dataSource = {...createTestDataSource(), selectionSummary: false};
+    setup<ItemsModel>(
+      ModalBuilder.form<ItemsModel, ItemsModel>()
+        .title('Pick')
+        .field({
+          kind: FieldKind.MULTI_SELECT_TABLE,
+          key: 'items',
+          label: 'Items',
+          tableDataSource: dataSource as unknown as TableDataSource<unknown>,
+          getRowValue: (row: unknown) => (row as TestRow).id,
+        })
+        .build(),
+    );
+
+    expect(dataSource.selectionSummary).toBeFalse();
+  });
+
   it('onTableSelectionChange should update form control with row IDs', () => {
     const ds = createTestDataSource();
     const field: MultiSelectTableFieldConfig<ItemsModel, TestRow> = {

@@ -198,14 +198,26 @@ describe('MnTable column filters', () => {
     expect(received[received.length - 1]).toEqual([]);
   }));
 
-  it('renders rich filter types behind a popover instead of inline', () => {
+  /**
+   * Every filter type renders as an ordinary control in the header row. Rich types
+   * used to hide behind a button that opened a floating panel; that cost a click to
+   * discover and a click to apply, and gave no hint a column was filterable at all.
+   */
+  it('renders every filter type inline, with no popover trigger', () => {
     const component = fixture.componentInstance;
     const columns = [nameColumn(), ageColumn()];
     component.dataSource = makeDataSource(columns);
     fixture.detectChanges();
 
-    expect(component.isInlineFilter(columns[0])).toBe(true);
-    expect(component.isInlineFilter(columns[1])).toBe(false);
-    expect(component.isPopoverFilter(columns[1])).toBe(true);
+    const filterRow: HTMLTableRowElement =
+      fixture.nativeElement.querySelector('thead tr:nth-child(2)');
+    expect(filterRow).toBeTruthy();
+
+    // A real control per filterable column, not a trigger button.
+    const controls = filterRow.querySelectorAll('input, select, mn-lib-multi-select');
+    expect(controls.length).toBeGreaterThanOrEqual(columns.length);
+
+    // Nothing anywhere opens a floating layer any more.
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
   });
 });

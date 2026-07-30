@@ -180,8 +180,7 @@ describe('MnTable data source configuration', () => {
   it('measures widths with the automatic layout before pinning them', () => {
     // While the rows are still loading there is nothing worth measuring: the
     // skeleton placeholders would pin the bars' widths instead of the data's.
-    const ds = makeDataSource({state: MnCollectionState.LOADING});
-    fixture.componentInstance.dataSource = ds;
+    fixture.componentInstance.dataSource = makeDataSource({state: MnCollectionState.LOADING});
     fixture.detectChanges();
 
     const table: HTMLTableElement = fixture.nativeElement.querySelector('table');
@@ -255,5 +254,98 @@ describe('MnTable data source configuration', () => {
     const header: HTMLTableCellElement =
       fixture.nativeElement.querySelector('thead th[data-column-key="name"]');
     expect(header.style.width).toBe('123px');
+  });
+
+  /**
+   * The point of the summary: it answers "what is selected?" even when those rows
+   * are not on screen. A server-paginated table holds one page, so the selection
+   * has to survive the rows themselves being replaced.
+   */
+  it('keeps showing a selected row after its page is replaced', async () => {
+    const rows = new BehaviorSubject<Row[]>([{id: '1', name: 'Alice'}, {id: '2', name: 'Bob'}]);
+    fixture.componentInstance.dataSource = makeDataSource({
+      dataRows: rows,
+      selectionMode: 'multi',
+      selectionSummary: true,
+      initialSelectedIds: ['1'],
+      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const summaryText = (): string =>
+      fixture.nativeElement.querySelector('ul')?.textContent?.trim() ?? '';
+    expect(summaryText()).toContain('Alice');
+
+    // Page 2 arrives: Alice is no longer among the loaded rows.
+    rows.next([{id: '3', name: 'Charlie'}, {id: '4', name: 'Dana'}]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const bodyText: string = fixture.nativeElement.querySelector('tbody').textContent ?? '';
+    expect(bodyText).not.toContain('Alice');
+    // ...but the summary still names her, which is the whole feature.
+    expect(summaryText()).toContain('Alice');
+  });
+
+  it('hides the selection summary when nothing is selected', () => {
+    fixture.componentInstance.dataSource = makeDataSource({
+      selectionMode: 'multi',
+      selectionSummary: true,
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('ul')).toBeNull();
+  });
+
+  it('removes a single row from the selection via its tag', async () => {
+    fixture.componentInstance.dataSource = makeDataSource({
+      selectionMode: 'multi',
+      selectionSummary: true,
+      initialSelectedIds: ['1'],
+      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const remove: HTMLButtonElement = fixture.nativeElement.querySelector('ul button');
+    expect(remove).toBeTruthy();
+    remove.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selectedIds.size).toBe(0);
+    expect(fixture.nativeElement.querySelector('ul')).toBeNull();
+  });
+
+  it('collapses a large selection behind a show-more control', async () => {
+    const many: Row[] = Array.from({length: 30}, (_, i) => ({id: String(i), name: `Row ${i}`}));
+    fixture.componentInstance.dataSource = makeDataSource({
+      dataRows: new BehaviorSubject<Row[]>(many),
+      selectionMode: 'multi',
+      selectionSummary: true,
+      initialSelectedIds: many.map((row) => row.id),
+      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const tags = (): number =>
+      fixture.nativeElement.querySelectorAll('ul li span.truncate').length;
+
+    // 30 selected, but only the default 8 tags render, so the summary cannot grow
+    // without bound and shove the table off screen.
+    expect(tags()).toBe(8);
+    expect(fixture.componentInstance.hiddenSelectionCount).toBe(22);
+    // The heading still reports the true total: tags are hidden, information is not.
+    expect(fixture.componentInstance.selectionSummaryTitle).toContain('30');
+
+    fixture.componentInstance.toggleSelectionSummary();
+    fixture.detectChanges();
+    expect(tags()).toBe(30);
+    expect(fixture.componentInstance.hiddenSelectionCount).toBe(0);
   });
 });

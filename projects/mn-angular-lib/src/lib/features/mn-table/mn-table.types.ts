@@ -294,6 +294,15 @@ export type MnTableFilterLabels = {
   /** False option of a boolean filter. Defaults to "No". */
   no?: string;
   noKey?: string;
+  /**
+   * Summary a multi-select filter collapses to from the second selection onwards.
+   * The `{count}` token is replaced with how many are selected. Defaults to
+   * `{count} selected`. A column header has room for about one value, so listing
+   * them all would overflow the cell the moment a second one is picked.
+   */
+  selected?: string;
+  /** Translation key for {@link selected}. */
+  selectedKey?: string;
 }
 
 /** @deprecated Use {@link MnCollectionLabels}. */

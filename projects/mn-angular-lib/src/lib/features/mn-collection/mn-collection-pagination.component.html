@@ -7,6 +7,7 @@
       [disabled]="loadingMoreRows"
       class="px-4 py-1.5 text-sm rounded border border-primary-500 text-primary-500 hover:bg-primary-100 transition-colors disabled:opacity-50"
       mnButton
+      type="button"
     >
       @if (loadingMoreRows) {
         <span
@@ -52,6 +53,7 @@
         aria-label="First page"
         class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         mnButton
+        type="button"
       >«
       </button>
 
@@ -62,6 +64,7 @@
         aria-label="Previous page"
         class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         mnButton
+        type="button"
       >‹
       </button>
 
@@ -75,6 +78,7 @@
               [data]="{ size: 'sm', variant: 'text', color: slot.page === currentPage ? 'primary' : 'gray' }"
               class="px-1.5 md:px-2.5 py-1 rounded underline underline-offset-2 transition-colors text-xs"
               mnButton
+              type="button"
             >{{ slot.page }}
             </button>
           } @else {
@@ -90,6 +94,7 @@
         aria-label="Next page"
         class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         mnButton
+        type="button"
       >›
       </button>
 
@@ -100,6 +105,7 @@
         aria-label="Last page"
         class="px-2 py-1 rounded border border-base-300 hover:bg-base-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed aspect-square leading-none"
         mnButton
+        type="button"
       >»
       </button>
     </div>

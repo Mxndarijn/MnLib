@@ -7,13 +7,13 @@ import {MnButton} from '../../../mn-button';
 import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
 import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
 import {MnLanguageService} from '../../../../language';
-import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
+import {LucideCircleAlert, LucideDynamicIcon, LucideIconData, LucideTriangleAlert} from '@lucide/angular';
 import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-action-icons';
 
 @Component({
   selector: 'mn-confirmation-body',
   standalone: true,
-  imports: [CommonModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, ReactiveFormsModule, LucideDynamicIcon],
+  imports: [CommonModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, ReactiveFormsModule, LucideDynamicIcon, LucideTriangleAlert, LucideCircleAlert],
   templateUrl: './mn-confirmation-body.component.html',
   styleUrls: ['./mn-confirmation-body.component.css'],
 })

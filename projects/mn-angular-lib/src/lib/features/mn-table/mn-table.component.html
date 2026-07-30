@@ -1,13 +1,70 @@
 <!-- Everything that reflows lives inside a @container, so the breakpoints below
      measure the table's own width rather than the window's. A table in a modal,
      a sidebar or a narrow grid cell is far narrower than the viewport, and
-     viewport breakpoints would hand it a desktop layout it has no room for.
-     The filter popover is deliberately left outside: `container-type` makes an
-     element the containing block for `position: fixed` descendants, which would
-     re-anchor the popover away from its trigger. -->
+     viewport breakpoints would hand it a desktop layout it has no room for. -->
 <div class="@container">
-<!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
-     so an unsearchable table without toolbar templates emits no empty spacer. -->
+  <!-- Selection summary: the whole selection, never paged, filtered or sorted. The
+       table below answers "what could I pick?", which is why it is searched and paged;
+       this answers "what did I pick?", which a paginated list cannot without hiding
+       most of the answer on some other page. -->
+  @if (showSelectionSummary) {
+    <div class="flex flex-col gap-2 rounded-md border border-base-300 bg-base-200/50 p-3 mb-3">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-sm font-medium text-base-content">{{ selectionSummaryTitle }}</span>
+        <button
+          (click)="clearSelection()"
+          [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
+          class="gap-1 shrink-0"
+          mnButton
+          type="button"
+        >
+          <svg [size]="14" lucideX></svg>
+          <span>{{ selectionClearAllLabel }}</span>
+        </button>
+      </div>
+      <!-- Only the first few tags render; the rest collapse behind a "+N more" control.
+           The heading's count always states the true total, so this hides tags, never
+           information. Expanded, the list is height-capped and scrolls, so even a
+           selection of hundreds cannot push the table off screen. -->
+      <ul
+        [class.max-h-28]="selectionSummaryExpanded"
+        [class.overflow-y-auto]="selectionSummaryExpanded"
+        class="flex flex-wrap gap-1.5 list-none m-0 p-0"
+      >
+        @for (row of visibleSelectionRows; track dataSource.getID(row)) {
+          <li
+            class="inline-flex items-center gap-1 rounded-full bg-base-100 border border-base-300 pl-2.5 pr-1 py-0.5 text-xs text-base-content max-w-full">
+            <span [attr.title]="selectionLabelFor(row)" class="truncate">{{ selectionLabelFor(row) }}</span>
+            <button
+              (click)="removeSelection(row)"
+              [attr.aria-label]="selectionRemoveLabel(row)"
+              class="shrink-0 rounded-full p-0.5 hover:bg-base-300 transition-colors cursor-pointer"
+              type="button"
+            >
+              <svg [size]="12" lucideX></svg>
+            </button>
+          </li>
+        }
+        @if (hiddenSelectionCount > 0 || selectionSummaryExpanded) {
+          <li>
+            <button
+              (click)="toggleSelectionSummary()"
+              [attr.aria-expanded]="selectionSummaryExpanded"
+              [data]="{ variant: 'text', color: 'primary', size: 'sm', borderRadius: 'md', hover: true }"
+              class="text-xs"
+              mnButton
+              type="button"
+            >
+              {{ selectionSummaryToggleLabel }}
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
+       so an unsearchable table without toolbar templates emits no empty spacer. -->
 @if (dataSource.canSearch || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
   <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
     <div class="flex items-center gap-2 w-full @min-[420px]:w-auto">
@@ -107,7 +164,7 @@
 }
 
 <!-- Table wrapper with horizontal scroll -->
-<div #collectionBody (scroll)="closeFilterPopover()" [style.min-height.px]="bodyMinHeight" aria-label="Data table"
+  <div #collectionBody [style.min-height.px]="bodyMinHeight" aria-label="Data table"
      class="overflow-x-auto"
      role="region">
   <table [class]="tableClasses">
@@ -162,7 +219,7 @@
            `font-normal` on the cells is load-bearing: these are `th` elements, which the
            browser renders bold, and the filter inputs and selects inside them inherit
            that. Filter controls are form fields, not headings, and must not look bold.
-           The stacked panel and the popover render outside any `th`, so they are fine. -->
+           The stacked filter panel renders outside any `th`, so it is unaffected. -->
       @if (hasColumnFilters && !filtersCollapsed) {
         <tr class="bg-base-100 border-b border-base-300 font-normal">
           @if (hasSelection) {
@@ -174,29 +231,14 @@
               [mnHiddenBelow]="column.hiddenBelow"
             >
               @if (column.filterable) {
-                @if (isInlineFilter(column)) {
-                  <!-- Compact types render directly under the header -->
-                  <ng-container
-                    [ngTemplateOutletContext]="{ $implicit: column, idScope: 'inline' }"
-                    [ngTemplateOutlet]="filterField"
-                  ></ng-container>
-                } @else {
-                  <!-- Ranges and multi-select don't fit a column width: trigger a popover -->
-                  <button
-                    (click)="$event.stopPropagation(); toggleFilterPopover(column, $event)"
-                    [attr.aria-expanded]="openFilterKey === column.key"
-                    [attr.aria-label]="column.filterPlaceholder ?? filtersButtonLabel"
-                    [data]="{ variant: isColumnFilterActive(column) ? 'fill' : 'outline', color: 'primary', size: 'sm', borderRadius: 'md', hover: true }"
-                    class="w-full gap-1.5"
-                    mnButton
-                    type="button"
-                  >
-                    <svg [size]="14" lucideFilter></svg>
-                    @if (isColumnFilterActive(column)) {
-                      <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
-                    }
-                  </button>
-                }
+                <!-- Every filter renders as an ordinary control right under its
+                     header. The rich types used to hide behind a button that opened
+                     a floating panel, which cost a click to discover, a click to
+                     apply, and hid whether a column was even filterable. -->
+                <ng-container
+                  [ngTemplateOutletContext]="{ $implicit: column, idScope: 'inline' }"
+                  [ngTemplateOutlet]="filterField"
+                ></ng-container>
               }
             </th>
           }
@@ -355,46 +397,9 @@
 ></mn-collection-pagination>
 </div>
 
-<!-- Filter popover for the rich filter types. Rendered outside the table's
-     overflow-x-auto wrapper and positioned fixed, so it can't be clipped or
-     scrolled away by it. -->
-@if (openFilterColumn(); as popoverColumn) {
-  <div
-    #filterPopover
-    [style.left.px]="popoverPosition.left"
-    [style.top.px]="popoverPosition.top"
-    class="fixed z-30 w-64 rounded-md border border-base-300 bg-base-100 p-3 shadow-lg"
-    role="dialog"
-  >
-    <p class="mb-2 text-xs font-medium text-base-content/70">
-      @if (isTemplateRef(popoverColumn.header)) {
-        <ng-container [ngTemplateOutlet]="$any(popoverColumn.header)"></ng-container>
-      } @else {
-        {{ popoverColumn.header }}
-      }
-    </p>
-    <ng-container
-      [ngTemplateOutletContext]="{ $implicit: popoverColumn, idScope: 'popover' }"
-      [ngTemplateOutlet]="filterField"
-    ></ng-container>
-    @if (isColumnFilterActive(popoverColumn)) {
-      <button
-        (click)="clearColumnFilter(popoverColumn)"
-        [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
-        class="mt-2 gap-1"
-        mnButton
-        type="button"
-      >
-        <svg [size]="14" lucideX></svg>
-        <span>{{ clearFiltersButtonLabel }}</span>
-      </button>
-    }
-  </div>
-}
-
 <!-- Single source of truth for every filter control, reused by the inline header
-     row, the popover and the small-screen panel. `idScope` keeps element ids
-     unique across the three placements. -->
+     row and the small-screen panel. `idScope` keeps element ids unique across
+     both placements. -->
 <ng-template #filterField let-column let-idScope="idScope">
   @switch (filterTypeOf(column)) {
     @case ('select') {
@@ -419,7 +424,8 @@
           id: 'mn-table-filter-' + idScope + '-' + column.key,
           options: getFilterMultiSelectOptions(column),
           placeholder: column.filterPlaceholder ?? '',
-          collapseThreshold: 2,
+          collapsePlaceholder: filterSelectedLabel,
+          collapseThreshold: 1,
           size: 'sm',
           fullWidth: true
         }"

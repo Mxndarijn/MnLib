@@ -779,8 +779,16 @@ export class ModalDemo {
       canSearch: true,
       searchPlaceholder: 'Search employees...',
       selectionMode: 'multi',
-      // No `layout` set: exercises the default `stable` mode.
-      appearance: {striped: true, hover: true},
+      selectionSummary: true,
+      selectionLabel: (row: Employee) => row.name,
+      // Pretend the modal opened on an existing record with three people already
+      // on it — including one who lives on a later server page.
+      // A deliberately large pre-selection, to show the summary staying compact.
+      initialSelectedIds: ALL.slice(0, 14).map((e) => e.id),
+      initialSelectedRows: ALL.slice(0, 14),
+      // No `layout` set: exercises the default `stable` mode. `hover` alone, with no
+      // striping, matches how the library is actually consumed in product.
+      appearance: {hover: true},
       paginationMode: 'paginated',
       pageSize: 5,
       pageSizeOptions: [5, 10, 25],
