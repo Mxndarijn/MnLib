@@ -24,6 +24,7 @@ import {DefaultCalendarDateFormatter} from '../../services/default-calendar-date
 import {CalendarEventLayoutService} from '../../services/calendar-event-layout.service';
 import {CalendarUtility} from '../../utils/calendar-utils';
 import {CalendarEventComponent} from '../calendar-event/calendar-event.component';
+import {MnLanguageService} from '../../../../language';
 
 /** Extended hour row with a pre-resolved display label. */
 type DisplayHourRow = {
@@ -44,6 +45,17 @@ type DisplayHourRow = {
   providers: [CalendarEventLayoutService],
 })
 export class CalendarDayComponent implements OnInit, OnDestroy {
+  private readonly lang = inject(MnLanguageService);
+
+  /**
+   * Accessible name for this control. Resolved through the conventional
+   * `mnCalendar.dayView` key so an app can translate it, falling back to English when the
+   * key is not defined rather than leaking the raw key into the UI.
+   */
+  get dayViewLabel(): string {
+    return this.lang.translateIfPresent('mnCalendar.dayView') ?? 'Day view';
+  }
+
   private layoutService = inject(CalendarEventLayoutService);
   private cdr = inject(ChangeDetectorRef);
 

@@ -38,6 +38,7 @@ import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.c
 import {MnButton} from '../../../mn-button';
 import {LucideX} from '@lucide/angular';
 import {MN_HAPTICS} from '../../mn-modal-haptics';
+import {MnLanguageService} from '../../../../language';
 
 @Component({
   selector: 'mn-modal-shell',
@@ -56,6 +57,17 @@ import {MN_HAPTICS} from '../../mn-modal-haptics';
   styleUrls: ['./mn-modal-shell.component.css'],
 })
 export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterViewInit, OnDestroy {
+  private readonly lang = inject(MnLanguageService);
+
+  /**
+   * Accessible name for this control. Resolved through the conventional
+   * `mnModal.close` key so an app can translate it, falling back to English when the
+   * key is not defined rather than leaking the raw key into the UI.
+   */
+  get closeModalLabel(): string {
+    return this.lang.translateIfPresent('mnModal.close') ?? 'Close modal';
+  }
+
   private el = inject<ElementRef<HTMLElement>>(ElementRef);
   private cdr = inject(ChangeDetectorRef);
   /** Downward release speed (px/ms) above which a short drag still dismisses — a "flick".

@@ -2,5 +2,6 @@
 @import './styles.css';
 /* Feature styles */
 @import '../features/mn-alert/mn-alert-outlet/mn-alert-outlet.css';
+@import '../features/mn-rich-text-editor/mn-rich-text-editor.component.css';
 @import "tailwindcss";
 

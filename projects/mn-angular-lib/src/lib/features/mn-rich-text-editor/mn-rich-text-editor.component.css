@@ -1,0 +1,36 @@
+/*
+  Hover labels for the toolbar controls.
+
+  Quill builds its toolbar at runtime, so those buttons never carry Angular's
+  scoping attribute — the component runs with `ViewEncapsulation.None` and every
+  rule here is scoped by `.mn-rich-text-editor` instead. Written as CSS rather
+  than utilities because the label text comes from `content: attr(data-tip)`,
+  which has no utility equivalent.
+*/
+.mn-rich-text-editor .mn-rte-tooltip {
+  position: relative;
+}
+
+.mn-rich-text-editor .mn-rte-tooltip[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  translate: -50% -0.375rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-content);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 50;
+}
+
+.mn-rich-text-editor .mn-rte-tooltip[data-tip]:hover::after,
+.mn-rich-text-editor .mn-rte-tooltip[data-tip]:focus-visible::after {
+  opacity: 1;
+}

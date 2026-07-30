@@ -1,4 +1,4 @@
-<div class="p-4" role="complementary" aria-label="Upcoming events">
+<div [attr.aria-label]="upcomingEventsLabel" class="p-4" role="complementary">
   <div class="mb-3 flex items-center gap-2">
     <h3 class="text-sm font-bold tracking-wide">{{ title }}</h3>
     @if (upcomingEvents.length) {

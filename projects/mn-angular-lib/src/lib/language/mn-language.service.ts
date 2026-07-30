@@ -1,7 +1,7 @@
-import {Injectable, inject, ApplicationRef} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { MnTranslationMap, MnTranslations } from './mn-language.types';
+import {ApplicationRef, inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
+import {MnTranslationMap, MnTranslations} from './mn-language.types';
 
 @Injectable({ providedIn: 'root' })
 export class MnLanguageService {
@@ -136,6 +136,26 @@ export class MnLanguageService {
     }
 
     return typeof current === 'string' ? current : undefined;
+  }
+
+  /**
+   * Translate a key **only if it is defined**, returning `undefined` otherwise.
+   *
+   * {@link translate} deliberately returns the key itself when it is missing, which
+   * makes it unusable for a library's own default labels: a consumer that never
+   * defined `mnCollection.rowsPerPage` would see that raw string in their UI. This
+   * lets a caller try a conventional key and fall back to a readable English default
+   * when the app has not translated it, so components ship translatable strings
+   * without forcing every consumer to define them.
+   *
+   * @param key The dot-notated translation key.
+   * @param params Optional `{{name}}` interpolation values.
+   * @returns The translation, or `undefined` when the key is not defined.
+   */
+  translateIfPresent(key: string, params?: Record<string, string | number>): string | undefined {
+    const map = this._translations[this.locale] ?? {};
+    if (this.getValueFromMap(map, key) === undefined) return undefined;
+    return this.translate(key, params);
   }
 
   /**

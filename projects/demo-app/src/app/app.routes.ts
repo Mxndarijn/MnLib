@@ -23,6 +23,7 @@ import {CheckboxDemo} from './checkbox-demo/checkbox-demo';
 import {SkeletonDemo} from './skeleton-demo/skeleton-demo';
 import {FileInputDemo} from './file-input-demo/file-input-demo';
 import {DateSelectorBarDemo} from './date-selector-bar-demo/date-selector-bar-demo';
+import {RichTextEditorDemo} from './rich-text-editor-demo/rich-text-editor-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -50,4 +51,5 @@ export const routes: Routes = [
   {path: 'demos/skeleton-demo', component: SkeletonDemo, title: 'Skeleton Demo'},
   {path: 'demos/file-input-demo', component: FileInputDemo, title: 'File Input Demo'},
   {path: 'demos/date-selector-bar-demo', component: DateSelectorBarDemo, title: 'Date Selector Bar Demo'},
+  {path: 'demos/rich-text-editor-demo', component: RichTextEditorDemo, title: 'Rich Text Editor Demo'},
 ];

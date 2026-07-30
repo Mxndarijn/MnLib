@@ -1,10 +1,16 @@
-﻿import { Component, Input, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable, Subject, takeUntil } from 'rxjs';
-import { CalendarEvent } from '../../models/calendar-event.model';
-import { CalendarConfig, DEFAULT_CALENDAR_CONFIG, MonthItem, resolveCalendarConfig } from '../../models/calendar-config.model';
-import { CalendarDateFormatter } from '../../services/calendar-date-formatter';
-import { DefaultCalendarDateFormatter } from '../../services/default-calendar-date-formatter';
+﻿import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Observable, Subject, takeUntil} from 'rxjs';
+import {CalendarEvent} from '../../models/calendar-event.model';
+import {
+  CalendarConfig,
+  DEFAULT_CALENDAR_CONFIG,
+  MonthItem,
+  resolveCalendarConfig
+} from '../../models/calendar-config.model';
+import {CalendarDateFormatter} from '../../services/calendar-date-formatter';
+import {DefaultCalendarDateFormatter} from '../../services/default-calendar-date-formatter';
+import {MnLanguageService} from '../../../../language';
 
 /**
  * Month grid view showing a 7Ã—6 grid of day cells.
@@ -19,6 +25,17 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
   templateUrl: './calendar-month.component.html',
 })
 export class CalendarMonthComponent implements OnInit, OnDestroy {
+  private readonly lang = inject(MnLanguageService);
+
+  /**
+   * Accessible name for this control. Resolved through the conventional
+   * `mnCalendar.monthView` key so an app can translate it, falling back to English when the
+   * key is not defined rather than leaking the raw key into the UI.
+   */
+  get monthViewLabel(): string {
+    return this.lang.translateIfPresent('mnCalendar.monthView') ?? 'Month view';
+  }
+
   /** The date whose month is displayed. */
   @Input() focusDay!: Date;
   /** Observable that emits the full event list whenever it changes. */

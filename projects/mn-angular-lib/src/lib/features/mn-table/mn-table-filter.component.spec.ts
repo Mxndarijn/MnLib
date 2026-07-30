@@ -225,4 +225,30 @@ describe('MnTable column filters', () => {
     // Nothing anywhere opens a floating layer any more.
     expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
   });
+
+  /**
+   * A table is routinely rendered inside a modal's `<form>`. Enter in a text input
+   * triggers the browser's implicit form submission, so searching or filtering would
+   * complete the wizard instead of narrowing the rows. The table's own controls are
+   * chrome, not form data, and must never submit.
+   */
+  it('does not let Enter in the search or filter inputs submit a surrounding form', () => {
+    const component = fixture.componentInstance;
+    component.dataSource = makeDataSource([nameColumn()]);
+    component.dataSource.canSearch = true;
+    fixture.detectChanges();
+
+    const inputs: HTMLInputElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('input[type="search"], input[type="text"]'),
+    );
+    expect(inputs.length).toBeGreaterThan(0);
+
+    for (const input of inputs) {
+      const event = new KeyboardEvent('keydown', {key: 'Enter', bubbles: true, cancelable: true});
+      input.dispatchEvent(event);
+      expect(event.defaultPrevented)
+        .withContext(`Enter in ${input.type} input must not submit`)
+        .toBeTrue();
+    }
+  });
 });

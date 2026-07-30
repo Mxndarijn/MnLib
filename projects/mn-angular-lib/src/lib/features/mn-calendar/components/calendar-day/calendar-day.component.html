@@ -1,7 +1,7 @@
 <!-- Day grid. One column, its header centered over that column (the toolbar
      already names the date). Today's number is tinted, not filled; the now-line
      carries a time bubble that overhangs into the gutter. -->
-<div class="w-full h-full flex flex-col overflow-hidden" role="grid" aria-label="Day view">
+<div [attr.aria-label]="dayViewLabel" class="w-full h-full flex flex-col overflow-hidden" role="grid">
   <div class="grid grid-cols-[60px_1fr]">
     <div></div>
     <div class="flex items-center justify-center gap-2 py-2 px-1" role="columnheader">

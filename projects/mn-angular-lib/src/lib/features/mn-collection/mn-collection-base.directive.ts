@@ -360,6 +360,33 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   }
 
   /**
+   * Resolves a label three ways, in order: the consumer's explicit key, a
+   * conventional `mnCollection.*` key when the app defines one, and finally a
+   * readable English default.
+   *
+   * The middle step is what makes the components translatable out of the box: an
+   * app that adds the `mnCollection` namespace to its locale files gets every
+   * table, list and grid translated at once, with no per-call-site wiring across
+   * dozens of data sources. An app that does not keeps today's English text rather
+   * than leaking raw keys into the UI.
+   *
+   * @param consumerKey The data source's own translation key, if it set one.
+   * @param defaultKey The conventional key this label falls back to.
+   * @param fallback The English text used when neither key resolves.
+   * @param params Optional interpolation values.
+   * @returns The resolved label.
+   */
+  protected resolveLabel(
+    consumerKey: string | undefined,
+    defaultKey: string,
+    fallback: string,
+    params?: Record<string, string | number>,
+  ): string {
+    if (consumerKey) return this.lang.t(consumerKey, params);
+    return this.lang.translateIfPresent(defaultKey, params) ?? fallback;
+  }
+
+  /**
    * Resolves translation keys to display strings via {@link MnLanguageService}.
    * Subclasses override to resolve their own keys; call `super` to keep these.
    */

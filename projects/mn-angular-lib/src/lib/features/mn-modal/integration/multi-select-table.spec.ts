@@ -185,8 +185,7 @@ describe('Feature: Multi-Select Table Field', () => {
     // The data source carries the ids through to the table...
     expect(dataSource.initialSelectedIds).toEqual(['1', '3']);
 
-    // ...the table ticks exactly those rows. Asserted by row name rather than by
-    // position, because the selected rows are also hoisted to the top.
+    // ...and the table ticks exactly those rows.
     const boxes: HTMLInputElement[] = Array.from(
       fixture.nativeElement.querySelectorAll('tbody input[type="checkbox"]'),
     );
@@ -248,11 +247,13 @@ describe('Feature: Multi-Select Table Field', () => {
   });
 
   /**
-   * An already-selected row buried on page 3 is invisible, so the user re-picks it
-   * or assumes nothing was chosen. The rows that arrived selected are hoisted to
-   * the top, but only while no column is sorted.
+   * Row order is the data source's to decide, and selection is not a sort key.
+   * A consumer that hands the rows over in a deliberate order (groups before
+   * members, most-recent first) must get that order back on screen, whether the
+   * table opened with a selection or not — otherwise the ordering it built is
+   * silently overruled by however many rows happen to be ticked.
    */
-  it('hoists the initially-selected rows to the top', () => {
+  it('renders the rows in source order regardless of the initial selection', () => {
     setup<ItemsModel>(
       ModalBuilder.form<ItemsModel, ItemsModel>()
         .title('Edit')
@@ -272,17 +273,17 @@ describe('Feature: Multi-Select Table Field', () => {
         fixture.nativeElement.querySelectorAll('tbody tr td:nth-child(2)') as NodeListOf<HTMLElement>,
       ).map((cell) => cell.textContent?.trim() ?? '');
 
-    // Charlie is id 3, last in the source order, and is hoisted above the rest.
-    expect(names()).toEqual(['Charlie', 'Alice', 'Bob']);
+    // Charlie is id 3 and arrives selected, but stays last where the source put it.
+    expect(names()).toEqual(['Alice', 'Bob', 'Charlie']);
 
-    // Ticking another row must NOT re-order the list: a row leaping to the top
-    // mid-click drags the next row under the pointer.
+    // Ticking a row must not move it either — a row leaping mid-click drags the
+    // next row under the pointer.
     const boxes: HTMLInputElement[] = Array.from(
       fixture.nativeElement.querySelectorAll('tbody input[type="checkbox"]'),
     );
     boxes[2].click();
     fixture.detectChanges();
-    expect(names()).toEqual(['Charlie', 'Alice', 'Bob']);
+    expect(names()).toEqual(['Alice', 'Bob', 'Charlie']);
   });
 
   it('leaves the order alone when nothing arrived selected', () => {

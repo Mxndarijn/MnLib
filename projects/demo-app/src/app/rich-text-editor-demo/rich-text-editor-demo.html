@@ -1,0 +1,46 @@
+<h2>Rich Text Editor</h2>
+<p class="intro">
+  A Quill-backed writing surface with a prose-oriented toolbar. Quill loads on demand when the
+  editor mounts, so it never lands in an app's initial bundle.
+</p>
+
+<div class="demo-sections">
+  <section>
+    <h3>Editing and seeding</h3>
+    <p>
+      The editor emits its HTML on every edit; this page writes it straight back into
+      <code>content</code>, which must not disturb the caret. The buttons replace the document
+      wholesale, which must.
+    </p>
+    <mn-rich-text-editor
+      (contentChange)="content.set($event)"
+      [content]="content()"
+      ariaLabel="Demo editor"
+      placeholder="Write something…">
+    </mn-rich-text-editor>
+    <div class="seeds">
+      @for (seed of seeds; track seed.name) {
+        <button (click)="content.set(seed.html)" [data]="{ color: 'primary', size: 'sm', variant: 'outline' }" mnButton>
+          {{ seed.name }}
+        </button>
+      }
+    </div>
+    <div class="readout">{{ content() || '(empty)' }}</div>
+  </section>
+
+  <section>
+    <h3>Toolbar labels and height</h3>
+    <p>
+      Hover a control to see its label. Labels come from <code>labels</code> (literal text) or
+      <code>labelKeys</code> (translation keys); anything unset keeps the built-in English wording.
+      <code>editorClass</code> replaces the default height limits.
+    </p>
+    <mn-rich-text-editor
+      (contentChange)="translatedContent.set($event)"
+      [content]="translatedContent()"
+      [labels]="dutchLabels"
+      editorClass="[&_.ql-editor]:max-h-64 [&_.ql-editor]:min-h-32 [&_.ql-editor]:overflow-y-auto"
+      placeholder="Schrijf hier…">
+    </mn-rich-text-editor>
+  </section>
+</div>
