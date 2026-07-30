@@ -56,16 +56,8 @@ export type TableAppearance = {
  * - `select` → `string` (single choice; empty string means "no filter")
  * - `multi-select` → `string[]` (OR semantics across the chosen values)
  * - `boolean` → `boolean` (tri-state: any / true / false)
- * - `number-range` → {@link NumberRangeFilterValue}
- * - `date-range` → {@link DateRangeFilterValue}
  */
-export type ColumnFilterType =
-  | 'text'
-  | 'select'
-  | 'multi-select'
-  | 'boolean'
-  | 'number-range'
-  | 'date-range';
+export type ColumnFilterType = 'text' | 'select' | 'multi-select' | 'boolean';
 
 // ── Column Filter Option ──
 export type ColumnFilterOption = {
@@ -73,29 +65,8 @@ export type ColumnFilterOption = {
   value: string;
 }
 
-// ── Column Filter Values ──
-/** Inclusive numeric bounds; either side may be omitted for an open-ended range. */
-export type NumberRangeFilterValue = {
-  min?: number;
-  max?: number;
-}
-
-/**
- * Inclusive date bounds as `YYYY-MM-DD` strings (the format the underlying
- * date control emits); either side may be omitted for an open-ended range.
- */
-export type DateRangeFilterValue = {
-  from?: string;
-  to?: string;
-}
-
 /** Every value shape a column filter can hold, discriminated by {@link ColumnFilterType}. */
-export type ColumnFilterValue =
-  | string
-  | string[]
-  | boolean
-  | NumberRangeFilterValue
-  | DateRangeFilterValue;
+export type ColumnFilterValue = string | string[] | boolean;
 
 /** Map of column key to its current filter value. */
 export type ColumnFilterState = Record<string, ColumnFilterValue | undefined>;
@@ -187,18 +158,6 @@ type ColumnFilterConfig<T> =
   /** Custom predicate. Receives the row and the chosen true/false state. */
   filterFn?: (row: T, filterValue: boolean) => boolean;
 })
-  | (ColumnFilterCommon & {
-  filterType: 'number-range';
-  filterOptions?: never;
-  /** Custom predicate. Receives the row and the inclusive numeric bounds. */
-  filterFn?: (row: T, filterValue: NumberRangeFilterValue) => boolean;
-})
-  | (ColumnFilterCommon & {
-  filterType: 'date-range';
-  filterOptions?: never;
-  /** Custom predicate. Receives the row and the inclusive `YYYY-MM-DD` bounds. */
-  filterFn?: (row: T, filterValue: DateRangeFilterValue) => boolean;
-})
   | {
   filterable?: false;
   filterType?: never;
@@ -273,18 +232,6 @@ export type TableDataSource<T> = MnSelectableCollectionDataSource<T> & {
  * every locale change.
  */
 export type MnTableFilterLabels = {
-  /** Lower bound of a number range. Defaults to "Min". */
-  min?: string;
-  minKey?: string;
-  /** Upper bound of a number range. Defaults to "Max". */
-  max?: string;
-  maxKey?: string;
-  /** Start of a date range. Defaults to "From". */
-  from?: string;
-  fromKey?: string;
-  /** End of a date range. Defaults to "To". */
-  to?: string;
-  toKey?: string;
   /** Unset option of a boolean filter. Defaults to "Any". */
   any?: string;
   anyKey?: string;

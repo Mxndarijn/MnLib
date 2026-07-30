@@ -51,17 +51,11 @@
 <!-- Loading state -->
   @if (isLoadingState) {
   <div
-    [class.mn-grid--auto]="isAutoLayout"
-    [style.--mn-grid-cols-base]="dataSource.layout?.cols?.base"
-    [style.--mn-grid-cols-lg]="dataSource.layout?.cols?.lg"
-    [style.--mn-grid-cols-md]="dataSource.layout?.cols?.md"
-    [style.--mn-grid-cols-sm]="dataSource.layout?.cols?.sm"
-    [style.--mn-grid-cols-xl]="dataSource.layout?.cols?.xl"
-    [style.--mn-grid-gap]="dataSource.layout?.gap"
-    [style.--mn-grid-min]="dataSource.layout?.minCardWidth"
+    [class]="gridClasses"
+    [style.gap]="gridGap"
+    [style.grid-template-columns]="autoTemplateColumns"
     aria-busy="true"
     aria-label="Loading"
-    class="mn-grid"
     role="list"
   >
     @for (_ of skeletonRows; track $index) {
@@ -106,16 +100,10 @@
   } @else {
     <!-- Card grid -->
     <div
-      [class.mn-grid--auto]="isAutoLayout"
-      [style.--mn-grid-cols-base]="dataSource.layout?.cols?.base"
-      [style.--mn-grid-cols-lg]="dataSource.layout?.cols?.lg"
-      [style.--mn-grid-cols-md]="dataSource.layout?.cols?.md"
-      [style.--mn-grid-cols-sm]="dataSource.layout?.cols?.sm"
-      [style.--mn-grid-cols-xl]="dataSource.layout?.cols?.xl"
-      [style.--mn-grid-gap]="dataSource.layout?.gap"
-      [style.--mn-grid-min]="dataSource.layout?.minCardWidth"
+    [class]="gridClasses"
+    [style.gap]="gridGap"
+    [style.grid-template-columns]="autoTemplateColumns"
       aria-label="Card grid"
-      class="mn-grid"
       role="list"
     >
       @for (item of paginatedItems; track trackByID($index, item)) {

@@ -70,7 +70,7 @@ describe('MnTable column filters', () => {
     expect(header.classList).not.toContain('font-normal');
   });
 
-  /** A number-range-filterable age column. */
+  /** A multi-select-filterable age column. */
   function ageColumn(): ColumnDefinition<Row> {
     return {
       key: 'age',
@@ -78,7 +78,12 @@ describe('MnTable column filters', () => {
       cell: (row) => String(row.age),
       getRawValueToSort: (row) => row.age,
       filterable: true,
-      filterType: 'number-range',
+      filterType: 'multi-select',
+      filterOptions: [
+        {label: '36', value: '36'},
+        {label: '41', value: '41'},
+        {label: '45', value: '45'},
+      ],
     };
   }
 
@@ -111,7 +116,7 @@ describe('MnTable column filters', () => {
     fixture.detectChanges();
 
     component.onColumnFilter(columns[0], 'a');
-    component.onColumnFilter(columns[1], {min: 40});
+    component.onColumnFilter(columns[1], ['45', '41']);
     expect(component.filteredItems.map(r => r.name)).toEqual(['Grace', 'Alan']);
   });
 
@@ -122,10 +127,10 @@ describe('MnTable column filters', () => {
     component.dataSource = makeDataSource(columns, filters => received.push(filters));
     fixture.detectChanges();
 
-    component.onColumnFilter(columns[0], {min: 40});
+    component.onColumnFilter(columns[0], ['45']);
     tick();
 
-    expect(received).toEqual([[{key: 'age', type: 'number-range', value: {min: 40}}]]);
+    expect(received).toEqual([[{key: 'age', type: 'multi-select', value: ['45']}]]);
     // The rows the consumer supplied must be left untouched — they are already the
     // filtered page, and filtering them again here would drop rows a second time.
     expect(component.filteredItems.length).toBe(3);
@@ -144,7 +149,7 @@ describe('MnTable column filters', () => {
     expect(received.length).toBe(0);
 
     // A non-text filter is not debounced, so it fires straight away.
-    component.onColumnFilter(columns[1], {min: 40});
+    component.onColumnFilter(columns[1], ['45']);
     expect(received.length).toBe(1);
 
     tick(300);
@@ -152,7 +157,7 @@ describe('MnTable column filters', () => {
     // One request for the whole run of keystrokes, carrying the final text.
     expect(received[1]).toEqual([
       {key: 'name', type: 'text', value: 'ada'},
-      {key: 'age', type: 'number-range', value: {min: 40}},
+      {key: 'age', type: 'multi-select', value: ['45']},
     ]);
   }));
 
@@ -163,8 +168,8 @@ describe('MnTable column filters', () => {
     component.dataSource = makeDataSource(columns, filters => received.push(filters));
     fixture.detectChanges();
 
-    component.onColumnFilter(columns[1], {min: 40});
-    component.onColumnFilter(columns[1], {});
+    component.onColumnFilter(columns[1], ['45']);
+    component.onColumnFilter(columns[1], []);
     tick();
 
     expect(received[1]).toEqual([]);
@@ -188,7 +193,7 @@ describe('MnTable column filters', () => {
     component.dataSource = makeDataSource(columns, filters => received.push(filters));
     fixture.detectChanges();
 
-    component.onColumnFilter(columns[1], {min: 40});
+    component.onColumnFilter(columns[1], ['45']);
     expect(component.hasActiveFilters).toBe(true);
 
     component.clearAllFilters();

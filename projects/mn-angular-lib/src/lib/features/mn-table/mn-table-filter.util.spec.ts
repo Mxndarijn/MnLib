@@ -18,8 +18,6 @@ describe('mn-table filter util', () => {
       expect(isFilterValueActive(emptyFilterValue('select'))).toBe(false);
       expect(isFilterValueActive(emptyFilterValue('boolean'))).toBe(false);
       expect(isFilterValueActive(emptyFilterValue('multi-select'))).toBe(false);
-      expect(isFilterValueActive(emptyFilterValue('number-range'))).toBe(false);
-      expect(isFilterValueActive(emptyFilterValue('date-range'))).toBe(false);
     });
   });
 
@@ -33,14 +31,6 @@ describe('mn-table filter util', () => {
     it('ignores whitespace-only text and empty collections', () => {
       expect(isFilterValueActive('   ')).toBe(false);
       expect(isFilterValueActive([])).toBe(false);
-      expect(isFilterValueActive({})).toBe(false);
-    });
-
-    it('is active when either side of a range is set', () => {
-      expect(isFilterValueActive({min: 18})).toBe(true);
-      expect(isFilterValueActive({max: 65})).toBe(true);
-      expect(isFilterValueActive({from: '2026-01-01'})).toBe(true);
-      expect(isFilterValueActive({to: ''})).toBe(false);
     });
   });
 
@@ -66,27 +56,6 @@ describe('mn-table filter util', () => {
       expect(defaultFilterPredicate('boolean', true, false)).toBe(false);
     });
 
-    it('applies number bounds inclusively and independently', () => {
-      expect(defaultFilterPredicate('number-range', 36, {min: 36})).toBe(true);
-      expect(defaultFilterPredicate('number-range', 36, {max: 36})).toBe(true);
-      expect(defaultFilterPredicate('number-range', 36, {min: 18, max: 30})).toBe(false);
-      expect(defaultFilterPredicate('number-range', 36, {max: 65})).toBe(true);
-    });
-
-    it('applies date bounds inclusively, covering the whole end day', () => {
-      const value = {from: '2026-03-01', to: '2026-03-15'};
-      // A timestamp late on the end day must still pass — the bound is a day, not midnight.
-      expect(defaultFilterPredicate('date-range', '2026-03-15T22:30:00', value)).toBe(true);
-      expect(defaultFilterPredicate('date-range', '2026-03-01T00:00:00', value)).toBe(true);
-      expect(defaultFilterPredicate('date-range', '2026-03-16T09:00:00', value)).toBe(false);
-      expect(defaultFilterPredicate('date-range', new Date('2026-02-28'), value)).toBe(false);
-    });
-
-    it('excludes rows whose raw value cannot be interpreted for the type', () => {
-      // An unevaluable row must not slip through an active filter.
-      expect(defaultFilterPredicate('number-range', 'not-a-number', {min: 1})).toBe(false);
-      expect(defaultFilterPredicate('date-range', 'not-a-date', {from: '2026-01-01'})).toBe(false);
-    });
   });
 
   describe('resolveFilterableValue', () => {
@@ -124,16 +93,16 @@ describe('mn-table filter util', () => {
 
     it('falls back to the type default when no filterFn is given', () => {
       const column = {
-        key: 'age',
-        header: 'Age',
-        cell: (r: Row) => String(r.age),
-        getRawValueToSort: (r: Row) => r.age,
+        key: 'name',
+        header: 'Name',
+        cell: (r: Row) => r.name,
         filterable: true,
-        filterType: 'number-range',
+        filterType: 'select',
       } as ColumnDefinition<Row>;
 
-      expect(matchesColumnFilter(column, row, {min: 30, max: 40})).toBe(true);
-      expect(matchesColumnFilter(column, row, {min: 40})).toBe(false);
+      // `select` is exact equality, unlike the substring default for `text`.
+      expect(matchesColumnFilter(column, row, 'Ada Lovelace')).toBe(true);
+      expect(matchesColumnFilter(column, row, 'Ada')).toBe(false);
     });
   });
 });
