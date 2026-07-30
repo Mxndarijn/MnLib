@@ -1,7 +1,7 @@
 <!-- Week grid. Hour rules are quiet hairlines; today's column header is a tinted
      number (no fill); the current time is a line carrying a small time bubble.
      Dynamic row/column placement stays inline — the layout maths lives in TS. -->
-<div class="w-full h-full flex flex-col overflow-hidden" role="grid" aria-label="Week view">
+<div [attr.aria-label]="weekViewLabel" class="w-full h-full flex flex-col overflow-hidden" role="grid">
   <div class="grid" [style.grid-template-columns]="'60px ' + gridTemplateColumns">
     <div></div>
     @for (col of columns; track col.dayName; let i = $index) {

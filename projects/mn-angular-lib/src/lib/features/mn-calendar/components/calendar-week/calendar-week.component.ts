@@ -1,24 +1,31 @@
 ﻿import {
   ChangeDetectorRef,
   Component,
+  EventEmitter,
+  inject,
   Input,
   OnDestroy,
   OnInit,
   Output,
-  EventEmitter,
-  Type,
-  inject
+  Type
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable, Subject, takeUntil } from 'rxjs';
-import { CalendarEvent } from '../../models/calendar-event.model';
-import { CalendarEventData } from '../../models/calendar-event-data.model';
-import { CalendarConfig, ColumnDay, DEFAULT_CALENDAR_CONFIG, HourRow, resolveCalendarConfig } from '../../models/calendar-config.model';
-import { CalendarDateFormatter } from '../../services/calendar-date-formatter';
-import { DefaultCalendarDateFormatter } from '../../services/default-calendar-date-formatter';
-import { CalendarEventLayoutService } from '../../services/calendar-event-layout.service';
-import { CalendarUtility } from '../../utils/calendar-utils';
-import { CalendarEventComponent } from '../calendar-event/calendar-event.component';
+import {CommonModule} from '@angular/common';
+import {Observable, Subject, takeUntil} from 'rxjs';
+import {CalendarEvent} from '../../models/calendar-event.model';
+import {CalendarEventData} from '../../models/calendar-event-data.model';
+import {
+  CalendarConfig,
+  ColumnDay,
+  DEFAULT_CALENDAR_CONFIG,
+  HourRow,
+  resolveCalendarConfig
+} from '../../models/calendar-config.model';
+import {CalendarDateFormatter} from '../../services/calendar-date-formatter';
+import {DefaultCalendarDateFormatter} from '../../services/default-calendar-date-formatter';
+import {CalendarEventLayoutService} from '../../services/calendar-event-layout.service';
+import {CalendarUtility} from '../../utils/calendar-utils';
+import {CalendarEventComponent} from '../calendar-event/calendar-event.component';
+import {MnLanguageService} from '../../../../language';
 
 /** Extended hour row with a pre-resolved display label. */
 type DisplayHourRow = {
@@ -39,6 +46,17 @@ type DisplayHourRow = {
   providers: [CalendarEventLayoutService],
 })
 export class CalendarWeekComponent implements OnInit, OnDestroy {
+  private readonly lang = inject(MnLanguageService);
+
+  /**
+   * Accessible name for this control. Resolved through the conventional
+   * `mnCalendar.weekView` key so an app can translate it, falling back to English when the
+   * key is not defined rather than leaking the raw key into the UI.
+   */
+  get weekViewLabel(): string {
+    return this.lang.translateIfPresent('mnCalendar.weekView') ?? 'Week view';
+  }
+
   private layoutService = inject(CalendarEventLayoutService);
   private cdr = inject(ChangeDetectorRef);
 

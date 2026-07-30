@@ -64,7 +64,8 @@
 
       <!-- View switcher (month / week / day) — hidden on mobile, which is forced to day view. -->
       @if (!isMobileView) {
-        <div aria-label="Calendar view" class="flex border border-base-300 rounded-md overflow-hidden" role="tablist">
+        <div [attr.aria-label]="calendarViewLabel" class="flex border border-base-300 rounded-md overflow-hidden"
+             role="tablist">
           @for (view of viewOptions; track view.value) {
             <button
               (click)="switchView(view.value)"

@@ -9,7 +9,7 @@
     "test": "ng test",
     "lint:i18n": "node tools/lint-hardcoded-strings.js",
     "generate:icons": "node tools/generate-icon-directive.js",
-    "lint": "ng lint",
+    "lint": "ng lint && node tools/lint-hardcoded-strings.js",
     "lint:fix": "ng lint --fix"
   },
   "prettier": {
@@ -61,6 +61,7 @@
     "ng-packagr": "^21.1.0",
     "postcss": "^8.5.3",
     "prettier": "^3.8.4",
+    "quill": "^2.0.3",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
     "typescript-eslint": "8.59.2",

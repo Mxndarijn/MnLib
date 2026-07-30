@@ -638,6 +638,12 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
         // `selectionSummary: false` on the data source to opt a field out.
         ds.selectionSummary ??= true;
 
+        // A modal is too short to make a rows-per-page choice meaningful, and the
+        // selector costs a row of footer the sheet cannot spare. Pinning the options
+        // to the single configured size hides it through the paginator's existing
+        // "more than one option" rule rather than adding a second way to hide it.
+        ds.pageSizeOptions = [ds.pageSize ?? 10];
+
         // Pre-select rows from the form's initial value
         const control = this.form.get(field.key as string);
         if (control && Array.isArray(control.value) && control.value.length > 0) {

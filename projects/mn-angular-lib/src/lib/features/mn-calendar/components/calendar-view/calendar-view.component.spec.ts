@@ -9,6 +9,16 @@ import {MnLanguageService} from '../../../../language';
 class LanguageStub {
   locale = 'en-US';
   locale$ = new BehaviorSubject<string>('en');
+
+  /**
+   * Mirrors the real service: `undefined` means "this key is not translated",
+   * which is what lets a component fall back to its English default instead of
+   * rendering the raw key. The stub defines no keys, so every lookup takes that
+   * path — exactly the state of an app that has not adopted the label keys.
+   */
+  translateIfPresent(): string | undefined {
+    return undefined;
+  }
 }
 
 /** Wednesday 15 January 2025. Its week runs Mon 13 – Sun 19 January. */

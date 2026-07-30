@@ -82,6 +82,15 @@ let instanceCounter = 0;
   styles: [`:host { display: flex; flex-direction: column; width: 100%; height: 100%; }`]
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
+  /**
+   * Accessible name for this control. Resolved through the conventional
+   * `mnCalendar.calendarView` key so an app can translate it, falling back to English when the
+   * key is not defined rather than leaking the raw key into the UI.
+   */
+  get calendarViewLabel(): string {
+    return this.lang.translateIfPresent('mnCalendar.calendarView') ?? 'Calendar view';
+  }
+
   /** Whether to show the action button in the toolbar. */
   @Input() showButton = false;
   /** Label text for the action button. */

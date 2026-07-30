@@ -1,9 +1,20 @@
-﻿import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
+﻿import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Observable, Subject, takeUntil} from 'rxjs';
 import {CalendarEvent} from '../../models/calendar-event.model';
 import {CalendarConfig, DEFAULT_CALENDAR_CONFIG, resolveCalendarConfig} from '../../models/calendar-config.model';
 import {UpcomingEventRowComponent} from '../upcoming-event-row/upcoming-event-row.component';
+import {MnLanguageService} from '../../../../language';
 
 /**
  * Sidebar component that lists the next 10 upcoming events
@@ -16,6 +27,17 @@ import {UpcomingEventRowComponent} from '../upcoming-event-row/upcoming-event-ro
   templateUrl: './upcoming-events.component.html',
 })
 export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
+  private readonly lang = inject(MnLanguageService);
+
+  /**
+   * Accessible name for this control. Resolved through the conventional
+   * `mnCalendar.upcomingEvents` key so an app can translate it, falling back to English when the
+   * key is not defined rather than leaking the raw key into the UI.
+   */
+  get upcomingEventsLabel(): string {
+    return this.lang.translateIfPresent('mnCalendar.upcomingEvents') ?? 'Upcoming events';
+  }
+
   /** Observable that emits the full event list whenever it changes. */
   @Input() eventsChanged!: Observable<CalendarEvent[]>;
   /** Resolved calendar configuration passed from the parent view. */

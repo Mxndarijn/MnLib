@@ -320,6 +320,26 @@ describe('MnTable data source configuration', () => {
     expect(fixture.nativeElement.querySelector('ul')).toBeNull();
   });
 
+  it('lets the data source override the responsive tag limit', async () => {
+    const many: Row[] = Array.from({length: 30}, (_, i) => ({id: String(i), name: `Row ${i}`}));
+    fixture.componentInstance.dataSource = makeDataSource({
+      dataRows: new BehaviorSubject<Row[]>(many),
+      selectionMode: 'multi',
+      selectionSummary: true,
+      selectionSummaryLimit: 2,
+      initialSelectedIds: many.map((row) => row.id),
+      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // An explicit limit wins over whatever the width would have chosen.
+    expect(fixture.componentInstance.selectionSummaryLimit).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('ul li span.truncate').length).toBe(2);
+    expect(fixture.componentInstance.hiddenSelectionCount).toBe(28);
+  });
+
   it('collapses a large selection behind a show-more control', async () => {
     const many: Row[] = Array.from({length: 30}, (_, i) => ({id: String(i), name: `Row ${i}`}));
     fixture.componentInstance.dataSource = makeDataSource({

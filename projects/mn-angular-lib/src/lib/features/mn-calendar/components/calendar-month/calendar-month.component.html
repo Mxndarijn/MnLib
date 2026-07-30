@@ -4,7 +4,7 @@
 <!-- Rows are a compact fixed height rather than stretched to fill the container:
      a month with few events shouldn't leave each cell mostly empty. The panel
      scrolls if the grid is taller than the space it's given. -->
-<div class="w-full flex flex-col" role="grid" aria-label="Month view">
+<div [attr.aria-label]="monthViewLabel" class="w-full flex flex-col" role="grid">
   <div class="grid grid-cols-7 pb-2">
     @for (day of weekdayLabels; track day) {
       <div class="pl-2 text-left text-[11px] font-semibold uppercase tracking-wide opacity-45" role="columnheader">{{ day }}</div>

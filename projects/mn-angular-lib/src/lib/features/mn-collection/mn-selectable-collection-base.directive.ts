@@ -39,12 +39,6 @@ export abstract class MnSelectableCollectionBase<
    * its ids matched a loaded row yet. See {@link beforeInitialFilter}.
    */
   private pendingInitialEmit = false;
-  /**
-   * The ids that arrived pre-selected, kept apart from {@link selectedIds} so
-   * {@link prioritizeInitialSelection} has a set that does **not** move as the user
-   * clicks. Null when the collection opened with nothing selected.
-   */
-  private pinnedSelectionIds: ReadonlySet<string> | null = null;
 
   /**
    * Every selected row, in selection order, for the summary. Ids whose row was
@@ -66,7 +60,22 @@ export abstract class MnSelectableCollectionBase<
 
   /** How many tags to show before collapsing the remainder. */
   get selectionSummaryLimit(): number {
-    return this.dataSource.selectionSummaryLimit ?? 8;
+    return this.dataSource.selectionSummaryLimit ?? this.defaultSelectionSummaryLimit;
+  }
+
+  /**
+   * Tag count the summary collapses at when the data source names no limit.
+   *
+   * Subclasses that know their own width narrow this: the same eight tags that
+   * read as a compact header on a wide table become seven stacked lines in a phone
+   * sheet, pushing the rows they describe off screen. Overridden by
+   * {@link MnCollectionDataSource.selectionSummaryLimit}.
+   */
+  // Deliberately an accessor, not a readonly field: MnTable overrides it with a
+  // width-dependent getter, and TypeScript cannot override a property with one.
+  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
+  protected get defaultSelectionSummaryLimit(): number {
+    return 8;
   }
 
   /**
@@ -179,35 +188,6 @@ export abstract class MnSelectableCollectionBase<
     return null;
   }
 
-  /**
-   * Reorders rows so the ones that were already selected when the collection
-   * opened come first, preserving the incoming order within each group.
-   *
-   * Deliberately keyed on the *initial* selection rather than the live one: pinning
-   * what the user is currently ticking would make a row jump to the top the instant
-   * it is clicked, moving the next row under the pointer mid-click. Freezing the set
-   * answers the actual question — "what was already chosen?" — and leaves the list
-   * still while it is being worked with. A row deselected during the session keeps
-   * its place for the same reason.
-   *
-   * Callers apply this only when no explicit sort is active, so a sorted column
-   * always wins.
-   * @param items The rows in their current order.
-   * @returns The rows with the initially-selected ones hoisted to the top.
-   */
-  protected prioritizeInitialSelection(items: T[]): T[] {
-    const pinned = this.pinnedSelectionIds;
-    if (!pinned?.size) return items;
-
-    const selected: T[] = [];
-    const rest: T[] = [];
-    for (const item of items) {
-      (pinned.has(this.dataSource.getID(item)) ? selected : rest).push(item);
-    }
-    // Nothing to hoist (e.g. the pinned rows are on another server-side page).
-    return selected.length === 0 ? items : [...selected, ...rest];
-  }
-
   /** Seeds selection from `initialSelectedIds` before the first filter pass. */
   protected override beforeInitialFilter(): void {
     super.beforeInitialFilter();
@@ -216,7 +196,6 @@ export abstract class MnSelectableCollectionBase<
     for (const id of this.dataSource.initialSelectedIds) {
       this.selectedIds.add(id);
     }
-    this.pinnedSelectionIds = new Set(this.dataSource.initialSelectedIds);
     for (const row of this.dataSource.initialSelectedRows ?? []) {
       this.selectedRowsById.set(this.dataSource.getID(row), row);
     }

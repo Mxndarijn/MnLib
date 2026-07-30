@@ -79,4 +79,9 @@ export class MnList<T = unknown>
       this.loadMoreRows();
     }
   }
+
+  /** Accessible name for the scrollable list region. */
+  get listRegionLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.dataList', 'Data list');
+  }
 }

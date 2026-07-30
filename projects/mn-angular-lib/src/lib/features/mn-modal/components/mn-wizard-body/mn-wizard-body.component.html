@@ -109,6 +109,7 @@
   <div class="flex-none flex gap-3 px-6 pt-4 pb-6 border-t border-base-300 bg-base-100">
     @if (!currentStep?.hideBack) {
       <button
+        type="button"
         mnButton
         [data]="{ variant: 'outline', color: 'secondary' }"
         (click)="back()"
@@ -133,6 +134,7 @@
 
     @if (!isLastStep) {
       <button
+        type="button"
         mnButton
         [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid }"
         (click)="next()"
@@ -146,6 +148,7 @@
 
     @if (isLastStep) {
       <button
+        type="button"
         mnButton
         [data]="{ variant: 'fill', color: 'primary', disabled: !isCurrentStepValid || isCompleting }"
         [disabled]="!isCurrentStepValid || isCompleting"

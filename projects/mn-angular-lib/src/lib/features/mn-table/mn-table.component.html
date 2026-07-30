@@ -77,14 +77,17 @@
     <div
       class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none @min-[560px]:w-auto">
     @if (dataSource.canSearch) {
+      <!-- Enter must not submit a surrounding form: the search box belongs to the
+           table's chrome, not to whatever form the table happens to sit in. -->
       <mn-lib-input-field
+        (keydown.enter)="$event.preventDefault()"
         class="w-full @min-[420px]:flex-1 @min-[560px]:max-w-64"
         [props]="{
             id: 'mn-table-search',
             type: 'search',
             label: '',
-            ariaLabel: dataSource.searchPlaceholder ?? 'Search...',
-            placeholder: dataSource.searchPlaceholder ?? 'Search...',
+            ariaLabel: searchPlaceholderLabel,
+            placeholder: searchPlaceholderLabel,
             size: 'sm',
             borderRadius: 'md',
             fullWidth: true
@@ -164,7 +167,7 @@
 }
 
 <!-- Table wrapper with horizontal scroll -->
-  <div #collectionBody [style.min-height.px]="bodyMinHeight" aria-label="Data table"
+  <div #collectionBody [attr.aria-label]="tableRegionLabel" [style.min-height.px]="bodyMinHeight"
      class="overflow-x-auto"
      role="region">
   <table [class]="tableClasses">
@@ -446,6 +449,7 @@
     }
     @default {
       <mn-lib-input-field
+        (keydown.enter)="$event.preventDefault()"
         (ngModelChange)="onColumnFilter(column, $event)"
         [disabled]="column.filterDisabled ?? false"
         [ngModel]="textFilterValue(column)"

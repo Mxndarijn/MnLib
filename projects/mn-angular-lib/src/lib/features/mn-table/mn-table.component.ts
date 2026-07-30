@@ -161,23 +161,17 @@ export class MnTable<T = object>
     return (column.filterOptions ?? []).map(opt => ({label: opt.label, value: String(opt.value)}));
   }
 
-  /** Any / Yes / No options for a boolean column filter. */
-  getBooleanFilterOptions(column: ColumnDefinition<T>): MnSelectOption<string>[] {
-    const labels = this.dataSource.filterLabels;
-    return [
-      {label: column.filterPlaceholder ?? labels?.any ?? 'Any', value: ''},
-      {label: labels?.yes ?? 'Yes', value: 'true'},
-      {label: labels?.no ?? 'No', value: 'false'},
-    ];
+  /** Label for the small-screen filters toggle button. */
+  get filtersButtonLabel(): string {
+    return this.resolveLabel(this.dataSource.filtersLabelKey, 'mnCollection.filters', this.dataSource.filtersLabel ?? 'Filters');
   }
 
-  /** Filter options formatted for mn-select for a given column. */
-  getFilterSelectOptions(column: ColumnDefinition<T>): MnSelectOption<string>[] {
-    const placeholder = column.filterPlaceholder ?? 'All';
-    return [
-      {label: placeholder, value: ''},
-      ...(column.filterOptions ?? []).map(opt => ({label: opt.label, value: String(opt.value)})),
-    ];
+  /**
+   * Summary a multi-select filter collapses to once more than one option is picked.
+   * Resolved with the `{count}` token intact for mn-multi-select to fill in.
+   */
+  get filterSelectedLabel(): string {
+    return this.resolveLabel(this.dataSource.filterLabels?.selectedKey, 'mnCollection.filterSelected', this.dataSource.filterLabels?.selected ?? '{count} selected');
   }
 
   /** Current text/select filter value for a column. */
@@ -215,22 +209,22 @@ export class MnTable<T = object>
     return this.dataSource.columns.some(c => c.filterable);
   }
 
-  /** Label for the small-screen filters toggle button. */
-  get filtersButtonLabel(): string {
-    return this.dataSource.filtersLabel ?? 'Filters';
-  }
-
-  /**
-   * Summary a multi-select filter collapses to once more than one option is picked.
-   * Resolved with the `{count}` token intact for mn-multi-select to fill in.
-   */
-  get filterSelectedLabel(): string {
-    return this.dataSource.filterLabels?.selected ?? '{count} selected';
-  }
-
   /** Label for the "clear all filters" action in the small-screen panel. */
   get clearFiltersButtonLabel(): string {
-    return this.dataSource.clearFiltersLabel ?? 'Clear all';
+    return this.resolveLabel(this.dataSource.clearFiltersLabelKey, 'mnCollection.clearAll', this.dataSource.clearFiltersLabel ?? 'Clear all');
+  }
+
+  /** Heading for the selection summary, with the count filled in. */
+  get selectionSummaryTitle(): string {
+    const labels = this.dataSource.selectionSummaryLabels;
+    const template = this.resolveLabel(labels?.titleKey, 'mnCollection.selectedCount', labels?.title ?? 'Selected ({{count}})');
+    return template.replace('{{count}}', String(this.selectedIds.size));
+  }
+
+  /** Label for the summary's clear-everything action. */
+  get selectionClearAllLabel(): string {
+    const labels = this.dataSource.selectionSummaryLabels;
+    return this.resolveLabel(labels?.clearAllKey, 'mnCollection.clearAll', labels?.clearAll ?? 'Clear all');
   }
 
   /** Opens/closes the stacked filter panel shown on small screens. */
@@ -376,33 +370,42 @@ export class MnTable<T = object>
   /** Page size to use at/above the `md` breakpoint (consumer's pageSize, or the user's selection). */
   private desktopPageSize = 10;
 
-  /** Heading for the selection summary, with the count filled in. */
-  get selectionSummaryTitle(): string {
-    const template = this.dataSource.selectionSummaryLabels?.title ?? 'Selected ({{count}})';
-    return template.replace('{{count}}', String(this.selectedIds.size));
-  }
-
-  /** Label for the summary's clear-everything action. */
-  get selectionClearAllLabel(): string {
-    return this.dataSource.selectionSummaryLabels?.clearAll ?? 'Clear all';
-  }
-
   /** Label for the summary's expand/collapse control. */
   get selectionSummaryToggleLabel(): string {
     const labels = this.dataSource.selectionSummaryLabels;
-    if (this.selectionSummaryExpanded) return labels?.showLess ?? 'Show less';
-    const template = labels?.showMore ?? '+{{count}} more';
+    if (this.selectionSummaryExpanded) {
+      return this.resolveLabel(labels?.showLessKey, 'mnCollection.showLess', labels?.showLess ?? 'Show less');
+    }
+    const template = this.resolveLabel(labels?.showMoreKey, 'mnCollection.showMore', labels?.showMore ?? '+{{count}} more');
     return template.replace('{{count}}', String(this.hiddenSelectionCount));
   }
 
+  /** Placeholder and accessible name for the search box. */
+  get searchPlaceholderLabel(): string {
+    return this.resolveLabel(
+      this.dataSource.searchPlaceholderKey,
+      'mnCollection.search',
+      this.dataSource.searchPlaceholder ?? 'Search...',
+    );
+  }
+
+  /** Accessible name for the scrollable table region. */
+  get tableRegionLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.dataTable', 'Data table');
+  }
+
   /**
-   * Accessible label for a tag's remove button.
-   * @param row The row the tag stands for.
-   * @returns The label, naming the row so screen readers announce which one goes.
+   * Fewer tags once the table is narrow. A tag holding a person's full name takes
+   * a whole line at phone width, so the eight that read as a compact header on a
+   * wide table become eight stacked lines in a modal sheet — the summary then
+   * occupies more of the screen than the rows it is summarising.
+   *
+   * Reuses {@link filtersCollapsed} rather than measuring again: it is already
+   * maintained on every resize and means exactly "this table is under 640px".
+   * The heading still states the true total, so the hidden tags cost no information.
    */
-  selectionRemoveLabel(row: T): string {
-    const template = this.dataSource.selectionSummaryLabels?.remove ?? 'Remove {{label}}';
-    return template.replace('{{label}}', this.selectionLabelFor(row));
+  protected override get defaultSelectionSummaryLimit(): number {
+    return this.filtersCollapsed ? 5 : 8;
   }
 
   /** Tracks the desktop page size when the user picks one (selector only shows at >= md). */
@@ -424,6 +427,19 @@ export class MnTable<T = object>
    */
   get widthsArePinned(): boolean {
     return this.layoutMode === 'fixed' || (this.layoutMode === 'stable' && this.widthsPinned);
+  }
+
+  /** Any / Yes / No options for a boolean column filter. */
+  getBooleanFilterOptions(column: ColumnDefinition<T>): MnSelectOption<string>[] {
+    const labels = this.dataSource.filterLabels;
+    return [
+      {
+        label: column.filterPlaceholder ?? this.resolveLabel(labels?.anyKey, 'mnCollection.filterAny', labels?.any ?? 'Any'),
+        value: ''
+      },
+      {label: this.resolveLabel(labels?.yesKey, 'mnCollection.filterYes', labels?.yes ?? 'Yes'), value: 'true'},
+      {label: this.resolveLabel(labels?.noKey, 'mnCollection.filterNo', labels?.no ?? 'No'), value: 'false'},
+    ];
   }
 
   /**
@@ -504,12 +520,6 @@ export class MnTable<T = object>
     }
 
     items = this.applySorting(items);
-
-    // With no column sorted, the order carries no meaning the user chose, so spend
-    // it on showing what is already selected. A sorted column always wins.
-    if (!this.currentSort) {
-      items = this.prioritizeInitialSelection(items);
-    }
 
     this.filteredItems = items;
     this.applyPagination();
@@ -766,5 +776,25 @@ export class MnTable<T = object>
           return 0;
       }
     });
+  }
+
+  /** Filter options formatted for mn-select for a given column. */
+  getFilterSelectOptions(column: ColumnDefinition<T>): MnSelectOption<string>[] {
+    const placeholder = column.filterPlaceholder ?? this.resolveLabel(undefined, 'mnCollection.filterAll', 'All');
+    return [
+      {label: placeholder, value: ''},
+      ...(column.filterOptions ?? []).map(opt => ({label: opt.label, value: String(opt.value)})),
+    ];
+  }
+
+  /**
+   * Accessible label for a tag's remove button.
+   * @param row The row the tag stands for.
+   * @returns The label, naming the row so screen readers announce which one goes.
+   */
+  selectionRemoveLabel(row: T): string {
+    const labels = this.dataSource.selectionSummaryLabels;
+    const template = this.resolveLabel(labels?.removeKey, 'mnCollection.removeSelected', labels?.remove ?? 'Remove {{label}}');
+    return template.replace('{{label}}', this.selectionLabelFor(row));
   }
 }

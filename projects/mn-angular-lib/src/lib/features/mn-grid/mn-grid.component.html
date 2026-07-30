@@ -19,7 +19,10 @@
     <div
       class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
       @if (dataSource.canSearch) {
+        <!-- Enter must not submit a surrounding form: the search box is the
+             collection's own chrome, not a field of whatever form it sits in. -->
         <mn-lib-input-field
+          (keydown.enter)="$event.preventDefault()"
           (ngModelChange)="onSearch($event)"
           [ngModel]="searchValue"
           [props]="{
@@ -55,7 +58,7 @@
     [style.gap]="gridGap"
     [style.grid-template-columns]="autoTemplateColumns"
     aria-busy="true"
-    aria-label="Loading"
+    [attr.aria-label]="loadingLabel"
     role="list"
   >
     @for (_ of skeletonRows; track $index) {
@@ -103,7 +106,7 @@
     [class]="gridClasses"
     [style.gap]="gridGap"
     [style.grid-template-columns]="autoTemplateColumns"
-      aria-label="Card grid"
+    [attr.aria-label]="gridRegionLabel"
       role="list"
     >
       @for (item of paginatedItems; track trackByID($index, item)) {
