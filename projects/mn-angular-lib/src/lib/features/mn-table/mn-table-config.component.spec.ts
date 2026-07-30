@@ -348,4 +348,17 @@ describe('MnTable data source configuration', () => {
     expect(tags()).toBe(30);
     expect(fixture.componentInstance.hiddenSelectionCount).toBe(0);
   });
+
+  it('gives the select-all header the same background as the rest of the header row', () => {
+    fixture.componentInstance.dataSource = makeDataSource({selectionMode: 'multi'});
+    fixture.detectChanges();
+
+    const headers: HTMLTableCellElement[] =
+      Array.from(fixture.nativeElement.querySelectorAll('thead tr:first-child th'));
+    // The checkbox cell used to paint itself base-200 while every neighbour stayed
+    // transparent over the row's base-100, leaving a lighter patch in the corner.
+    for (const header of headers) {
+      expect(header.classList).not.toContain('bg-base-200');
+    }
+  });
 });
