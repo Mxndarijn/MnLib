@@ -34,6 +34,15 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
   /** The horizontally-scrolling wrapper the edge fade is painted onto. */
   @ViewChild('scrollContainer') private scrollContainer?: ElementRef<HTMLElement>;
 
+  /** The tab row; queried for the active tab so the indicator can measure it. */
+  @ViewChild('tabList') private tabList?: ElementRef<HTMLElement>;
+
+  /** The shared underline that slides to the active tab. */
+  @ViewChild('indicator') private indicator?: ElementRef<HTMLElement>;
+
+  /** Pending indicator remeasure, cancelled on destroy so a post-destroy frame can't read a detached ref. */
+  private indicatorFrame?: number;
+
   /** How far the fade reaches in from each overflowing edge. */
   private static readonly FADE = '2rem';
   /** Data source containing tab items and default active index. */
@@ -106,14 +115,22 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     const el = this.scrollContainer?.nativeElement;
     if (!el) return;
-    this.resizeObserver = new ResizeObserver(() => this.updateEdgeFades());
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateEdgeFades();
+      // Tabs may have reflowed (viewport change, justified widths); snap the
+      // indicator to the new geometry — animating a resize tick reads as jank.
+      this.updateIndicator(false);
+    });
     this.resizeObserver.observe(el);
     if (el.firstElementChild) this.resizeObserver.observe(el.firstElementChild);
     this.updateEdgeFades();
+    // Place the indicator on the default tab without a slide-in from zero.
+    this.updateIndicator(false);
   }
 
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
+    if (this.indicatorFrame !== undefined) cancelAnimationFrame(this.indicatorFrame);
   }
 
   /**
@@ -152,6 +169,51 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
     item.onClick?.();
     this.currentActive = item;
     this.activeChange.emit(item);
+    // Slide the underline to the new tab. Measure on the next frame, after
+    // change detection has applied the active tab's `font-bold` (which widens
+    // it) so the indicator lands on the final, bolded geometry.
+    this.scheduleIndicator(true);
+  }
+
+  /**
+   * Moves the shared underline to the active tab. When `animate` is false the
+   * move is snapped (no slide) by disabling the transition for one reflow —
+   * used on init, async selection and resize, where a slide would read as jank.
+   * @param animate - Whether the move should slide (true) or snap (false).
+   */
+  private updateIndicator(animate: boolean): void {
+    const bar = this.indicator?.nativeElement;
+    const list = this.tabList?.nativeElement;
+    if (!bar || !list) return;
+    const active = list.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    if (!active) {
+      bar.style.opacity = '0';
+      return;
+    }
+    if (!animate) bar.style.transition = 'none';
+    bar.style.opacity = '1';
+    bar.style.width = `${active.offsetWidth}px`;
+    bar.style.transform = `translateX(${active.offsetLeft}px)`;
+    if (!animate) {
+      // Force a reflow so the snapped values apply before the transition is
+      // restored, then hand animation back to the CSS class.
+      void bar.offsetWidth;
+      bar.style.transition = '';
+    }
+  }
+
+  /**
+   * Remeasures the indicator on the next animation frame, so the read happens
+   * after layout reflects the latest active-tab classes. Coalesces bursts and
+   * is cancellable on destroy.
+   * @param animate - Whether the resulting move should slide.
+   */
+  private scheduleIndicator(animate: boolean): void {
+    if (this.indicatorFrame !== undefined) cancelAnimationFrame(this.indicatorFrame);
+    this.indicatorFrame = requestAnimationFrame(() => {
+      this.indicatorFrame = undefined;
+      this.updateIndicator(animate);
+    });
   }
 
   /**
@@ -171,7 +233,10 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
   private syncActiveTab(): void {
     const items = this.dataSource?.items;
     if (!items || items.length === 0) {
-      this.currentActive = undefined;
+      if (this.currentActive !== undefined) {
+        this.currentActive = undefined;
+        this.scheduleIndicator(false);
+      }
       return;
     }
     if (this.currentActive && items.includes(this.currentActive)) {
@@ -181,5 +246,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
     const index =
       defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0;
     this.currentActive = items[index];
+    // Selection resolved from data (not a user click): snap, don't slide.
+    this.scheduleIndicator(false);
   }
 }
