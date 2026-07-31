@@ -7,10 +7,24 @@
     [class.overflow-y-hidden]="scrollable"
   >
     <div
+      #tabList
       role="tablist"
-      class="tabs flex flex-nowrap -mb-[1px] border-b border-base-300"
+      class="tabs relative flex flex-nowrap -mb-[1px] border-b border-base-300"
       [class.w-full]="justified"
     >
+      <!--
+        Shared sliding indicator: a single underline that travels to the active
+        tab, rather than each tab flipping its own border on/off (which snaps).
+        Pinned to left-0/top-auto so offsetLeft maps 1:1 regardless of the
+        flex justify-content or the justified full-width layout; position and
+        width are measured and set from TS. Sits on the same baseline as the
+        hover ::after so hover → select reads as one continuous underline.
+      -->
+      <div
+        #indicator
+        aria-hidden="true"
+        class="pointer-events-none absolute left-0 top-auto bottom-0 h-[2px] w-0 bg-primary opacity-0 transition-[transform,width] duration-300 ease-out motion-reduce:transition-none"
+      ></div>
       @if (isLoadingState) {
         @for (i of skeletonTabs; track i) {
           <div
@@ -27,14 +41,12 @@
             (keyup.enter)="setActive(item)"
             (keyup.space)="setActive(item)"
             [attr.aria-selected]="currentActive === item"
-            [class.border-primary]="currentActive === item"
-            [class.border-transparent]="currentActive !== item"
             [class.hover:after:scale-x-100]="currentActive !== item"
             [class.flex-1]="justified"
             [class.font-bold]="currentActive === item"
             [class.text-base-content]="currentActive !== item"
             [class.text-primary]="currentActive === item"
-            class="tab relative px-4 py-2 border-b-2 cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2 after:content-[''] after:absolute after:inset-x-0 after:-bottom-[2px] after:h-[2px] after:bg-primary/60 after:origin-center after:scale-x-0 after:transition-transform after:duration-300 after:ease-out"
+            class="tab relative px-4 py-2 border-b-2 border-transparent cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2 after:content-[''] after:absolute after:inset-x-0 after:-bottom-[2px] after:h-[2px] after:bg-primary/60 after:origin-center after:scale-x-0 after:transition-transform after:duration-300 after:ease-out"
             role="tab"
             tabindex="0"
           >
