@@ -43,6 +43,23 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
   /** Pending indicator remeasure, cancelled on destroy so a post-destroy frame can't read a detached ref. */
   private indicatorFrame?: number;
 
+  /**
+   * True while a click-initiated slide is animating. The active tab's
+   * `font-bold` widens the row, which fires {@link resizeObserver}; without
+   * this guard the observer's snap ({@link updateIndicator} with `animate:
+   * false`) would land the indicator at its target the same frame the slide
+   * starts, so the transition never paints. Set synchronously in
+   * {@link setActive} — before the frame runs — so the guard doesn't depend on
+   * rAF-vs-ResizeObserver callback ordering.
+   */
+  private sliding = false;
+
+  /** Clears {@link sliding} after the slide finishes; re-armed per click, cancelled on destroy. */
+  private slidingTimer?: number;
+
+  /** Slide duration in ms; matches the indicator's `duration-300` transition. */
+  private static readonly SLIDE_MS = 300;
+
   /** How far the fade reaches in from each overflowing edge. */
   private static readonly FADE = '2rem';
   /** Data source containing tab items and default active index. */
@@ -119,7 +136,9 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
       this.updateEdgeFades();
       // Tabs may have reflowed (viewport change, justified widths); snap the
       // indicator to the new geometry — animating a resize tick reads as jank.
-      this.updateIndicator(false);
+      // But skip the snap mid-slide: a click's own `font-bold` resizes the row
+      // and fires this observer, and snapping there kills the slide it triggered.
+      if (!this.sliding) this.updateIndicator(false);
     });
     this.resizeObserver.observe(el);
     if (el.firstElementChild) this.resizeObserver.observe(el.firstElementChild);
@@ -131,6 +150,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
     if (this.indicatorFrame !== undefined) cancelAnimationFrame(this.indicatorFrame);
+    if (this.slidingTimer !== undefined) clearTimeout(this.slidingTimer);
   }
 
   /**
@@ -171,8 +191,24 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
     this.activeChange.emit(item);
     // Slide the underline to the new tab. Measure on the next frame, after
     // change detection has applied the active tab's `font-bold` (which widens
-    // it) so the indicator lands on the final, bolded geometry.
+    // it) so the indicator lands on the final, bolded geometry. Guard the slide
+    // against the resize snap the same `font-bold` triggers (see {@link sliding}).
+    this.beginSlide();
     this.scheduleIndicator(true);
+  }
+
+  /**
+   * Marks a click-driven slide as in progress and schedules the guard to lift
+   * once the transition has finished. A timeout (not `transitionend`) so the
+   * flag still clears under `motion-reduce`, where no transition event fires.
+   */
+  private beginSlide(): void {
+    this.sliding = true;
+    if (this.slidingTimer !== undefined) clearTimeout(this.slidingTimer);
+    this.slidingTimer = setTimeout(() => {
+      this.slidingTimer = undefined;
+      this.sliding = false;
+    }, MnTabComponent.SLIDE_MS) as unknown as number;
   }
 
   /**
