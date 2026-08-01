@@ -11,7 +11,7 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {NgClass} from '@angular/common';
+import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {
   MnMultiSelectErrorMessageData,
   MnMultiSelectOption,
@@ -23,6 +23,7 @@ import {mnMultiSelectVariants} from './mn-multi-selectVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 import {MnButton} from '../mn-button';
 import {MnInputField} from '../mn-input-field';
+import {MnBottomSheet} from '../mn-bottom-sheet';
 import {MnConfigService} from "../../config";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
 import {MnLanguageService} from "../../language";
@@ -34,7 +35,7 @@ export const MN_MULTI_SELECT_CONFIG = new InjectionToken<MnMultiSelectUIConfig>(
 @Component({
   selector: 'mn-lib-multi-select',
   standalone: true,
-  imports: [NgClass, FormsModule, MnErrorMessage, MnButton, MnInputField, LucideX, LucideChevronDown],
+  imports: [NgClass, NgTemplateOutlet, FormsModule, MnErrorMessage, MnButton, MnInputField, MnBottomSheet, LucideX, LucideChevronDown],
   templateUrl: './mn-multi-select.html',
   styleUrl: './mn-multi-select.css',
 })
@@ -56,11 +57,11 @@ export class MnMultiSelect implements OnInit {
 
   /** Reference to the trigger element for positioning the dropdown */
   @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
-  /** The panel element currently moved into `document.body`, if any. */
+  /** Layout classes for the anchored popover panel. The mobile sheet is rendered by
+   *  mn-bottom-sheet instead, so it no longer needs a branch here. */
+  readonly panelClasses = 'fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+  /** The anchored popover panel currently moved into `document.body`, if any. */
   private movedPanel: HTMLElement | null = null;
-
-  /** The sheet backdrop element currently moved into `document.body`, if any. */
-  private movedBackdrop: HTMLElement | null = null;
 
   /** Option count at which the search input auto-enables when `searchable` is unset. */
   private static readonly DEFAULT_SEARCH_THRESHOLD = 8;
@@ -102,6 +103,8 @@ export class MnMultiSelect implements OnInit {
    * card) used to leave the portalled panel floating at its stale coordinates.
    */
   private scrollCapture: ((event: Event) => void) | null = null;
+  /** The bottom-sheet host currently moved into `document.body`, if any. */
+  private movedSheet: HTMLElement | null = null;
 
   /**
    * The dropdown panel element, queried while it is rendered by the `@if` block.
@@ -113,23 +116,7 @@ export class MnMultiSelect implements OnInit {
    */
   @ViewChild('dropdown', {static: false})
   set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
-    const el = ref?.nativeElement ?? null;
-    this.movedPanel = this.portal(el, this.movedPanel);
-    if (el && this.isSheet) {
-      this.captureSheetFloor(el);
-    } else if (!el) {
-      this.sheetFloorPx = null;
-    }
-  }
-
-  /**
-   * The dimming backdrop rendered behind the mobile sheet. Portalled alongside the
-   * panel for the same reason — a `position: fixed` backdrop left inside a transformed
-   * ancestor would cover that ancestor rather than the viewport.
-   */
-  @ViewChild('sheetBackdrop', {static: false})
-  set sheetBackdropRef(ref: ElementRef<HTMLElement> | undefined) {
-    this.movedBackdrop = this.portal(ref?.nativeElement ?? null, this.movedBackdrop);
+    this.movedPanel = this.portal(ref?.nativeElement ?? null, this.movedPanel);
   }
 
   /** Currently selected values */
@@ -153,22 +140,21 @@ export class MnMultiSelect implements OnInit {
     if (this.ngControl) this.ngControl.valueAccessor = this;
   }
 
-  ngOnInit() {
-    this.resolveConfig();
-    this.startWatchingViewport();
-
-    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
-      this.resolveConfig();
-    });
-    this.destroyRef.onDestroy(() => {
-      sub.unsubscribe();
-      this.stopWatchingTrigger();
-      this.stopWatchingViewport();
-      this.unlockBodyScroll();
-      // Guarantee the portalled elements never outlive the component.
-      this.movedPanel = this.portal(null, this.movedPanel);
-      this.movedBackdrop = this.portal(null, this.movedBackdrop);
-    });
+  /**
+   * The bottom-sheet host, read as an `ElementRef` so it can be relocated to
+   * `document.body` — its `position: fixed` children (backdrop + container) must anchor
+   * to the viewport, not to any transformed/filtered ancestor of this component. On open
+   * its container height is captured as the sheet's `min-height` floor.
+   */
+  @ViewChild('sheet', {static: false, read: ElementRef})
+  set sheetRef(ref: ElementRef<HTMLElement> | undefined) {
+    const el = ref?.nativeElement ?? null;
+    this.movedSheet = this.portal(el, this.movedSheet);
+    if (el) {
+      this.captureSheetFloor(el);
+    } else {
+      this.sheetFloorPx = null;
+    }
   }
 
   /**
@@ -201,16 +187,22 @@ export class MnMultiSelect implements OnInit {
     this.sheetMediaListener = null;
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    const target = event.target as Node | null;
-    // The panel lives at the body root once open, so it is not a descendant of the
-    // host element — treat clicks inside the portalled panel as "inside" too.
-    const insideHost = !!target && this.elRef.nativeElement.contains(target);
-    const insidePanel = !!target && !!this.movedPanel && this.movedPanel.contains(target);
-    if (!insideHost && !insidePanel) {
-      this.close();
-    }
+  ngOnInit() {
+    this.resolveConfig();
+    this.startWatchingViewport();
+
+    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveConfig();
+    });
+    this.destroyRef.onDestroy(() => {
+      sub.unsubscribe();
+      this.stopWatchingTrigger();
+      this.stopWatchingViewport();
+      this.unlockBodyScroll();
+      // Guarantee the portalled elements never outlive the component.
+      this.movedPanel = this.portal(null, this.movedPanel);
+      this.movedSheet = this.portal(null, this.movedSheet);
+    });
   }
 
   private resolveConfig() {
@@ -281,15 +273,19 @@ export class MnMultiSelect implements OnInit {
     return this.props.options.length >= threshold;
   }
 
-  /** Layout classes for the panel — a bottom-anchored sheet, or the trigger-anchored popover. */
-  get panelClasses(): string {
-    // The sheet sizes to its content (capped at 80vh), so a short list gets a short
-    // sheet. To stop it collapsing upward as the search filters options away, the height
-    // it opens at is captured once and re-applied as a `min-height` floor (see
-    // `sheetFloorPx`): the `flex-1` list then keeps that frame and just shows fewer rows.
-    return this.isSheet
-      ? 'mn-ms-sheet fixed inset-x-0 bottom-0 z-9999 flex flex-col bg-base-100 border-t border-base-300 rounded-t-2xl shadow-lg max-h-[80vh]'
-      : 'fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as Node | null;
+    // The panel lives at the body root once open, so it is not a descendant of the
+    // host element — treat clicks inside the portalled panel as "inside" too.
+    const insideHost = !!target && this.elRef.nativeElement.contains(target);
+    const insidePanel = !!target && !!this.movedPanel && this.movedPanel.contains(target);
+    // In sheet mode the backdrop tap is handled by mn-bottom-sheet's own (dismiss); the
+    // sheet host counts as "inside" here so this listener never double-fires the close.
+    const insideSheet = !!target && !!this.movedSheet && this.movedSheet.contains(target);
+    if (!insideHost && !insidePanel && !insideSheet) {
+      this.close();
+    }
   }
 
   /**
@@ -298,16 +294,23 @@ export class MnMultiSelect implements OnInit {
    * empty on open) and never forces a reflow mid change-detection. The floor equals the
    * content height at that instant, so applying it triggers no resize — it only stops a
    * later, shorter filtered list from pulling the sheet down.
+   *
+   * `hostEl` is the portalled mn-bottom-sheet host (`display: contents`), so the height
+   * is read from its `.mn-sheet-container` child rather than the host itself.
    */
-  private captureSheetFloor(panel: HTMLElement): void {
+  private captureSheetFloor(hostEl: HTMLElement): void {
+    const measure = (): number => {
+      const container = hostEl.querySelector<HTMLElement>('.mn-sheet-container');
+      return container?.offsetHeight ?? hostEl.offsetHeight;
+    };
     if (typeof requestAnimationFrame !== 'function') {
-      this.sheetFloorPx = panel.offsetHeight;
+      this.sheetFloorPx = measure();
       return;
     }
     requestAnimationFrame(() => {
-      // The panel may have closed before the frame ran; don't strand a stale floor.
-      if (!this.isOpen || this.movedPanel !== panel) return;
-      this.sheetFloorPx = panel.offsetHeight;
+      // The sheet may have closed before the frame ran; don't strand a stale floor.
+      if (!this.isOpen || this.movedSheet !== hostEl) return;
+      this.sheetFloorPx = measure();
       this.cdr.markForCheck();
     });
   }

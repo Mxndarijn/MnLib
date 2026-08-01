@@ -1,9 +1,4 @@
 :host {
-  /* Native-feeling sheet curve (iOS-style decelerate, no out-of-bounds overshoot
-     which would expose a gap below a bottom-anchored sheet). Shared by the
-     slide keyframes, the drag spring-back, and the swipe-dismiss glide. */
-  --mn-sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
-
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -13,31 +8,18 @@
   transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
+/* Anchor the mobile sheet to the bottom of the viewport. The sheet's own chrome
+   (rounded top, slide-up, swipe-to-dismiss, safe-area inset, keyboard-grow) is provided
+   by mn-bottom-sheet; the shell only supplies the bottom alignment and the backdrop. */
+:host(.mobile-sheet) {
+  align-items: flex-end;
+}
+
 :host(.is-stacked) {
   transform: scale(0.96) translateY(-1rem);
   filter: brightness(0.9) blur(1px);
   pointer-events: none;
   opacity: 0.8;
-}
-
-/* Swipe-to-dismiss: animate the spring-back, but follow the finger 1:1 while dragging.
-   `min-height` is transitioned too so the mobile sheet grows/shrinks smoothly (not instantly)
-   when the soft keyboard opens/closes — see the `.mn-keyboard-open` growth rule below. */
-.modal-container {
-  transition: transform 0.35s var(--mn-sheet-ease), min-height 0.25s var(--mn-sheet-ease);
-}
-
-.modal-container.sheet-dragging {
-  transition: none;
-}
-
-/* A swipe past the dismiss threshold glides the sheet off-screen via its transform
-   transition. Suppress the slide-up keyframe (it would snap back to 0 first); the
-   backdrop still fades out via its own .closing animation. */
-:host(.swipe-dismissing) .modal-container,
-:host(.swipe-dismissing).closing .modal-container {
-  animation: none !important;
-  transition: transform 0.3s var(--mn-sheet-ease);
 }
 
 @keyframes fadeIn {
@@ -70,19 +52,9 @@
   to { opacity: 0; transform: scale(0.95); }
 }
 
-@keyframes slideUpIn {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Open animations — keyed by the same .anim-* host classes as the close animations
-   below, so mobile bottom-sheet overrides can target both in one place. */
+/* Open animations for the desktop centered dialog — keyed by the same .anim-* host
+   classes as the close animations below. The mobile sheet ignores these; its entrance
+   and exit are owned by mn-bottom-sheet. */
 :host(.anim-slide) .modal-container {
   animation: slideIn 0.2s ease-in-out;
 }
@@ -112,81 +84,9 @@
 }
 
 /* =========================
-   Mobile bottom sheet (< 640px), gated by the .mobile-sheet host class.
-   Anchors the modal to the bottom, makes it full-width with rounded top
-   corners, and overrides every open/close animation with a slide-up.
-   ========================= */
-@media (max-width: 639.98px) {
-  :host(.mobile-sheet) {
-    align-items: flex-end;
-  }
-
-  :host(.mobile-sheet) .modal-container {
-    width: 100%;
-    max-width: 100%;
-    /* Explicit resting min-height so the keyboard-open growth (min-height: 92vh) can transition
-       from a defined value (`auto` would jump instead of animate). */
-    min-height: 0;
-    /* Cap the sheet at 92vh. The soft keyboard OVERLAYS the lower part of the sheet rather
-       than lifting it (on iOS the WKWebView does not resize — Capacitor `resize: none` — so
-       there is nothing to lift into): the sheet stays anchored at the bottom and its inner
-       scroll area scrolls the focused field up above the keyboard (see the `.mn-keyboard-open`
-       growth rule below plus `scroll-padding-bottom` in the host app's styles.css). */
-    max-height: 92vh;
-    /* Keep the footer / last content clear of the iOS home indicator. The sheet
-       background extends into the inset so it reads as one continuous surface.
-       The container is border-box (Tailwind preflight), so this padding sits inside
-       max-height — no need to subtract the inset from the cap. env() is 0 on the
-       web, so this is a no-op outside the native shell. */
-    padding-bottom: env(safe-area-inset-bottom);
-    border-radius: 1rem 1rem 0 0;
-    animation: slideUpIn 0.45s var(--mn-sheet-ease);
-  }
-
-  /* While the soft keyboard is open (the host app adds `.mn-keyboard-open` to <html> on iOS),
-     grow the sheet to the full capped height. The keyboard overlays the lower part, so a
-     SHORT form would otherwise sit entirely behind the keyboard with no room to scroll the
-     focused field into view — pinning the height to 92vh guarantees content above the keyboard
-     for the inner scroll (with its `--keyboard-height` scroll-padding) to reveal the field.
-     Read as a plain class/var, so the library keeps no dependency on Capacitor.
-     Uses `min-height` (not `height`) so it beats the inline `[style.height]` the shell binds for
-     FULL-size / explicit `sizeHeight` sheets WITHOUT `!important` — a larger `min-height` wins over
-     `height`, and `max-height: 92vh` caps a taller inline height back down — AND so the growth can
-     be smoothly transitioned (see the `.modal-container` transition above). The app only adds
-     `.mn-keyboard-open` when the focused field would actually be behind the keyboard, so a modal
-     whose field is already visible never grows. */
-  :host-context(.mn-keyboard-open).mobile-sheet .modal-container {
-    min-height: 92vh;
-  }
-
-  /* Override whichever anim-* open animation was selected */
-  :host(.mobile-sheet).anim-slide .modal-container,
-  :host(.mobile-sheet).anim-fade .modal-container,
-  :host(.mobile-sheet).anim-zoom .modal-container {
-    animation: slideUpIn 0.45s var(--mn-sheet-ease);
-  }
-
-  /* Close via a transform TRANSITION, not a re-triggered keyframe. Replaying the
-     slideUpOut KEYFRAME on a sheet whose open keyframe has already finished does
-     not animate reliably on mobile browsers — the sheet just disappears. A
-     transition animates dependably there (it's the same mechanism swipe-to-dismiss
-     uses), and works whether or not change detection flushes the host class. */
-  :host(.mobile-sheet).closing .modal-container,
-  :host(.mobile-sheet).closing.anim-slide .modal-container,
-  :host(.mobile-sheet).closing.anim-fade .modal-container,
-  :host(.mobile-sheet).closing.anim-zoom .modal-container {
-    animation: none !important;
-    transform: translateY(100%);
-    opacity: 0;
-    transition: transform 0.45s var(--mn-sheet-ease), opacity 0.45s var(--mn-sheet-ease);
-  }
-}
-
-/* =========================
-   Reduced motion: collapse every open/close/drag animation to ~instant.
-   Kept at 0.01ms (not `none`) so animationend still fires for the
-   event-driven close teardown in the shell component. The shell also
-   short-circuits its close wait when reduced motion is requested.
+   Reduced motion: collapse every open/close animation to ~instant. Kept at 0.01ms
+   (not `none`) so animationend still fires for the event-driven close teardown in the
+   shell component. The shell also short-circuits its close wait under reduced motion.
    ========================= */
 @media (prefers-reduced-motion: reduce) {
   :host,

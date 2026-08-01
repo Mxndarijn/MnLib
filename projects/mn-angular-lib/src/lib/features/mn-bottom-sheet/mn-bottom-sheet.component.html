@@ -1,0 +1,37 @@
+@if (showBackdrop) {
+  <!-- Dims the page behind the sheet. Tapping it dismisses when the sheet is dismissible. -->
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+  <div (click)="onBackdropClick()" class="mn-sheet-backdrop fixed inset-0 z-9998 bg-black/40"></div>
+}
+
+<div
+  #container
+  [attr.aria-label]="ariaLabelledby ? null : (ariaLabel || null)"
+  [attr.aria-labelledby]="ariaLabelledby || null"
+  [class.sheet-dragging]="isDraggingSheet"
+  [ngClass]="containerClass"
+  [style.--mn-sheet-max]="maxHeightVh + 'vh'"
+  [style.max-height.vh]="maxHeightVh"
+  [style.min-height.px]="minHeightPx"
+  [style.transform]="sheetDragY ? 'translateY(' + sheetDragY + 'px)' : null"
+  aria-modal="true"
+  class="mn-sheet-container fixed inset-x-0 bottom-0 z-9999 flex flex-col bg-base-100 border-t border-base-300 rounded-t-2xl shadow-lg"
+  role="dialog"
+  tabindex="-1"
+>
+  @if (showGrabber) {
+    <!-- Drag handle for swipe-to-dismiss. The gesture is armed on the whole handle;
+         drags starting on a control inside the projected content are ignored. -->
+    <div
+      (pointercancel)="onSheetPointerUp()"
+      (pointerdown)="onSheetPointerDown($event)"
+      (pointermove)="onSheetPointerMove($event)"
+      (pointerup)="onSheetPointerUp()"
+      class="flex justify-center pt-2 pb-1 touch-none cursor-grab shrink-0"
+    >
+      <div class="h-1.5 w-10 rounded-full bg-base-300"></div>
+    </div>
+  }
+
+  <ng-content></ng-content>
+</div>

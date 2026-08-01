@@ -1,56 +1,6 @@
 /*
-  Mobile bottom-sheet chrome for the dropdown panel.
-
-  These rules are keyed off plain classes rather than `:host` because both the panel
-  and its backdrop are portalled out to `document.body` while open. Angular's emulated
-  encapsulation attribute is stamped on the elements themselves and travels with them
-  when they are relocated, so the scoping still holds — but `:host` would no longer
-  match, since neither element is the host any more.
-
-  Layout (position, size, colour) lives in the template's Tailwind classes; only the
-  things Tailwind cannot express — keyframes and the safe-area inset — are here.
+  The mobile bottom-sheet chrome (anchoring, slide animation, backdrop, safe-area inset)
+  now lives in the shared mn-bottom-sheet component, which this multi-select projects its
+  panel content into. No component-local styles remain — layout is expressed through the
+  template's Tailwind classes.
 */
-
-.mn-ms-sheet {
-  /* Same iOS-style decelerate curve the modal sheet uses, so the two read as one
-     motion language when a multi-select opens from inside a modal. */
-  --mn-sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
-
-  /* Keeps the last option clear of the iOS home indicator. The sheet background
-     extends into the inset so it still reads as one continuous surface. env() is 0
-     on the web, so this is a no-op outside the native shell. */
-  padding-bottom: env(safe-area-inset-bottom);
-
-  animation: mn-ms-sheet-in 0.3s var(--mn-sheet-ease);
-}
-
-.mn-ms-sheet-backdrop {
-  animation: mn-ms-backdrop-in 0.2s ease-out;
-}
-
-@keyframes mn-ms-sheet-in {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes mn-ms-backdrop-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Collapse the entrance animations to ~instant rather than removing them, matching
-   the modal shell's approach so anything listening for animationend still fires. */
-@media (prefers-reduced-motion: reduce) {
-  .mn-ms-sheet,
-  .mn-ms-sheet-backdrop {
-    animation-duration: 0.01ms !important;
-  }
-}

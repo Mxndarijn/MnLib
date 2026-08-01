@@ -429,7 +429,22 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
 
   /** The portalled sheet backdrop, if one is rendered. */
   function backdrop(): HTMLElement | null {
-    return document.querySelector('.mn-ms-sheet-backdrop');
+    return document.querySelector('.mn-sheet-backdrop');
+  }
+
+  /** The shared bottom-sheet container (mn-bottom-sheet's chrome), if in sheet mode. */
+  function sheet(): HTMLElement | null {
+    return document.querySelector('.mn-sheet-container');
+  }
+
+  /** The mn-bottom-sheet host element that gets portalled to the body in sheet mode. */
+  function sheetHost(): HTMLElement | null {
+    return document.querySelector('mn-bottom-sheet');
+  }
+
+  /** The anchored popover wrapper (the trigger-positioned panel), if in popover mode. */
+  function anchoredPanel(): HTMLElement | null {
+    return document.querySelector('.max-h-60');
   }
 
   /** The search input inside the panel, if one is rendered (rendered by mn-lib-input-field). */
@@ -459,6 +474,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     // Defensive: strip any leaked overlay so tests stay isolated.
     panel()?.remove();
     backdrop()?.remove();
+    sheetHost()?.remove();
   });
 
   describe('search threshold', () => {
@@ -529,17 +545,19 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
       fixture.detectChanges();
 
       expect(component.isSheet).toBeTrue();
-      expect(panel()!.classList.contains('mn-ms-sheet')).toBeTrue();
+      expect(sheet()).not.toBeNull();
       expect(backdrop()).not.toBeNull();
     });
 
-    it('portals both the sheet and its backdrop to document.body', () => {
+    it('portals the sheet host to document.body so its fixed chrome anchors to the viewport', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
       fixture.detectChanges();
 
-      expect(panel()!.parentElement).toBe(document.body);
-      expect(backdrop()!.parentElement).toBe(document.body);
+      // The whole mn-bottom-sheet host (backdrop + container) is relocated as one unit.
+      expect(sheetHost()!.parentElement).toBe(document.body);
+      expect(sheetHost()!.contains(backdrop())).toBeTrue();
+      expect(sheetHost()!.contains(panel())).toBeTrue();
     });
 
     it('drops the trigger-relative inline position that only the anchored panel needs', () => {
@@ -640,7 +658,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
 
       expect(component.isSheet).toBeFalse();
       expect(backdrop()).toBeNull();
-      expect(panel()!.style.top).toMatch(/px$/);
+      expect(anchoredPanel()!.style.top).toMatch(/px$/);
     });
   });
 
@@ -653,9 +671,9 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
       fixture.detectChanges();
 
       expect(component.isSheet).toBeFalse();
-      expect(panel()!.classList.contains('mn-ms-sheet')).toBeFalse();
+      expect(sheet()).toBeNull();
       expect(backdrop()).toBeNull();
-      expect(panel()!.style.top).toMatch(/px$/);
+      expect(anchoredPanel()!.style.top).toMatch(/px$/);
     });
 
     it('leaves body scroll untouched', () => {
