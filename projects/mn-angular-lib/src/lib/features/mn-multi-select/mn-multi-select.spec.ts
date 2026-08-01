@@ -3,7 +3,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {Subject} from 'rxjs';
 
-import {MnMultiSelect, MnMultiSelectProps} from 'mn-angular-lib';
+import {MnMultiSelect, MnMultiSelectOption, MnMultiSelectProps} from 'mn-angular-lib';
 import {MnConfigService} from '../../config';
 import {MnLanguageService} from '../../language';
 
@@ -41,7 +41,12 @@ const languageStub: Partial<MnLanguageService> = {
   `,
 })
 class HostComponent {
-  /** Props for the multi-select under test. */
+  /**
+   * Props for the multi-select under test. `mobileSheet: false` pins the anchored
+   * layout: this suite asserts trigger-relative positioning and scroll-to-close, both
+   * of which the sheet deliberately does not do — without the pin the assertions would
+   * hinge on how wide the Karma iframe happens to be.
+   */
   props: MnMultiSelectProps = {
     id: 'test-ms',
     options: [
@@ -50,6 +55,7 @@ class HostComponent {
       {label: 'Gamma', value: 'c'},
     ],
     searchable: true,
+    mobileSheet: false,
   };
 }
 
@@ -364,5 +370,310 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     fixture.detectChanges();
     expect(component.isCollapsed).toBeTrue();
     expect(component.collapseSummaryText).toBe('4 chosen');
+  });
+});
+
+/**
+ * Coverage for the mobile bottom sheet and the auto-enabling search input.
+ *
+ * The sheet exists because the anchored panel sits at the trigger's bottom edge, which
+ * on a phone is exactly where the soft keyboard appears once the search field is
+ * focused. Viewport width is stubbed rather than measured so neither suite depends on
+ * the size of the Karma iframe.
+ */
+@Component({
+  standalone: true,
+  imports: [MnMultiSelect],
+  template: `
+    <mn-lib-multi-select [props]="props"></mn-lib-multi-select> `,
+})
+class SheetHostComponent {
+  /** Props for the multi-select under test; each spec overrides before first render. */
+  props: MnMultiSelectProps = {
+    id: 'sheet-ms',
+    label: 'Members',
+    options: [],
+  };
+}
+
+describe('MnMultiSelect (mobile sheet and search threshold)', () => {
+  let fixture: ComponentFixture<SheetHostComponent>;
+  let component: MnMultiSelect;
+
+  /** Builds `count` distinct options, enough to cross whichever threshold is under test. */
+  function optionsOfLength(count: number): MnMultiSelectOption[] {
+    return Array.from({length: count}, (_, i) => ({label: `Option ${i + 1}`, value: i + 1}));
+  }
+
+  /**
+   * Forces the breakpoint the component reads at init. Stubbing `matchMedia` (rather
+   * than resizing) keeps the layout under test independent of the runner's window.
+   */
+  function stubViewport(narrow: boolean): void {
+    spyOn(window, 'matchMedia').and.returnValue({
+      matches: narrow,
+      media: '',
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    } as unknown as MediaQueryList);
+  }
+
+  /** The portalled panel, wherever it currently lives in the DOM. */
+  function panel(): HTMLElement | null {
+    return document.getElementById('sheet-ms-listbox');
+  }
+
+  /** The portalled sheet backdrop, if one is rendered. */
+  function backdrop(): HTMLElement | null {
+    return document.querySelector('.mn-ms-sheet-backdrop');
+  }
+
+  /** The search input inside the panel, if one is rendered (rendered by mn-lib-input-field). */
+  function searchInput(): HTMLInputElement | null {
+    return panel()?.querySelector('mn-lib-input-field input') ?? null;
+  }
+
+  /** Rebuilds the fixture so per-test prop tweaks are picked up before first render. */
+  function build(props: Partial<MnMultiSelectProps>): void {
+    fixture = TestBed.createComponent(SheetHostComponent);
+    fixture.componentInstance.props = {...fixture.componentInstance.props, ...props};
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [SheetHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+  });
+
+  afterEach(() => {
+    // Defensive: strip any leaked overlay so tests stay isolated.
+    panel()?.remove();
+    backdrop()?.remove();
+  });
+
+  describe('search threshold', () => {
+    beforeEach(() => stubViewport(false));
+
+    it('hides the search input just below the default threshold of 8', () => {
+      build({options: optionsOfLength(7)});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSearchable).toBeFalse();
+      expect(searchInput()).toBeNull();
+    });
+
+    it('auto-enables the search input at the default threshold of 8', () => {
+      build({options: optionsOfLength(8)});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSearchable).toBeTrue();
+      expect(searchInput()).not.toBeNull();
+    });
+
+    it('lets an explicit searchable:false suppress search on a long list', () => {
+      build({options: optionsOfLength(20), searchable: false});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSearchable).toBeFalse();
+      expect(searchInput()).toBeNull();
+    });
+
+    it('lets an explicit searchable:true force search on a short list', () => {
+      build({options: optionsOfLength(2), searchable: true});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSearchable).toBeTrue();
+      expect(searchInput()).not.toBeNull();
+    });
+
+    it('honours a custom searchThreshold instead of the default', () => {
+      build({options: optionsOfLength(3), searchThreshold: 3});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSearchable).toBeTrue();
+      expect(searchInput()).not.toBeNull();
+    });
+
+    it('still filters the option list through the auto-enabled input', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      component.onSearch('Option 1');
+      fixture.detectChanges();
+
+      // "Option 1" and "Option 10" — a substring match, so both survive.
+      expect(component.filteredOptions.map(o => o.label)).toEqual(['Option 1', 'Option 10']);
+    });
+  });
+
+  describe('narrow viewport', () => {
+    beforeEach(() => stubViewport(true));
+
+    it('renders the panel as a sheet with a backdrop', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSheet).toBeTrue();
+      expect(panel()!.classList.contains('mn-ms-sheet')).toBeTrue();
+      expect(backdrop()).not.toBeNull();
+    });
+
+    it('portals both the sheet and its backdrop to document.body', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(panel()!.parentElement).toBe(document.body);
+      expect(backdrop()!.parentElement).toBe(document.body);
+    });
+
+    it('drops the trigger-relative inline position that only the anchored panel needs', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      const el = panel()!;
+      expect(el.style.top).toBe('');
+      expect(el.style.left).toBe('');
+      expect(el.style.width).toBe('');
+    });
+
+    it('stays open on scroll and resize, which the soft keyboard triggers', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      // Focusing the search field fires `resize` on Android; closing there would
+      // dismiss the sheet the instant the user tries to search.
+      component.onWindowScrollOrResize();
+      fixture.detectChanges();
+
+      expect(component.isOpen).toBeTrue();
+      expect(panel()).not.toBeNull();
+    });
+
+    it('closes on an outside click and tears down both overlays', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+      fixture.detectChanges();
+
+      expect(component.isOpen).toBeFalse();
+      expect(panel()).toBeNull();
+      expect(backdrop()).toBeNull();
+    });
+
+    it('removes both overlays when destroyed while open', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      fixture.destroy();
+
+      expect(panel()).toBeNull();
+      expect(backdrop()).toBeNull();
+    });
+
+    it('locks body scroll while open and restores the previous value on close', () => {
+      document.body.style.overflow = 'auto';
+      build({options: optionsOfLength(10)});
+
+      component.toggle();
+      fixture.detectChanges();
+      expect(document.body.style.overflow).toBe('hidden');
+
+      component.close();
+      fixture.detectChanges();
+      expect(document.body.style.overflow).toBe('auto');
+
+      document.body.style.overflow = '';
+    });
+
+    it('captures a min-height floor once the sheet has opened', async () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      // The floor is measured on the next frame, so it is still null synchronously.
+      expect(component.sheetFloorPx).toBeNull();
+
+      await new Promise<void>(r => requestAnimationFrame(() => r()));
+      fixture.detectChanges();
+
+      expect(component.sheetFloorPx).not.toBeNull();
+      expect(component.sheetFloorPx!).toBeGreaterThanOrEqual(0);
+    });
+
+    it('clears the floor when the sheet closes so the next open re-measures', async () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+      await new Promise<void>(r => requestAnimationFrame(() => r()));
+
+      component.close();
+      fixture.detectChanges();
+
+      expect(component.sheetFloorPx).toBeNull();
+    });
+
+    it('keeps the anchored panel when mobileSheet is disabled', () => {
+      build({options: optionsOfLength(10), mobileSheet: false});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSheet).toBeFalse();
+      expect(backdrop()).toBeNull();
+      expect(panel()!.style.top).toMatch(/px$/);
+    });
+  });
+
+  describe('wide viewport', () => {
+    beforeEach(() => stubViewport(false));
+
+    it('keeps the trigger-anchored panel and renders no backdrop', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(component.isSheet).toBeFalse();
+      expect(panel()!.classList.contains('mn-ms-sheet')).toBeFalse();
+      expect(backdrop()).toBeNull();
+      expect(panel()!.style.top).toMatch(/px$/);
+    });
+
+    it('leaves body scroll untouched', () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+
+      expect(document.body.style.overflow).toBe('');
+    });
+
+    it('never captures a sheet floor for the anchored panel', async () => {
+      build({options: optionsOfLength(10)});
+      component.toggle();
+      fixture.detectChanges();
+      await new Promise<void>(r => requestAnimationFrame(() => r()));
+      fixture.detectChanges();
+
+      expect(component.sheetFloorPx).toBeNull();
+    });
   });
 });

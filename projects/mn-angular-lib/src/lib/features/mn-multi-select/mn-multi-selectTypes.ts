@@ -32,11 +32,31 @@ export type MnMultiSelectProps<TValue = unknown> = {
   /** Available options to select from */
   options: MnMultiSelectOption<TValue>[];
 
-  /** Whether to show a search/filter input (default: false) */
+  /**
+   * Whether to show a search/filter input. When omitted, search auto-enables once the
+   * number of options reaches `searchThreshold`, so long lists stay filterable without
+   * every call site having to opt in. Set explicitly to force it on or off.
+   */
   searchable?: boolean;
+
+  /**
+   * Number of options at which the search input auto-enables (default: 8).
+   * Ignored when `searchable` is set explicitly.
+   */
+  searchThreshold?: number;
 
   /** Placeholder text for the search input */
   searchPlaceholder?: string;
+
+  /**
+   * Whether the dropdown renders as a bottom sheet on small screens (< 640px).
+   * Defaults to true. Set to false to keep the trigger-anchored panel on mobile.
+   *
+   * The anchored panel sits at the trigger's bottom edge, which puts it directly in
+   * the path of the soft keyboard as soon as the search input takes focus. The sheet
+   * is anchored to the viewport instead, so the list stays reachable.
+   */
+  mobileSheet?: boolean;
 
   /** Maximum number of items that can be selected (undefined = unlimited) */
   maxSelections?: number;
@@ -109,4 +129,7 @@ export type MnMultiSelectUIConfig = {
 
   /** Text shown when no options match the search filter */
   noOptionsFound?: string;
+
+  /** Accessible label for the mobile sheet's close button (falls back to 'Close') */
+  closeLabel?: string;
 }
