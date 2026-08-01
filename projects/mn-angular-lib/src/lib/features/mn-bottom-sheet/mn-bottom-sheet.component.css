@@ -1,0 +1,76 @@
+:host {
+  /* Native-feeling sheet curve (iOS-style decelerate, no out-of-bounds overshoot which
+     would expose a gap below the bottom-anchored sheet). Shared by the entrance keyframe,
+     the drag spring-back, and the swipe-dismiss glide so they read as one motion. */
+  --mn-sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  display: contents;
+}
+
+.mn-sheet-container {
+  /* Keep the last content clear of the iOS home indicator. The sheet background extends
+     into the inset so it still reads as one continuous surface. env() is 0 on the web,
+     so this is a no-op outside the native shell. */
+  padding-bottom: env(safe-area-inset-bottom);
+
+  /* Defined resting floor so the keyboard-grow (min-height -> max) animates from a set
+     value instead of jumping from `auto`. A consumer-supplied `minHeightPx` (inline
+     style) overrides this without disturbing the transition. */
+  min-height: 0;
+
+  /* Animate the spring-back / exit glide (follow the finger 1:1 while dragging), and the
+     keyboard-driven grow/shrink. */
+  transition: transform 0.35s var(--mn-sheet-ease), min-height 0.25s var(--mn-sheet-ease);
+
+  /* Entrance: rise from below the fold. */
+  animation: mn-sheet-in 0.35s var(--mn-sheet-ease);
+}
+
+/* While the host app marks the soft keyboard open, an opted-in sheet grows to its cap so
+   a short body still has scroll room to lift the focused field above the keyboard. Read
+   as a plain class/var, so the library keeps no dependency on the native shell. */
+:host(.grow-with-keyboard):host-context(.mn-keyboard-open) .mn-sheet-container {
+  min-height: var(--mn-sheet-max, 92vh);
+}
+
+.mn-sheet-container.sheet-dragging {
+  transition: none;
+}
+
+.mn-sheet-backdrop {
+  animation: mn-sheet-backdrop-in 0.2s ease-out;
+}
+
+/* While dismissing, suppress the entrance keyframe (it would fight the exit transform)
+   and let the transform transition glide the sheet the rest of the way down. */
+:host(.is-dismissing) .mn-sheet-container {
+  animation: none;
+}
+
+@keyframes mn-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes mn-sheet-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Collapse the entrance/exit to ~instant rather than removing them, so anything waiting
+   on transitionend (the exit teardown) still resolves promptly. */
+@media (prefers-reduced-motion: reduce) {
+  .mn-sheet-container,
+  .mn-sheet-backdrop {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

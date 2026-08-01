@@ -63,29 +63,28 @@
 
   <!-- Dropdown -->
   @if (isOpen) {
-    <!-- Dims the page behind the sheet. Deliberately has no click handler: the host's
-         `document:click` listener already treats anything outside the panel as a
-         dismissal, so a second handler would only duplicate that path. -->
     @if (isSheet) {
-      <div #sheetBackdrop class="mn-ms-sheet-backdrop fixed inset-0 z-9998 bg-black/40"></div>
-    }
-    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
-    <div
-    #dropdown
-      [id]="resolvedId + '-listbox'"
-      aria-multiselectable="true"
-      role="listbox"
-      [ngClass]="panelClasses"
-      [style.top]="isSheet ? null : dropdownStyle.top"
-      [style.left]="isSheet ? null : dropdownStyle.left"
-      [style.width]="isSheet ? null : dropdownStyle.width"
-      [style.min-height.px]="isSheet ? sheetFloorPx : null"
-      (click)="$event.stopPropagation()"
-    >
-        <!-- The sheet covers its own trigger, so it needs a header to name the field and
-             an explicit way out — tapping the trigger again is not reachable here. -->
-        @if (isSheet) {
-          <div class="flex items-center justify-between gap-x-2 px-4 pt-4 pb-2 shrink-0">
+      <!-- On mobile the panel is presented as a shared bottom sheet: the sheet chrome
+           (backdrop, grabber, swipe/flick-to-dismiss, slide animation) lives in
+           mn-bottom-sheet; this component only projects the field's content into it.
+           The sheet host is portalled to document.body (see the `sheet` ViewChild) so
+           its `position: fixed` anchors to the viewport, not a transformed ancestor. -->
+      <mn-bottom-sheet
+        #sheet
+        (dismiss)="close()"
+        [ariaLabel]="uiConfig.ariaLabel || uiConfig.label || props.label || uiConfig.placeholder || props.placeholder"
+        [maxHeightVh]="80"
+        [minHeightPx]="sheetFloorPx"
+      >
+        <div
+          [id]="resolvedId + '-listbox'"
+          aria-multiselectable="true"
+          class="flex flex-col flex-1 min-h-0 overflow-hidden"
+          role="listbox"
+        >
+          <!-- The sheet covers its own trigger, so it needs a header to name the field and
+               an explicit way out — tapping the trigger again is not reachable here. -->
+          <div class="flex items-center justify-between gap-x-2 px-4 pt-1 pb-2 shrink-0">
             <p class="text-base font-medium text-base-content truncate">
               {{ uiConfig.label || props.label || uiConfig.placeholder || props.placeholder || '' }}
             </p>
@@ -98,63 +97,84 @@
               [attr.aria-label]="uiConfig.closeLabel || 'Close'"
             ><svg lucideX [size]="20"></svg></button>
           </div>
-        }
-        @if (isSearchable) {
-          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
-          <div
-            class="border-b border-base-300 shrink-0"
-            [ngClass]="isSheet ? 'px-4 py-2' : 'p-2'"
-            (click)="$event.stopPropagation()"
-          >
-            <mn-lib-input-field
-              [ngModel]="searchTerm"
-              [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="onSearch($event)"
-              [props]="{
-                id: resolvedId + '-search',
-                type: 'search',
-                placeholder: props.searchPlaceholder || 'Search...',
-                ariaLabel: props.searchPlaceholder || 'Search...',
-                fullWidth: true,
-                size: 'sm'
-              }"
-            ></mn-lib-input-field>
-          </div>
-        }
-        <!-- In sheet mode the panel is the flex column and this list is the scroller;
-             anchored, the panel itself scrolls and this is a passthrough wrapper. -->
-        <div [ngClass]="isSheet ? 'flex-1 overflow-auto overscroll-contain' : ''">
-          @for (opt of filteredOptions; track opt.value) {
-            <div
-              (keyup.enter)="toggleOption(opt)"
-              (keyup.space)="toggleOption(opt)"
-              [attr.aria-selected]="isSelected(opt)"
-              class="flex items-center gap-x-2 cursor-pointer text-base-content hover:bg-base-200"
-              [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'"
-              [class.opacity-50]="opt.disabled || isMaxReached(opt)"
-              [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
-              (click)="toggleOption(opt); $event.stopPropagation()"
-              role="option"
-              tabindex="0"
-            >
-              <input
-                type="checkbox"
-                class="w-4 h-4 accent-primary pointer-events-none shrink-0"
-                [checked]="isSelected(opt)"
-                [disabled]="opt.disabled || isMaxReached(opt)"
-                tabindex="-1"
-              />
-              <span>{{ opt.label }}</span>
-            </div>
-          }
-          @if (filteredOptions.length === 0) {
-            <div class="text-base-content/50" [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'">
-              {{ uiConfig.noOptionsFound || 'No options found' }}
-            </div>
-          }
+          <ng-container [ngTemplateOutlet]="panelBody"></ng-container>
         </div>
-    </div>
+      </mn-bottom-sheet>
+    } @else {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <div
+        #dropdown
+        (click)="$event.stopPropagation()"
+        [id]="resolvedId + '-listbox'"
+        [ngClass]="panelClasses"
+        [style.left]="dropdownStyle.left"
+        [style.top]="dropdownStyle.top"
+        [style.width]="dropdownStyle.width"
+        aria-multiselectable="true"
+        role="listbox"
+      >
+        <ng-container [ngTemplateOutlet]="panelBody"></ng-container>
+      </div>
+    }
   }
+
+  <!-- The search box + option list, shared verbatim by the sheet and the anchored
+       popover. `isSheet` only tunes spacing/sizing and which element scrolls: in sheet
+       mode the list is the flex scroller; anchored, the popover itself scrolls. -->
+  <ng-template #panelBody>
+    @if (isSearchable) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <div
+        (click)="$event.stopPropagation()"
+        [ngClass]="isSheet ? 'px-4 py-2' : 'p-2'"
+        class="border-b border-base-300 shrink-0"
+      >
+        <mn-lib-input-field
+          (ngModelChange)="onSearch($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [ngModel]="searchTerm"
+          [props]="{
+            id: resolvedId + '-search',
+            type: 'search',
+            placeholder: props.searchPlaceholder || 'Search...',
+            ariaLabel: props.searchPlaceholder || 'Search...',
+            fullWidth: true,
+            size: 'sm'
+          }"
+        ></mn-lib-input-field>
+      </div>
+    }
+    <div [ngClass]="isSheet ? 'flex-1 overflow-auto overscroll-contain' : ''">
+      @for (opt of filteredOptions; track opt.value) {
+        <div
+          (click)="toggleOption(opt); $event.stopPropagation()"
+          (keyup.enter)="toggleOption(opt)"
+          (keyup.space)="toggleOption(opt)"
+          [attr.aria-selected]="isSelected(opt)"
+          [class.opacity-50]="opt.disabled || isMaxReached(opt)"
+          [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
+          [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'"
+          class="flex items-center gap-x-2 cursor-pointer text-base-content hover:bg-base-200"
+          role="option"
+          tabindex="0"
+        >
+          <input
+            [checked]="isSelected(opt)"
+            [disabled]="opt.disabled || isMaxReached(opt)"
+            class="w-4 h-4 accent-primary pointer-events-none shrink-0"
+            tabindex="-1"
+            type="checkbox"
+          />
+          <span>{{ opt.label }}</span>
+        </div>
+      }
+      @if (filteredOptions.length === 0) {
+        <div [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'" class="text-base-content/50">
+          {{ uiConfig.noOptionsFound || 'No options found' }}
+        </div>
+      }
+    </div>
+  </ng-template>
 
   @if (showError) {
     @if (props.showAllErrors) {
