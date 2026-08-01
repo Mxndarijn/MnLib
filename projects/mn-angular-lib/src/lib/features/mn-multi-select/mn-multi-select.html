@@ -63,55 +63,96 @@
 
   <!-- Dropdown -->
   @if (isOpen) {
+    <!-- Dims the page behind the sheet. Deliberately has no click handler: the host's
+         `document:click` listener already treats anything outside the panel as a
+         dismissal, so a second handler would only duplicate that path. -->
+    @if (isSheet) {
+      <div #sheetBackdrop class="mn-ms-sheet-backdrop fixed inset-0 z-9998 bg-black/40"></div>
+    }
     <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
     <div
     #dropdown
       [id]="resolvedId + '-listbox'"
       aria-multiselectable="true"
       role="listbox"
-      class="fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto"
-      [style.top]="dropdownStyle.top"
-      [style.left]="dropdownStyle.left"
-      [style.width]="dropdownStyle.width"
+      [ngClass]="panelClasses"
+      [style.top]="isSheet ? null : dropdownStyle.top"
+      [style.left]="isSheet ? null : dropdownStyle.left"
+      [style.width]="isSheet ? null : dropdownStyle.width"
+      [style.min-height.px]="isSheet ? sheetFloorPx : null"
       (click)="$event.stopPropagation()"
     >
-        @if (props.searchable) {
-          <div class="p-2 border-b border-base-300">
-            <input
-              type="text"
-              class="w-full p-1.5 text-sm border border-base-300 rounded-md outline-none focus:border-primary-500 bg-base-200 text-base-content placeholder-base-content/50"
-              [placeholder]="props.searchPlaceholder || 'Search...'"
-              [value]="searchTerm"
-              (input)="onSearch(($any($event.target)).value)"
-              (click)="$event.stopPropagation()"
-            />
+        <!-- The sheet covers its own trigger, so it needs a header to name the field and
+             an explicit way out — tapping the trigger again is not reachable here. -->
+        @if (isSheet) {
+          <div class="flex items-center justify-between gap-x-2 px-4 pt-4 pb-2 shrink-0">
+            <p class="text-base font-medium text-base-content truncate">
+              {{ uiConfig.label || props.label || uiConfig.placeholder || props.placeholder || '' }}
+            </p>
+            <button
+              mnButton
+              [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
+              type="button"
+              class="shrink-0 cursor-pointer"
+              (click)="close()"
+              [attr.aria-label]="uiConfig.closeLabel || 'Close'"
+            ><svg lucideX [size]="20"></svg></button>
           </div>
         }
-        @for (opt of filteredOptions; track opt.value) {
+        @if (isSearchable) {
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
           <div
-            (keyup.enter)="toggleOption(opt)"
-            (keyup.space)="toggleOption(opt)"
-            [attr.aria-selected]="isSelected(opt)"
-            class="flex items-center gap-x-2 px-3 py-2 text-sm cursor-pointer text-base-content hover:bg-base-200"
-            [class.opacity-50]="opt.disabled || isMaxReached(opt)"
-            [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
-            (click)="toggleOption(opt); $event.stopPropagation()"
-            role="option"
-            tabindex="0"
+            class="border-b border-base-300 shrink-0"
+            [ngClass]="isSheet ? 'px-4 py-2' : 'p-2'"
+            (click)="$event.stopPropagation()"
           >
-            <input
-              type="checkbox"
-              class="w-4 h-4 accent-primary pointer-events-none"
-              [checked]="isSelected(opt)"
-              [disabled]="opt.disabled || isMaxReached(opt)"
-              tabindex="-1"
-            />
-            <span>{{ opt.label }}</span>
+            <mn-lib-input-field
+              [ngModel]="searchTerm"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="onSearch($event)"
+              [props]="{
+                id: resolvedId + '-search',
+                type: 'search',
+                placeholder: props.searchPlaceholder || 'Search...',
+                ariaLabel: props.searchPlaceholder || 'Search...',
+                fullWidth: true,
+                size: 'sm'
+              }"
+            ></mn-lib-input-field>
           </div>
         }
-        @if (filteredOptions.length === 0) {
-          <div class="px-3 py-2 text-sm text-base-content/50">{{ uiConfig.noOptionsFound || 'No options found' }}</div>
-        }
+        <!-- In sheet mode the panel is the flex column and this list is the scroller;
+             anchored, the panel itself scrolls and this is a passthrough wrapper. -->
+        <div [ngClass]="isSheet ? 'flex-1 overflow-auto overscroll-contain' : ''">
+          @for (opt of filteredOptions; track opt.value) {
+            <div
+              (keyup.enter)="toggleOption(opt)"
+              (keyup.space)="toggleOption(opt)"
+              [attr.aria-selected]="isSelected(opt)"
+              class="flex items-center gap-x-2 cursor-pointer text-base-content hover:bg-base-200"
+              [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'"
+              [class.opacity-50]="opt.disabled || isMaxReached(opt)"
+              [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
+              (click)="toggleOption(opt); $event.stopPropagation()"
+              role="option"
+              tabindex="0"
+            >
+              <input
+                type="checkbox"
+                class="w-4 h-4 accent-primary pointer-events-none shrink-0"
+                [checked]="isSelected(opt)"
+                [disabled]="opt.disabled || isMaxReached(opt)"
+                tabindex="-1"
+              />
+              <span>{{ opt.label }}</span>
+            </div>
+          }
+          @if (filteredOptions.length === 0) {
+            <div class="text-base-content/50" [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'">
+              {{ uiConfig.noOptionsFound || 'No options found' }}
+            </div>
+          }
+        </div>
     </div>
   }
 

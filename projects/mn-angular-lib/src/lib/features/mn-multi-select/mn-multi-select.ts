@@ -18,10 +18,11 @@ import {
   MnMultiSelectProps,
   MnMultiSelectUIConfig
 } from './mn-multi-selectTypes';
-import {NgControl, ValidationErrors, Validators} from '@angular/forms';
+import {FormsModule, NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {mnMultiSelectVariants} from './mn-multi-selectVariants';
 import {MnErrorMessage} from '../mn-error-message/mn-error-message';
 import {MnButton} from '../mn-button';
+import {MnInputField} from '../mn-input-field';
 import {MnConfigService} from "../../config";
 import {MN_INSTANCE_ID, MN_SECTION_PATH} from "../../context";
 import {MnLanguageService} from "../../language";
@@ -33,8 +34,9 @@ export const MN_MULTI_SELECT_CONFIG = new InjectionToken<MnMultiSelectUIConfig>(
 @Component({
   selector: 'mn-lib-multi-select',
   standalone: true,
-  imports: [NgClass, MnErrorMessage, MnButton, LucideX, LucideChevronDown],
+  imports: [NgClass, FormsModule, MnErrorMessage, MnButton, MnInputField, LucideX, LucideChevronDown],
   templateUrl: './mn-multi-select.html',
+  styleUrl: './mn-multi-select.css',
 })
 export class MnMultiSelect implements OnInit {
   ngControl = inject(NgControl, {optional: true, self: true});
@@ -56,6 +58,35 @@ export class MnMultiSelect implements OnInit {
   @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
   /** The panel element currently moved into `document.body`, if any. */
   private movedPanel: HTMLElement | null = null;
+
+  /** The sheet backdrop element currently moved into `document.body`, if any. */
+  private movedBackdrop: HTMLElement | null = null;
+
+  /** Option count at which the search input auto-enables when `searchable` is unset. */
+  private static readonly DEFAULT_SEARCH_THRESHOLD = 8;
+
+  /** Tailwind's `sm` breakpoint — below this the panel renders as a bottom sheet.
+   *  Kept in step with the same constant in `MnModalShellComponent`. */
+  private static readonly SHEET_MAX_WIDTH = 639.98;
+
+  /** Whether the viewport is currently narrow enough for the sheet layout. */
+  private isNarrowViewport = false;
+
+  /** Live breakpoint match, so rotating the device re-evaluates the layout. */
+  private sheetMedia: MediaQueryList | null = null;
+
+  /** The listener registered on `sheetMedia`, retained for teardown. */
+  private sheetMediaListener: ((event: MediaQueryListEvent) => void) | null = null;
+
+  /** `document.body`'s inline `overflow` before the sheet locked it, restored on close. */
+  private previousBodyOverflow: string | null = null;
+
+  /**
+   * The sheet's height (px) captured the moment it opened, before any search. Re-applied
+   * as a `min-height` floor so filtering the option list shorter cannot shrink the sheet
+   * mid-type. Null while anchored or closed, so the popover and desktop path are untouched.
+   */
+  sheetFloorPx: number | null = null;
 
   /**
    * Watches the trigger while the panel is open. The panel lives in `document.body`,
@@ -82,7 +113,23 @@ export class MnMultiSelect implements OnInit {
    */
   @ViewChild('dropdown', {static: false})
   set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
-    this.relocateDropdown(ref?.nativeElement ?? null);
+    const el = ref?.nativeElement ?? null;
+    this.movedPanel = this.portal(el, this.movedPanel);
+    if (el && this.isSheet) {
+      this.captureSheetFloor(el);
+    } else if (!el) {
+      this.sheetFloorPx = null;
+    }
+  }
+
+  /**
+   * The dimming backdrop rendered behind the mobile sheet. Portalled alongside the
+   * panel for the same reason — a `position: fixed` backdrop left inside a transformed
+   * ancestor would cover that ancestor rather than the viewport.
+   */
+  @ViewChild('sheetBackdrop', {static: false})
+  set sheetBackdropRef(ref: ElementRef<HTMLElement> | undefined) {
+    this.movedBackdrop = this.portal(ref?.nativeElement ?? null, this.movedBackdrop);
   }
 
   /** Currently selected values */
@@ -108,6 +155,7 @@ export class MnMultiSelect implements OnInit {
 
   ngOnInit() {
     this.resolveConfig();
+    this.startWatchingViewport();
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
@@ -115,9 +163,42 @@ export class MnMultiSelect implements OnInit {
     this.destroyRef.onDestroy(() => {
       sub.unsubscribe();
       this.stopWatchingTrigger();
-      // Guarantee the portalled panel never outlives the component.
-      this.relocateDropdown(null);
+      this.stopWatchingViewport();
+      this.unlockBodyScroll();
+      // Guarantee the portalled elements never outlive the component.
+      this.movedPanel = this.portal(null, this.movedPanel);
+      this.movedBackdrop = this.portal(null, this.movedBackdrop);
     });
+  }
+
+  /**
+   * Tracks the sheet breakpoint through `matchMedia` rather than reading `innerWidth`
+   * once, so rotating the device switches layout instead of leaving a panel positioned
+   * for the previous orientation. An open panel is closed on the switch — its anchored
+   * coordinates and its sheet layout are not interchangeable.
+   */
+  private startWatchingViewport(): void {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+
+    this.sheetMedia = window.matchMedia(`(max-width: ${MnMultiSelect.SHEET_MAX_WIDTH}px)`);
+    this.isNarrowViewport = this.sheetMedia.matches;
+
+    this.sheetMediaListener = (event: MediaQueryListEvent) => {
+      this.isNarrowViewport = event.matches;
+      this.close();
+      // The listener fires outside Angular, so a zoneless app needs an explicit nudge.
+      this.cdr.markForCheck();
+    };
+    this.sheetMedia.addEventListener('change', this.sheetMediaListener);
+  }
+
+  /** Tears down the breakpoint listener. Idempotent. */
+  private stopWatchingViewport(): void {
+    if (this.sheetMedia && this.sheetMediaListener) {
+      this.sheetMedia.removeEventListener('change', this.sheetMediaListener);
+    }
+    this.sheetMedia = null;
+    this.sheetMediaListener = null;
   }
 
   @HostListener('document:click', ['$event'])
@@ -175,8 +256,60 @@ export class MnMultiSelect implements OnInit {
       return;
     }
     this.isOpen = true;
+    if (this.isSheet) {
+      // A sheet is anchored to the viewport, so it needs no trigger tracking — only a
+      // scroll lock so the page behind it stays put while the list is scrolled.
+      this.lockBodyScroll();
+      return;
+    }
     this.updateDropdownPosition();
     this.startWatchingTrigger();
+  }
+
+  /** Whether the panel should currently render as a bottom sheet. */
+  get isSheet(): boolean {
+    return this.props.mobileSheet !== false && this.isNarrowViewport;
+  }
+
+  /**
+   * Whether the search input is shown: the explicit `searchable` prop when set,
+   * otherwise auto-enabled once the option count reaches the threshold.
+   */
+  get isSearchable(): boolean {
+    if (this.props.searchable !== undefined) return this.props.searchable;
+    const threshold = this.props.searchThreshold ?? MnMultiSelect.DEFAULT_SEARCH_THRESHOLD;
+    return this.props.options.length >= threshold;
+  }
+
+  /** Layout classes for the panel — a bottom-anchored sheet, or the trigger-anchored popover. */
+  get panelClasses(): string {
+    // The sheet sizes to its content (capped at 80vh), so a short list gets a short
+    // sheet. To stop it collapsing upward as the search filters options away, the height
+    // it opens at is captured once and re-applied as a `min-height` floor (see
+    // `sheetFloorPx`): the `flex-1` list then keeps that frame and just shows fewer rows.
+    return this.isSheet
+      ? 'mn-ms-sheet fixed inset-x-0 bottom-0 z-9999 flex flex-col bg-base-100 border-t border-base-300 rounded-t-2xl shadow-lg max-h-[80vh]'
+      : 'fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+  }
+
+  /**
+   * Records the sheet's opened height as its `min-height` floor. Measured on the next
+   * frame so the read reflects the fully-rendered, unfiltered list (the search box is
+   * empty on open) and never forces a reflow mid change-detection. The floor equals the
+   * content height at that instant, so applying it triggers no resize — it only stops a
+   * later, shorter filtered list from pulling the sheet down.
+   */
+  private captureSheetFloor(panel: HTMLElement): void {
+    if (typeof requestAnimationFrame !== 'function') {
+      this.sheetFloorPx = panel.offsetHeight;
+      return;
+    }
+    requestAnimationFrame(() => {
+      // The panel may have closed before the frame ran; don't strand a stale floor.
+      if (!this.isOpen || this.movedPanel !== panel) return;
+      this.sheetFloorPx = panel.offsetHeight;
+      this.cdr.markForCheck();
+    });
   }
 
   /** Closes the dropdown on Escape for keyboard accessibility. */
@@ -185,10 +318,18 @@ export class MnMultiSelect implements OnInit {
     this.close();
   }
 
-  /** Closes the dropdown when the page or a scrollable parent is scrolled */
+  /**
+   * Closes the dropdown when the page or a scrollable parent is scrolled.
+   *
+   * Skipped for a sheet: it is anchored to the viewport, not to the trigger, so it has
+   * no stale position to escape. Crucially, opening the soft keyboard fires a `resize`
+   * on Android — closing on that would dismiss the sheet the instant search is focused.
+   * A genuine layout switch is handled by the `matchMedia` listener instead.
+   */
   @HostListener('window:scroll', [])
   @HostListener('window:resize', [])
   onWindowScrollOrResize(): void {
+    if (this.isSheet) return;
     this.close();
   }
 
@@ -197,11 +338,33 @@ export class MnMultiSelect implements OnInit {
    * trigger being hidden) funnels through here so the open-only listeners are always
    * torn down with the panel and never leak.
    */
-  private close(): void {
+  close(): void {
     if (!this.isOpen) return;
     this.isOpen = false;
     this.searchTerm = '';
     this.stopWatchingTrigger();
+    this.unlockBodyScroll();
+  }
+
+  /**
+   * Freezes the page behind an open sheet. The previous inline value is captured and
+   * restored verbatim so a surrounding modal that set its own lock is left intact.
+   */
+  private lockBodyScroll(): void {
+    if (this.previousBodyOverflow !== null) return;
+    this.previousBodyOverflow = document.body.style.overflow;
+    this.renderer.setStyle(document.body, 'overflow', 'hidden');
+  }
+
+  /** Restores the pre-lock `overflow`. Idempotent. */
+  private unlockBodyScroll(): void {
+    if (this.previousBodyOverflow === null) return;
+    if (this.previousBodyOverflow) {
+      this.renderer.setStyle(document.body, 'overflow', this.previousBodyOverflow);
+    } else {
+      this.renderer.removeStyle(document.body, 'overflow');
+    }
+    this.previousBodyOverflow = null;
   }
 
   /** Calculates the fixed position for the dropdown based on the trigger element */
@@ -247,26 +410,28 @@ export class MnMultiSelect implements OnInit {
   }
 
   /**
-   * Move the dropdown panel to `document.body` when it appears, and detach it when
-   * the query clears. Appending to the body root makes the panel immune to ancestor
-   * `transform`/`filter`/`will-change`, so `position: fixed` anchors to the viewport
-   * and the panel stays under its trigger. Idempotent and safe to call with `null`.
+   * Move an overlay element to `document.body` when it appears, and detach it when the
+   * query clears. Appending to the body root makes the element immune to ancestor
+   * `transform`/`filter`/`will-change`, so `position: fixed` anchors to the viewport —
+   * without this the panel lands mid-screen (and breaks outright on iOS).
+   *
+   * Returns the element now portalled, so the caller can store it. Idempotent and safe
+   * to call with `null`.
    */
-  private relocateDropdown(el: HTMLElement | null): void {
+  private portal(el: HTMLElement | null, current: HTMLElement | null): HTMLElement | null {
     if (el) {
-      if (this.movedPanel === el) return;
+      if (current === el) return current;
       this.renderer.appendChild(document.body, el);
-      this.movedPanel = el;
-      return;
+      return el;
     }
-    if (this.movedPanel) {
+    if (current) {
       // Angular's view teardown may already have removed it; only detach if still attached.
-      const parent = this.movedPanel.parentNode;
+      const parent = current.parentNode;
       if (parent) {
-        this.renderer.removeChild(parent, this.movedPanel);
+        this.renderer.removeChild(parent, current);
       }
-      this.movedPanel = null;
     }
+    return null;
   }
 
   /** Tears down the watchers installed by `startWatchingTrigger`. Idempotent. */
