@@ -1,271 +1,247 @@
-<div class="p-8 max-w-7xl mx-auto">
-  <div class="mb-12">
-    <h1 class="text-4xl font-bold text-base-content mb-2">Modal Demo</h1>
-    <p class="text-lg text-base-content/60">Showcase of all modal variants</p>
-  </div>
-
-  <section class="flex flex-col gap-y-10">
-    <!-- Confirmation Modals -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Confirmation Modals</h2>
-      <div class="flex flex-row gap-x-2 flex-wrap">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openConfirmationModal()"
-        >
-          Open Confirmation
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'danger', size: 'md', variant: 'fill' }"
-          (click)="openDangerConfirmation()"
-        >
-          Open Danger Confirmation
-        </button>
-      </div>
+<app-demo-page
+  title="Modal"
+  tag="mn-modal"
+  lead="Confirmation, form, wizard, custom and table modals built with the ModalBuilder API."
+>
+  <app-demo-example title="Confirmation Modals" hint="Default and danger-toned confirmations; the danger one uses a close guard.">
+    <div class="flex flex-row gap-x-2 flex-wrap">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openConfirmationModal()"
+      >
+        Open Confirmation
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'danger', size: 'md', variant: 'fill' }"
+        (click)="openDangerConfirmation()"
+      >
+        Open Danger Confirmation
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Form Modal -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Form Modal</h2>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openFormModal()"
-        >
-          Open Form Modal
-        </button>
-      </div>
+  <app-demo-example title="Form Modal" hint="Declarative form with rows, conditional fields, async and cascading selects.">
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openFormModal()"
+      >
+        Open Form Modal
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Wizard Modal -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Wizard Modal</h2>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openWizardModal()"
-        >
-          Open Wizard
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
-          (click)="openWizardWithAdditionalButtons()"
-        >
-          Open Wizard with Additional Buttons
-        </button>
-        <button
-          (click)="openMultiSelectInWizardModal()"
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          mnButton
-        >
-          Open Multi-Select in Wizard
-        </button>
-      </div>
+  <app-demo-example title="Wizard Modal" hint="Multi-step flows with guards, async validation and per-step callbacks.">
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openWizardModal()"
+      >
+        Open Wizard
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
+        (click)="openWizardWithAdditionalButtons()"
+      >
+        Open Wizard with Additional Buttons
+      </button>
+      <button
+        (click)="openMultiSelectInWizardModal()"
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        mnButton
+      >
+        Open Multi-Select in Wizard
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Custom Modal -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Custom & Hybrid Modals</h2>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openCustomModal()"
-        >
-          Open Custom Modal
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
-          (click)="openHybridModal()"
-        >
-          Open Hybrid (Form + Template)
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
-          (click)="openHybridConfirmationModal()"
-        >
-          Open Hybrid Confirmation
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          (click)="openWizardWithCustomHeader()"
-        >
-          Open Wizard + Custom Header
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openAdvancedFormFeatures()"
-        >
-          Open Advanced Form (Mask/Focus/Blur)
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          (click)="openStackedModalDemo()"
-        >
-          Open Stacked Modal Demo
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
-          (click)="openFluentValidationDemo()"
-        >
-          Open Fluent Validation Demo
-        </button>
-      </div>
+  <app-demo-example title="Custom &amp; Hybrid Modals" hint="Template-driven, hybrid form + template, and custom-header variations.">
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openCustomModal()"
+      >
+        Open Custom Modal
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
+        (click)="openHybridModal()"
+      >
+        Open Hybrid (Form + Template)
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
+        (click)="openHybridConfirmationModal()"
+      >
+        Open Hybrid Confirmation
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        (click)="openWizardWithCustomHeader()"
+      >
+        Open Wizard + Custom Header
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openAdvancedFormFeatures()"
+      >
+        Open Advanced Form (Mask/Focus/Blur)
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        (click)="openStackedModalDemo()"
+      >
+        Open Stacked Modal Demo
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
+        (click)="openFluentValidationDemo()"
+      >
+        Open Fluent Validation Demo
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Multiple Footer Actions -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Multiple Footer Actions</h2>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openMultiActionModal()"
-        >
-          Open Multi-Action Modal
-        </button>
-      </div>
+  <app-demo-example title="Multiple Footer Actions" hint="A custom modal with several positioned footer actions.">
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openMultiActionModal()"
+      >
+        Open Multi-Action Modal
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Polling Modal -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Polling / Async Modal</h2>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openPollingModal()"
-        >
-          Open Polling Modal
-        </button>
-      </div>
+  <app-demo-example title="Polling / Async Modal" hint="Auto-closes once an async poll reports success.">
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openPollingModal()"
+      >
+        Open Polling Modal
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Read-Only / Field Groups -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Read-Only & Field Groups</h2>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openReadOnlyGroupedModal()"
-        >
-          Open Weapon Info (Read-Only)
-        </button>
-      </div>
+  <app-demo-example title="Read-Only &amp; Field Groups" hint="A grouped, read-only view assembled from field groups.">
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openReadOnlyGroupedModal()"
+      >
+        Open Weapon Info (Read-Only)
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Multi-Select Table -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Multi-Select Table Modal</h2>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          mnButton
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          (click)="openMultiSelectTableModal()"
-        >
-          Open Table Select Modal
-        </button>
-        <button
-          (click)="openServerTableModal()"
-          [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
-          mnButton
-        >
-          Open Server-Paginated Table Modal
-        </button>
-      </div>
-      <p class="text-base-content/60 text-sm -mt-2">The second modal is server-side paginated, searched and
-        filtered. It uses the default <code>stable</code> column layout: widths are measured once from the
-        real content, then pinned, so they keep sensible proportions and stop moving across pages and filters.</p>
+  <app-demo-example
+    title="Multi-Select Table Modal"
+    hint="The second modal is server-side paginated, searched and filtered. It uses the default stable column layout: widths are measured once from the real content, then pinned, so they keep sensible proportions and stop moving across pages and filters."
+  >
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        mnButton
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        (click)="openMultiSelectTableModal()"
+      >
+        Open Table Select Modal
+      </button>
+      <button
+        (click)="openServerTableModal()"
+        [data]="{ color: 'primary', size: 'md', variant: 'outline' }"
+        mnButton
+      >
+        Open Server-Paginated Table Modal
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Fixed Height (Bottom-Pinned Buttons) -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Fixed Height (Bottom-Pinned Buttons)</h2>
-      <p class="text-base-content/60 text-sm -mt-3">Demonstrates that form/wizard buttons stick to the bottom when the
-        modal has a fixed height and content doesn't fill the space.</p>
-      <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
-        <button
-          (click)="openFixedHeightFormModal()"
-          [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
-          mnButton
-        >
-          Fixed Height Form
-        </button>
-        <button
-          (click)="openFixedHeightWizardModal()"
-          [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
-          mnButton
-        >
-          Fixed Height Wizard
-        </button>
-      </div>
+  <app-demo-example
+    title="Fixed Height (Bottom-Pinned Buttons)"
+    hint="Demonstrates that form/wizard buttons stick to the bottom when the modal has a fixed height and content doesn't fill the space."
+  >
+    <div class="flex flex-row flex-wrap gap-x-2 gap-y-2">
+      <button
+        (click)="openFixedHeightFormModal()"
+        [data]="{ color: 'primary', size: 'md', variant: 'fill' }"
+        mnButton
+      >
+        Fixed Height Form
+      </button>
+      <button
+        (click)="openFixedHeightWizardModal()"
+        [data]="{ color: 'secondary', size: 'md', variant: 'fill' }"
+        mnButton
+      >
+        Fixed Height Wizard
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Size Variations -->
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-2xl font-semibold text-base-content mb-4">Modal Sizes</h2>
-      <div class="flex flex-row gap-x-2 flex-wrap">
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          (click)="openConfirmationModal()"
-        >
-          Small (SM)
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          (click)="openFormModal()"
-        >
-          Medium (MD)
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          (click)="openLargeModal()"
-        >
-          Large (LG)
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          (click)="openLargeModal()"
-        >
-          Extra Large (XL)
-        </button>
-        <button
-          mnButton
-          [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
-          (click)="openFullScreenModal()"
-        >
-          Full Screen
-        </button>
-      </div>
+  <app-demo-example title="Modal Sizes" hint="Width presets from small through full screen.">
+    <div class="flex flex-row gap-x-2 flex-wrap">
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        (click)="openConfirmationModal()"
+      >
+        Small (SM)
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        (click)="openFormModal()"
+      >
+        Medium (MD)
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        (click)="openLargeModal()"
+      >
+        Large (LG)
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        (click)="openLargeModal()"
+      >
+        Extra Large (XL)
+      </button>
+      <button
+        mnButton
+        [data]="{ color: 'secondary', size: 'md', variant: 'outline' }"
+        (click)="openFullScreenModal()"
+      >
+        Full Screen
+      </button>
     </div>
+  </app-demo-example>
 
-    <!-- Result Display -->
-    @if (lastResult) {
-      <div class="flex flex-col gap-y-4">
-        <h2 class="text-2xl font-semibold text-base-content mb-4">Last Modal Result</h2>
-        <div class="p-4 bg-base-200 rounded-lg border border-base-300 font-mono text-sm text-base-content/70">
-          {{ lastResult }}
-        </div>
+  @if (lastResult) {
+    <app-demo-example title="Last Modal Result" hint="The most recent modal's close result.">
+      <div class="p-4 bg-base-200 rounded-lg border border-base-300 font-mono text-sm text-base-content/70">
+        {{ lastResult }}
       </div>
-    }
-  </section>
-</div>
+    </app-demo-example>
+  }
+</app-demo-page>
 
 <!-- Custom Template for Custom Modal -->
 <ng-template #customTemplate let-modalRef="modalRef">

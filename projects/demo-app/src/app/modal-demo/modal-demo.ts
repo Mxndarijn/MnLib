@@ -21,6 +21,8 @@ import {
   WizardResult,
 } from 'mn-angular-lib';
 import {BehaviorSubject} from 'rxjs';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 type UserFormModel = {
   firstName: string;
@@ -43,7 +45,7 @@ type UserFormModel = {
 @Component({
   selector: 'app-modal-demo',
   standalone: true,
-  imports: [NgClass, MnButton],
+  imports: [NgClass, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './modal-demo.html',
   styleUrls: ['./modal-demo.css'],
 })

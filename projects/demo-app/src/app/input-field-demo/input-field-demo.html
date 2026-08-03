@@ -1,86 +1,69 @@
-<h2>MnInputField Demo - Error Handling & Display Modes</h2>
-
-<p>
-  This demo showcases the refactored MnInputField component with English documentation,
-  flexible error handling, and the new <strong>showAllErrors</strong> feature.
-</p>
-
-<form [formGroup]="form" mn-section="root">
-  <!-- Example 1: Default Behavior -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 1: Default Built-in Error Messages</h3>
-    <p>
-      Uses built-in English error messages with <code>hover: true</code> for interactive styling.
-      Label and Placeholder come from <code>defaults['mn-input-field']</code> in <code>mn-config.json5</code>.
-    </p>
-    <mn-lib-input-field class="block w-[200px]"
-      formControlName="name"
-      [props]="nameProps"
-    ></mn-lib-input-field>
-  </div>
-
-  <!-- Example 2: Custom Messages, No Built-ins -->
-  <div style="margin-bottom: 30px;" mn-section="section-a">
-    <h3>Example 2: Custom Error Messages & Section Override</h3>
-    <p>
-      <code>useBuiltInErrorMessages: false</code> - Only uses custom error messages with <code>hover: true</code>.
-      Label and Placeholder come from <code>overrides['root']['section-a']['#mn-input-email']</code> because <code>props.id</code> is 'email'.
-    </p>
-    <mn-lib-input-field
-      formControlName="email"
-      [props]="emailProps"
-    ></mn-lib-input-field>
-  </div>
-
-  <!-- Example 3: Priority-Based Error Display -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 3: Priority-Based Error Display (Single Error)</h3>
-    <p>
-      Uses <code>errorPriority</code> to control which error shows first.
-      Custom validator (noXAllowed) + function-based error messages.
-      Try entering 'x' or less than 3 characters.
-    </p>
-    <mn-lib-input-field
-      formControlName="username"
-      [props]="usernameProps"
-    ></mn-lib-input-field>
-  </div>
-
-  <!-- Example 4: Show All Errors -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 4: Show All Errors Mode NEW</h3>
-    <p>
-      <code>showAllErrors: true</code> - Displays ALL validation errors simultaneously.
-      Perfect for complex validation rules where users need to see all requirements at once.
-      Try entering a weak password to see multiple errors appear.
-    </p>
-    <mn-lib-input-field
-      formControlName="password"
-      [props]="passwordProps"
-    ></mn-lib-input-field>
-  </div>
-
-  <!-- Example 5: Disabled Field -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 5: Disabled Field</h3>
-    <p>
-      The FormControl is created with <code>disabled: true</code>. The input shows
-      <code>opacity-50 cursor-not-allowed</code> and hover effects are suppressed.
-    </p>
-    <mn-lib-input-field class="block w-[200px]"
-      formControlName="disabledField"
-      [props]="disabledProps"
-                        [disabled]="true"
-    ></mn-lib-input-field>
-  </div>
-
-  <div style="margin-top: 30px;">
-    <button type="button" (click)="form.markAllAsTouched()">
+<app-demo-page
+  title="Input Field"
+  tag="mn-input-field"
+  lead="Reactive-forms text input with flexible error handling and display modes."
+>
+  <div demo-actions style="display: flex; gap: 10px;">
+    <button mnButton [data]="{ variant: 'outline', color: 'primary', size: 'sm' }" type="button" (click)="form.markAllAsTouched()">
       Show All Validation Errors
     </button>
-    <button type="button" (click)="form.reset()" style="margin-left: 10px;">
+    <button mnButton [data]="{ variant: 'text', color: 'gray', size: 'sm' }" type="button" (click)="form.reset()">
       Reset Form
     </button>
   </div>
-</form>
 
+  <form [formGroup]="form" mn-section="root" style="display: flex; flex-direction: column; gap: 18px;">
+    <app-demo-example
+      title="Default built-in error messages"
+      hint="Built-in English error messages with hover styling. Label and placeholder come from defaults['mn-input-field']."
+    >
+      <mn-lib-input-field class="block w-[200px]"
+        formControlName="name"
+        [props]="nameProps"
+      ></mn-lib-input-field>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Custom error messages &amp; section override"
+      hint="useBuiltInErrorMessages: false uses only custom messages. Label and placeholder resolve from the section-a override."
+    >
+      <div mn-section="section-a">
+        <mn-lib-input-field
+          formControlName="email"
+          [props]="emailProps"
+        ></mn-lib-input-field>
+      </div>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Priority-based error display (single error)"
+      hint="errorPriority controls which error shows first. Try entering 'x' or fewer than 3 characters."
+    >
+      <mn-lib-input-field
+        formControlName="username"
+        [props]="usernameProps"
+      ></mn-lib-input-field>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Show all errors mode"
+      hint="showAllErrors: true displays every validation error at once. Try a weak password to see them stack."
+    >
+      <mn-lib-input-field
+        formControlName="password"
+        [props]="passwordProps"
+      ></mn-lib-input-field>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Disabled field"
+      hint="The FormControl is created with disabled: true; hover effects are suppressed."
+    >
+      <mn-lib-input-field class="block w-[200px]"
+        formControlName="disabledField"
+        [props]="disabledProps"
+        [disabled]="true"
+      ></mn-lib-input-field>
+    </app-demo-example>
+  </form>
+</app-demo-page>

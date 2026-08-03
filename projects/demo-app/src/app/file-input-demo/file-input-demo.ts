@@ -1,6 +1,8 @@
 import {Component, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnFileInput, MnFileInputProps} from 'mn-angular-lib';
+import {MnButton, MnFileInput, MnFileInputProps} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 /**
  * Demo component showcasing MnFileInput features:
@@ -13,7 +15,7 @@ import {MnFileInput, MnFileInputProps} from 'mn-angular-lib';
 @Component({
   selector: 'app-file-input-demo',
   standalone: true,
-  imports: [MnFileInput, ReactiveFormsModule],
+  imports: [MnFileInput, ReactiveFormsModule, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './file-input-demo.html',
 })
 export class FileInputDemo {

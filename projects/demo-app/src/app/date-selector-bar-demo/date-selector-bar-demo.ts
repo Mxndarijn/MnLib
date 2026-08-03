@@ -1,6 +1,8 @@
 import {AfterViewInit, Component, computed, DestroyRef, ElementRef, inject, signal, viewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MnButton, MnDateSelectorBar} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 /** A locale preset offered by the "Locale and labels" section. */
 type LocalePreset = {
@@ -23,16 +25,13 @@ type AgendaItem = {
 @Component({
   selector: 'app-date-selector-bar-demo',
   standalone: true,
-  imports: [CommonModule, MnDateSelectorBar, MnButton],
+  imports: [CommonModule, MnDateSelectorBar, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './date-selector-bar-demo.html',
   styles: [`
     /* The app's reset strips heading margins, so the page sets its own rhythm —
        without it the section headings read as body copy. */
     h2 { font-size: 24px; font-weight: 700; margin: 0 0 8px; }
     h3 { font-size: 17px; font-weight: 600; margin: 0 0 6px; }
-    .intro { max-width: 68ch; margin: 0 0 8px; opacity: 0.7; line-height: 1.6; }
-    .demo-sections { display: flex; flex-direction: column; gap: 56px; margin-top: 40px; }
-    .demo-sections p { max-width: 68ch; margin: 0; opacity: 0.7; line-height: 1.6; }
     .bar-frame {
       border: 1px solid var(--color-base-300);
       border-radius: var(--mn-radius, 12px);

@@ -1,6 +1,8 @@
 import {Component, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MnButton, MnRichTextEditor, MnRichTextEditorLabels} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 /** A seed a visitor can push into the editor from outside it. */
 type Seed = {
@@ -13,7 +15,7 @@ type Seed = {
 @Component({
   selector: 'app-rich-text-editor-demo',
   standalone: true,
-  imports: [CommonModule, MnRichTextEditor, MnButton],
+  imports: [CommonModule, MnRichTextEditor, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './rich-text-editor-demo.html',
   styles: [
     `
@@ -27,24 +29,6 @@ type Seed = {
         font-size: 17px;
         font-weight: 600;
         margin: 0 0 6px;
-      }
-      .intro {
-        max-width: 68ch;
-        margin: 0 0 8px;
-        opacity: 0.7;
-        line-height: 1.6;
-      }
-      .demo-sections {
-        display: flex;
-        flex-direction: column;
-        gap: 56px;
-        margin-top: 40px;
-      }
-      .demo-sections p {
-        max-width: 68ch;
-        margin: 0;
-        opacity: 0.7;
-        line-height: 1.6;
       }
       .seeds {
         display: flex;

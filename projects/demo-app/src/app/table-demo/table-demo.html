@@ -1,12 +1,8 @@
-<div style="padding: 24px; max-width: 1200px; margin: 0 auto;">
-  <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">MnTable Demo</h1>
-
-  <!-- Basic table -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Basic Table (string columns, sorting, hover)</h2>
-    <mn-table [dataSource]="basicDataSource" (sortChange)="onSortChange($event)"></mn-table>
-  </section>
-
+<app-demo-page
+  title="Table"
+  tag="mn-table"
+  lead="A data-driven table with sorting, selection, search, pagination, column filters, and loading skeletons."
+>
   <!-- Cell templates for the profile skeleton table -->
   <ng-template #avatarTpl let-user>
     <div
@@ -19,9 +15,32 @@
     <span class="text-xs px-2 py-0.5 rounded bg-base-200">{{ user.role }}</span>
   </ng-template>
 
-  <!-- Loading skeletons -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Loading Skeletons</h2>
+  <!-- Toolbar right template -->
+  <ng-template #toolbarRightTpl>
+    <button mnButton [data]="{ color: 'primary', size: 'sm', variant: 'fill' }" (click)="onToolbarAction()">
+      Add User
+    </button>
+  </ng-template>
+
+  <!-- Actions template -->
+  <ng-template #actionsTpl let-row>
+    <div class="inline-flex items-center gap-2">
+      <button
+        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors"
+        (click)="$event.stopPropagation(); onAction('Edit', row)"
+      >Edit</button>
+      <button
+        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors text-red-500"
+        (click)="$event.stopPropagation(); onAction('Delete', row)"
+      >Delete</button>
+    </div>
+  </ng-template>
+
+  <app-demo-example title="Basic Table (string columns, sorting, hover)">
+    <mn-table [dataSource]="basicDataSource" (sortChange)="onSortChange($event)"></mn-table>
+  </app-demo-example>
+
+  <app-demo-example title="Loading Skeletons">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       Skeleton rows now use the <code>mn-skeleton</code> component (shimmer + reduced-motion aware).
       Use the optional per-column <code>skeleton</code> field to customize each placeholder. Toggle to compare
@@ -46,71 +65,36 @@
       Circle for the profile picture, wide bars for name/email, and a small rounded rectangle for the role badge.
     </p>
     <mn-table [dataSource]="profileSkeletonDataSource"></mn-table>
-  </section>
+  </app-demo-example>
 
-  <!-- Toolbar right template -->
-  <ng-template #toolbarRightTpl>
-    <button mnButton [data]="{ color: 'primary', size: 'sm', variant: 'fill' }" (click)="onToolbarAction()">
-      Add User
-    </button>
-  </ng-template>
-
-  <!-- Table with toolbar right button -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Table with Toolbar Right Button</h2>
+  <app-demo-example title="Table with Toolbar Right Button">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>toolbarRightTemplate</code> to place an <code>mnButton</code> in the toolbar next to the search field.</p>
     <mn-table [dataSource]="toolbarRightDataSource"></mn-table>
-  </section>
+  </app-demo-example>
 
-  <!-- Actions template -->
-  <ng-template #actionsTpl let-row>
-    <div class="inline-flex items-center gap-2">
-      <button
-        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors"
-        (click)="$event.stopPropagation(); onAction('Edit', row)"
-      >Edit</button>
-      <button
-        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors text-red-500"
-        (click)="$event.stopPropagation(); onAction('Delete', row)"
-      >Delete</button>
-    </div>
-  </ng-template>
-
-  <!-- Table with actions column -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Table with Actions Column</h2>
+  <app-demo-example title="Table with Actions Column">
     <mn-table [dataSource]="actionsDataSource"></mn-table>
-  </section>
+  </app-demo-example>
 
-  <!-- Selection table -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Multi-Select Table</h2>
+  <app-demo-example title="Multi-Select Table">
     <mn-table [dataSource]="selectionDataSource" (selectionChange)="onSelectionChange($event)"></mn-table>
     <p style="margin-top: 8px; font-size: 14px; color: #666;">Selected: {{ selectedNames }}</p>
-  </section>
+  </app-demo-example>
 
-  <!-- Searchable table with load more -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Searchable Table with Load More</h2>
+  <app-demo-example title="Searchable Table with Load More">
     <mn-table [dataSource]="searchDataSource"></mn-table>
-  </section>
+  </app-demo-example>
 
-  <!-- Column filters table -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Table with Column Filters</h2>
+  <app-demo-example title="Table with Column Filters">
     <mn-table [dataSource]="filterDataSource"></mn-table>
-  </section>
+  </app-demo-example>
 
-  <!-- Paginated table -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Paginated Table (18 rows, 5 per page)</h2>
+  <app-demo-example title="Paginated Table (18 rows, 5 per page)">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>paginationMode: 'paginated'</code> with <code>pageSize: 5</code> and a page-size selector (5, 10, 15). Supports search and sorting across all pages.</p>
     <mn-table [dataSource]="paginatedDataSource" (sortChange)="onSortChange($event)"></mn-table>
-  </section>
+  </app-demo-example>
 
-  <!-- Client-side paginated table -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Client-Side Paginated Table</h2>
+  <app-demo-example title="Client-Side Paginated Table">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>paginationMode:
       'client-side-pagination'</code>. All data is loaded upfront; pagination, search, and sorting happen entirely in
       the browser.</p>
@@ -128,11 +112,9 @@
       </button>
     </div>
     <mn-table (sortChange)="onSortChange($event)" [dataSource]="clientPaginatedDataSource"></mn-table>
-  </section>
+  </app-demo-example>
 
-  <!-- Empty table -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Empty Table</h2>
+  <app-demo-example title="Empty Table">
     <mn-table [dataSource]="emptyDataSource"></mn-table>
-  </section>
-</div>
+  </app-demo-example>
+</app-demo-page>

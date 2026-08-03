@@ -1,11 +1,13 @@
 import {Component} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnCheckbox, MnCheckboxProps} from 'mn-angular-lib';
+import {MnButton, MnCheckbox, MnCheckboxProps} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-checkbox-demo',
   standalone: true,
-  imports: [MnCheckbox, ReactiveFormsModule],
+  imports: [MnCheckbox, ReactiveFormsModule, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './checkbox-demo.html',
 })
 export class CheckboxDemo {

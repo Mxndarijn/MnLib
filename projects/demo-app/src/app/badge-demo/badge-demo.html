@@ -1,64 +1,51 @@
-<div class="container">
-  <div class="header">
-    <h1>Badge Demo</h1>
-    <p>Showcase of all badge color variants</p>
-  </div>
-
-  <section class="flex flex-col gap-y-10">
-    <!-- All variants in a row -->
-    <div class="flex flex-col gap-y-4">
-      <h1>Color variants</h1>
-      <div class="flex flex-row gap-x-2">
-        <span mnBadge [data]="{ color: 'primary' }">Primary</span>
-        <span mnBadge [data]="{ color: 'secondary' }">Secondary</span>
-        <span mnBadge [data]="{ color: 'danger' }">Danger</span>
-        <span mnBadge [data]="{ color: 'warning' }">Warning</span>
-        <span mnBadge [data]="{ color: 'success' }">Success</span>
-        <span mnBadge [data]="{ color: 'accent' }">Accent</span>
-        <span mnBadge [data]="{ color: 'lightgray' }">Light Gray</span>
-      </div>
+<app-demo-page
+  title="Badge"
+  tag="[mnBadge]"
+  lead="Color and fill variants, sizes, wrapping, and defaults."
+>
+  <app-demo-example title="Color variants">
+    <div class="flex flex-row gap-x-2">
+      <span mnBadge [data]="{ color: 'primary' }">Primary</span>
+      <span mnBadge [data]="{ color: 'secondary' }">Secondary</span>
+      <span mnBadge [data]="{ color: 'danger' }">Danger</span>
+      <span mnBadge [data]="{ color: 'warning' }">Warning</span>
+      <span mnBadge [data]="{ color: 'success' }">Success</span>
+      <span mnBadge [data]="{ color: 'accent' }">Accent</span>
+      <span mnBadge [data]="{ color: 'lightgray' }">Light Gray</span>
     </div>
+  </app-demo-example>
 
-    <!-- Fill variant -->
-    <div class="flex flex-col gap-y-4">
-      <h1>Fill variant</h1>
-      <div class="flex flex-row gap-x-2">
-        <span mnBadge [data]="{ variant: 'fill', color: 'primary' }">Primary</span>
-        <span mnBadge [data]="{ variant: 'fill', color: 'secondary' }">Secondary</span>
-        <span mnBadge [data]="{ variant: 'fill', color: 'danger' }">Danger</span>
-        <span mnBadge [data]="{ variant: 'fill', color: 'warning' }">Warning</span>
-        <span mnBadge [data]="{ variant: 'fill', color: 'success' }">Success</span>
-        <span mnBadge [data]="{ variant: 'fill', color: 'accent' }">Accent</span>
-        <span mnBadge [data]="{ variant: 'fill', color: 'lightgray' }">Light Gray</span>
-      </div>
+  <app-demo-example title="Fill variant">
+    <div class="flex flex-row gap-x-2">
+      <span mnBadge [data]="{ variant: 'fill', color: 'primary' }">Primary</span>
+      <span mnBadge [data]="{ variant: 'fill', color: 'secondary' }">Secondary</span>
+      <span mnBadge [data]="{ variant: 'fill', color: 'danger' }">Danger</span>
+      <span mnBadge [data]="{ variant: 'fill', color: 'warning' }">Warning</span>
+      <span mnBadge [data]="{ variant: 'fill', color: 'success' }">Success</span>
+      <span mnBadge [data]="{ variant: 'fill', color: 'accent' }">Accent</span>
+      <span mnBadge [data]="{ variant: 'fill', color: 'lightgray' }">Light Gray</span>
     </div>
+  </app-demo-example>
 
-    <!-- Sizes -->
-    <div class="flex flex-col gap-y-4">
-      <h1>Size variants</h1>
-      <div class="flex flex-row items-center gap-x-2">
-        <span mnBadge [data]="{ size: 'sm' }">Small</span>
-        <span mnBadge [data]="{ size: 'md' }">Medium</span>
-        <span mnBadge [data]="{ size: 'lg' }">Large</span>
-        <span mnBadge [data]="{ size: 'xl' }">Extra Large</span>
-      </div>
+  <app-demo-example title="Size variants">
+    <div class="flex flex-row items-center gap-x-2">
+      <span mnBadge [data]="{ size: 'sm' }">Small</span>
+      <span mnBadge [data]="{ size: 'md' }">Medium</span>
+      <span mnBadge [data]="{ size: 'lg' }">Large</span>
+      <span mnBadge [data]="{ size: 'xl' }">Extra Large</span>
     </div>
+  </app-demo-example>
 
-    <!-- Wrap variants -->
-    <div class="flex flex-col gap-y-4">
-      <h1>Wrap variants</h1>
-      <div class="flex flex-row items-center gap-x-2 max-w-xs">
-        <span mnBadge>No wrap (default)</span>
-        <span mnBadge [data]="{ wrap: true }">This is a long text that will wrap when needed</span>
-      </div>
+  <app-demo-example title="Wrap variants" hint="Set wrap: true to let long text flow onto multiple lines.">
+    <div class="flex flex-row items-center gap-x-2 max-w-xs">
+      <span mnBadge>No wrap (default)</span>
+      <span mnBadge [data]="{ wrap: true }">This is a long text that will wrap when needed</span>
     </div>
+  </app-demo-example>
 
-    <!-- Default (no data) -->
-    <div class="flex flex-col gap-y-4">
-      <h1>Default (primary, md)</h1>
-      <div class="flex flex-row gap-x-2">
-        <span mnBadge>Default badge</span>
-      </div>
+  <app-demo-example title="Default (primary, md)">
+    <div class="flex flex-row gap-x-2">
+      <span mnBadge>Default badge</span>
     </div>
-  </section>
-</div>
+  </app-demo-example>
+</app-demo-page>

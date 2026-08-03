@@ -2,6 +2,8 @@ import { Component, inject, InjectionToken } from '@angular/core';
 import { MnLanguageService, MnTranslatePipe, MnConfigService, provideMnComponentConfig, MnInputField, MnTextarea, MN_SECTION_PATH } from 'mn-angular-lib';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 export type ReactiveConfigDemo = {
   title: string;
@@ -14,30 +16,28 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
 @Component({
   selector: 'app-language-demo',
   standalone: true,
-  imports: [MnTranslatePipe, AsyncPipe, MnInputField, MnTextarea, ReactiveFormsModule],
+  imports: [MnTranslatePipe, AsyncPipe, MnInputField, MnTextarea, ReactiveFormsModule, DemoPageComponent, DemoExampleComponent],
   providers: [
     provideMnComponentConfig<ReactiveConfigDemo>(REACTIVE_CFG, 'language-demo-reactive'),
     { provide: MN_SECTION_PATH, useValue: ['root', 'language-demo'] },
   ],
   template: `
-    <div class="container">
-      <h1>{{ 'demo.title' | mnTranslate }}</h1>
-      <p>{{ 'demo.subtitle' | mnTranslate }}</p>
-
+    <app-demo-page
+      [title]="'demo.title' | mnTranslate"
+      tag="MnLanguageService"
+      [lead]="'demo.subtitle' | mnTranslate"
+    >
       <!-- Locale switcher -->
-      <section>
-        <h2>{{ 'demo.switch_locale' | mnTranslate }}</h2>
+      <app-demo-example [title]="'demo.switch_locale' | mnTranslate">
         <p>{{ 'demo.current_locale' | mnTranslate:{ locale: lang.locale } }}</p>
         <div class="button-row">
           <button (click)="switchLocale('en')" [class.active]="lang.locale === 'en'">English</button>
           <button (click)="switchLocale('nl')" [class.active]="lang.locale === 'nl'">Nederlands</button>
         </div>
-      </section>
+      </app-demo-example>
 
       <!-- 1. Pipe usage -->
-      <section>
-        <h2>{{ 'demo.pipe.title' | mnTranslate }}</h2>
-        <p>{{ 'demo.pipe.description' | mnTranslate }}</p>
+      <app-demo-example [title]="'demo.pipe.title' | mnTranslate" [hint]="'demo.pipe.description' | mnTranslate">
         <div class="example">
           <h3>Template</h3>
           <code>{{ "{{ 'demo.greeting' | mnTranslate:{ name: 'World' } }}" }}</code>
@@ -50,12 +50,10 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
           <h3>Result</h3>
           <p class="result">{{ 'demo.items_count' | mnTranslate:{ count: 5 } }}</p>
         </div>
-      </section>
+      </app-demo-example>
 
       <!-- 2. Standalone service usage -->
-      <section>
-        <h2>{{ 'demo.standalone.title' | mnTranslate }}</h2>
-        <p>{{ 'demo.standalone.description' | mnTranslate }}</p>
+      <app-demo-example [title]="'demo.standalone.title' | mnTranslate" [hint]="'demo.standalone.description' | mnTranslate">
         <div class="example">
           <h3>Code</h3>
           <code>this.lang.t('demo.welcome')</code>
@@ -68,24 +66,20 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
           <h3>Result</h3>
           <p class="result">{{ standaloneParamResult }}</p>
         </div>
-      </section>
+      </app-demo-example>
 
       <!-- 3. Config integration -->
-      <section>
-        <h2>{{ 'demo.config.title' | mnTranslate }}</h2>
-        <p>{{ 'demo.config.description' | mnTranslate }}</p>
+      <app-demo-example [title]="'demo.config.title' | mnTranslate" [hint]="'demo.config.description' | mnTranslate">
         <div class="example">
           <h3>Config value</h3>
           <code>label: {{ '{' }} $translate: "demo.greeting", params: {{ '{' }} name: "Config" {{ '}' }} {{ '}' }}</code>
           <h3>Resolved</h3>
           <p class="result">{{ configResolved }}</p>
         </div>
-      </section>
+      </app-demo-example>
 
       <!-- 4. Reactive config (provideMnComponentConfig) -->
-      <section>
-        <h2>{{ 'demo.reactive_config.title' | mnTranslate }}</h2>
-        <p>{{ 'demo.reactive_config.description' | mnTranslate }}</p>
+      <app-demo-example [title]="'demo.reactive_config.title' | mnTranslate" [hint]="'demo.reactive_config.description' | mnTranslate">
         <div class="example">
           <h3>mn-config.json5</h3>
           <code>title: {{ '{' }} $translate: "demo.reactive_config.title" {{ '}' }}</code><br/>
@@ -96,12 +90,10 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
           <p class="result">Description: {{ reactiveCfg.description }}</p>
           <p class="result">Label: {{ reactiveCfg.label }}</p>
         </div>
-      </section>
+      </app-demo-example>
 
       <!-- 5. Reactive form fields (internal components) -->
-      <section>
-        <h2>{{ 'demo.form.section_title' | mnTranslate }}</h2>
-        <p>{{ 'demo.form.section_description' | mnTranslate }}</p>
+      <app-demo-example [title]="'demo.form.section_title' | mnTranslate" [hint]="'demo.form.section_description' | mnTranslate">
         <div class="example">
           <h3>mn-config.json5</h3>
           <code>placeholder: {{ '{' }} $translate: "demo.form.name.placeholder" {{ '}' }}</code><br/>
@@ -113,12 +105,10 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
           <h3>mn-textarea (switch locale to see placeholder/label update)</h3>
           <mn-lib-textarea [formControl]="messageCtrl" [props]="{ id: 'demo-message', size: 'md', borderRadius: 'md', rows: 3 }"></mn-lib-textarea>
         </div>
-      </section>
+      </app-demo-example>
 
       <!-- 6. Validation with translated error messages -->
-      <section>
-        <h2>{{ 'demo.validation.section_title' | mnTranslate }}</h2>
-        <p>{{ 'demo.validation.section_description' | mnTranslate }}</p>
+      <app-demo-example [title]="'demo.validation.section_title' | mnTranslate" [hint]="'demo.validation.section_description' | mnTranslate">
         <div class="example">
           <h3>mn-config.json5</h3>
           <code>errorMessages: {{ '{' }} required: {{ '{' }} $translate: "validation.required" {{ '}' }} {{ '}' }}</code>
@@ -133,21 +123,19 @@ const REACTIVE_CFG = new InjectionToken<ReactiveConfigDemo>('REACTIVE_CFG');
           <h3>mn-textarea (required) — touch and clear to see translated error</h3>
           <mn-lib-textarea [formControl]="valMessageCtrl" [props]="{ id: 'validation-message', size: 'md', borderRadius: 'md', rows: 3 }"></mn-lib-textarea>
         </div>
-      </section>
+      </app-demo-example>
 
       <!-- 7. Locale observable -->
-      <section>
-        <h2>Locale Observable</h2>
+      <app-demo-example title="Locale Observable">
         <p>Subscribe to <code>locale$</code> for reactive locale changes.</p>
         <div class="example">
           <h3>Current locale$ value</h3>
           <p class="result">{{ lang.locale$ | async }}</p>
         </div>
-      </section>
-    </div>
+      </app-demo-example>
+    </app-demo-page>
   `,
   styles: [`
-    .container { display: grid; gap: 16px; max-width: 800px; }
     h1 { margin: 0 0 4px; }
     section { padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; }
     h2 { margin-top: 0; font-size: 16px; }

@@ -1,11 +1,13 @@
 import {Component} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnSectionDirective, MnSelect, MnSelectProps} from 'mn-angular-lib';
+import {MnButton, MnSectionDirective, MnSelect, MnSelectProps} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-select-demo',
   standalone: true,
-  imports: [MnSelect, ReactiveFormsModule, MnSectionDirective],
+  imports: [MnSelect, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './select-demo.html',
 })
 export class SelectDemo {

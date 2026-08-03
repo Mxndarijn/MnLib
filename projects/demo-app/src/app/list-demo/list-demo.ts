@@ -1,6 +1,8 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ListDataSource, MnButton, MnCollectionState, MnList, MnSkeleton} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 type User = {
   id: string;
@@ -40,7 +42,7 @@ const ALL_USERS: User[] = [
 @Component({
   selector: 'app-list-demo',
   standalone: true,
-  imports: [MnList, MnButton, MnSkeleton],
+  imports: [MnList, MnButton, MnSkeleton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './list-demo.html',
 })
 export class ListDemo implements OnInit {

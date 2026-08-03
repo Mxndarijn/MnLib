@@ -1,52 +1,48 @@
-<h2>Checkbox Demo</h2>
-
-<div style="max-width: 600px; display: flex; flex-direction: column; gap: 40px;">
-
-  <!-- Standalone -->
-  <div>
-    <h3>Standalone (no FormControl)</h3>
-    <p>Use <code>[checked]</code> + <code>(checkedChange)</code> outside Angular Forms.</p>
-    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px;">
+<app-demo-page
+  title="Checkbox"
+  tag="mn-checkbox"
+  lead="Standalone or forms-bound checkboxes with validation, sizes, and colors."
+>
+  <app-demo-example
+    title="Standalone (no FormControl)"
+    hint="Use [checked] + (checkedChange) outside Angular Forms."
+  >
+    <div style="display: flex; flex-direction: column; gap: 6px;">
       <mn-lib-checkbox [props]="optionAProps" [checked]="optionA" (checkedChange)="optionA = $event"></mn-lib-checkbox>
       <mn-lib-checkbox [props]="optionBProps" [checked]="optionB" (checkedChange)="optionB = $event"></mn-lib-checkbox>
     </div>
-    <p style="margin-top: 10px; font-size: 12px; opacity: 0.5;">A: {{ optionA }} | B: {{ optionB }}</p>
-  </div>
+    <p style="margin-top: 12px; font-size: 12px; opacity: 0.5;">A: {{ optionA }} | B: {{ optionB }}</p>
+  </app-demo-example>
 
-  <!-- Reactive forms + validation -->
-  <div>
-    <h3>Reactive Forms &amp; Validation</h3>
-    <p>The <em>terms</em> checkbox uses <code>Validators.requiredTrue</code>. The third is disabled via FormControl.</p>
-    <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
+  <app-demo-example
+    title="Reactive forms &amp; validation"
+    hint="The terms checkbox uses Validators.requiredTrue; the third is disabled via FormControl."
+  >
+    <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 10px;">
       <mn-lib-checkbox formControlName="terms" [props]="termsProps"></mn-lib-checkbox>
       <mn-lib-checkbox formControlName="newsletter" [props]="newsletterProps"></mn-lib-checkbox>
       <mn-lib-checkbox formControlName="disabled" [props]="disabledProps"></mn-lib-checkbox>
       <div style="margin-top: 4px;">
-        <button type="button" (click)="form.markAllAsTouched()">Validate</button>
+        <button mnButton [data]="{ variant: 'outline', color: 'primary', size: 'sm' }" type="button" (click)="form.markAllAsTouched()">Validate</button>
       </div>
     </form>
-  </div>
+  </app-demo-example>
 
-  <!-- Sizes -->
-  <div>
-    <h3>Sizes</h3>
-    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+  <app-demo-example title="Sizes">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
       <mn-lib-checkbox [checked]="sizeChecked" [props]="xsProps"></mn-lib-checkbox>
       <mn-lib-checkbox [props]="smProps" [checked]="sizeChecked"></mn-lib-checkbox>
       <mn-lib-checkbox [props]="mdProps" [checked]="sizeChecked"></mn-lib-checkbox>
       <mn-lib-checkbox [props]="lgProps" [checked]="sizeChecked"></mn-lib-checkbox>
       <mn-lib-checkbox [checked]="sizeChecked" [props]="xlProps"></mn-lib-checkbox>
     </div>
-  </div>
+  </app-demo-example>
 
-  <!-- Colors -->
-  <div>
-    <h3>Colors</h3>
-    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+  <app-demo-example title="Colors">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
       @for (cp of colorProps; track cp.id) {
         <mn-lib-checkbox [checked]="colorChecked" [props]="cp"></mn-lib-checkbox>
       }
     </div>
-  </div>
-
-</div>
+  </app-demo-example>
+</app-demo-page>

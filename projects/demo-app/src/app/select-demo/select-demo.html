@@ -1,62 +1,55 @@
-<h2>MnSelect Demo - Native Browser Select</h2>
-
-<p>
-  This demo showcases the <code>mn-lib-select</code> component which uses the native browser
-  <code>&lt;select&gt;</code> element with ControlValueAccessor, validation, and tailwind-variants styling.
-</p>
-
-<form [formGroup]="form" mn-section="root">
-  <!-- Example 1: Basic required select -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 1: Required Select with Validation</h3>
-    <p>
-      A basic select with <code>Validators.required</code>. Shows built-in error message when touched without selecting.
-    </p>
-    <mn-lib-select [props]="countryProps"
-                   class="block w-[300px] max-w-full"
-                   formControlName="country"
-    ></mn-lib-select>
-    <p style="margin-top: 8px; font-size: 14px; color: gray;">
-      Selected: <strong>{{ selectedCountry }}</strong>
-    </p>
-  </div>
-
-  <!-- Example 2: Disabled options and custom styling -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 2: Disabled Options & Custom Styling</h3>
-    <p>
-      Uses <code>size: 'lg'</code> and <code>borderRadius: 'lg'</code>. The "XXL" option is disabled.
-    </p>
-    <mn-lib-select [props]="sizeProps"
-                   class="block w-[300px] max-w-full"
-                   formControlName="size"
-    ></mn-lib-select>
-    <p style="margin-top: 8px; font-size: 14px; color: gray;">
-      Selected: <strong>{{ selectedSize }}</strong>
-    </p>
-  </div>
-
-  <!-- Example 3: Custom error messages -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 3: Custom Error Messages</h3>
-    <p>
-      Uses custom <code>errorMessages</code> to override the built-in "Please select an option" message.
-    </p>
-    <mn-lib-select [props]="priorityProps"
-                   class="block w-[300px] max-w-full"
-                   formControlName="priority"
-    ></mn-lib-select>
-    <p style="margin-top: 8px; font-size: 14px; color: gray;">
-      Selected: <strong>{{ selectedPriority }}</strong>
-    </p>
-  </div>
-
-  <div style="margin-top: 30px;">
-    <button (click)="form.markAllAsTouched()" type="button">
+<app-demo-page
+  title="Select"
+  tag="mn-select"
+  lead="Native browser select with ControlValueAccessor, validation, and tailwind-variants styling."
+>
+  <div demo-actions style="display: flex; gap: 10px;">
+    <button mnButton [data]="{ variant: 'outline', color: 'primary', size: 'sm' }" (click)="form.markAllAsTouched()" type="button">
       Show All Validation Errors
     </button>
-    <button (click)="form.reset()" style="margin-left: 10px;" type="button">
+    <button mnButton [data]="{ variant: 'text', color: 'gray', size: 'sm' }" (click)="form.reset()" type="button">
       Reset Form
     </button>
   </div>
-</form>
+
+  <form [formGroup]="form" mn-section="root" style="display: flex; flex-direction: column; gap: 18px;">
+    <app-demo-example
+      title="Required select with validation"
+      hint="A basic select with Validators.required. Shows the built-in error when touched without a selection."
+    >
+      <mn-lib-select [props]="countryProps"
+                     class="block w-[300px] max-w-full"
+                     formControlName="country"
+      ></mn-lib-select>
+      <p style="margin-top: 8px; font-size: 14px; color: gray;">
+        Selected: <strong>{{ selectedCountry }}</strong>
+      </p>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Disabled options &amp; custom styling"
+      hint="Uses size: 'lg' and borderRadius: 'lg'. The XXL option is disabled."
+    >
+      <mn-lib-select [props]="sizeProps"
+                     class="block w-[300px] max-w-full"
+                     formControlName="size"
+      ></mn-lib-select>
+      <p style="margin-top: 8px; font-size: 14px; color: gray;">
+        Selected: <strong>{{ selectedSize }}</strong>
+      </p>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Custom error messages"
+      hint="Custom errorMessages override the built-in 'Please select an option' message."
+    >
+      <mn-lib-select [props]="priorityProps"
+                     class="block w-[300px] max-w-full"
+                     formControlName="priority"
+      ></mn-lib-select>
+      <p style="margin-top: 8px; font-size: 14px; color: gray;">
+        Selected: <strong>{{ selectedPriority }}</strong>
+      </p>
+    </app-demo-example>
+  </form>
+</app-demo-page>

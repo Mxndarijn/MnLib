@@ -1,0 +1,9 @@
+<section class="specimen">
+  <h2 class="specimen-title">{{ title }}</h2>
+  @if (hint) {
+    <p class="specimen-hint">{{ hint }}</p>
+  }
+  <div class="specimen-stage">
+    <ng-content></ng-content>
+  </div>
+</section>

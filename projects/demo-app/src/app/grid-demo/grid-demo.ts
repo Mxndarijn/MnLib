@@ -1,6 +1,8 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {GridDataSource, MnButton, MnCollectionState, MnGrid, MnSkeleton} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 type User = {
   id: string;
@@ -33,7 +35,7 @@ const ALL_USERS: User[] = [
 @Component({
   selector: 'app-grid-demo',
   standalone: true,
-  imports: [MnGrid, MnButton, MnSkeleton],
+  imports: [MnGrid, MnButton, MnSkeleton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './grid-demo.html',
 })
 export class GridDemo implements OnInit {

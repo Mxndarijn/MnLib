@@ -1,44 +1,47 @@
-<div class="calendar-demo-wrapper">
-  <div class="calendar-demo-header">
-    <h2>Calendar Demo</h2>
-    <span class="calendar-demo-subtitle">Week, day, and month views with custom event renderers and configurable hours.</span>
-  </div>
+<app-demo-page
+  title="Calendar"
+  tag="mn-calendar"
+  lead="Week, day, and month views with custom event renderers and configurable hours."
+>
+  <app-demo-example title="Calendar view" hint="Async events load 5s after the initial set; click an event to see its details below.">
+    <div class="calendar-demo-body">
+      <mn-calendar-view
+        [showButton]="true"
+        [buttonTitle]="'Plan onderhoud'"
+        [NewCalendarItemsEvent]="eventsEmitter"
+        (RequestNewCalendarItemsEvent)="loadEvents($event)"
+        (CalendarItemClickedEvent)="onEventClick($event)"
+        (ButtonClickedEvent)="onNewEvent()">
+      </mn-calendar-view>
+    </div>
 
-  <div class="calendar-demo-body">
-    <mn-calendar-view
-      [showButton]="true"
-      [buttonTitle]="'Plan onderhoud'"
-      [NewCalendarItemsEvent]="eventsEmitter"
-      (RequestNewCalendarItemsEvent)="loadEvents($event)"
-      (CalendarItemClickedEvent)="onEventClick($event)"
-      (ButtonClickedEvent)="onNewEvent()">
-    </mn-calendar-view>
-  </div>
+    @if (clickedEvent) {
+    <div class="calendar-demo-clicked">
+      <strong>Last clicked:</strong> {{ clickedEvent.title }} ({{ clickedEvent.startTime | date:'short' }} - {{ clickedEvent.endTime | date:'short' }})
+    </div>
+    }
+  </app-demo-example>
 
-  @if (clickedEvent) {
-  <div class="calendar-demo-clicked">
-    <strong>Last clicked:</strong> {{ clickedEvent.title }} ({{ clickedEvent.startTime | date:'short' }} - {{ clickedEvent.endTime | date:'short' }})
-  </div>
-  }
+  <app-demo-example title="Calendar in a tab" hint="A second calendar instance mounted only when its tab is active.">
+    <mn-tab [dataSource]="tabDataSource" (activeChange)="onTabChange($event)"></mn-tab>
 
-  <mn-tab [dataSource]="tabDataSource" (activeChange)="onTabChange($event)"></mn-tab>
+    @if (activeTabIndex === 0) {
+    <div class="calendar-demo-body">
+      <p style="padding: 16px; color: #6b7280;">Select the <strong>"Calendar in Tab"</strong> tab to see a second calendar instance.</p>
+    </div>
+    }
 
-  @if (activeTabIndex === 0) {
-  <div class="calendar-demo-body">
-    <p style="padding: 16px; color: #6b7280;">Select the <strong>"Calendar in Tab"</strong> tab to see a second calendar instance.</p>
-  </div>
-  }
-
-  @if (activeTabIndex === 1) {
-  <div class="calendar-demo-body">
-    <mn-calendar-view
-      [showButton]="true"
-      [buttonTitle]="'New Event'"
-      [NewCalendarItemsEvent]="eventsEmitter2"
-      (RequestNewCalendarItemsEvent)="loadEvents2($event)"
-      (CalendarItemClickedEvent)="onEventClick($event)"
-      (ButtonClickedEvent)="onNewEvent()">
-    </mn-calendar-view>
-  </div>
-  }
-</div>
+    @if (activeTabIndex === 1) {
+    <div class="calendar-demo-body">
+      <mn-calendar-view
+        [showButton]="true"
+        [buttonTitle]="'New Event'"
+        [NewCalendarItemsEvent]="eventsEmitter2"
+        (RequestNewCalendarItemsEvent)="loadEvents2($event)"
+        (CalendarItemClickedEvent)="onEventClick($event)"
+        (ButtonClickedEvent)="onNewEvent()">
+      </mn-calendar-view>
+    </div>
+    }
+  </app-demo-example>
+</app-demo-page>

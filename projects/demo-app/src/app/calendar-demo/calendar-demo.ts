@@ -10,11 +10,13 @@ import {
   MnTabDataSource,
   MnTabItem
 } from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-calendar-demo',
   standalone: true,
-  imports: [CommonModule, CalendarViewComponent, MnTabComponent],
+  imports: [CommonModule, CalendarViewComponent, MnTabComponent, DemoPageComponent, DemoExampleComponent],
   providers: [
     { provide: CALENDAR_DATE_FORMATTER, useClass: DefaultCalendarDateFormatter },
     {
@@ -33,23 +35,6 @@ import {
   templateUrl: './calendar-demo.html',
   styles: [`
     :host { display: block; }
-    .calendar-demo-wrapper {
-      width: 100vw;
-      margin-left: calc(-50vw + 50%);
-      display: flex;
-      flex-direction: column;
-      padding: 0 5vw;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
-    .calendar-demo-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 8px 0;
-    }
-    .calendar-demo-header h2 { margin: 0; font-size: 18px; }
-    .calendar-demo-subtitle { color: #6b7280; font-size: 12px; }
     .calendar-demo-body { min-height: 800px; }
     .calendar-demo-clicked {
       padding: 6px 12px;

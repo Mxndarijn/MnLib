@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { MnTextarea, MnTextareaProps, MnSectionDirective } from 'mn-angular-lib';
+import { MnButton, MnTextarea, MnTextareaProps, MnSectionDirective } from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 /**
  * Demo component showcasing MnTextarea features:
@@ -12,7 +14,7 @@ import { MnTextarea, MnTextareaProps, MnSectionDirective } from 'mn-angular-lib'
 @Component({
   selector: 'app-textarea-demo',
   standalone: true,
-  imports: [MnTextarea, ReactiveFormsModule, MnSectionDirective],
+  imports: [MnTextarea, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './textarea-demo.html',
 })
 export class TextareaDemo {

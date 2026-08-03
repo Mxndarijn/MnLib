@@ -2,14 +2,7 @@ import {Component} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MnInputField, MnInputProps} from 'mn-angular-lib';
-
-type DemoItem = {
-  title: string;
-  path: string;
-  description?: string;
-  abbr: string;
-  color: string;
-};
+import {DEMOS, DemoGroup, groupDemos} from '../shared/demo-catalog';
 
 @Component({
   selector: 'app-demo-list',
@@ -18,279 +11,177 @@ type DemoItem = {
   templateUrl: './demo-list.component.html',
   styles: [
     `
-      .list-header {
+      :host {
+        display: block;
+      }
+
+      .home-hero {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: space-between;
-        margin-bottom: 24px;
-        gap: 16px;
+        gap: 24px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
       }
 
-      .demo-grid {
+      .home-search {
+        width: 280px;
+        max-width: 100%;
+      }
+
+      .home-empty {
+        padding: 36px 0;
+        font-size: 14px;
+        opacity: 0.5;
+      }
+
+      .home-eyebrow {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-primary);
+        margin: 0 0 10px;
+      }
+
+      .home-title {
+        font-size: clamp(28px, 4vw, 36px);
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        line-height: 1.05;
+        margin: 0;
+        color: var(--color-base-content);
+      }
+
+      .home-lead {
+        margin: 14px 0 0;
+        font-size: 15px;
+        line-height: 1.6;
+        opacity: 0.6;
+        max-width: 58ch;
+      }
+
+      .home-lead .num {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-weight: 600;
+        opacity: 0.85;
+      }
+
+      /* Category section */
+      .home-group + .home-group {
+        margin-top: 34px;
+      }
+
+      .home-group-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .home-group-name {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin: 0;
+        color: var(--color-base-content);
+      }
+
+      .home-group-count {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+        opacity: 0.4;
+      }
+
+      /* Cards */
+      .home-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(224px, 1fr));
+        gap: 14px;
       }
 
-      .demo-card {
+      .home-card {
         display: flex;
         flex-direction: column;
         gap: 10px;
-        padding: 20px;
+        padding: 18px;
         background: var(--color-base-200);
         border: 1px solid var(--color-base-300);
-        border-radius: var(--mn-radius);
+        border-radius: 12px;
         text-decoration: none;
         color: inherit;
-        transition: background 0.18s,
-        border-color 0.18s,
-        transform 0.15s,
-        box-shadow 0.15s;
-        cursor: pointer;
+        transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
       }
 
-      .demo-card:hover {
-        background: var(--color-base-300);
+      .home-card:hover {
         border-color: var(--color-primary);
         transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
       }
 
-      .card-avatar {
-        width: 40px;
-        height: 40px;
+      .home-card:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+      }
+
+      .home-avatar {
+        width: 38px;
+        height: 38px;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
         color: #fff;
         letter-spacing: 0.03em;
         flex-shrink: 0;
       }
 
-      .card-title {
-        font-weight: 600;
+      .home-card-title {
         font-size: 15px;
+        font-weight: 600;
         color: var(--color-base-content);
       }
 
-      .card-desc {
-        color: var(--color-base-content);
-        opacity: 0.6;
+      .home-card-desc {
         font-size: 12px;
         line-height: 1.5;
-        flex: 1;
+        opacity: 0.6;
       }
 
-      .no-results {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 48px;
-        opacity: 0.4;
-        font-size: 14px;
+      @media (prefers-reduced-motion: reduce) {
+        .home-card {
+          transition: none;
+        }
+        .home-card:hover {
+          transform: none;
+        }
       }
     `,
   ],
 })
 export class DemoListComponent {
+  readonly total = DEMOS.length;
+
   searchControl = new FormControl('');
 
   searchProps: MnInputProps = {
-    id: 'demo-search',
+    id: 'home-search',
     type: 'search',
-    placeholder: 'Search demos...',
+    placeholder: 'Search components…',
     hover: false,
   };
 
-  demos: DemoItem[] = [
-    {
-      title: 'Alerts',
-      path: '/demos/alerts',
-      abbr: 'AL',
-      color: '#ef4444',
-      description: 'Alert service, providers, and outlet template.',
-    },
-    {
-      title: 'Breadcrumbs',
-      path: '/demos/breadcrumbs-demo',
-      abbr: 'BC',
-      color: '#f59e0b',
-      description: 'Flexible linkable trail that degrades to a single Back control.',
-    },
-    {
-      title: 'Button',
-      path: '/demos/button-demo',
-      abbr: 'BT',
-      color: '#3b82f6',
-      description: 'Buttons with sizes, variants, and colors.',
-    },
-    {
-      title: 'Checkbox',
-      path: '/demos/checkbox-demo',
-      abbr: 'CB',
-      color: '#22c55e',
-      description: 'Checkbox with standalone, forms, sizes, and disabled state.',
-    },
-    {
-      title: 'Config',
-      path: '/demos/config',
-      abbr: 'CF',
-      color: '#6366f1',
-      description: 'Section scoping, component defaults, and instance overrides.',
-    },
-    {
-      title: 'Date Selector Bar',
-      path: '/demos/date-selector-bar-demo',
-      abbr: 'DS',
-      color: '#e11d48',
-      description:
-        'Day strip with Today, window arrows, and a date picker across locales and widths.',
-    },
-    {
-      title: 'Dual Horizontal Image',
-      path: '/demos/dual-horizontal-image-demo',
-      abbr: 'DI',
-      color: '#8b5cf6',
-      description: 'Two images shown side by side.',
-    },
-    {
-      title: 'File Input',
-      path: '/demos/file-input-demo',
-      abbr: 'FI',
-      color: '#d97706',
-      description: 'Dropzone, thumbnail, list, and compact modes with accept/size/count limits.',
-    },
-    {
-      title: 'Information Card',
-      path: '/demos/information-card-demo',
-      abbr: 'IC',
-      color: '#0ea5e9',
-      description: 'Card with title, description and optional images.',
-    },
-    {
-      title: 'Input Field',
-      path: '/demos/input-field-demo',
-      abbr: 'IF',
-      color: '#0d9488',
-      description: 'Text inputs with masking, validation, and error display.',
-    },
-    {
-      title: 'Textarea',
-      path: '/demos/textarea-demo',
-      abbr: 'TX',
-      color: '#059669',
-      description: 'Configurable rows, cols, resize, and error handling.',
-    },
-    {
-      title: 'Modal',
-      path: '/demos/modal-demo',
-      abbr: 'MO',
-      color: '#475569',
-      description: 'Wizard, form, confirmation, and custom modal variants.',
-    },
-    {
-      title: 'Table',
-      path: '/demos/table-demo',
-      abbr: 'TB',
-      color: '#0284c7',
-      description: 'Sorting, selection, row actions, search, and pagination.',
-    },
-    {
-      title: 'Language',
-      path: '/demos/language-demo',
-      abbr: 'LG',
-      color: '#a21caf',
-      description: 'Locale switching, translate pipe, interpolation, and config.',
-    },
-    {
-      title: 'Calendar',
-      path: '/demos/calendar-demo',
-      abbr: 'CA',
-      color: '#0891b2',
-      description: 'Week, day, and month views with pluggable event renderers.',
-    },
-    {
-      title: 'List',
-      path: '/demos/list-demo',
-      abbr: 'LI',
-      color: '#16a34a',
-      description: 'Search, selection, load more, pagination, and custom templates.',
-    },
-    {
-      title: 'Grid',
-      path: '/demos/grid-demo',
-      abbr: 'GR',
-      color: '#2563eb',
-      description:
-        'Responsive card grid with cols/auto-fit layout, skeleton, preview cap, and search.',
-    },
-    {
-      title: 'Datetime',
-      path: '/demos/datetime-demo',
-      abbr: 'DT',
-      color: '#dc2626',
-      description: 'Date, time, and datetime-local modes with validation.',
-    },
-    {
-      title: 'Select',
-      path: '/demos/select-demo',
-      abbr: 'SL',
-      color: '#7c3aed',
-      description: 'Native select with ControlValueAccessor, validation, and styling.',
-    },
-    {
-      title: 'Badge',
-      path: '/demos/badge-demo',
-      abbr: 'BG',
-      color: '#db2777',
-      description: 'Badge component with color variants using tailwind-variants.',
-    },
-    {
-      title: 'Icon',
-      path: '/demos/icon-demo',
-      abbr: 'IO',
-      color: '#ea580c',
-      description: 'Icon component with attribute shorthand, color variants, and sizes.',
-    },
-    {
-      title: 'Multi-Select',
-      path: '/demos/multi-select-demo',
-      abbr: 'MS',
-      color: '#65a30d',
-      description: 'Searchable options, max selections, disabled options, and validation.',
-    },
-    {
-      title: 'Rich Text Editor',
-      path: '/demos/rich-text-editor-demo',
-      abbr: 'RT',
-      color: '#0891b2',
-      description: 'Quill-backed writing surface with a prose toolbar, hover labels, and seeding.',
-    },
-    {
-      title: 'Tab',
-      path: '/demos/tab-demo',
-      abbr: 'TP',
-      color: '#0f766e',
-      description: 'Tab component with data source, active tab management, and callbacks.',
-    },
-    {
-      title: 'Skeleton',
-      path: '/demos/skeleton-demo',
-      abbr: 'SK',
-      color: '#94a3b8',
-      description: 'Generic loading placeholders — compose shapes to match any component layout.',
-    },
-  ];
-
-  get filteredDemos(): DemoItem[] {
+  /** Cards matching the current search, grouped into shelves. */
+  get groups(): DemoGroup[] {
     const q = (this.searchControl.value ?? '').toLowerCase().trim();
-    const items = !q
-      ? this.demos
-      : this.demos.filter(
-        (d) => d.title.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q),
-      );
-    return [...items].sort((a, b) => a.title.localeCompare(b.title));
+    const matches = q
+      ? DEMOS.filter(
+        (d) => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q),
+      )
+      : DEMOS;
+    return groupDemos(matches);
   }
 }

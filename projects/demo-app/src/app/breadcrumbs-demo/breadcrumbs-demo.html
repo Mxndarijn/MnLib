@@ -1,37 +1,25 @@
-<div class="container mx-auto p-4">
-  <h1 class="text-2xl font-bold mb-6">Breadcrumbs Demo</h1>
-  <p class="mb-6 opacity-70">
-    A flexible trail: pass crumbs (each optionally linked) and the last one is the
-    current page. Pass none and it degrades to a single <code>Back</code> control.
-  </p>
-
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Linked trail</h2>
-    <p class="text-sm opacity-60 mb-4">Each previous crumb carries an <code>href</code>; the last is the current page.</p>
+<app-demo-page
+  title="Breadcrumbs"
+  tag="mn-breadcrumbs"
+  lead="A flexible trail: pass crumbs (each optionally linked) and the last one is the current page. Pass none and it degrades to a single Back control."
+>
+  <app-demo-example title="Linked trail" hint="Each previous crumb carries an href; the last is the current page.">
     <mn-breadcrumbs [data]="trail" (crumbClick)="onCrumb($event)"></mn-breadcrumbs>
-  </section>
+  </app-demo-example>
 
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Callback-driven trail</h2>
-    <p class="text-sm opacity-60 mb-4">Crumbs use <code>onClick</code>/<code>crumbClick</code> for SPA routing (check the console).</p>
+  <app-demo-example title="Callback-driven trail" hint="Crumbs use onClick/crumbClick for SPA routing (check the console).">
     <mn-breadcrumbs [data]="clickTrail" (crumbClick)="onCrumb($event)"></mn-breadcrumbs>
-  </section>
+  </app-demo-example>
 
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Back fallback — with link</h2>
-    <p class="text-sm opacity-60 mb-4">No crumbs, but a <code>backHref</code> and custom label point the way.</p>
+  <app-demo-example title="Back fallback — with link" hint="No crumbs, but a backHref and custom label point the way.">
     <mn-breadcrumbs [data]="backWithLink" (back)="onBack()"></mn-breadcrumbs>
-  </section>
+  </app-demo-example>
 
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Back fallback — automatic</h2>
-    <p class="text-sm opacity-60 mb-4">No crumbs and no link: the generic <code>back</code> steps through browser history.</p>
+  <app-demo-example title="Back fallback — automatic" hint="No crumbs and no link: the generic back steps through browser history.">
     <mn-breadcrumbs [data]="backAuto" (back)="onBack()"></mn-breadcrumbs>
-  </section>
+  </app-demo-example>
 
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Small size</h2>
-    <p class="text-sm opacity-60 mb-4">The same trail at <code>size: 'sm'</code>.</p>
+  <app-demo-example title="Small size" hint="The same trail at size: 'sm'.">
     <mn-breadcrumbs [data]="{ items: trail.items, size: 'sm' }" (crumbClick)="onCrumb($event)"></mn-breadcrumbs>
-  </section>
-</div>
+  </app-demo-example>
+</app-demo-page>

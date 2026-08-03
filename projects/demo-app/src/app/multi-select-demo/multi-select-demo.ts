@@ -1,11 +1,13 @@
 import {Component} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnMultiSelect, MnMultiSelectProps, MnSectionDirective} from 'mn-angular-lib';
+import {MnButton, MnMultiSelect, MnMultiSelectProps, MnSectionDirective} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-multi-select-demo',
   standalone: true,
-  imports: [MnMultiSelect, ReactiveFormsModule, MnSectionDirective],
+  imports: [MnMultiSelect, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './multi-select-demo.html',
 })
 export class MultiSelectDemo {
