@@ -1,10 +1,8 @@
-<div style="padding: 24px; max-width: 1200px; margin: 0 auto;">
-  <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">MnGrid Demo</h1>
-  <p style="font-size: 14px; color: #666; margin-bottom: 32px;">
-    A responsive card grid that shares its chrome (search, pagination, loading skeleton, empty state, toolbar)
-    with <code>mn-list</code> and <code>mn-table</code>. The consumer supplies only the card template and the data.
-  </p>
-
+<app-demo-page
+  title="Grid"
+  tag="mn-grid"
+  lead="A responsive card grid sharing its chrome (search, pagination, skeleton, empty state, toolbar) with mn-list and mn-table."
+>
   <!-- Shared card template -->
   <ng-template #cardTpl let-user>
     <div class="flex flex-col gap-3 p-4 border border-base-300 rounded-lg bg-base-100 h-full">
@@ -74,40 +72,32 @@
     </button>
   </ng-template>
 
-  <!-- Basic grid: explicit columns -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Basic Grid (explicit columns)</h2>
+  <app-demo-example title="Basic Grid (explicit columns)">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       <code>layout.cols = &#123; base: 1, sm: 2, lg: 3 &#125;</code> — 1 column on phones, 2 on small screens, 3 on
       large.
     </p>
     <mn-grid [dataSource]="basicDataSource"></mn-grid>
-  </section>
+  </app-demo-example>
 
-  <!-- Auto-fit grid -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Auto-Fit Grid (minCardWidth)</h2>
+  <app-demo-example title="Auto-Fit Grid (minCardWidth)">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       <code>layout.minCardWidth = '16rem'</code> — cards fill the row automatically via CSS
       <code>auto-fit</code>/<code>minmax</code>; no breakpoint configuration. Resize the window to compare with the grid
       above.
     </p>
     <mn-grid [dataSource]="autoFitDataSource"></mn-grid>
-  </section>
+  </app-demo-example>
 
-  <!-- Preview cap -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Preview Cap (maxItems) + Toolbar</h2>
+  <app-demo-example title="Preview Cap (maxItems) + Toolbar">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       <code>layout.maxItems = 3</code> shows only the first three cards;
       <code>toolbarTemplate</code> hosts the count badge and a "view all" button.
     </p>
     <mn-grid [dataSource]="previewDataSource"></mn-grid>
-  </section>
+  </app-demo-example>
 
-  <!-- Loading skeletons -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Loading Skeletons</h2>
+  <app-demo-example title="Loading Skeletons">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       With no <code>skeleton</code> field the grid renders a default card placeholder. Provide a
       <code>TemplateRef</code> via <code>skeleton</code> to profile the exact card shape. Toggle to compare states.
@@ -126,41 +116,33 @@
 
     <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Custom (profiled) skeleton</h3>
     <mn-grid [dataSource]="customSkeletonDataSource"></mn-grid>
-  </section>
+  </app-demo-example>
 
-  <!-- Search + client-side pagination -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Search + Client-Side Pagination</h2>
+  <app-demo-example title="Search + Client-Side Pagination">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       <code>canSearch</code> with <code>isInSearch</code> and
       <code>paginationMode: 'client-side-pagination'</code> (6 per page). Search and paging happen in the browser.
     </p>
     <mn-grid [dataSource]="searchPaginatedDataSource"></mn-grid>
-  </section>
+  </app-demo-example>
 
-  <!-- Whole-card click -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Clickable Cards (itemClick)</h2>
+  <app-demo-example title="Clickable Cards (itemClick)">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       Each card is clickable via <code>onItemClick</code> / the <code>(itemClick)</code> output.
     </p>
     <mn-grid (itemClick)="onItemClick($event)" [dataSource]="clickDataSource"></mn-grid>
     <p style="margin-top: 8px; font-size: 14px; color: #666;">Last clicked: {{ clickedName }}</p>
-  </section>
+  </app-demo-example>
 
-  <!-- In-card actions -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">In-Card Action Buttons</h2>
+  <app-demo-example title="In-Card Action Buttons">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       Buttons inside the card call <code>$event.stopPropagation()</code> so they fire their own handler without
       triggering the card click.
     </p>
     <mn-grid (itemClick)="onItemClick($event)" [dataSource]="actionsDataSource"></mn-grid>
-  </section>
+  </app-demo-example>
 
-  <!-- Empty grid -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Empty Grid</h2>
+  <app-demo-example title="Empty Grid">
     <mn-grid [dataSource]="emptyDataSource"></mn-grid>
-  </section>
-</div>
+  </app-demo-example>
+</app-demo-page>

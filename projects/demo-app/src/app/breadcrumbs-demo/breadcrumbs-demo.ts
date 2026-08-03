@@ -1,10 +1,12 @@
 import {Component} from '@angular/core';
 import {MnBreadcrumbs, MnBreadcrumbItem, MnBreadcrumbsData} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-breadcrumbs-demo',
   standalone: true,
-  imports: [MnBreadcrumbs],
+  imports: [MnBreadcrumbs, DemoPageComponent, DemoExampleComponent],
   templateUrl: './breadcrumbs-demo.html',
 })
 export class BreadcrumbsDemo {

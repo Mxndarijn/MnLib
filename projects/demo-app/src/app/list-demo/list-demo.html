@@ -1,6 +1,8 @@
-<div style="padding: 24px; max-width: 1200px; margin: 0 auto;">
-  <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">MnList Demo</h1>
-
+<app-demo-page
+  title="List"
+  tag="mn-list"
+  lead="A data-driven list with custom item templates, selection, search, pagination, and loading skeletons."
+>
   <!-- Item templates (defined once, referenced by data sources) -->
 
   <ng-template #basicItemTpl let-user>
@@ -65,14 +67,6 @@
     </div>
   </ng-template>
 
-  <!-- Basic list -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Basic List (hover, dividers)</h2>
-    @if (basicDataSource) {
-      <mn-list [dataSource]="basicDataSource" (itemClick)="onItemClicked($event)"></mn-list>
-    }
-  </section>
-
   <!-- Custom skeleton template: avatar circle beside two text lines -->
   <ng-template #listSkeletonTpl>
     <div class="flex items-center gap-3 w-full">
@@ -84,9 +78,13 @@
     </div>
   </ng-template>
 
-  <!-- Loading skeletons -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Loading Skeletons</h2>
+  <app-demo-example title="Basic List (hover, dividers)">
+    @if (basicDataSource) {
+      <mn-list [dataSource]="basicDataSource" (itemClick)="onItemClicked($event)"></mn-list>
+    }
+  </app-demo-example>
+
+  <app-demo-example title="Loading Skeletons">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
       Skeleton items now use the <code>mn-skeleton</code> component. Customize via <code>skeleton.lines</code>
       (stacked bars) or a <code>skeleton</code> <code>TemplateRef</code> for a fully custom placeholder.
@@ -115,50 +113,40 @@
         profile)</h3>
       <mn-list [dataSource]="templateSkeletonDataSource"></mn-list>
     }
-  </section>
+  </app-demo-example>
 
-  <!-- Selection list -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Multi-Select List</h2>
+  <app-demo-example title="Multi-Select List">
     @if (selectionDataSource) {
       <mn-list [dataSource]="selectionDataSource" (selectionChange)="onSelectionChange($event)"></mn-list>
     }
     <p style="margin-top: 8px; font-size: 14px; color: #666;">Selected: {{ selectedNames }}</p>
-  </section>
+  </app-demo-example>
 
-  <!-- Searchable list with load more -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Searchable List with Load More</h2>
+  <app-demo-example title="Searchable List with Load More">
     @if (searchDataSource) {
       <mn-list [dataSource]="searchDataSource"></mn-list>
     }
-  </section>
+  </app-demo-example>
 
-  <!-- Paginated list -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Paginated List (15 items, 5 per page)</h2>
+  <app-demo-example title="Paginated List (15 items, 5 per page)">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>paginationMode: 'paginated'</code> with <code>pageSize: 5</code> and a page-size selector (5, 10, 15). Supports search across all pages.</p>
     @if (paginatedDataSource) {
       <mn-list [dataSource]="paginatedDataSource"></mn-list>
     }
-  </section>
+  </app-demo-example>
 
-  <!-- Client-side paginated list -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Client-Side Paginated List</h2>
+  <app-demo-example title="Client-Side Paginated List">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Uses <code>paginationMode:
       'client-side-pagination'</code>. All data is loaded upfront; pagination and search happen entirely in the browser.
     </p>
     @if (clientPaginatedDataSource) {
       <mn-list [dataSource]="clientPaginatedDataSource"></mn-list>
     }
-  </section>
+  </app-demo-example>
 
-  <!-- Empty list -->
-  <section style="margin-bottom: 48px;">
-    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Empty List</h2>
+  <app-demo-example title="Empty List">
     @if (emptyDataSource) {
       <mn-list [dataSource]="emptyDataSource"></mn-list>
     }
-  </section>
-</div>
+  </app-demo-example>
+</app-demo-page>

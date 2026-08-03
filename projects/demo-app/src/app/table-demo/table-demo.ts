@@ -1,6 +1,8 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ColumnSortType, MnButton, MnCollectionState, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 type User = {
   id: string;
@@ -43,7 +45,7 @@ const ALL_USERS: User[] = [
 @Component({
   selector: 'app-table-demo',
   standalone: true,
-  imports: [MnTable, MnButton],
+  imports: [MnTable, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './table-demo.html',
 })
 export class TableDemo implements OnInit {

@@ -1,21 +1,37 @@
-<div class="list-header">
-  <h1>All Demos</h1>
-  <div style="width: 260px;">
+<section class="home-hero">
+  <div class="home-hero-text">
+    <p class="home-eyebrow">MnLib</p>
+    <h1 class="home-title">Angular component library</h1>
+    <p class="home-lead">
+      A cohesive set of components — grouped by space, not boxed by rules.
+      <span class="num">{{ total }}</span> components across
+      <span class="num">6</span> groups. Pick one below or from the sidebar.
+    </p>
+  </div>
+  <div class="home-search">
     <mn-lib-input-field [formControl]="searchControl" [props]="searchProps"></mn-lib-input-field>
   </div>
-</div>
+</section>
 
-<div class="demo-grid">
-  @for (d of filteredDemos; track d.path) {
-    <a class="demo-card" [routerLink]="d.path">
-      <div class="card-avatar" [style.background]="d.color">{{ d.abbr }}</div>
-      <div class="card-title">{{ d.title }}</div>
-      @if (d.description) {
-        <div class="card-desc">{{ d.description }}</div>
+@for (group of groups; track group.category) {
+  <section class="home-group">
+    <div class="home-group-head">
+      <h2 class="home-group-name">{{ group.category }}</h2>
+      <span class="home-group-count">{{ group.items.length }}</span>
+    </div>
+
+    <div class="home-grid">
+      @for (item of group.items; track item.path) {
+        <a class="home-card" [routerLink]="item.path">
+          <div class="home-avatar" [style.background]="item.color">{{ item.abbr }}</div>
+          <div class="home-card-title">{{ item.title }}</div>
+          <div class="home-card-desc">{{ item.description }}</div>
+        </a>
       }
-    </a>
-  }
-  @if (filteredDemos.length === 0) {
-    <div class="no-results">No demos match "{{ searchControl.value }}"</div>
-  }
-</div>
+    </div>
+  </section>
+}
+
+@if (groups.length === 0) {
+  <p class="home-empty">No components match “{{ searchControl.value }}”. Try another name.</p>
+}

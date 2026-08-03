@@ -1,8 +1,25 @@
-<div class="container">
-  <div class="header">
-    <h1>{{ title }}</h1>
-    <ng-content select="[demo-actions]"></ng-content>
-  </div>
+<div class="demo-page">
+  <header class="demo-page-head">
+    <div class="demo-page-heading">
+      @if (eyebrow) {
+        <p class="demo-page-eyebrow">{{ eyebrow }}</p>
+      }
+      <div class="demo-page-titles">
+        <h1 class="demo-page-title">{{ title }}</h1>
+        @if (tag) {
+          <code class="demo-page-tag">{{ tag }}</code>
+        }
+      </div>
+      @if (lead) {
+        <p class="demo-page-lead">{{ lead }}</p>
+      }
+    </div>
+    <div class="demo-page-actions">
+      <ng-content select="[demo-actions]"></ng-content>
+    </div>
+  </header>
 
-  <ng-content></ng-content>
+  <div class="demo-page-body">
+    <ng-content></ng-content>
+  </div>
 </div>

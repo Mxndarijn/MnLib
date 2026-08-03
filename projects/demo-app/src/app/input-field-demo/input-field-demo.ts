@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import {MnInputField, MnInputProps, MnSectionDirective} from 'mn-angular-lib';
+import {MnButton, MnInputField, MnInputProps, MnSectionDirective} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
 
 /**
  * Custom validator: disallows the letter 'x' in the input value
@@ -22,7 +24,7 @@ function noXAllowedValidator(control: AbstractControl): ValidationErrors | null 
 @Component({
   selector: 'app-input-field-demo',
   standalone: true,
-  imports: [MnInputField, ReactiveFormsModule, MnSectionDirective],
+  imports: [MnInputField, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './input-field-demo.html',
 })
 export class InputFieldDemo {

@@ -1,66 +1,56 @@
-<h2>MnDatetime Demo - Modes, Variants & Validation</h2>
-
-<p>
-  This demo showcases the MnDatetime component with different modes
-  (<code>datetime-local</code>, <code>date</code>, <code>time</code>),
-  size/border-radius variants, min/max constraints, and error handling.
-</p>
-
-<form [formGroup]="form">
-  <!-- Example 1: Datetime-local (default) with required validation -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 1: Datetime-local (Default Mode)</h3>
-    <p>
-      Default <code>datetime-local</code> mode with required validation, built-in error messages, and <code>hover: true</code> for interactive styling.
-    </p>
-    <mn-lib-datetime
-      formControlName="appointment"
-      [props]="appointmentProps"
-    ></mn-lib-datetime>
-  </div>
-
-  <!-- Example 2: Date-only mode -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 2: Date-only Mode</h3>
-    <p>
-      Uses <code>mode: 'date'</code> for date-only input with larger size and border radius.
-    </p>
-    <mn-lib-datetime
-      formControlName="birthday"
-      [props]="birthdayProps"
-    ></mn-lib-datetime>
-  </div>
-
-  <!-- Example 3: Time-only mode -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 3: Time-only Mode</h3>
-    <p>
-      Uses <code>mode: 'time'</code> with a 15-minute step interval and custom error messages.
-    </p>
-    <mn-lib-datetime
-      formControlName="meetingTime"
-      [props]="meetingTimeProps"
-    ></mn-lib-datetime>
-  </div>
-
-  <!-- Example 4: Min/Max constraints with full width -->
-  <div style="margin-bottom: 30px;">
-    <h3>Example 4: Min/Max Constraints & Full Width</h3>
-    <p>
-      Datetime-local with <code>min</code>/<code>max</code> constraints, full width, shadow, small size variant, and <code>hover: true</code>.
-    </p>
-    <mn-lib-datetime
-      formControlName="deadline"
-      [props]="deadlineProps"
-    ></mn-lib-datetime>
-  </div>
-
-  <div style="margin-top: 30px;">
-    <button type="button" (click)="form.markAllAsTouched()">
+<app-demo-page
+  title="Datetime"
+  tag="mn-datetime"
+  lead="Date and time picker with datetime-local, date, and time modes, variants, min/max constraints, and validation."
+>
+  <div demo-actions style="display: flex; gap: 10px;">
+    <button mnButton [data]="{ variant: 'outline', color: 'primary', size: 'sm' }" type="button" (click)="form.markAllAsTouched()">
       Show All Validation Errors
     </button>
-    <button type="button" (click)="form.reset()" style="margin-left: 10px;">
+    <button mnButton [data]="{ variant: 'text', color: 'gray', size: 'sm' }" type="button" (click)="form.reset()">
       Reset Form
     </button>
   </div>
-</form>
+
+  <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 18px;">
+    <app-demo-example
+      title="Datetime-local (default mode)"
+      hint="Default datetime-local mode with required validation, built-in error messages, and hover styling."
+    >
+      <mn-lib-datetime
+        formControlName="appointment"
+        [props]="appointmentProps"
+      ></mn-lib-datetime>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Date-only mode"
+      hint="Uses mode: 'date' for date-only input with larger size and border radius."
+    >
+      <mn-lib-datetime
+        formControlName="birthday"
+        [props]="birthdayProps"
+      ></mn-lib-datetime>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Time-only mode"
+      hint="Uses mode: 'time' with a 15-minute step interval and custom error messages."
+    >
+      <mn-lib-datetime
+        formControlName="meetingTime"
+        [props]="meetingTimeProps"
+      ></mn-lib-datetime>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Min/max constraints &amp; full width"
+      hint="Datetime-local with min/max constraints, full width, shadow, small size variant, and hover styling."
+    >
+      <mn-lib-datetime
+        formControlName="deadline"
+        [props]="deadlineProps"
+      ></mn-lib-datetime>
+    </app-demo-example>
+  </form>
+</app-demo-page>

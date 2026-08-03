@@ -1,17 +1,9 @@
-<h2>Date Selector Bar Demo</h2>
-<p class="intro">
-  A day strip with a "Today" button, a month header and arrows. Given room the strip runs Monday to
-  Sunday, so the weekday columns hold still as you page; as the bar narrows it shows fewer days
-  rather than adding a row. Selecting a day or pressing "Today" emits it; the arrows page the strip
-  and never change the selection. Where the strip crosses into a new month, the days either side of
-  the break move apart. Narrower still, and the days give way to a date picker beside Today.
-</p>
-
-<div class="demo-sections">
-
-  <!-- Default -->
-  <section>
-    <h3>Default</h3>
+<app-demo-page
+  title="Date Selector Bar"
+  tag="mn-date-selector-bar"
+  lead="A day strip with a Today button, month header, and paging arrows that fits the number of days shown to the available width, handing over to a date picker when a week won't fit."
+>
+  <app-demo-example title="Default">
     <p>Uncustomised, with the selection kept in the parent through <code>[selectedDate]</code> and
       <code>(dateSelected)</code>.</p>
 
@@ -26,14 +18,12 @@
       <span class="readout-label">Selected</span>
       <span class="readout-value">{{ format(basicDate()) }}</span>
     </div>
-  </section>
+  </app-demo-example>
 
-  <!-- Driving content -->
-  <section>
-    <h3>Driving content below it</h3>
-    <p>The usual job of the bar: pick a day, and the panel underneath reloads for that day. Weekends
-      are empty here to show the empty state.</p>
-
+  <app-demo-example
+    title="Driving content below it"
+    hint="The usual job of the bar: pick a day, and the panel underneath reloads for that day. Weekends are empty here to show the empty state."
+  >
     <div class="bar-frame">
       <mn-date-selector-bar
         [selectedDate]="agendaDate()"
@@ -51,11 +41,9 @@
         <div class="agenda-empty">Nothing scheduled on {{ format(agendaDate()) }}.</div>
       }
     </div>
-  </section>
+  </app-demo-example>
 
-  <!-- Locale -->
-  <section>
-    <h3>Locale and labels</h3>
+  <app-demo-example title="Locale and labels">
     <p>
       <code>[locale]</code> formats the day and month names; <code>[todayLabel]</code> and
       <code>[pickDateLabel]</code> supply the copy. The component ships no hardcoded text, so they
@@ -88,11 +76,9 @@
       <span class="readout-label">Selected</span>
       <span class="readout-value">{{ format(localeDate(), activePreset().locale) }}</span>
     </div>
-  </section>
+  </app-demo-example>
 
-  <!-- Container sizing -->
-  <section>
-    <h3>Sizes to its container</h3>
+  <app-demo-example title="Sizes to its container">
     <p>
       The bar measures itself, not the window. Drag the handle in the bottom-right corner of the
       frame: days drop away one at a time, and the bar stays a single row throughout — it never
@@ -112,11 +98,9 @@
       <span class="readout-label">Frame width</span>
       <span class="readout-value">{{ frameWidth() }}px</span>
     </div>
-  </section>
+  </app-demo-example>
 
-  <!-- Window behaviour -->
-  <section>
-    <h3>The window stays put</h3>
+  <app-demo-example title="The window stays put">
     <p>
       Picking a day that's already on the strip leaves the tiles exactly where they are. These
       buttons move <code>[selectedDate]</code> from outside the bar, the way a month view or a deep
@@ -153,11 +137,9 @@
       window steps one day at a time, so the days read as one continuous run rather than separate
       pages. Home and End jump to the ends of the visible window.
     </p>
-  </section>
+  </app-demo-example>
 
-  <!-- Emit behaviour -->
-  <section>
-    <h3>What the bar emits</h3>
+  <app-demo-example title="What the bar emits">
     <p>
       <code>(dateSelected)</code> fires only when the day actually changes. Re-selecting the current
       tile, or pressing "Today" while today is already selected, stays silent so consumers don't
@@ -189,6 +171,5 @@
         </button>
       </div>
     }
-  </section>
-
-</div>
+  </app-demo-example>
+</app-demo-page>
