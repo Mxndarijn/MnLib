@@ -1,12 +1,11 @@
-import { Component } from '@angular/core';
-import { MnSectionDirective } from 'mn-angular-lib';
-import { DemoPageComponent } from '../shared/demo-page.component';
-import { DemoExampleComponent } from '../shared/demo-example.component';
+import {Component} from '@angular/core';
+import {MnSectionDirective} from 'mn-angular-lib';
+import {DemoPageComponent} from '../shared/demo-page.component';
 
 @Component({
   selector: 'app-config-demo',
   standalone: true,
-  imports: [MnSectionDirective, DemoPageComponent, DemoExampleComponent],
+  imports: [MnSectionDirective, DemoPageComponent],
   template: `
     <app-demo-page
       mn-section="root"

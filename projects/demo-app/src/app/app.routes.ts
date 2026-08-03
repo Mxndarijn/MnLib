@@ -25,6 +25,7 @@ import {FileInputDemo} from './file-input-demo/file-input-demo';
 import {DateSelectorBarDemo} from './date-selector-bar-demo/date-selector-bar-demo';
 import {RichTextEditorDemo} from './rich-text-editor-demo/rich-text-editor-demo';
 import {BreadcrumbsDemo} from './breadcrumbs-demo/breadcrumbs-demo';
+import {BottomSheetDemo} from './bottom-sheet-demo/bottom-sheet-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -32,15 +33,23 @@ export const routes: Routes = [
   { path: 'demos/alerts', component: AlertsDemoComponent, title: 'Alerts Demo' },
   { path: 'demos/button-demo', component: ButtonDemo, title: 'Button Demo' },
   { path: 'demos/config', component: ConfigDemoComponent, title: 'Config Demo' },
-  { path: 'demos/dual-horizontal-image-demo', component: DualHorizontalImageDemo, title: 'DualImageHorizontal Demo' },
-  { path: 'demos/information-card-demo', component: InformationCardDemo, title: 'Information card Demo' },
-  {path: 'demos/input-field-demo', component: InputFieldDemo, title: 'Input Field Demo' },
-  {path: 'demos/textarea-demo', component: TextareaDemo, title: 'Textarea Demo' },
-  {path: 'demos/modal-demo', component: ModalDemo, title: 'Modal Demo' },
-  {path: 'demos/table-demo', component: TableDemo, title: 'Table Demo' },
-  {path: 'demos/language-demo', component: LanguageDemo, title: 'Language Demo' },
-  {path: 'demos/calendar-demo', component: CalendarDemo, title: 'Calendar Demo' },
-  {path: 'demos/list-demo', component: ListDemo, title: 'List Demo' },
+  {
+    path: 'demos/dual-horizontal-image-demo',
+    component: DualHorizontalImageDemo,
+    title: 'DualImageHorizontal Demo',
+  },
+  {
+    path: 'demos/information-card-demo',
+    component: InformationCardDemo,
+    title: 'Information card Demo',
+  },
+  {path: 'demos/input-field-demo', component: InputFieldDemo, title: 'Input Field Demo'},
+  {path: 'demos/textarea-demo', component: TextareaDemo, title: 'Textarea Demo'},
+  {path: 'demos/modal-demo', component: ModalDemo, title: 'Modal Demo'},
+  {path: 'demos/table-demo', component: TableDemo, title: 'Table Demo'},
+  {path: 'demos/language-demo', component: LanguageDemo, title: 'Language Demo'},
+  {path: 'demos/calendar-demo', component: CalendarDemo, title: 'Calendar Demo'},
+  {path: 'demos/list-demo', component: ListDemo, title: 'List Demo'},
   {path: 'demos/grid-demo', component: GridDemo, title: 'Grid Demo'},
   {path: 'demos/datetime-demo', component: DatetimeDemo, title: 'Datetime Demo'},
   {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'},
@@ -51,7 +60,16 @@ export const routes: Routes = [
   {path: 'demos/checkbox-demo', component: CheckboxDemo, title: 'Checkbox Demo'},
   {path: 'demos/skeleton-demo', component: SkeletonDemo, title: 'Skeleton Demo'},
   {path: 'demos/file-input-demo', component: FileInputDemo, title: 'File Input Demo'},
-  {path: 'demos/date-selector-bar-demo', component: DateSelectorBarDemo, title: 'Date Selector Bar Demo'},
-  {path: 'demos/rich-text-editor-demo', component: RichTextEditorDemo, title: 'Rich Text Editor Demo'},
+  {
+    path: 'demos/date-selector-bar-demo',
+    component: DateSelectorBarDemo,
+    title: 'Date Selector Bar Demo',
+  },
+  {
+    path: 'demos/rich-text-editor-demo',
+    component: RichTextEditorDemo,
+    title: 'Rich Text Editor Demo',
+  },
   {path: 'demos/breadcrumbs-demo', component: BreadcrumbsDemo, title: 'Breadcrumbs Demo'},
+  {path: 'demos/bottom-sheet-demo', component: BottomSheetDemo, title: 'Bottom Sheet Demo'},
 ];

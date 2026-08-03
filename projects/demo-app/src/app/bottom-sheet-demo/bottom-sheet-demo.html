@@ -1,0 +1,156 @@
+<app-demo-page
+  lead="Viewport-anchored mobile sheet chrome: an optional backdrop and grabber, swipe/flick-to-dismiss, a slide-up entrance, and a promise-based slide-down exit. The body is projected — the sheet owns only the chrome and gestures."
+  tag="mn-bottom-sheet"
+  title="Bottom Sheet"
+>
+  <p demo-actions style="font-size: 12px; opacity: 0.55; max-width: 40ch; text-align: right;">
+    Swipe/flick-to-dismiss arms at ≤640px. On a wide window, close via the backdrop, the in-sheet
+    buttons, or resize narrow to feel the drag.
+  </p>
+
+  <!-- Example 1: Basic sheet -->
+  <app-demo-example
+    hint="Backdrop + grabber. Dismiss by swiping down, flicking, or tapping the backdrop — or programmatically with startClosing(). (dismiss) fires after the exit animation, so the host can unmount it cleanly."
+    title="Basic sheet"
+  >
+    <button (click)="basicOpen.set(true)" [data]="{ variant: 'fill', color: 'primary', size: 'sm' }" mnButton
+            type="button">
+      Open sheet
+    </button>
+
+    @if (basicOpen()) {
+      <mn-bottom-sheet
+        #basicSheet
+        (dismiss)="basicOpen.set(false)"
+        ariaLabel="Basic bottom sheet"
+      >
+        <div style="padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700;">Share this page</h3>
+            <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.6;">Pick where this should go.</p>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            @for (row of ['Copy link', 'Send in a message', 'Add to favourites', 'Report']; track row) {
+              <div style="padding: 12px 4px; border-top: 1px solid var(--color-base-300); font-size: 14px;">
+                {{ row }}
+              </div>
+            }
+          </div>
+          <button (click)="closeBasic()" [data]="{ variant: 'fill', color: 'primary', size: 'md' }" mnButton
+                  type="button">
+            Done
+          </button>
+        </div>
+      </mn-bottom-sheet>
+    }
+  </app-demo-example>
+
+  <!-- Example 2: Non-dismissible, programmatic close -->
+  <app-demo-example
+    hint="Gestures are inert and the backdrop is non-closing — the sheet can only leave through its own buttons, which call startClosing() before unmounting. Use this for a decision the user must make."
+    title="Non-dismissible (dismissible = false)"
+  >
+    <button (click)="lockedOpen.set(true)" [data]="{ variant: 'outline', color: 'primary', size: 'sm' }" mnButton
+            type="button">
+      Open locked sheet
+    </button>
+
+    @if (lockedOpen()) {
+      <mn-bottom-sheet
+        #lockedSheet
+        [dismissible]="false"
+        [showGrabber]="false"
+        ariaLabel="Confirmation sheet"
+      >
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700;">Discard changes?</h3>
+            <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.6;">
+              This can't be undone. You have to choose — swipe and backdrop tap are disabled here.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button (click)="closeLocked()" [data]="{ variant: 'text', color: 'gray', size: 'md' }" mnButton
+                    type="button">
+              Keep editing
+            </button>
+            <button (click)="closeLocked()" [data]="{ variant: 'fill', color: 'danger', size: 'md' }" mnButton
+                    type="button">
+              Discard
+            </button>
+          </div>
+        </div>
+      </mn-bottom-sheet>
+    }
+  </app-demo-example>
+
+  <!-- Example 3: Dismiss guard -->
+  <app-demo-example
+    hint="[dismissGuard] runs before a user dismissal commits. Returning false aborts it and springs the sheet back. Toggle the checkbox, then try to swipe or tap the backdrop."
+    title="Dismiss guard (spring-back)"
+  >
+    <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+      <mn-lib-checkbox
+        (checkedChange)="guardAllows.set($event)"
+        [checked]="guardAllows()"
+        [props]="guardProps"
+      ></mn-lib-checkbox>
+      <button (click)="guardedOpen.set(true)" [data]="{ variant: 'fill', color: 'primary', size: 'sm' }" mnButton
+              type="button">
+        Open guarded sheet
+      </button>
+      <p style="margin: 2px 0 0; font-size: 12px; opacity: 0.55;">Last dismissal: <strong>{{ guardLog() }}</strong></p>
+    </div>
+
+    @if (guardedOpen()) {
+      <mn-bottom-sheet
+        (dismiss)="guardedOpen.set(false)"
+        [dismissGuard]="dismissGuard"
+        ariaLabel="Guarded bottom sheet"
+      >
+        <div style="padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 8px;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700;">Unsaved draft</h3>
+          <p style="margin: 0; font-size: 13px; opacity: 0.6;">
+            While “Allow dismissal” is off, the guard blocks every swipe and backdrop tap and the sheet
+            snaps back. Turn it on to let a dismissal through.
+          </p>
+        </div>
+      </mn-bottom-sheet>
+    }
+  </app-demo-example>
+
+  <!-- Example 4: Sizing -->
+  <app-demo-example
+    hint="minHeightPx sets a floor so filtering the body shorter can't shrink the sheet mid-interaction; maxHeightVh caps it and the body scrolls within. Here the grabber is hidden — swipe still works on narrow viewports."
+    title="Sizing (minHeightPx + maxHeightVh, no grabber)"
+  >
+    <button (click)="tallOpen.set(true)" [data]="{ variant: 'outline', color: 'primary', size: 'sm' }" mnButton
+            type="button">
+      Open tall sheet
+    </button>
+
+    @if (tallOpen()) {
+      <mn-bottom-sheet
+        (dismiss)="tallOpen.set(false)"
+        [maxHeightVh]="85"
+        [minHeightPx]="320"
+        [showGrabber]="false"
+        ariaLabel="Tall bottom sheet"
+      >
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto;">
+          <h3 style="margin: 0 0 6px; font-size: 17px; font-weight: 700;">Terms</h3>
+          @for (n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; track n) {
+            <p style="margin: 0; font-size: 13px; line-height: 1.6; opacity: 0.7;">
+              {{ n }}. This paragraph pads the body so the sheet reaches its cap and the content scrolls
+              inside it while the sheet stays pinned to the bottom of the viewport.
+            </p>
+          }
+          <button (click)="tallOpen.set(false)" [data]="{ variant: 'fill', color: 'primary', size: 'md' }" mnButton
+                  type="button">
+            Accept
+          </button>
+        </div>
+      </mn-bottom-sheet>
+    }
+  </app-demo-example>
+</app-demo-page>
