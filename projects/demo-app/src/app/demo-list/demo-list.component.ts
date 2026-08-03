@@ -113,6 +113,13 @@ export class DemoListComponent {
       description: 'Alert service, providers, and outlet template.',
     },
     {
+      title: 'Breadcrumbs',
+      path: '/demos/breadcrumbs-demo',
+      abbr: 'BC',
+      color: '#f59e0b',
+      description: 'Flexible linkable trail that degrades to a single Back control.',
+    },
+    {
       title: 'Button',
       path: '/demos/button-demo',
       abbr: 'BT',
