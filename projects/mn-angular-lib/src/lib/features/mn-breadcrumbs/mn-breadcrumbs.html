@@ -1,0 +1,32 @@
+<nav aria-label="Breadcrumb" [class]="styles.root()">
+  @if (hasTrail) {
+    <ol [class]="styles.list()">
+      @for (item of data.items; track $index; let first = $first) {
+        @if (!first) {
+          <li aria-hidden="true" [class]="styles.separator()">
+            <svg [size]="14" lucideChevronRight></svg>
+          </li>
+        }
+        <li class="inline-flex items-center">
+          @if (isCurrent($index)) {
+            <span aria-current="page" [class]="styles.current()">{{ item.label | mnTranslate }}</span>
+          } @else if (item.href) {
+            <a [attr.href]="item.href" [class]="styles.link()" (click)="onCrumb(item)">{{ item.label | mnTranslate }}</a>
+          } @else {
+            <button type="button" [class]="styles.link()" (click)="onCrumb(item)">{{ item.label | mnTranslate }}</button>
+          }
+        </li>
+      }
+    </ol>
+  } @else if (data.backHref) {
+    <a [attr.href]="data.backHref" [class]="styles.back()" (click)="onBack()">
+      <svg [size]="16" lucideChevronLeft></svg>
+      {{ backLabel | mnTranslate }}
+    </a>
+  } @else {
+    <button type="button" [class]="styles.back()" (click)="onBack()">
+      <svg [size]="16" lucideChevronLeft></svg>
+      {{ backLabel | mnTranslate }}
+    </button>
+  }
+</nav>

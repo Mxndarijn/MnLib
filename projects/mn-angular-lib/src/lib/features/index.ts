@@ -22,4 +22,5 @@ export * from './mn-tab'
 export * from './mn-rich-text-editor'
 export * from './mn-icon';
 export * from './mn-skeleton';
+export * from './mn-breadcrumbs';
 
