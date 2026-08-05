@@ -502,18 +502,21 @@
     <button
       mnButton
       type="button"
-      [data]="{ size: 'sm', variant: 'text', color: action.danger ? 'danger' : 'secondary' }"
+      [data]="{ size: 'sm', variant: 'text', color: rowActionColor(action) }"
       [disabled]="isRowActionDisabled(action, row)"
       class="cursor-pointer"
       (click)="$event.stopPropagation(); runRowAction(action, row)"
       [attr.aria-label]="rowActionLabel(action)"
+      [attr.title]="showActionLabel(column, action) ? null : rowActionLabel(action)"
     >
-      @if (action.icon) {
+      @if (showActionIcon(column, action)) {
         <span class="inline-flex items-center shrink-0">
           <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
         </span>
       }
-      <span>{{ rowActionLabel(action) }}</span>
+      @if (showActionLabel(column, action)) {
+        <span>{{ rowActionLabel(action) }}</span>
+      }
     </button>
   }
 </ng-template>

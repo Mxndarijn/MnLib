@@ -67,7 +67,8 @@
   <app-demo-example title="Table with Actions Column">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">The column's <code>actions</code> config renders inline
       command buttons that automatically collapse into a ⋯ menu (<code>mn-dropdown</code>) once the table is narrower
-      than 450px — resize the window, or open it on a phone, to see the switch.</p>
+      than 450px — resize the window, or open it on a phone, to see the switch. Here <code>actionsInline: 'icon'</code>
+      keeps the wide layout icon-only (labels on hover), while the collapsed bottom-sheet shows full text.</p>
     <mn-table [dataSource]="actionsDataSource"></mn-table>
   </app-demo-example>
 

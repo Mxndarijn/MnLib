@@ -289,6 +289,118 @@ describe('MnDropdown (mobile sheet)', () => {
   });
 });
 
+describe('MnDropdown (trigger presentation)', () => {
+  @Component({
+    standalone: true,
+    imports: [MnDropdown],
+    template: `<mn-lib-dropdown [props]="props"></mn-lib-dropdown>`,
+  })
+  class TriggerHostComponent {
+    props: MnDropdownProps = {
+      id: 'trig-dd',
+      mobileSheet: false,
+      actions: [{label: 'Edit', run: () => undefined}],
+    };
+  }
+
+  let fixture: ComponentFixture<TriggerHostComponent>;
+  let host: TriggerHostComponent;
+  let component: MnDropdown;
+
+  function trigger(): HTMLElement {
+    return document.getElementById('trig-dd')!;
+  }
+
+  function build(props: Partial<MnDropdownProps>): void {
+    fixture = TestBed.createComponent(TriggerHostComponent);
+    host = fixture.componentInstance;
+    host.props = {...host.props, ...props};
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TriggerHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+    stubViewport(false);
+  });
+
+  it('defaults to an icon-only vertical-dots trigger with an aria-label', () => {
+    build({});
+    expect(component.triggerLabelText).toBeNull();
+    expect(component.resolvedTriggerIcon).toBe('dots-vertical');
+    expect(trigger().querySelector('span')).toBeNull();
+    expect(trigger().getAttribute('aria-label')).toBe('Actions');
+  });
+
+  it('renders visible text and a trailing chevron when triggerLabel is set', () => {
+    build({triggerLabel: 'Actions'});
+    expect(component.triggerLabelText).toBe('Actions');
+    expect(component.resolvedTriggerIcon).toBe('chevron');
+    expect(trigger().querySelector('span')?.textContent).toContain('Actions');
+    // With visible text the accessible name comes from the content, so no aria-label.
+    expect(trigger().getAttribute('aria-label')).toBeNull();
+  });
+
+  it('honours triggerIcon:none for a text-only trigger', () => {
+    build({triggerLabel: 'More', triggerIcon: 'none'});
+    expect(component.resolvedTriggerIcon).toBe('none');
+    expect(trigger().querySelector('svg')).toBeNull();
+    expect(trigger().querySelector('span')?.textContent).toContain('More');
+  });
+
+  it('resolves triggerLabelKey via the language service', async () => {
+    await TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [TriggerHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {
+          provide: MnLanguageService,
+          useValue: {...languageStub, translateIfPresent: (k: string) => (k === 'menu.more' ? 'Meer' : undefined)},
+        },
+      ],
+    }).compileComponents();
+    build({triggerLabelKey: 'menu.more', triggerLabel: 'More'});
+    expect(component.triggerLabelText).toBe('Meer');
+  });
+});
+
+describe('MnDropdown (action colour)', () => {
+  @Component({
+    standalone: true,
+    imports: [MnDropdown],
+    template: `<mn-lib-dropdown [props]="props"></mn-lib-dropdown>`,
+  })
+  class ColourHostComponent {
+    props: MnDropdownProps = {id: 'col-dd', mobileSheet: false, actions: [{label: 'x', run: () => undefined}]};
+  }
+
+  it('resolves the foreground class from color, danger, then the default', async () => {
+    await TestBed.configureTestingModule({
+      imports: [ColourHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ColourHostComponent);
+    fixture.detectChanges();
+    const c = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
+
+    expect(c.actionColorClass({label: 'a', run: () => undefined})).toBe('text-base-content');
+    expect(c.actionColorClass({label: 'a', danger: true, run: () => undefined})).toBe('text-error');
+    expect(c.actionColorClass({label: 'a', color: 'success', run: () => undefined})).toBe('text-success');
+    // An explicit colour wins over the danger shorthand.
+    expect(c.actionColorClass({label: 'a', color: 'primary', danger: true, run: () => undefined})).toBe('text-primary');
+  });
+});
+
 describe('MnDropdown (label resolution)', () => {
   @Component({
     standalone: true,

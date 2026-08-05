@@ -1,6 +1,16 @@
 import { TemplateRef } from '@angular/core';
 import { MnDropdownTriggerVariants } from './mn-dropdownVariants';
 
+/** Theme colour tokens an action item can be tinted with, mirroring mn-button's palette. */
+export type MnDropdownActionColor =
+  | 'primary'
+  | 'secondary'
+  | 'danger'
+  | 'warning'
+  | 'success'
+  | 'accent'
+  | 'gray';
+
 /**
  * A single command in a {@link MnDropdownProps} menu. Unlike a select option it holds
  * no value — choosing it fires {@link run} and closes the menu. This is a *command*
@@ -28,7 +38,15 @@ export type MnDropdownAction = {
   /** When true the item is shown dimmed and cannot be chosen. */
   disabled?: boolean;
 
-  /** Renders the item in a destructive style (e.g. a "Delete" action). */
+  /**
+   * Tints the item's label and icon. When omitted the item uses the default foreground
+   * ({@link danger} still forces the destructive red). Lets a host carry a per-item
+   * colour — e.g. an mn-table actions column keeps the same colours it shows inline.
+   */
+  color?: MnDropdownActionColor;
+
+  /** Renders the item in a destructive style (e.g. a "Delete" action). Shorthand for
+   *  the red foreground; equivalent to `color: 'danger'`. */
   danger?: boolean;
 };
 
@@ -43,7 +61,25 @@ export type MnDropdownProps = {
   /** The commands rendered in the menu, in order. */
   actions: MnDropdownAction[];
 
-  /** Accessible label for the ⋯ trigger button. Falls back to a translated default. */
+  /**
+   * Text shown inside the trigger button, turning the ⋯ icon into a labelled control
+   * (e.g. "Actions"). When set, {@link triggerIcon} defaults to a trailing chevron
+   * instead of the dots. Omit for the icon-only ⋯ trigger.
+   */
+  triggerLabel?: string;
+
+  /** Translation key for {@link triggerLabel}. Resolved via MnLanguageService. */
+  triggerLabelKey?: string;
+
+  /**
+   * Which glyph the trigger shows. Defaults to `'dots-vertical'` (⋮) for an icon-only
+   * trigger, or `'chevron'` (▾) when a {@link triggerLabel} is set. Use `'none'` for a
+   * text-only trigger, or `'dots-horizontal'` (⋯) for the horizontal ellipsis.
+   */
+  triggerIcon?: 'dots-vertical' | 'dots-horizontal' | 'chevron' | 'none';
+
+  /** Accessible label for the trigger button. Falls back to a translated default.
+   *  Ignored for name purposes when {@link triggerLabel} provides visible text. */
   ariaLabel?: string;
 
   /** Translation key for {@link ariaLabel}. Resolved via MnLanguageService. */
