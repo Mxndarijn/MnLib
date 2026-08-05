@@ -7,13 +7,20 @@
     [id]="resolvedId"
     [data]="{ size: 'sm', variant: 'text', color: 'gray' }"
     [ngClass]="triggerClasses"
-    [attr.aria-label]="triggerAriaLabel"
+    [attr.aria-label]="triggerLabelText ? null : triggerAriaLabel"
     [attr.aria-haspopup]="'menu'"
     [attr.aria-expanded]="isOpen"
     [attr.aria-controls]="isOpen ? resolvedId + '-menu' : null"
     (click)="$event.stopPropagation(); toggle()"
   >
-    <svg lucideEllipsisVertical [size]="18"></svg>
+    @if (triggerLabelText) {
+      <span class="truncate">{{ triggerLabelText }}</span>
+    }
+    @switch (resolvedTriggerIcon) {
+      @case ('dots-vertical') { <svg lucideEllipsisVertical [size]="18"></svg> }
+      @case ('dots-horizontal') { <svg lucideEllipsis [size]="18"></svg> }
+      @case ('chevron') { <svg lucideChevronDown [size]="16" class="opacity-70"></svg> }
+    }
   </button>
 
   <!-- Menu -->
@@ -76,9 +83,7 @@
         [disabled]="action.disabled"
         [class.opacity-50]="action.disabled"
         [class.pointer-events-none]="action.disabled"
-        [class.text-error]="action.danger"
-        [class.text-base-content]="!action.danger"
-        [ngClass]="sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'"
+        [ngClass]="[actionColorClass(action), sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm']"
         class="flex w-full items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
         (click)="select(action)"
       >

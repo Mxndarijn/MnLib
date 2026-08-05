@@ -30,7 +30,7 @@ import {emptyFilterValue, isFilterValueActive, matchesColumnFilter} from './mn-t
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
 import {MnSelect, MnSelectOption} from '../mn-select';
 import {MnMultiSelect, MnMultiSelectOption} from '../mn-multi-select';
-import {MnDropdown, MnDropdownAction} from '../mn-dropdown';
+import {MnDropdown, MnDropdownAction, MnDropdownActionColor} from '../mn-dropdown';
 import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnShowAboveDirective} from './mn-show-above.directive';
@@ -649,9 +649,33 @@ export class MnTable<T = object>
     return action.label ?? (action.labelKey ? this.lang.t(action.labelKey) : '');
   }
 
+  /** Whether an inline action button should render its icon. */
+  showActionIcon(column: ColumnDefinition<T>, action: MnTableRowAction<T>): boolean {
+    return (column.actionsInline ?? 'both') !== 'label' && !!action.icon;
+  }
+
+  /**
+   * Whether an inline action button should render its text label. In `'icon'` mode the
+   * label is hidden — unless the action has no icon, in which case it is shown anyway so
+   * the button is never blank.
+   */
+  showActionLabel(column: ColumnDefinition<T>, action: MnTableRowAction<T>): boolean {
+    if ((column.actionsInline ?? 'both') === 'icon') return !action.icon;
+    return true;
+  }
+
   /** Whether an action is disabled for the given row. */
   isRowActionDisabled(action: MnTableRowAction<T>, row: T): boolean {
     return action.disabled ? action.disabled(row) : false;
+  }
+
+  /**
+   * The effective colour for an action, used identically by the inline button and the
+   * collapsed ⋯-menu item so the two never diverge: an explicit `color`, else `'danger'`
+   * for a destructive action, else the default `'secondary'`.
+   */
+  rowActionColor(action: MnTableRowAction<T>): MnDropdownActionColor {
+    return action.color ?? (action.danger ? 'danger' : 'secondary');
   }
 
   /** Invokes an action for a row. */
@@ -670,6 +694,7 @@ export class MnTable<T = object>
       label: action.label,
       labelKey: action.labelKey,
       icon: action.icon,
+      color: this.rowActionColor(action),
       danger: action.danger,
       disabled: this.isRowActionDisabled(action, row),
       run: () => action.run(row),

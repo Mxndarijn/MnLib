@@ -124,6 +124,14 @@ export const DEMOS: DemoEntry[] = [
     abbr: 'IO',
     description: 'Icons with attribute shorthand, color variants, and sizes.',
   },
+  {
+    title: 'Dropdown',
+    path: '/demos/dropdown-demo',
+    category: 'Actions',
+    color: '#9333ea',
+    abbr: 'DD',
+    description: 'A ⋯ command menu: popover on desktop, bottom sheet on mobile.',
+  },
 
   // Data
   {

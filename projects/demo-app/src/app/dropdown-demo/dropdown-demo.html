@@ -1,0 +1,50 @@
+<app-demo-page
+  title="Dropdown"
+  tag="mn-lib-dropdown"
+  lead="A ⋯ command menu: an anchored popover on desktop, a bottom sheet on mobile. Actions fire and dismiss — it is a command menu, not a value picker."
+>
+  <!-- Action icons, referenced from the props' `actions` config. -->
+  <ng-template #editIcon><svg lucidePencil [size]="16"></svg></ng-template>
+  <ng-template #duplicateIcon><svg lucideCopy [size]="16"></svg></ng-template>
+  <ng-template #shareIcon><svg lucideShare2 [size]="16"></svg></ng-template>
+  <ng-template #deleteIcon><svg lucideTrash2 [size]="16"></svg></ng-template>
+
+  <p style="font-size: 14px; color: #888; margin-bottom: 4px;">
+    Last chosen: <code>{{ lastAction }}</code>
+  </p>
+
+  <app-demo-example title="Basic (labels only)" hint="The leanest form — a ⋯ trigger opening a list of commands.">
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-base-content/60">Actions</span>
+      <mn-lib-dropdown [props]="basicProps"></mn-lib-dropdown>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example title="With icons" hint="Each action can carry a leading icon template.">
+    <mn-lib-dropdown [props]="iconProps"></mn-lib-dropdown>
+  </app-demo-example>
+
+  <app-demo-example title="Danger and disabled states" hint="danger renders a destructive style; disabled items cannot be chosen.">
+    <mn-lib-dropdown [props]="stateProps"></mn-lib-dropdown>
+  </app-demo-example>
+
+  <app-demo-example title="Text trigger" hint="Set triggerLabel to turn the ⋯ into a labelled button; it defaults to a trailing chevron.">
+    <div class="flex flex-wrap items-center gap-4">
+      <mn-lib-dropdown [props]="textProps"></mn-lib-dropdown>
+      <mn-lib-dropdown [props]="textOnlyProps"></mn-lib-dropdown>
+      <mn-lib-dropdown [props]="textDotsProps"></mn-lib-dropdown>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example title="With a menu heading" hint="menuLabel names the menu — always shown on the mobile sheet, which covers its own trigger.">
+    <mn-lib-dropdown [props]="labelledProps"></mn-lib-dropdown>
+  </app-demo-example>
+
+  <app-demo-example title="Translated labels" hint="labelKey / ariaLabelKey resolve via MnLanguageService, falling back to the literal label when a key is untranslated.">
+    <mn-lib-dropdown [props]="i18nProps"></mn-lib-dropdown>
+  </app-demo-example>
+
+  <app-demo-example title="Mobile presentation" hint="Narrow the window below 640px and open any menu above — it presents as a swipe-to-dismiss bottom sheet instead of a popover.">
+    <mn-lib-dropdown [props]="iconProps"></mn-lib-dropdown>
+  </app-demo-example>
+</app-demo-page>

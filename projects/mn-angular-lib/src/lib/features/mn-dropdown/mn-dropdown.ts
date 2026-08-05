@@ -12,17 +12,28 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
-import { LucideEllipsisVertical, LucideX } from '@lucide/angular';
+import { LucideChevronDown, LucideEllipsis, LucideEllipsisVertical, LucideX } from '@lucide/angular';
 import { skip } from 'rxjs';
 import { MnButton } from '../mn-button';
 import { MnBottomSheet } from '../mn-bottom-sheet';
 import { MnConfigService } from '../../config';
 import { MN_INSTANCE_ID, MN_SECTION_PATH } from '../../context';
 import { MnLanguageService } from '../../language';
-import { MnDropdownAction, MnDropdownProps, MnDropdownUIConfig } from './mn-dropdownTypes';
+import { MnDropdownAction, MnDropdownActionColor, MnDropdownProps, MnDropdownUIConfig } from './mn-dropdownTypes';
 import { mnDropdownTriggerVariants } from './mn-dropdownVariants';
 
 export const MN_DROPDOWN_CONFIG = new InjectionToken<MnDropdownUIConfig>('MN_DROPDOWN_CONFIG');
+
+/** Foreground class per action colour token, matching mn-button's text variants. */
+const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
+  primary: 'text-primary',
+  secondary: 'text-secondary',
+  danger: 'text-error',
+  warning: 'text-warning',
+  success: 'text-success',
+  accent: 'text-accent',
+  gray: 'text-base-content/70',
+};
 
 /**
  * A ⋯ command menu. The trigger opens a `role="menu"` list of {@link MnDropdownAction}s
@@ -38,7 +49,7 @@ export const MN_DROPDOWN_CONFIG = new InjectionToken<MnDropdownUIConfig>('MN_DRO
 @Component({
   selector: 'mn-lib-dropdown',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton, MnBottomSheet, LucideEllipsisVertical, LucideX],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnBottomSheet, LucideEllipsisVertical, LucideEllipsis, LucideChevronDown, LucideX],
   templateUrl: './mn-dropdown.html',
   styleUrl: './mn-dropdown.css',
 })
@@ -325,10 +336,32 @@ export class MnDropdown implements OnInit {
     return translated ?? action.label ?? '';
   }
 
+  /**
+   * Foreground class for an item: an explicit {@link MnDropdownAction.color}, else the
+   * destructive red for a {@link MnDropdownAction.danger} item, else the default text.
+   */
+  actionColorClass(action: MnDropdownAction): string {
+    if (action.color) return ACTION_COLOR_CLASS[action.color];
+    if (action.danger) return ACTION_COLOR_CLASS.danger;
+    return 'text-base-content';
+  }
+
   /** Accessible name for the ⋯ trigger button. */
   get triggerAriaLabel(): string {
     const translated = this.props.ariaLabelKey ? this.lang.translateIfPresent(this.props.ariaLabelKey) : undefined;
     return translated ?? this.props.ariaLabel ?? this.uiConfig.ariaLabel ?? 'Actions';
+  }
+
+  /** The visible text on the trigger, or null for an icon-only ⋯ trigger. */
+  get triggerLabelText(): string | null {
+    const translated = this.props.triggerLabelKey ? this.lang.translateIfPresent(this.props.triggerLabelKey) : undefined;
+    return translated ?? this.props.triggerLabel ?? null;
+  }
+
+  /** Which glyph the trigger renders: an explicit choice, else a chevron when the
+   *  trigger is labelled and the vertical dots when it is icon-only. */
+  get resolvedTriggerIcon(): 'dots-vertical' | 'dots-horizontal' | 'chevron' | 'none' {
+    return this.props.triggerIcon ?? (this.triggerLabelText ? 'chevron' : 'dots-vertical');
   }
 
   /** Heading shown above the menu/sheet, or null when none is configured. */
@@ -346,6 +379,7 @@ export class MnDropdown implements OnInit {
     return mnDropdownTriggerVariants({
       size: this.props.size,
       borderRadius: this.props.borderRadius,
+      labeled: !!this.triggerLabelText,
     });
   }
 

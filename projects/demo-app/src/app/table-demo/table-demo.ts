@@ -325,6 +325,8 @@ export class TableDemo implements OnInit {
           key: 'actions',
           header: 'Actions',
           align: 'right',
+          // Icon-only inline on a wide table; the collapsed ⋯ menu shows full labels.
+          actionsInline: 'icon',
           // Four actions: inline on a wide table, collapsed into a ⋯ menu below 450px.
           actions: [
             {label: 'Edit', icon: this.editIcon(), run: (row) => this.onAction('Edit', row)},

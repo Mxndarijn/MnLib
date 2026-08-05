@@ -1,6 +1,7 @@
 import {TemplateRef} from '@angular/core';
 import {MnSkeletonProps} from '../mn-skeleton';
 import {MnCollectionLabels, MnSelectableCollectionDataSource} from '../mn-collection';
+import {MnDropdownActionColor} from '../mn-dropdown';
 
 // ── Column Sort Type ──
 export enum ColumnSortType {
@@ -110,7 +111,14 @@ export type MnTableRowAction<T> = {
   run: (row: T) => void;
   /** Predicate deciding whether the action is disabled for a given row. */
   disabled?: (row: T) => boolean;
-  /** Renders the action in a destructive style (e.g. "Delete"). */
+  /**
+   * Tints the action's button and its ⋯-menu item. Defaults to `'secondary'` (or
+   * `'danger'` when {@link danger} is set), matching the built-in look. Whatever colour
+   * an action shows inline is carried into the collapsed bottom-sheet item too.
+   */
+  color?: MnDropdownActionColor;
+  /** Renders the action in a destructive style (e.g. "Delete"). Shorthand for
+   *  `color: 'danger'`. */
   danger?: boolean;
 };
 
@@ -140,6 +148,18 @@ export type ColumnBase<T> = {
    * list does not.
    */
   actionsCollapseThreshold?: number;
+  /**
+   * How each inline action button is presented on a wide table:
+   * - `'both'` (default) — icon (when provided) followed by the label;
+   * - `'icon'` — icon only; the label becomes the button's accessible name and hover
+   *   tooltip. An action without an icon falls back to showing its label so it is never
+   *   blank;
+   * - `'label'` — text only, no icon.
+   *
+   * The collapsed ⋯ menu always lists full labels regardless of this setting, so
+   * `'icon'` still reads clearly once the actions move into the bottom sheet on mobile.
+   */
+  actionsInline?: 'icon' | 'label' | 'both';
   /** Alternative cell renderer shown below the given breakpoint. When set, `cell` is hidden below this breakpoint and `cellSm` is shown instead. */
   cellSm?: { below: 'sm' | 'md' | 'lg'; cell: ((row: T) => string) | TemplateRef<unknown> };
   sortType?: ColumnSortType;

@@ -26,6 +26,7 @@ import {DateSelectorBarDemo} from './date-selector-bar-demo/date-selector-bar-de
 import {RichTextEditorDemo} from './rich-text-editor-demo/rich-text-editor-demo';
 import {BreadcrumbsDemo} from './breadcrumbs-demo/breadcrumbs-demo';
 import {BottomSheetDemo} from './bottom-sheet-demo/bottom-sheet-demo';
+import {DropdownDemo} from './dropdown-demo/dropdown-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -54,6 +55,7 @@ export const routes: Routes = [
   {path: 'demos/datetime-demo', component: DatetimeDemo, title: 'Datetime Demo'},
   {path: 'demos/select-demo', component: SelectDemo, title: 'Select Demo'},
   {path: 'demos/badge-demo', component: BadgeDemo, title: 'Badge Demo'},
+  {path: 'demos/dropdown-demo', component: DropdownDemo, title: 'Dropdown Demo'},
   {path: 'demos/icon-demo', component: IconDemo, title: 'Icon Demo'},
   {path: 'demos/multi-select-demo', component: MultiSelectDemo, title: 'Multi-Select Demo'},
   {path: 'demos/tab-demo', component: TabDemo, title: 'Tab Demo'},
