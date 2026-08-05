@@ -327,12 +327,13 @@ export class TableDemo implements OnInit {
           align: 'right',
           // Icon-only inline on a wide table; the collapsed ⋯ menu shows full labels.
           actionsInline: 'icon',
-          // Four actions: inline on a wide table, collapsed into a ⋯ menu below 450px.
+          // Four actions, with per-row visibility: Viewers are read-only (no actions at
+          // all → empty cell, no ⋯), and only Admins may delete.
           actions: [
-            {label: 'Edit', icon: this.editIcon(), run: (row) => this.onAction('Edit', row)},
-            {label: 'Duplicate', icon: this.duplicateIcon(), run: (row) => this.onAction('Duplicate', row)},
-            {label: 'Share', icon: this.shareIcon(), run: (row) => this.onAction('Share', row)},
-            {label: 'Delete', icon: this.deleteIcon(), danger: true, run: (row) => this.onAction('Delete', row)},
+            {label: 'Edit', icon: this.editIcon(), hidden: (row) => row.role === 'Viewer', run: (row) => this.onAction('Edit', row)},
+            {label: 'Duplicate', icon: this.duplicateIcon(), hidden: (row) => row.role === 'Viewer', run: (row) => this.onAction('Duplicate', row)},
+            {label: 'Share', icon: this.shareIcon(), hidden: (row) => row.role === 'Viewer', run: (row) => this.onAction('Share', row)},
+            {label: 'Delete', icon: this.deleteIcon(), danger: true, hidden: (row) => row.role !== 'Admin', run: (row) => this.onAction('Delete', row)},
           ],
         },
       ],
