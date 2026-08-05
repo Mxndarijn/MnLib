@@ -1,0 +1,94 @@
+<div class="relative inline-flex">
+  <!-- Trigger -->
+  <button
+    #trigger
+    mnButton
+    type="button"
+    [id]="resolvedId"
+    [data]="{ size: 'sm', variant: 'text', color: 'gray' }"
+    [ngClass]="triggerClasses"
+    [attr.aria-label]="triggerAriaLabel"
+    [attr.aria-haspopup]="'menu'"
+    [attr.aria-expanded]="isOpen"
+    [attr.aria-controls]="isOpen ? resolvedId + '-menu' : null"
+    (click)="$event.stopPropagation(); toggle()"
+  >
+    <svg lucideEllipsisVertical [size]="18"></svg>
+  </button>
+
+  <!-- Menu -->
+  @if (isOpen) {
+    @if (isSheet) {
+      <!-- On mobile the menu is presented as the shared bottom sheet: chrome (backdrop,
+           grabber, swipe-to-dismiss, slide animation) lives in mn-bottom-sheet; this
+           component only projects the item list into it. The host is portalled to
+           document.body (see the `sheet` ViewChild). -->
+      <mn-bottom-sheet
+        #sheet
+        (dismiss)="close()"
+        [ariaLabel]="menuLabel || triggerAriaLabel"
+        [maxHeightVh]="80"
+      >
+        <div [id]="resolvedId + '-menu'" role="menu" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <!-- The sheet covers its own trigger, so it needs a header and an explicit way out. -->
+          <div class="flex items-center justify-between gap-x-2 px-4 pt-1 pb-2 shrink-0">
+            <p class="text-base font-medium text-base-content truncate">{{ menuLabel || triggerAriaLabel }}</p>
+            <button
+              mnButton
+              type="button"
+              [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
+              class="shrink-0 cursor-pointer"
+              (click)="close()"
+              [attr.aria-label]="closeLabel"
+            ><svg lucideX [size]="20"></svg></button>
+          </div>
+          <div class="flex-1 overflow-auto overscroll-contain">
+            <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: true }"></ng-container>
+          </div>
+        </div>
+      </mn-bottom-sheet>
+    } @else {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <div
+        #dropdown
+        (click)="$event.stopPropagation()"
+        [id]="resolvedId + '-menu'"
+        [ngClass]="panelClasses"
+        [style.left]="dropdownStyle.left"
+        [style.top]="dropdownStyle.top"
+        role="menu"
+      >
+        @if (menuLabel) {
+          <p class="px-3 pt-1 pb-1.5 text-xs font-medium text-base-content/50 truncate">{{ menuLabel }}</p>
+        }
+        <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+      </div>
+    }
+  }
+
+  <!-- The item list, shared verbatim by the sheet and the anchored popover. `sheet`
+       only tunes the spacing so touch targets are roomier on mobile. -->
+  <ng-template #items let-sheet="sheet">
+    @for (action of props.actions; track $index) {
+      <button
+        type="button"
+        role="menuitem"
+        [disabled]="action.disabled"
+        [class.opacity-50]="action.disabled"
+        [class.pointer-events-none]="action.disabled"
+        [class.text-error]="action.danger"
+        [class.text-base-content]="!action.danger"
+        [ngClass]="sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'"
+        class="flex w-full items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
+        (click)="select(action)"
+      >
+        @if (action.icon) {
+          <span class="shrink-0 inline-flex items-center">
+            <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
+          </span>
+        }
+        <span class="truncate">{{ actionLabel(action) }}</span>
+      </button>
+    }
+  </ng-template>
+</div>

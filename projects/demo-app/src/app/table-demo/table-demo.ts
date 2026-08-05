@@ -1,6 +1,7 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ColumnSortType, MnButton, MnCollectionState, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
+import {LucideCopy, LucidePencil, LucideShare2, LucideTrash2} from '@lucide/angular';
 import {DemoPageComponent} from '../shared/demo-page.component';
 import {DemoExampleComponent} from '../shared/demo-example.component';
 
@@ -45,7 +46,7 @@ const ALL_USERS: User[] = [
 @Component({
   selector: 'app-table-demo',
   standalone: true,
-  imports: [MnTable, MnButton, DemoPageComponent, DemoExampleComponent],
+  imports: [MnTable, MnButton, DemoPageComponent, DemoExampleComponent, LucidePencil, LucideCopy, LucideShare2, LucideTrash2],
   templateUrl: './table-demo.html',
 })
 export class TableDemo implements OnInit {
@@ -68,7 +69,10 @@ export class TableDemo implements OnInit {
 
   selectedNames = 'none';
 
-  readonly actionsTpl = viewChild.required<TemplateRef<unknown>>('actionsTpl');
+  readonly editIcon = viewChild.required<TemplateRef<unknown>>('editIcon');
+  readonly duplicateIcon = viewChild.required<TemplateRef<unknown>>('duplicateIcon');
+  readonly shareIcon = viewChild.required<TemplateRef<unknown>>('shareIcon');
+  readonly deleteIcon = viewChild.required<TemplateRef<unknown>>('deleteIcon');
   readonly toolbarRightTpl = viewChild.required<TemplateRef<unknown>>('toolbarRightTpl');
   readonly avatarTpl = viewChild.required<TemplateRef<unknown>>('avatarTpl');
   readonly roleBadgeTpl = viewChild.required<TemplateRef<unknown>>('roleBadgeTpl');
@@ -317,7 +321,18 @@ export class TableDemo implements OnInit {
       columns: [
         {key: 'name', header: 'Name', cell: (row) => row.name},
         {key: 'role', header: 'Role', cell: (row) => row.role},
-        {key: 'actions', header: 'Actions', cell: this.actionsTpl(), align: 'right', width: '150px'},
+        {
+          key: 'actions',
+          header: 'Actions',
+          align: 'right',
+          // Four actions: inline on a wide table, collapsed into a ⋯ menu below 450px.
+          actions: [
+            {label: 'Edit', icon: this.editIcon(), run: (row) => this.onAction('Edit', row)},
+            {label: 'Duplicate', icon: this.duplicateIcon(), run: (row) => this.onAction('Duplicate', row)},
+            {label: 'Share', icon: this.shareIcon(), run: (row) => this.onAction('Share', row)},
+            {label: 'Delete', icon: this.deleteIcon(), danger: true, run: (row) => this.onAction('Delete', row)},
+          ],
+        },
       ],
     };
 

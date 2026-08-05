@@ -22,19 +22,11 @@
     </button>
   </ng-template>
 
-  <!-- Actions template -->
-  <ng-template #actionsTpl let-row>
-    <div class="inline-flex items-center gap-2">
-      <button
-        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors"
-        (click)="$event.stopPropagation(); onAction('Edit', row)"
-      >Edit</button>
-      <button
-        class="px-2 py-1 text-xs rounded hover:bg-base-200 transition-colors text-red-500"
-        (click)="$event.stopPropagation(); onAction('Delete', row)"
-      >Delete</button>
-    </div>
-  </ng-template>
+  <!-- Action icons, referenced from the actionsDataSource column's `actions` config. -->
+  <ng-template #editIcon><svg lucidePencil [size]="15"></svg></ng-template>
+  <ng-template #duplicateIcon><svg lucideCopy [size]="15"></svg></ng-template>
+  <ng-template #shareIcon><svg lucideShare2 [size]="15"></svg></ng-template>
+  <ng-template #deleteIcon><svg lucideTrash2 [size]="15"></svg></ng-template>
 
   <app-demo-example title="Basic Table (string columns, sorting, hover)">
     <mn-table [dataSource]="basicDataSource" (sortChange)="onSortChange($event)"></mn-table>
@@ -73,6 +65,9 @@
   </app-demo-example>
 
   <app-demo-example title="Table with Actions Column">
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">The column's <code>actions</code> config renders inline
+      command buttons that automatically collapse into a ⋯ menu (<code>mn-dropdown</code>) once the table is narrower
+      than 450px — resize the window, or open it on a phone, to see the switch.</p>
     <mn-table [dataSource]="actionsDataSource"></mn-table>
   </app-demo-example>
 

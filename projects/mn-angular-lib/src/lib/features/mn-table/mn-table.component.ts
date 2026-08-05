@@ -22,6 +22,7 @@ import {
   ColumnFilterValue,
   ColumnSortType,
   MnColumnFilter,
+  MnTableRowAction,
   SortState,
   TableDataSource,
 } from './mn-table.types';
@@ -29,6 +30,7 @@ import {emptyFilterValue, isFilterValueActive, matchesColumnFilter} from './mn-t
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
 import {MnSelect, MnSelectOption} from '../mn-select';
 import {MnMultiSelect, MnMultiSelectOption} from '../mn-multi-select';
+import {MnDropdown, MnDropdownAction} from '../mn-dropdown';
 import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnShowAboveDirective} from './mn-show-above.directive';
@@ -42,7 +44,7 @@ import {LucideDynamicIcon, LucideFilter, LucideFunnel, LucideX} from '@lucide/an
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
+  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnDropdown, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Block-level so the host has a definite width for the @container chrome inside it.
@@ -494,6 +496,11 @@ export class MnTable<T = object>
       if (col.filterPlaceholderKey) {
         col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
       }
+      for (const action of col.actions ?? []) {
+        if (action.labelKey) {
+          action.label = this.lang.t(action.labelKey);
+        }
+      }
     }
     if (this.dataSource.filtersLabelKey) {
       this.dataSource.filtersLabel = this.lang.t(this.dataSource.filtersLabelKey);
@@ -620,6 +627,53 @@ export class MnTable<T = object>
   getCellSmValue(column: ColumnDefinition<T>, row: T): string {
     if (column.cellSm && typeof column.cellSm.cell === 'function') return column.cellSm.cell(row);
     return '';
+  }
+
+  // ── Row actions ──
+
+  /**
+   * Whether an actions column should offer the collapsing ⋯ variant: only when it has at
+   * least its threshold's worth of actions (default 3). Below that, the inline buttons
+   * stay put at every width — one or two fit on a phone. The width switch itself is a
+   * pure container query in the template; this only decides whether to render the ⋯ path
+   * at all.
+   */
+  shouldCollapseActions(column: ColumnDefinition<T>): boolean {
+    const actions = column.actions;
+    if (!actions) return false;
+    return actions.length >= (column.actionsCollapseThreshold ?? 3);
+  }
+
+  /** The resolved label for an inline action button (translation key wins once resolved). */
+  rowActionLabel(action: MnTableRowAction<T>): string {
+    return action.label ?? (action.labelKey ? this.lang.t(action.labelKey) : '');
+  }
+
+  /** Whether an action is disabled for the given row. */
+  isRowActionDisabled(action: MnTableRowAction<T>, row: T): boolean {
+    return action.disabled ? action.disabled(row) : false;
+  }
+
+  /** Invokes an action for a row. */
+  runRowAction(action: MnTableRowAction<T>, row: T): void {
+    action.run(row);
+  }
+
+  /** A stable, unique element id for a row's actions dropdown (aria wiring). */
+  actionsDropdownId(column: ColumnDefinition<T>, row: T): string {
+    return `mn-table-actions-${column.key}-${this.dataSource.getID(row)}`;
+  }
+
+  /** Maps a column's actions to mn-dropdown commands, binding the row into each. */
+  rowDropdownActions(column: ColumnDefinition<T>, row: T): MnDropdownAction[] {
+    return (column.actions ?? []).map(action => ({
+      label: action.label,
+      labelKey: action.labelKey,
+      icon: action.icon,
+      danger: action.danger,
+      disabled: this.isRowActionDisabled(action, row),
+      run: () => action.run(row),
+    }));
   }
 
   trackByKey = (_index: number, column: ColumnDefinition<T>): string => {

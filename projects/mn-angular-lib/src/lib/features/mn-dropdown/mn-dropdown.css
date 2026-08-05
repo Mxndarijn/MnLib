@@ -1,0 +1,6 @@
+/*
+  The mobile bottom-sheet chrome (anchoring, slide animation, backdrop, safe-area inset)
+  lives in the shared mn-bottom-sheet component, which this dropdown projects its item
+  list into. No component-local styles are needed — layout is expressed entirely through
+  the template's Tailwind classes.
+*/
