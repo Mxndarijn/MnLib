@@ -631,17 +631,25 @@ export class MnTable<T = object>
 
   // ── Row actions ──
 
+  /** The actions visible for a given row — those whose `hidden(row)` is not true. */
+  visibleRowActions(column: ColumnDefinition<T>, row: T): MnTableRowAction<T>[] {
+    return (column.actions ?? []).filter(action => !(action.hidden?.(row) ?? false));
+  }
+
+  /** Whether a row has any visible actions at all; when false its cell is left empty. */
+  hasRowActions(column: ColumnDefinition<T>, row: T): boolean {
+    return this.visibleRowActions(column, row).length > 0;
+  }
+
   /**
-   * Whether an actions column should offer the collapsing ⋯ variant: only when it has at
-   * least its threshold's worth of actions (default 3). Below that, the inline buttons
-   * stay put at every width — one or two fit on a phone. The width switch itself is a
-   * pure container query in the template; this only decides whether to render the ⋯ path
-   * at all.
+   * Whether a row's actions should offer the collapsing ⋯ variant: only when it has at
+   * least its threshold's worth of *visible* actions (default 3). Below that, the inline
+   * buttons stay put at every width — one or two fit on a phone. The width switch itself
+   * is a pure container query in the template; this only decides whether to render the ⋯
+   * path at all, per row.
    */
-  shouldCollapseActions(column: ColumnDefinition<T>): boolean {
-    const actions = column.actions;
-    if (!actions) return false;
-    return actions.length >= (column.actionsCollapseThreshold ?? 3);
+  shouldCollapseActions(column: ColumnDefinition<T>, row: T): boolean {
+    return this.visibleRowActions(column, row).length >= (column.actionsCollapseThreshold ?? 3);
   }
 
   /** The resolved label for an inline action button (translation key wins once resolved). */
@@ -688,9 +696,9 @@ export class MnTable<T = object>
     return `mn-table-actions-${column.key}-${this.dataSource.getID(row)}`;
   }
 
-  /** Maps a column's actions to mn-dropdown commands, binding the row into each. */
+  /** Maps a row's visible actions to mn-dropdown commands, binding the row into each. */
   rowDropdownActions(column: ColumnDefinition<T>, row: T): MnDropdownAction[] {
-    return (column.actions ?? []).map(action => ({
+    return this.visibleRowActions(column, row).map(action => ({
       label: action.label,
       labelKey: action.labelKey,
       icon: action.icon,

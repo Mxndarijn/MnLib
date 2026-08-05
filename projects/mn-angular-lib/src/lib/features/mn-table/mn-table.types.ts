@@ -109,7 +109,14 @@ export type MnTableRowAction<T> = {
   icon?: TemplateRef<unknown>;
   /** Invoked with the row when the action is chosen. */
   run: (row: T) => void;
-  /** Predicate deciding whether the action is disabled for a given row. */
+  /**
+   * Predicate deciding whether the action is hidden for a given row. A hidden action is
+   * dropped entirely for that row (not shown, not counted). When every action is hidden
+   * for a row its cell is left empty — no buttons and no ⋯ menu. Use this for "row 1 has
+   * actions, row 2 doesn't", or per-permission actions (e.g. only admins can delete).
+   */
+  hidden?: (row: T) => boolean;
+  /** Predicate deciding whether the action is disabled (shown but non-interactive) for a row. */
   disabled?: (row: T) => boolean;
   /**
    * Tints the action's button and its ⋯-menu item. Defaults to `'secondary'` (or

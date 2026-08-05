@@ -346,10 +346,12 @@
                 @if (column.actions) {
                   <!-- Actions column: inline command buttons that collapse into a ⋯ menu
                        once the table is narrower than 450px (container query), but only
-                       when there are enough of them to warrant it. -->
+                       when there are enough of them to warrant it. A row with no visible
+                       actions renders nothing — no buttons, no ⋯. -->
+                  @if (hasRowActions(column, row)) {
                   <div class="inline-flex items-center gap-1"
                        [class.justify-end]="(column.align ?? 'left') === 'right'">
-                    @if (shouldCollapseActions(column)) {
+                    @if (shouldCollapseActions(column, row)) {
                       <span class="hidden items-center gap-1 @min-[450px]:inline-flex">
                         <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
                                       [ngTemplateOutlet]="actionButtons"></ng-container>
@@ -368,6 +370,7 @@
                                     [ngTemplateOutlet]="actionButtons"></ng-container>
                     }
                   </div>
+                  }
                 } @else if (column.cellSm) {
                   <!-- Default cell: hidden below the cellSm breakpoint -->
                   <span [mnShowAbove]="column.cellSm.below">
@@ -498,7 +501,7 @@
 <!-- Inline action buttons for an actions column, shared by the wide-table layout and
      (implicitly) mirrored by the ⋯ menu below 450px. -->
 <ng-template #actionButtons let-column="column" let-row="row">
-  @for (action of column.actions; track $index) {
+  @for (action of visibleRowActions(column, row); track $index) {
     <button
       mnButton
       type="button"
