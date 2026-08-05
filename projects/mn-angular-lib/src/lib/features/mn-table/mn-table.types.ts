@@ -91,6 +91,29 @@ export type MnColumnFilter = {
  */
 export type ColumnSkeleton = Partial<MnSkeletonProps> | TemplateRef<unknown>;
 
+// ── Row Action ──
+/**
+ * A per-row command rendered in an actions column (see {@link ColumnBase.actions}).
+ * Unlike a cell it carries no display value — choosing it invokes {@link run} with the
+ * row. The table renders actions inline as buttons and, when there are
+ * {@link ColumnBase.actionsCollapseThreshold} or more, collapses them into a ⋯ menu
+ * (mn-dropdown) once the table is narrower than 450px.
+ */
+export type MnTableRowAction<T> = {
+  /** Visible label. Falls back to `labelKey`'s resolved text when omitted. */
+  label?: string;
+  /** Translation key for the label, resolved via MnLanguageService and kept updated on locale change. */
+  labelKey?: string;
+  /** Optional leading icon, supplied as a template (a lucide `<svg>`, an `<mn-icon>`, …). */
+  icon?: TemplateRef<unknown>;
+  /** Invoked with the row when the action is chosen. */
+  run: (row: T) => void;
+  /** Predicate deciding whether the action is disabled for a given row. */
+  disabled?: (row: T) => boolean;
+  /** Renders the action in a destructive style (e.g. "Delete"). */
+  danger?: boolean;
+};
+
 // ── Column Definition ──
 /** Everything about a column that is independent of filtering. */
 export type ColumnBase<T> = {
@@ -98,7 +121,25 @@ export type ColumnBase<T> = {
   header: string | TemplateRef<unknown>;
   /** Translation key for the column header. When set, mn-table resolves it via MnLanguageService and keeps it updated on locale change. */
   headerKey?: string;
-  cell: ((row: T) => string) | TemplateRef<unknown>;
+  /**
+   * How a data cell is rendered — a string accessor or a `TemplateRef`. Optional only
+   * because an {@link actions} column renders commands instead of a value; every value
+   * column must set it.
+   */
+  cell?: ((row: T) => string) | TemplateRef<unknown>;
+  /**
+   * Turns this column into an actions column: per-row command buttons rendered inline,
+   * automatically collapsing into a ⋯ menu (mn-dropdown) once the table is narrower than
+   * 450px **and** there are at least {@link actionsCollapseThreshold} actions. When set,
+   * {@link cell} is ignored.
+   */
+  actions?: MnTableRowAction<T>[];
+  /**
+   * Number of {@link actions} at or above which the inline buttons collapse to a ⋯ menu
+   * on a narrow table. Defaults to 3 — one or two buttons still fit on a phone, a longer
+   * list does not.
+   */
+  actionsCollapseThreshold?: number;
   /** Alternative cell renderer shown below the given breakpoint. When set, `cell` is hidden below this breakpoint and `cellSm` is shown instead. */
   cellSm?: { below: 'sm' | 'md' | 'lg'; cell: ((row: T) => string) | TemplateRef<unknown> };
   sortType?: ColumnSortType;
