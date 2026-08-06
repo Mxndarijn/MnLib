@@ -1,5 +1,19 @@
 import { TemplateRef } from '@angular/core';
+import { LucideIconData } from '@lucide/angular';
 import { MnDropdownTriggerVariants } from './mn-dropdownVariants';
+
+/**
+ * The leading icon of a command — either a `TemplateRef` (full control over the icon
+ * set: an `<mn-icon>`, an emoji, a bespoke `<svg>`) or lucide icon *data*, i.e. a
+ * lucide icon's static `.icon` (e.g. `LucidePencil.icon`), which the component renders
+ * itself at the right size for its slot.
+ *
+ * The data form exists so an action can be declared in plain TypeScript — a shared
+ * action factory, a config array, a service — without the host component having to
+ * carry an `<ng-template>` stub and a `@ViewChild` for every glyph. Same convention as
+ * {@link MnCollectionDataSource.emptyIcon}.
+ */
+export type MnActionIcon = TemplateRef<unknown> | LucideIconData;
 
 /** Theme colour tokens an action item can be tinted with, mirroring mn-button's palette. */
 export type MnDropdownActionColor =
@@ -27,10 +41,11 @@ export type MnDropdownAction = {
   labelKey?: string;
 
   /**
-   * Optional leading icon, supplied as a template so the consumer keeps full control
-   * over which icon set is used (a lucide `<svg>`, an `<mn-icon>`, an emoji…).
+   * Optional leading icon: a template, so the consumer keeps full control over which
+   * icon set is used (an `<mn-icon>`, an emoji…), or lucide icon data such as
+   * `LucidePencil.icon` for a template-free declaration. See {@link MnActionIcon}.
    */
-  icon?: TemplateRef<unknown>;
+  icon?: MnActionIcon;
 
   /** Invoked when the item is chosen. The menu closes immediately afterwards. */
   run: () => void;

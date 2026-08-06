@@ -9,10 +9,17 @@ import {
   Input,
   OnInit,
   Renderer2,
+  TemplateRef,
   ViewChild,
 } from '@angular/core';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
-import { LucideChevronDown, LucideEllipsis, LucideEllipsisVertical, LucideX } from '@lucide/angular';
+import {
+  LucideChevronDown,
+  LucideDynamicIcon,
+  LucideEllipsis,
+  LucideEllipsisVertical,
+  LucideX,
+} from '@lucide/angular';
 import { skip } from 'rxjs';
 import { MnButton } from '../mn-button';
 import { MnBottomSheet } from '../mn-bottom-sheet';
@@ -49,7 +56,7 @@ const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
 @Component({
   selector: 'mn-lib-dropdown',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton, MnBottomSheet, LucideEllipsisVertical, LucideEllipsis, LucideChevronDown, LucideX],
+  imports: [NgClass, NgTemplateOutlet, MnButton, MnBottomSheet, LucideEllipsisVertical, LucideEllipsis, LucideChevronDown, LucideX, LucideDynamicIcon],
   templateUrl: './mn-dropdown.html',
   styleUrl: './mn-dropdown.css',
 })
@@ -334,6 +341,17 @@ export class MnDropdown implements OnInit {
   actionLabel(action: MnDropdownAction): string {
     const translated = action.labelKey ? this.lang.translateIfPresent(action.labelKey) : undefined;
     return translated ?? action.label ?? '';
+  }
+
+  /**
+   * Whether an icon was supplied as a `TemplateRef` rather than lucide icon data, which
+   * decides how the template renders it. Kept as a method (not a pipe) so the narrowing
+   * is available inline in the item loop.
+   * @param value The icon to test.
+   * @returns True when the icon is a template the caller owns.
+   */
+  isTemplateRef(value: unknown): value is TemplateRef<unknown> {
+    return value instanceof TemplateRef;
   }
 
   /**

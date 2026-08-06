@@ -505,20 +505,31 @@
     <button
       mnButton
       type="button"
-      [data]="{ size: 'sm', variant: 'text', color: rowActionColor(action) }"
-      [disabled]="isRowActionDisabled(action, row)"
+      [data]="{
+        size: 'sm',
+        variant: 'text',
+        color: rowActionColor(action, row),
+        disabled: isRowActionDisabled(action, row)
+      }"
       class="cursor-pointer"
       (click)="$event.stopPropagation(); runRowAction(action, row)"
-      [attr.aria-label]="rowActionLabel(action)"
-      [attr.title]="showActionLabel(column, action) ? null : rowActionLabel(action)"
+      [attr.aria-label]="rowActionLabel(action, row)"
+      [attr.title]="showActionLabel(column, action, row) ? null : rowActionLabel(action, row)"
     >
-      @if (showActionIcon(column, action)) {
+      @if (showActionIcon(column, action, row)) {
         <span class="inline-flex items-center shrink-0">
-          <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
+          @let icon = rowActionIcon(action, row);
+          @if (isTemplateRef(icon)) {
+            <ng-container [ngTemplateOutlet]="icon"></ng-container>
+          } @else {
+            <!-- Data icon: sized here to match the sm button's text, so a caller can
+                 declare the action in TypeScript without owning a template. -->
+            <svg [lucideIcon]="$any(icon)" [size]="17"></svg>
+          }
         </span>
       }
-      @if (showActionLabel(column, action)) {
-        <span>{{ rowActionLabel(action) }}</span>
+      @if (showActionLabel(column, action, row)) {
+        <span>{{ rowActionLabel(action, row) }}</span>
       }
     </button>
   }

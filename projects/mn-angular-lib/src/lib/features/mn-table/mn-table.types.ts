@@ -1,7 +1,7 @@
 import {TemplateRef} from '@angular/core';
 import {MnSkeletonProps} from '../mn-skeleton';
 import {MnCollectionLabels, MnSelectableCollectionDataSource} from '../mn-collection';
-import {MnDropdownActionColor} from '../mn-dropdown';
+import {MnActionIcon, MnDropdownActionColor} from '../mn-dropdown';
 
 // ── Column Sort Type ──
 export enum ColumnSortType {
@@ -94,6 +94,18 @@ export type ColumnSkeleton = Partial<MnSkeletonProps> | TemplateRef<unknown>;
 
 // ── Row Action ──
 /**
+ * A presentation value that is either fixed for the whole column or derived per row.
+ *
+ * The function form is what lets one action cover a state that flips — an
+ * activate/deactivate toggle, a pin/unpin — instead of declaring two actions and hiding
+ * one of them per row. It is only for *presentation*: visibility stays with `hidden` and
+ * interactivity with `disabled`, both of which are always predicates.
+ *
+ * Resolved on every change detection, so the accessor must be cheap and side-effect free.
+ */
+export type MnRowValue<T, V> = V | ((row: T) => V);
+
+/**
  * A per-row command rendered in an actions column (see {@link ColumnBase.actions}).
  * Unlike a cell it carries no display value — choosing it invokes {@link run} with the
  * row. The table renders actions inline as buttons and, when there are
@@ -102,11 +114,16 @@ export type ColumnSkeleton = Partial<MnSkeletonProps> | TemplateRef<unknown>;
  */
 export type MnTableRowAction<T> = {
   /** Visible label. Falls back to `labelKey`'s resolved text when omitted. */
-  label?: string;
+  label?: MnRowValue<T, string>;
   /** Translation key for the label, resolved via MnLanguageService and kept updated on locale change. */
-  labelKey?: string;
-  /** Optional leading icon, supplied as a template (a lucide `<svg>`, an `<mn-icon>`, …). */
-  icon?: TemplateRef<unknown>;
+  labelKey?: MnRowValue<T, string>;
+  /**
+   * Optional leading icon: a template (an `<mn-icon>`, a bespoke `<svg>`, …), or lucide
+   * icon data such as `LucidePencil.icon`, which the table renders itself. The data form
+   * lets an action be declared without an `<ng-template>` stub and a `@ViewChild` per
+   * glyph, which is what makes shared action factories practical.
+   */
+  icon?: MnRowValue<T, MnActionIcon>;
   /** Invoked with the row when the action is chosen. */
   run: (row: T) => void;
   /**
@@ -123,7 +140,7 @@ export type MnTableRowAction<T> = {
    * `'danger'` when {@link danger} is set), matching the built-in look. Whatever colour
    * an action shows inline is carried into the collapsed bottom-sheet item too.
    */
-  color?: MnDropdownActionColor;
+  color?: MnRowValue<T, MnDropdownActionColor>;
   /** Renders the action in a destructive style (e.g. "Delete"). Shorthand for
    *  `color: 'danger'`. */
   danger?: boolean;

@@ -22,6 +22,7 @@ import {
   ColumnFilterValue,
   ColumnSortType,
   MnColumnFilter,
+  MnRowValue,
   MnTableRowAction,
   SortState,
   TableDataSource,
@@ -30,7 +31,7 @@ import {emptyFilterValue, isFilterValueActive, matchesColumnFilter} from './mn-t
 import {MnSkeleton, MnSkeletonProps} from '../mn-skeleton';
 import {MnSelect, MnSelectOption} from '../mn-select';
 import {MnMultiSelect, MnMultiSelectOption} from '../mn-multi-select';
-import {MnDropdown, MnDropdownAction, MnDropdownActionColor} from '../mn-dropdown';
+import {MnActionIcon, MnDropdown, MnDropdownAction, MnDropdownActionColor} from '../mn-dropdown';
 import {MnCheckbox} from '../mn-checkbox';
 import {MnHiddenBelowDirective} from './mn-hidden-below.directive';
 import {MnShowAboveDirective} from './mn-show-above.directive';
@@ -496,11 +497,10 @@ export class MnTable<T = object>
       if (col.filterPlaceholderKey) {
         col.filterPlaceholder = this.lang.t(col.filterPlaceholderKey);
       }
-      for (const action of col.actions ?? []) {
-        if (action.labelKey) {
-          action.label = this.lang.t(action.labelKey);
-        }
-      }
+      // Row actions are deliberately not pre-resolved here: `rowActionLabel` translates
+      // at render time (a locale change calls markForCheck, so the next pass picks the
+      // new text up), which keeps a per-row `label`/`labelKey` accessor intact instead
+      // of being flattened to one string for every row.
     }
     if (this.dataSource.filtersLabelKey) {
       this.dataSource.filtersLabel = this.lang.t(this.dataSource.filtersLabelKey);
@@ -652,14 +652,30 @@ export class MnTable<T = object>
     return this.visibleRowActions(column, row).length >= (column.actionsCollapseThreshold ?? 3);
   }
 
+  /**
+   * Resolves a {@link MnRowValue}: either the fixed value, or the accessor applied to
+   * the row. Every per-row presentation field goes through here so the fixed and derived
+   * forms can never drift apart.
+   */
+  private resolveRowValue<V>(value: MnRowValue<T, V> | undefined, row: T): V | undefined {
+    return typeof value === 'function' ? (value as (row: T) => V)(row) : value;
+  }
+
   /** The resolved label for an inline action button (translation key wins once resolved). */
-  rowActionLabel(action: MnTableRowAction<T>): string {
-    return action.label ?? (action.labelKey ? this.lang.t(action.labelKey) : '');
+  rowActionLabel(action: MnTableRowAction<T>, row: T): string {
+    const labelKey = this.resolveRowValue(action.labelKey, row);
+    if (labelKey) return this.lang.t(labelKey);
+    return this.resolveRowValue(action.label, row) ?? '';
+  }
+
+  /** The resolved leading icon for an action on a given row, if it has one. */
+  rowActionIcon(action: MnTableRowAction<T>, row: T): MnActionIcon | undefined {
+    return this.resolveRowValue(action.icon, row);
   }
 
   /** Whether an inline action button should render its icon. */
-  showActionIcon(column: ColumnDefinition<T>, action: MnTableRowAction<T>): boolean {
-    return (column.actionsInline ?? 'both') !== 'label' && !!action.icon;
+  showActionIcon(column: ColumnDefinition<T>, action: MnTableRowAction<T>, row: T): boolean {
+    return (column.actionsInline ?? 'both') !== 'label' && !!this.rowActionIcon(action, row);
   }
 
   /**
@@ -667,8 +683,8 @@ export class MnTable<T = object>
    * label is hidden — unless the action has no icon, in which case it is shown anyway so
    * the button is never blank.
    */
-  showActionLabel(column: ColumnDefinition<T>, action: MnTableRowAction<T>): boolean {
-    if ((column.actionsInline ?? 'both') === 'icon') return !action.icon;
+  showActionLabel(column: ColumnDefinition<T>, action: MnTableRowAction<T>, row: T): boolean {
+    if ((column.actionsInline ?? 'both') === 'icon') return !this.rowActionIcon(action, row);
     return true;
   }
 
@@ -682,8 +698,8 @@ export class MnTable<T = object>
    * collapsed ⋯-menu item so the two never diverge: an explicit `color`, else `'danger'`
    * for a destructive action, else the default `'secondary'`.
    */
-  rowActionColor(action: MnTableRowAction<T>): MnDropdownActionColor {
-    return action.color ?? (action.danger ? 'danger' : 'secondary');
+  rowActionColor(action: MnTableRowAction<T>, row: T): MnDropdownActionColor {
+    return this.resolveRowValue(action.color, row) ?? (action.danger ? 'danger' : 'secondary');
   }
 
   /** Invokes an action for a row. */
@@ -699,10 +715,12 @@ export class MnTable<T = object>
   /** Maps a row's visible actions to mn-dropdown commands, binding the row into each. */
   rowDropdownActions(column: ColumnDefinition<T>, row: T): MnDropdownAction[] {
     return this.visibleRowActions(column, row).map(action => ({
-      label: action.label,
-      labelKey: action.labelKey,
-      icon: action.icon,
-      color: this.rowActionColor(action),
+      // Per-row values are resolved here, but `labelKey` stays a *key* so the dropdown
+      // keeps re-translating it on a locale change rather than freezing today's text.
+      label: this.resolveRowValue(action.label, row),
+      labelKey: this.resolveRowValue(action.labelKey, row),
+      icon: this.rowActionIcon(action, row),
+      color: this.rowActionColor(action, row),
       danger: action.danger,
       disabled: this.isRowActionDisabled(action, row),
       run: () => action.run(row),

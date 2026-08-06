@@ -89,7 +89,13 @@
       >
         @if (action.icon) {
           <span class="shrink-0 inline-flex items-center">
-            <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
+            @if (isTemplateRef(action.icon)) {
+              <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
+            } @else {
+              <!-- Data icon: rendered here so the item sizes it to match its own text
+                   (larger in the sheet, where the rows are touch-sized). -->
+              <svg [lucideIcon]="$any(action.icon)" [size]="sheet ? 18 : 16"></svg>
+            }
           </span>
         }
         <span class="truncate">{{ actionLabel(action) }}</span>
