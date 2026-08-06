@@ -39,7 +39,7 @@
         <div [id]="resolvedId + '-menu'" role="menu" class="flex flex-col flex-1 min-h-0 overflow-hidden">
           <!-- The sheet covers its own trigger, so it needs a header and an explicit way out. -->
           <div class="flex items-center justify-between gap-x-2 px-4 pt-1 pb-2 shrink-0">
-            <p class="text-base font-medium text-base-content truncate">{{ menuLabel || triggerAriaLabel }}</p>
+            <p class="text-base font-bold text-base-content truncate">{{ menuLabel || triggerAriaLabel }}</p>
             <button
               mnButton
               type="button"
