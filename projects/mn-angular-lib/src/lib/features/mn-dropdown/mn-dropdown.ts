@@ -13,16 +13,19 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   LucideChevronDown,
   LucideDynamicIcon,
   LucideEllipsis,
   LucideEllipsisVertical,
+  LucideSearchX,
   LucideX,
 } from '@lucide/angular';
 import { skip } from 'rxjs';
 import { MnButton } from '../mn-button';
 import { MnBottomSheet } from '../mn-bottom-sheet';
+import { MnInputField } from '../mn-input-field';
 import { MnConfigService } from '../../config';
 import { MN_INSTANCE_ID, MN_SECTION_PATH } from '../../context';
 import { MnLanguageService } from '../../language';
@@ -56,7 +59,7 @@ const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
 @Component({
   selector: 'mn-lib-dropdown',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnButton, MnBottomSheet, LucideEllipsisVertical, LucideEllipsis, LucideChevronDown, LucideX, LucideDynamicIcon],
+  imports: [NgClass, NgTemplateOutlet, FormsModule, MnButton, MnBottomSheet, MnInputField, LucideEllipsisVertical, LucideEllipsis, LucideChevronDown, LucideX, LucideSearchX, LucideDynamicIcon],
   templateUrl: './mn-dropdown.html',
   styleUrl: './mn-dropdown.css',
 })
@@ -79,10 +82,18 @@ export class MnDropdown implements OnInit {
    *  otherwise return the MnButton instance, which has no `nativeElement`. */
   @ViewChild('trigger', { static: false, read: ElementRef }) triggerRef!: ElementRef<HTMLElement>;
 
-  /** Layout classes for the anchored popover panel. The mobile sheet is rendered by
-   *  mn-bottom-sheet instead, so it needs no branch here. */
-  readonly panelClasses =
-    'fixed z-9999 min-w-48 max-w-[min(20rem,90vw)] bg-base-100 border border-base-300 rounded-md shadow-lg py-1 max-h-[60vh] overflow-auto -translate-x-full';
+  /**
+   * Layout classes for the anchored popover panel. Searchable menus become a flex column
+   * so the search box can be pinned (`shrink-0`) above a single scrolling list region —
+   * paired with {@link panelFloorPx}, that keeps the popover a fixed height while the
+   * filter runs, instead of the panel resizing on every keystroke. The mobile sheet is
+   * rendered by mn-bottom-sheet instead, so it needs no branch here.
+   */
+  get panelClasses(): string {
+    const base =
+      'fixed z-9999 min-w-48 max-w-[min(20rem,90vw)] bg-base-100 border border-base-300 rounded-md shadow-lg py-1 max-h-[60vh] -translate-x-full';
+    return this.isSearchable ? `${base} flex flex-col overflow-hidden` : `${base} overflow-auto`;
+  }
 
   /** Tailwind's `sm` breakpoint — below this the menu renders as a bottom sheet.
    *  Kept in step with the same constant in mn-bottom-sheet / mn-multi-select. */
@@ -103,12 +114,31 @@ export class MnDropdown implements OnInit {
   /** `document.body`'s inline `overflow` before the sheet locked it, restored on close. */
   private previousBodyOverflow: string | null = null;
 
+  /**
+   * The anchored popover's opened height, locked so a shorter filtered list cannot resize
+   * it mid-type. Captured on the frame after the panel appears (with the full, unfiltered
+   * list), so applying it is jump-free — it only stops a later shrink. Null while closed
+   * or when the menu is not searchable, leaving the plain content-height popover untouched.
+   */
+  panelFloorPx: number | null = null;
+
+  /**
+   * The mobile sheet's opened height, applied as a `min-height` floor for the same reason
+   * as {@link panelFloorPx} — mirroring mn-multi-select's sheet floor. Null while anchored,
+   * closed, or non-searchable.
+   */
+  sheetFloorPx: number | null = null;
+
   /** Watches the trigger while open, so the panel closes if the trigger is hidden. */
   private visibilityObserver: IntersectionObserver | null = null;
   /** Capture-phase scroll listener installed while open, closing on any ancestor scroll. */
   private scrollCapture: ((event: Event) => void) | null = null;
 
   isOpen = false;
+
+  /** Current text in the search input, cleared on close. Only meaningful when the menu
+   *  is {@link MnDropdownProps.searchable}. */
+  searchTerm = '';
 
   /** Popover position computed from the trigger's bounding rect. */
   dropdownStyle: { top: string; left: string } = { top: '0px', left: '0px' };
@@ -119,7 +149,13 @@ export class MnDropdown implements OnInit {
    */
   @ViewChild('dropdown', { static: false })
   set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
-    this.movedPanel = this.portal(ref?.nativeElement ?? null, this.movedPanel);
+    const el = ref?.nativeElement ?? null;
+    this.movedPanel = this.portal(el, this.movedPanel);
+    if (el && this.isSearchable) {
+      this.capturePanelFloor(el);
+    } else if (!el) {
+      this.panelFloorPx = null;
+    }
   }
 
   /**
@@ -128,7 +164,13 @@ export class MnDropdown implements OnInit {
    */
   @ViewChild('sheet', { static: false, read: ElementRef })
   set sheetRef(ref: ElementRef<HTMLElement> | undefined) {
-    this.movedSheet = this.portal(ref?.nativeElement ?? null, this.movedSheet);
+    const el = ref?.nativeElement ?? null;
+    this.movedSheet = this.portal(el, this.movedSheet);
+    if (el && this.isSearchable) {
+      this.captureSheetFloor(el);
+    } else if (!el) {
+      this.sheetFloorPx = null;
+    }
   }
 
   ngOnInit(): void {
@@ -207,6 +249,9 @@ export class MnDropdown implements OnInit {
   close(): void {
     if (!this.isOpen) return;
     this.isOpen = false;
+    this.searchTerm = '';
+    this.panelFloorPx = null;
+    this.sheetFloorPx = null;
     this.stopWatchingTrigger();
     this.unlockBodyScroll();
   }
@@ -221,6 +266,46 @@ export class MnDropdown implements OnInit {
     if (action.disabled) return;
     this.close();
     action.run();
+  }
+
+  // ── Search ──
+
+  /** Whether the filter input is shown — the explicit `searchable` prop, off by default. */
+  get isSearchable(): boolean {
+    return this.props.searchable === true;
+  }
+
+  /**
+   * Records the current filter text as the search input changes. The input's
+   * ControlValueAccessor emits `null` for an empty field (its text adapter maps `''` to
+   * `null`), so coerce to `''` — otherwise clearing or backspacing the box would leave
+   * `searchTerm` null and {@link filteredActions}'s `.trim()` would throw, freezing the menu.
+   */
+  onSearch(term: string | null): void {
+    this.searchTerm = term ?? '';
+  }
+
+  /**
+   * The actions currently passing the filter, in their declared order. Every action when
+   * the menu is not searchable or the box is empty; otherwise those whose resolved label
+   * or {@link MnDropdownAction.keywords} contain the (case-insensitive) query.
+   */
+  get filteredActions(): MnDropdownAction[] {
+    const term = (this.searchTerm ?? '').trim().toLowerCase();
+    if (!this.isSearchable || !term) return this.props.actions;
+    return this.props.actions.filter(action => {
+      const haystack = `${this.actionLabel(action)} ${action.keywords ?? ''}`.toLowerCase();
+      return haystack.includes(term);
+    });
+  }
+
+  /**
+   * Runs the first still-visible, enabled action — the Enter key's target, matching a
+   * help search where Enter opens the top hit. No-op when nothing matches.
+   */
+  selectFirstVisible(): void {
+    const first = this.filteredActions.find(action => !action.disabled);
+    if (first) this.select(first);
   }
 
   // ── Positioning ──
@@ -318,6 +403,49 @@ export class MnDropdown implements OnInit {
     this.previousBodyOverflow = null;
   }
 
+  // ── Height floors (searchable only) ──
+
+  /**
+   * Records the anchored popover's opened height and locks it via {@link panelFloorPx}.
+   * Measured on the next frame so the read reflects the fully-rendered, unfiltered list
+   * (the search box is empty on open) and never forces a reflow mid change-detection. The
+   * value equals the current height, so applying it is jump-free — it only stops a later,
+   * shorter filtered list from shrinking the panel.
+   */
+  private capturePanelFloor(panelEl: HTMLElement): void {
+    if (typeof requestAnimationFrame !== 'function') {
+      this.panelFloorPx = panelEl.offsetHeight;
+      return;
+    }
+    requestAnimationFrame(() => {
+      // The panel may have closed (or the query cleared) before the frame ran.
+      if (!this.isOpen || this.movedPanel !== panelEl) return;
+      this.panelFloorPx = panelEl.offsetHeight;
+      this.cdr.markForCheck();
+    });
+  }
+
+  /**
+   * Records the sheet's opened height as its `min-height` floor, on the same next-frame
+   * basis as {@link capturePanelFloor}. `hostEl` is the portalled mn-bottom-sheet host
+   * (`display: contents`), so the height is read from its `.mn-sheet-container` child.
+   */
+  private captureSheetFloor(hostEl: HTMLElement): void {
+    const measure = (): number => {
+      const container = hostEl.querySelector<HTMLElement>('.mn-sheet-container');
+      return container?.offsetHeight ?? hostEl.offsetHeight;
+    };
+    if (typeof requestAnimationFrame !== 'function') {
+      this.sheetFloorPx = measure();
+      return;
+    }
+    requestAnimationFrame(() => {
+      if (!this.isOpen || this.movedSheet !== hostEl) return;
+      this.sheetFloorPx = measure();
+      this.cdr.markForCheck();
+    });
+  }
+
   // ── Portal helper (see mn-multi-select for the full rationale) ──
 
   private portal(el: HTMLElement | null, current: HTMLElement | null): HTMLElement | null {
@@ -391,6 +519,18 @@ export class MnDropdown implements OnInit {
   /** Accessible label for the sheet's close button. */
   get closeLabel(): string {
     return this.uiConfig.closeLabel ?? 'Close';
+  }
+
+  /** Placeholder shown in the search input, preferring a resolved translation key. */
+  get searchPlaceholder(): string {
+    const translated = this.props.searchPlaceholderKey ? this.lang.translateIfPresent(this.props.searchPlaceholderKey) : undefined;
+    return translated ?? this.props.searchPlaceholder ?? this.uiConfig.searchPlaceholder ?? 'Search...';
+  }
+
+  /** Text shown in place of the list when the filter matches no actions. */
+  get searchEmptyLabel(): string {
+    const translated = this.props.searchEmptyLabelKey ? this.lang.translateIfPresent(this.props.searchEmptyLabelKey) : undefined;
+    return translated ?? this.props.searchEmptyLabel ?? this.uiConfig.searchEmptyLabel ?? 'No results';
   }
 
   get triggerClasses(): string {

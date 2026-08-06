@@ -130,7 +130,9 @@ export class MnInputField implements OnInit {
    */
   focus(): void {
     const input = this.el.nativeElement.querySelector('input');
-    if (input) input.focus();
+    // `preventScroll` so autofocusing inside a popover (e.g. mn-dropdown's search) never
+    // scrolls the input into view — a scroll would trip the host's scroll-to-close logic.
+    if (input) input.focus({ preventScroll: true });
   }
 
   private resolveConfig() {

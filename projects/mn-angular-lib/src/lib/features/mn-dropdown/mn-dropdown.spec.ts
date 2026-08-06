@@ -198,6 +198,13 @@ describe('MnDropdown (anchored popover)', () => {
     expect(menu()).toBeNull();
   });
 
+  it('does not lock the panel height when not searchable', () => {
+    component.toggle();
+    fixture.detectChanges();
+    expect(component.panelFloorPx).toBeNull();
+    expect(menu()!.style.height).toBe('');
+  });
+
   it('does not open when there are no actions', () => {
     host.props = {id: 'test-dd', mobileSheet: false, actions: []};
     fixture.detectChanges();
@@ -435,5 +442,183 @@ describe('MnDropdown (label resolution)', () => {
     const component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
 
     expect(component.actionLabel(fixture.componentInstance.props.actions[0])).toBe('Bewerken');
+  });
+});
+
+describe('MnDropdown (searchable)', () => {
+  @Component({
+    standalone: true,
+    imports: [MnDropdown],
+    template: `<mn-lib-dropdown [props]="props"></mn-lib-dropdown>`,
+  })
+  class SearchHostComponent {
+    copy = jasmine.createSpy('copy');
+    copyLink = jasmine.createSpy('copyLink');
+    edit = jasmine.createSpy('edit');
+    props: MnDropdownProps = {
+      id: 'search-dd',
+      mobileSheet: false,
+      searchable: true,
+      actions: [
+        // A disabled action ordered before an enabled match, so "Enter picks first" can be
+        // shown to skip it. Its unique keyword lets a query isolate the disabled item alone.
+        {label: 'Copy', disabled: true, keywords: 'archived', run: this.copy},
+        {label: 'Copy link', run: this.copyLink},
+        // `keywords` lets search match beyond the visible label.
+        {label: 'Edit', keywords: 'modify', run: this.edit},
+      ],
+    };
+  }
+
+  let fixture: ComponentFixture<SearchHostComponent>;
+  let host: SearchHostComponent;
+  let component: MnDropdown;
+
+  function menu(): HTMLElement | null {
+    return document.getElementById('search-dd-menu');
+  }
+
+  function items(): HTMLButtonElement[] {
+    return Array.from(menu()?.querySelectorAll('[role="menuitem"]') ?? []) as HTMLButtonElement[];
+  }
+
+  function searchInput(): HTMLInputElement | null {
+    return document.getElementById('search-dd-search') as HTMLInputElement | null;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [SearchHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+
+    stubViewport(false);
+    fixture = TestBed.createComponent(SearchHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
+    component.toggle();
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    menu()?.remove();
+  });
+
+  it('renders the search input at the top of the popover when searchable', () => {
+    expect(searchInput()).not.toBeNull();
+    expect(items().length).toBe(3);
+  });
+
+  it('filters by label as the query changes', () => {
+    component.onSearch('link');
+    fixture.detectChanges();
+
+    expect(component.filteredActions.map(a => a.label)).toEqual(['Copy link']);
+    expect(items().length).toBe(1);
+  });
+
+  it('matches keywords, not only the visible label', () => {
+    component.onSearch('modify');
+    fixture.detectChanges();
+
+    expect(component.filteredActions.map(a => a.label)).toEqual(['Edit']);
+  });
+
+  it('shows a centered icon + label empty state when nothing matches', () => {
+    component.onSearch('nothing-here');
+    fixture.detectChanges();
+
+    expect(items().length).toBe(0);
+    const empty = menu()!.querySelector('.justify-center');
+    expect(empty).withContext('empty state is centered').not.toBeNull();
+    expect(empty!.querySelector('svg')).withContext('empty state shows an icon').not.toBeNull();
+    expect(empty!.textContent).toContain('No results');
+  });
+
+  it('Enter runs the first visible action, skipping a disabled one', () => {
+    component.onSearch('copy');
+    fixture.detectChanges();
+
+    component.selectFirstVisible();
+
+    expect(host.copy).not.toHaveBeenCalled();
+    expect(host.copyLink).toHaveBeenCalledTimes(1);
+    expect(component.isOpen).toBeFalse();
+  });
+
+  it('Enter on the search input bubbles to the wrapper and runs the first match', () => {
+    component.onSearch('link');
+    fixture.detectChanges();
+
+    searchInput()!.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    fixture.detectChanges();
+
+    expect(host.copyLink).toHaveBeenCalledTimes(1);
+  });
+
+  it('Enter is a no-op when only a disabled action matches', () => {
+    // Its unique keyword isolates the disabled "Copy" as the sole match.
+    component.onSearch('archived');
+    fixture.detectChanges();
+    expect(component.filteredActions.map(a => a.label)).toEqual(['Copy']);
+    expect(component.filteredActions.every(a => a.disabled)).withContext('only match is disabled').toBeTrue();
+
+    component.selectFirstVisible();
+
+    expect(host.copy).not.toHaveBeenCalled();
+    expect(component.isOpen).withContext('menu stays open when no enabled action matches').toBeTrue();
+  });
+
+  it('locks the popover height so filtering does not resize it', async () => {
+    // The floor is captured on the animation frame after open, with the full list; a CD
+    // pass then writes it to the panel's inline height (markForCheck drives this in the app).
+    await new Promise(requestAnimationFrame);
+    fixture.detectChanges();
+    const locked = component.panelFloorPx;
+    expect(locked).withContext('a floor height is captured on open').toBeGreaterThan(0);
+    expect(menu()!.style.height).toBe(`${locked}px`);
+
+    component.onSearch('link'); // narrows to a single visible item
+    fixture.detectChanges();
+    await new Promise(requestAnimationFrame);
+    fixture.detectChanges();
+
+    expect(items().length).toBe(1);
+    expect(component.panelFloorPx).withContext('locked height survives filtering').toBe(locked);
+    expect(menu()!.style.height).toBe(`${locked}px`);
+  });
+
+  it('releases the locked height on close', async () => {
+    await new Promise(requestAnimationFrame);
+    expect(component.panelFloorPx).toBeGreaterThan(0);
+
+    component.close();
+    expect(component.panelFloorPx).toBeNull();
+  });
+
+  it('restores the full list when the field is cleared (CVA emits null for empty)', () => {
+    component.onSearch('link');
+    fixture.detectChanges();
+    expect(items().length).toBe(1);
+
+    // The text input's ControlValueAccessor emits null — not '' — for an empty field.
+    component.onSearch(null);
+    fixture.detectChanges();
+
+    expect(component.searchTerm).toBe('');
+    expect(component.filteredActions.length).toBe(host.props.actions.length);
+    expect(items().length).toBe(host.props.actions.length);
+  });
+
+  it('clears the query when the menu closes', () => {
+    component.onSearch('link');
+    expect(component.searchTerm).toBe('link');
+
+    component.close();
+    expect(component.searchTerm).toBe('');
   });
 });

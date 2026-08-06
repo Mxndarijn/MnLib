@@ -24,6 +24,7 @@ export class DropdownDemo implements OnInit {
   stateProps!: MnDropdownProps;
   labelledProps!: MnDropdownProps;
   i18nProps!: MnDropdownProps;
+  searchProps!: MnDropdownProps;
   textProps!: MnDropdownProps;
   textOnlyProps!: MnDropdownProps;
   textDotsProps!: MnDropdownProps;
@@ -76,6 +77,27 @@ export class DropdownDemo implements OnInit {
         {label: 'View profile', run: () => this.pick('View profile')},
         {label: 'Reset password', run: () => this.pick('Reset password')},
         {label: 'Suspend', danger: true, run: () => this.pick('Suspend')},
+      ],
+    };
+
+    // Searchable: a filter input narrows a long list as you type. `keywords` lets an
+    // action match on more than its label (here a synonym or summary), and Enter runs the
+    // first still-visible action — the pattern a long ⋯ menu or a command palette wants.
+    this.searchProps = {
+      id: 'dd-search',
+      triggerLabel: 'Commands',
+      menuLabel: 'Run a command',
+      searchable: true,
+      searchPlaceholder: 'Search commands...',
+      actions: [
+        {label: 'Edit', icon: this.editIcon(), keywords: 'modify change update', run: () => this.pick('Edit')},
+        {label: 'Duplicate', icon: this.duplicateIcon(), keywords: 'copy clone', run: () => this.pick('Duplicate')},
+        {label: 'Share', icon: this.shareIcon(), keywords: 'send invite link', run: () => this.pick('Share')},
+        {label: 'Rename', icon: this.editIcon(), keywords: 'title name', run: () => this.pick('Rename')},
+        {label: 'Move to folder', keywords: 'organise organize file', run: () => this.pick('Move to folder')},
+        {label: 'Archive', keywords: 'store hide', run: () => this.pick('Archive')},
+        {label: 'Export', keywords: 'download save csv', run: () => this.pick('Export')},
+        {label: 'Delete', icon: this.deleteIcon(), danger: true, keywords: 'remove destroy', run: () => this.pick('Delete')},
       ],
     };
 

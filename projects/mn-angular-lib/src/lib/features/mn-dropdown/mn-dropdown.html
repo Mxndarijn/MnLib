@@ -35,6 +35,7 @@
         (dismiss)="close()"
         [ariaLabel]="menuLabel || triggerAriaLabel"
         [maxHeightVh]="80"
+        [minHeightPx]="sheetFloorPx"
       >
         <div [id]="resolvedId + '-menu'" role="menu" class="flex flex-col flex-1 min-h-0 overflow-hidden">
           <!-- The sheet covers its own trigger, so it needs a header and an explicit way out. -->
@@ -49,7 +50,8 @@
               [attr.aria-label]="closeLabel"
             ><svg lucideX [size]="20"></svg></button>
           </div>
-          <div class="flex-1 overflow-auto overscroll-contain">
+          <ng-container [ngTemplateOutlet]="searchBox" [ngTemplateOutletContext]="{ sheet: true }"></ng-container>
+          <div class="flex-1 flex flex-col overflow-auto overscroll-contain">
             <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: true }"></ng-container>
           </div>
         </div>
@@ -63,12 +65,23 @@
         [ngClass]="panelClasses"
         [style.left]="dropdownStyle.left"
         [style.top]="dropdownStyle.top"
+        [style.height.px]="panelFloorPx"
         role="menu"
       >
         @if (menuLabel) {
-          <p class="px-3 pt-1 pb-1.5 text-xs font-medium text-base-content/50 truncate">{{ menuLabel }}</p>
+          <p class="px-3 pt-1 pb-1.5 text-xs font-medium text-base-content/50 truncate shrink-0">{{ menuLabel }}</p>
         }
-        <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+        <ng-container [ngTemplateOutlet]="searchBox" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+        @if (isSearchable) {
+          <!-- Its own scroll region so the pinned search box above stays fixed and the
+               locked panel height (panelFloorPx) doesn't change as the list filters. The
+               flex column lets the empty state fill and centre in the reserved space. -->
+          <div class="flex-1 min-h-0 flex flex-col overflow-auto">
+            <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+          </div>
+        } @else {
+          <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+        }
       </div>
     }
   }
@@ -76,7 +89,7 @@
   <!-- The item list, shared verbatim by the sheet and the anchored popover. `sheet`
        only tunes the spacing so touch targets are roomier on mobile. -->
   <ng-template #items let-sheet="sheet">
-    @for (action of props.actions; track $index) {
+    @for (action of filteredActions; track $index) {
       <button
         type="button"
         role="menuitem"
@@ -84,7 +97,7 @@
         [class.opacity-50]="action.disabled"
         [class.pointer-events-none]="action.disabled"
         [ngClass]="[actionColorClass(action), sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm']"
-        class="flex w-full items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
+        class="flex w-full shrink-0 items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
         (click)="select(action)"
       >
         @if (action.icon) {
@@ -100,6 +113,43 @@
         }
         <span class="truncate">{{ actionLabel(action) }}</span>
       </button>
+    }
+    @if (isSearchable && filteredActions.length === 0) {
+      <div class="flex-1 flex flex-col items-center justify-center gap-2 px-4 py-6 text-center text-base-content/50">
+        <svg lucideSearchX [size]="sheet ? 28 : 24" class="opacity-60"></svg>
+        <span [ngClass]="sheet ? 'text-base' : 'text-sm'">{{ searchEmptyLabel }}</span>
+      </div>
+    }
+  </ng-template>
+
+  <!-- The filter input, shared by the sheet and the anchored popover. Autofocused on
+       desktop (`!sheet`) so typing starts immediately; deliberately not on mobile, where
+       it would pop the soft keyboard and fight the viewport-anchored sheet. Enter runs
+       the first visible action via the wrapper's bubbled keydown. -->
+  <ng-template #searchBox let-sheet="sheet">
+    @if (isSearchable) {
+      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+      <div
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="selectFirstVisible()"
+        [ngClass]="sheet ? 'px-4 py-2' : 'p-2'"
+        class="border-b border-base-300 shrink-0"
+      >
+        <mn-lib-input-field
+          (ngModelChange)="onSearch($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [ngModel]="searchTerm"
+          [props]="{
+            id: resolvedId + '-search',
+            type: 'search',
+            placeholder: searchPlaceholder,
+            ariaLabel: searchPlaceholder,
+            fullWidth: true,
+            size: 'sm',
+            autoFocus: !sheet
+          }"
+        ></mn-lib-input-field>
+      </div>
     }
   </ng-template>
 </div>
