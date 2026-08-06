@@ -1,31 +1,44 @@
-@if (alerts$ | async; as alerts) {
-  <div class="fixed top-4 left-0 right-0 z-[9999] flex flex-col gap-3 w-full px-2 sm:px-0 sm:left-auto sm:right-4 sm:max-w-sm">
-    @for (a of alerts; track trackById($index, a)) {
-      @if (template) {
-        <ng-container
-          [ngTemplateOutlet]="template"
-          [ngTemplateOutletContext]="contextFor(a)">
-        </ng-container>
-      } @else {
-        <div [class]="getAlertClasses(a)" [class.extra]="a.cssClass" class="relative">
-          <div class="flex-1 min-w-0 pr-8">
-            <h4 class="font-semibold text-sm">{{ a.title }}</h4>
-            @if (a.subTitle) {
-              <p class="text-sm mt-1 opacity-90 leading-tight">{{ a.subTitle }}</p>
-            }
+<div class="fixed top-4 left-0 right-0 z-[9999] flex flex-col w-full px-2 sm:px-0 sm:left-auto sm:right-4 sm:max-w-sm">
+  @for (v of views(); track trackById($index, v)) {
+    <div
+      class="mn-alert-item"
+      [class.dragging]="v.dragging"
+      [class.leaving]="v.leaving"
+      [style.touch-action]="touchAction"
+      [style.transform]="itemTransform(v)"
+      [style.opacity]="itemOpacity(v)"
+      (pointerdown)="onPointerDown($event, v)"
+      (pointermove)="onPointerMove($event, v)"
+      (pointerup)="onPointerUp($event, v)"
+      (pointercancel)="onPointerUp($event, v)"
+    >
+      <div class="mn-alert-inner">
+        @if (template) {
+          <ng-container
+            [ngTemplateOutlet]="template"
+            [ngTemplateOutletContext]="contextFor(v.alert)">
+          </ng-container>
+        } @else {
+          <div [class]="getAlertClasses(v.alert)" [class.extra]="v.alert.cssClass" class="relative">
+            <div class="flex-1 min-w-0 pr-8">
+              <h4 class="font-semibold text-sm">{{ v.alert.title }}</h4>
+              @if (v.alert.subTitle) {
+                <p class="text-sm mt-1 opacity-90 leading-tight">{{ v.alert.subTitle }}</p>
+              }
+            </div>
+            <button
+              [attr.aria-label]="closeLabel"
+              mnButton
+              [data]="{ size: 'md', variant: 'text' }"
+              (click)="dismissAlert(v.alert.id)"
+              class="absolute top-2 right-2 shrink-0 !text-current hover:!bg-current/10"
+              type="button"
+            >
+              &times;
+            </button>
           </div>
-          <button
-            [attr.aria-label]="closeLabel"
-            mnButton
-            [data]="{ size: 'md', variant: 'text' }"
-            (click)="dismissAlert(a.id)"
-            class="absolute top-2 right-2 shrink-0 !text-current hover:!bg-current/10"
-            type="button"
-          >
-            &times;
-          </button>
-        </div>
-      }
-    }
-  </div>
-}
+        }
+      </div>
+    </div>
+  }
+</div>
