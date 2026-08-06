@@ -63,6 +63,14 @@ export type MnDropdownAction = {
   /** Renders the item in a destructive style (e.g. a "Delete" action). Shorthand for
    *  the red foreground; equivalent to `color: 'danger'`. */
   danger?: boolean;
+
+  /**
+   * Extra text the search filter matches against, beyond the visible label — a summary,
+   * synonyms, a category. Only consulted when the menu is {@link MnDropdownProps.searchable}.
+   * Lets search find a command by more than its label, e.g. a help search that matches a
+   * topic's title *and* its summary.
+   */
+  keywords?: string;
 };
 
 /**
@@ -115,6 +123,28 @@ export type MnDropdownProps = {
    */
   mobileSheet?: boolean;
 
+  /**
+   * Shows a filter input at the top of the menu (and the mobile sheet), narrowing the
+   * actions as the user types. Each action matches on its resolved label and its
+   * {@link MnDropdownAction.keywords}, case-insensitively. On desktop the input is
+   * focused on open; pressing Enter runs the first still-visible, enabled action —
+   * mirroring a help search that opens the top hit. Defaults to false.
+   */
+  searchable?: boolean;
+
+  /** Placeholder for the search input. Falls back to a translated default ("Search..."). */
+  searchPlaceholder?: string;
+
+  /** Translation key for {@link searchPlaceholder}. Resolved via MnLanguageService. */
+  searchPlaceholderKey?: string;
+
+  /** Text shown in place of the list when the filter matches no actions. Falls back to
+   *  a translated default ("No results"). */
+  searchEmptyLabel?: string;
+
+  /** Translation key for {@link searchEmptyLabel}. Resolved via MnLanguageService. */
+  searchEmptyLabelKey?: string;
+
   /** Size variant of the ⋯ trigger (default: 'md'). */
   size?: MnDropdownTriggerVariants['size'];
 
@@ -133,4 +163,8 @@ export type MnDropdownUIConfig = {
   menuLabel?: string;
   /** Accessible label for the mobile sheet's close button (falls back to "Close"). */
   closeLabel?: string;
+  /** Default placeholder for the search input (falls back to "Search..."). */
+  searchPlaceholder?: string;
+  /** Default empty-state text when the filter matches nothing (falls back to "No results"). */
+  searchEmptyLabel?: string;
 };
