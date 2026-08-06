@@ -1,5 +1,6 @@
 import { TemplateRef } from '@angular/core';
 import { LucideIconData } from '@lucide/angular';
+import { MnButtonTypes } from '../mn-button';
 import { MnDropdownTriggerVariants } from './mn-dropdownVariants';
 
 /**
@@ -74,15 +75,34 @@ export type MnDropdownAction = {
 };
 
 /**
- * Configuration for {@link MnDropdown}. Everything is passed through the single
- * `props` input, mirroring mn-select / mn-multi-select.
+ * A divider between commands, rendered as an `<hr>`. Group related actions — e.g. a
+ * destructive "Logout" set off from a profile menu's navigation, or a name header above
+ * its items. Non-interactive: it is skipped by keyboard nav and hidden while a
+ * {@link MnDropdownProps.searchable} filter is active (a divider stranded between hidden
+ * results is meaningless).
+ */
+export type MnDropdownSeparator = {
+  separator: true;
+};
+
+/** An entry in a {@link MnDropdownProps.actions} list: a command or a {@link MnDropdownSeparator}. */
+export type MnDropdownItem = MnDropdownAction | MnDropdownSeparator;
+
+/**
+ * Configuration for {@link MnDropdown}, passed through its single `datasource` input.
+ * (The type keeps the `Props` name; only the input binding is `datasource`.)
  */
 export type MnDropdownProps = {
-  /** Unique identifier, required for the trigger/menu accessibility wiring. */
-  id: string;
+  /**
+   * Unique identifier for the trigger/menu accessibility wiring. Optional — a stable one is
+   * generated when omitted, so the leanest dropdown is just `{ actions: [...] }`. Set it
+   * explicitly only to target this instance from {@link MnConfigService} `#id` overrides.
+   */
+  id?: string;
 
-  /** The commands rendered in the menu, in order. */
-  actions: MnDropdownAction[];
+  /** The commands rendered in the menu, in order. May include {@link MnDropdownSeparator}
+   *  entries (`{ separator: true }`) to divide the list into groups. */
+  actions: MnDropdownItem[];
 
   /**
    * Text shown inside the trigger button, turning the ⋯ icon into a labelled control
@@ -97,9 +117,30 @@ export type MnDropdownProps = {
   /**
    * Which glyph the trigger shows. Defaults to `'dots-vertical'` (⋮) for an icon-only
    * trigger, or `'chevron'` (▾) when a {@link triggerLabel} is set. Use `'none'` for a
-   * text-only trigger, or `'dots-horizontal'` (⋯) for the horizontal ellipsis.
+   * text-only trigger.
+   *
+   * Beyond the three built-in glyphs, this also accepts a custom {@link MnActionIcon} — a
+   * `TemplateRef` (full control: an `<mn-icon>`, an emoji, a bespoke `<svg>`) or lucide
+   * icon *data* such as `LucideFilter.icon`, rendered by the component at trigger size.
+   * The same convention the per-item {@link MnDropdownAction.icon} uses. (For a horizontal
+   * ellipsis ⋯, pass `LucideEllipsis.icon` here.)
    */
-  triggerIcon?: 'dots-vertical' | 'dots-horizontal' | 'chevron' | 'none';
+  triggerIcon?: 'dots-vertical' | 'chevron' | 'none' | MnActionIcon;
+
+  /**
+   * Styles the trigger as a full {@link MnButtonTypes} button instead of the default ghost
+   * ⋯ affordance — `variant`, `color`, `size`, `borderRadius`, `shape`, etc. Merged over
+   * the default `{ size: 'sm', variant: 'text', color: 'gray' }`, so a partial config only
+   * changes what you name (e.g. `{ variant: 'fill', color: 'primary' }` for a solid button).
+   *
+   * When set, mn-button owns the trigger's look entirely: the trigger's own {@link size}
+   * and {@link borderRadius} props no longer apply (use this config's), and mn-button's
+   * `borderRadius` default (`lg`) takes over. Composes with {@link triggerIcon} and
+   * {@link triggerLabel} — the glyph/label render inside the styled button. For a square
+   * icon-only button, set `shape: 'square'` (or `'circle'`) here; otherwise a filled
+   * icon-only trigger is a small padded box rather than a fixed square.
+   */
+  triggerButton?: Partial<MnButtonTypes>;
 
   /** Accessible label for the trigger button. Falls back to a translated default.
    *  Ignored for name purposes when {@link triggerLabel} provides visible text. */

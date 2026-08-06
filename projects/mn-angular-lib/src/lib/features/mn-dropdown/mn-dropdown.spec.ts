@@ -1,9 +1,10 @@
 import {Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
+import {LucideChevronDown, LucideEllipsisVertical} from '@lucide/angular';
 import {Subject} from 'rxjs';
 
-import {MnDropdown, MnDropdownProps} from 'mn-angular-lib';
+import {MnDropdown, MnDropdownAction, MnDropdownProps} from 'mn-angular-lib';
 import {MnConfigService} from '../../config';
 import {MnLanguageService} from '../../language';
 
@@ -27,7 +28,7 @@ const languageStub: Partial<MnLanguageService> = {
   imports: [MnDropdown],
   template: `
     <div class="transformed-ancestor" style="transform: translateY(20px); position: relative;">
-      <mn-lib-dropdown [props]="props"></mn-lib-dropdown>
+      <mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>
     </div>
   `,
 })
@@ -70,6 +71,10 @@ describe('MnDropdown (anchored popover)', () => {
 
   function items(): HTMLButtonElement[] {
     return Array.from(menu()?.querySelectorAll('[role="menuitem"]') ?? []) as HTMLButtonElement[];
+  }
+
+  function separators(): HTMLElement[] {
+    return Array.from(menu()?.querySelectorAll('hr[role="separator"]') ?? []) as HTMLElement[];
   }
 
   beforeEach(async () => {
@@ -126,6 +131,60 @@ describe('MnDropdown (anchored popover)', () => {
     expect(items()[0].textContent).toContain('Edit');
   });
 
+  it('renders a separator entry as an <hr>, not a menuitem', () => {
+    host.props = {
+      ...host.props,
+      actions: [
+        {label: 'Profile', run: () => undefined},
+        {separator: true},
+        {label: 'Logout', danger: true, run: () => undefined},
+      ],
+    };
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+
+    expect(items().length).withContext('separators are not menuitems').toBe(2);
+    expect(separators().length).toBe(1);
+    // The divider sits between the two commands, in declared order.
+    const rendered = Array.from(menu()!.querySelectorAll('[role="menuitem"], hr[role="separator"]'));
+    expect(rendered.map(el => el.tagName.toLowerCase())).toEqual(['button', 'hr', 'button']);
+  });
+
+  it('skips separators when running the first visible action (Enter)', () => {
+    const first = jasmine.createSpy('first');
+    host.props = {
+      ...host.props,
+      actions: [{separator: true}, {label: 'First', run: first}],
+    };
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+
+    component.selectFirstVisible();
+    expect(first).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops separators from the filtered results while searching', () => {
+    host.props = {
+      ...host.props,
+      searchable: true,
+      actions: [
+        {label: 'Edit', run: () => undefined},
+        {separator: true},
+        {label: 'Delete', run: () => undefined},
+      ],
+    };
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+
+    component.onSearch('e');
+    // Both commands match 'e'; the separator between them must not survive the filter.
+    expect(component.filteredActions.some(i => component.isSeparator(i))).toBeFalse();
+    expect(component.filteredActions.length).toBe(2);
+  });
+
   it('fires the chosen action and closes', () => {
     component.toggle();
     fixture.detectChanges();
@@ -145,7 +204,7 @@ describe('MnDropdown (anchored popover)', () => {
     const disabled = items()[2];
     expect(disabled.disabled).toBeTrue();
     // Even if a click is forced past the disabled attribute, the handler guards.
-    component.select(host.props.actions[2]);
+    component.select(host.props.actions[2] as MnDropdownAction);
     expect(component.isOpen).toBeTrue();
   });
 
@@ -300,7 +359,7 @@ describe('MnDropdown (trigger presentation)', () => {
   @Component({
     standalone: true,
     imports: [MnDropdown],
-    template: `<mn-lib-dropdown [props]="props"></mn-lib-dropdown>`,
+    template: `<mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>`,
   })
   class TriggerHostComponent {
     props: MnDropdownProps = {
@@ -337,18 +396,32 @@ describe('MnDropdown (trigger presentation)', () => {
     stubViewport(false);
   });
 
+  it('generates a stable id for the a11y wiring when none is provided', () => {
+    build({id: undefined});
+    expect(component.resolvedId).toMatch(/^mn-dropdown-\d+$/);
+    // The trigger button carries the generated id, so aria-controls/menu id stay valid.
+    const btn = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(btn.id).toBe(component.resolvedId);
+  });
+
   it('defaults to an icon-only vertical-dots trigger with an aria-label', () => {
     build({});
     expect(component.triggerLabelText).toBeNull();
-    expect(component.resolvedTriggerIcon).toBe('dots-vertical');
-    expect(trigger().querySelector('span')).toBeNull();
+    // Icon-only default resolves to the vertical-dots lucide data, not a template.
+    expect(component.triggerIconTemplate).toBeNull();
+    expect(component.triggerIconData?.data).toBe(LucideEllipsisVertical.icon);
+    // No visible label (the label span carries `truncate`); the glyph span is expected.
+    expect(trigger().querySelector('span.truncate')).toBeNull();
+    expect(trigger().querySelector('svg')).not.toBeNull();
     expect(trigger().getAttribute('aria-label')).toBe('Actions');
   });
 
   it('renders visible text and a trailing chevron when triggerLabel is set', () => {
     build({triggerLabel: 'Actions'});
     expect(component.triggerLabelText).toBe('Actions');
-    expect(component.resolvedTriggerIcon).toBe('chevron');
+    // A labelled trigger defaults to the (dimmed) chevron.
+    expect(component.triggerIconData?.data).toBe(LucideChevronDown.icon);
+    expect(component.triggerIconData?.dim).toBeTrue();
     expect(trigger().querySelector('span')?.textContent).toContain('Actions');
     // With visible text the accessible name comes from the content, so no aria-label.
     expect(trigger().getAttribute('aria-label')).toBeNull();
@@ -356,7 +429,8 @@ describe('MnDropdown (trigger presentation)', () => {
 
   it('honours triggerIcon:none for a text-only trigger', () => {
     build({triggerLabel: 'More', triggerIcon: 'none'});
-    expect(component.resolvedTriggerIcon).toBe('none');
+    expect(component.triggerIconTemplate).toBeNull();
+    expect(component.triggerIconData).toBeNull();
     expect(trigger().querySelector('svg')).toBeNull();
     expect(trigger().querySelector('span')?.textContent).toContain('More');
   });
@@ -382,7 +456,7 @@ describe('MnDropdown (action colour)', () => {
   @Component({
     standalone: true,
     imports: [MnDropdown],
-    template: `<mn-lib-dropdown [props]="props"></mn-lib-dropdown>`,
+    template: `<mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>`,
   })
   class ColourHostComponent {
     props: MnDropdownProps = {id: 'col-dd', mobileSheet: false, actions: [{label: 'x', run: () => undefined}]};
@@ -408,11 +482,47 @@ describe('MnDropdown (action colour)', () => {
   });
 });
 
+describe('MnDropdown (custom template trigger)', () => {
+  @Component({
+    standalone: true,
+    imports: [MnDropdown],
+    template: `
+      <ng-template #glyph><img class="avatar" src="" alt="" /></ng-template>
+      <mn-lib-dropdown
+        [datasource]="{id: 'tpl-dd', mobileSheet: false, triggerIcon: glyph, actions: [{label: 'x', run: noop}]}"
+      ></mn-lib-dropdown>
+    `,
+  })
+  class TplHostComponent {
+    noop = (): void => undefined;
+  }
+
+  it('lets a template trigger size itself instead of forcing the preset square-box', async () => {
+    await TestBed.configureTestingModule({
+      imports: [TplHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+    stubViewport(false);
+    const fixture = TestBed.createComponent(TplHostComponent);
+    fixture.detectChanges();
+    const c = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
+
+    // No `h-7 w-7` square-box — the projected content defines the trigger's size.
+    expect(c.triggerClasses).toBe('gap-x-1.5');
+    expect(c.triggerClasses).not.toContain('h-7');
+    // The projected avatar renders inside the trigger (no triggerButton needed).
+    expect(fixture.nativeElement.querySelector('img.avatar')).not.toBeNull();
+  });
+});
+
 describe('MnDropdown (label resolution)', () => {
   @Component({
     standalone: true,
     imports: [MnDropdown],
-    template: `<mn-lib-dropdown [props]="props"></mn-lib-dropdown>`,
+    template: `<mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>`,
   })
   class KeyHostComponent {
     props: MnDropdownProps = {
@@ -441,7 +551,7 @@ describe('MnDropdown (label resolution)', () => {
     fixture.detectChanges();
     const component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
 
-    expect(component.actionLabel(fixture.componentInstance.props.actions[0])).toBe('Bewerken');
+    expect(component.actionLabel(fixture.componentInstance.props.actions[0] as MnDropdownAction)).toBe('Bewerken');
   });
 });
 
@@ -449,7 +559,7 @@ describe('MnDropdown (searchable)', () => {
   @Component({
     standalone: true,
     imports: [MnDropdown],
-    template: `<mn-lib-dropdown [props]="props"></mn-lib-dropdown>`,
+    template: `<mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>`,
   })
   class SearchHostComponent {
     copy = jasmine.createSpy('copy');
@@ -517,7 +627,7 @@ describe('MnDropdown (searchable)', () => {
     component.onSearch('link');
     fixture.detectChanges();
 
-    expect(component.filteredActions.map(a => a.label)).toEqual(['Copy link']);
+    expect((component.filteredActions as MnDropdownAction[]).map(a => a.label)).toEqual(['Copy link']);
     expect(items().length).toBe(1);
   });
 
@@ -525,7 +635,7 @@ describe('MnDropdown (searchable)', () => {
     component.onSearch('modify');
     fixture.detectChanges();
 
-    expect(component.filteredActions.map(a => a.label)).toEqual(['Edit']);
+    expect((component.filteredActions as MnDropdownAction[]).map(a => a.label)).toEqual(['Edit']);
   });
 
   it('shows a centered icon + label empty state when nothing matches', () => {
@@ -564,8 +674,10 @@ describe('MnDropdown (searchable)', () => {
     // Its unique keyword isolates the disabled "Copy" as the sole match.
     component.onSearch('archived');
     fixture.detectChanges();
-    expect(component.filteredActions.map(a => a.label)).toEqual(['Copy']);
-    expect(component.filteredActions.every(a => a.disabled)).withContext('only match is disabled').toBeTrue();
+    // Active search filters out any separators, so every result is a command here.
+    const matches = component.filteredActions as MnDropdownAction[];
+    expect(matches.map(a => a.label)).toEqual(['Copy']);
+    expect(matches.every(a => a.disabled)).withContext('only match is disabled').toBeTrue();
 
     component.selectFirstVisible();
 

@@ -108,8 +108,7 @@ export type MnRowValue<T, V> = V | ((row: T) => V);
 /**
  * A per-row command rendered in an actions column (see {@link ColumnBase.actions}).
  * Unlike a cell it carries no display value — choosing it invokes {@link run} with the
- * row. The table renders actions inline as buttons and, when there are
- * {@link ColumnBase.actionsCollapseThreshold} or more, collapses them into a ⋯ menu
+ * row. The table renders actions inline as buttons and collapses them into a ⋯ menu
  * (mn-dropdown) once the table is narrower than 450px.
  */
 export type MnTableRowAction<T> = {
@@ -162,16 +161,9 @@ export type ColumnBase<T> = {
   /**
    * Turns this column into an actions column: per-row command buttons rendered inline,
    * automatically collapsing into a ⋯ menu (mn-dropdown) once the table is narrower than
-   * 450px **and** there are at least {@link actionsCollapseThreshold} actions. When set,
-   * {@link cell} is ignored.
+   * 450px. When set, {@link cell} is ignored.
    */
   actions?: MnTableRowAction<T>[];
-  /**
-   * Number of {@link actions} at or above which the inline buttons collapse to a ⋯ menu
-   * on a narrow table. Defaults to 3 — one or two buttons still fit on a phone, a longer
-   * list does not.
-   */
-  actionsCollapseThreshold?: number;
   /**
    * How each inline action button is presented on a wide table:
    * - `'both'` (default) — icon (when provided) followed by the label;

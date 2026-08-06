@@ -85,6 +85,13 @@
     <mn-table [dataSource]="dataIconActionsDataSource"></mn-table>
   </app-demo-example>
 
+  <app-demo-example title="Single action (still collapses to ⋯ when narrow)" hint="One inline button when wide; the same single action becomes the ⋯ menu below 450px. The second copy is boxed to 360px to force the collapse.">
+    <mn-table [dataSource]="singleActionDataSource"></mn-table>
+    <div style="max-width: 360px" class="mt-6">
+      <mn-table [dataSource]="singleActionDataSource"></mn-table>
+    </div>
+  </app-demo-example>
+
   <app-demo-example title="Multi-Select Table">
     <mn-table [dataSource]="selectionDataSource" (selectionChange)="onSelectionChange($event)"></mn-table>
     <p style="margin-top: 8px; font-size: 14px; color: #666;">Selected: {{ selectedNames }}</p>

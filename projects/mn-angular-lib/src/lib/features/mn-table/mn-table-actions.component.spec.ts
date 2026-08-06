@@ -59,8 +59,10 @@ describe('MnTable row actions', () => {
   ): HTMLButtonElement[] {
     fixture.componentInstance.dataSource = makeDataSource(actions, overrides);
     fixture.detectChanges();
+    // Every action row also renders the collapsed ⋯ trigger (itself a button[mnButton]);
+    // exclude it so these assert on the inline action buttons.
     return Array.from(
-      fixture.nativeElement.querySelectorAll('tbody button[mnButton]'),
+      fixture.nativeElement.querySelectorAll('tbody button[mnButton]:not(mn-lib-dropdown *)'),
     ) as HTMLButtonElement[];
   }
 
@@ -114,7 +116,7 @@ describe('MnTable row actions', () => {
   it('renders a lucide data icon without the caller owning a template', () => {
     renderActions([{label: 'Edit', icon: LucidePencil.icon, run: () => undefined}]);
 
-    const svgs = fixture.nativeElement.querySelectorAll('tbody button[mnButton] svg');
+    const svgs = fixture.nativeElement.querySelectorAll('tbody button[mnButton]:not(mn-lib-dropdown *) svg');
     expect(svgs.length).toBe(2);
     // Rendered from the data, not an empty placeholder: the glyph has real geometry.
     expect(svgs[0].innerHTML.trim().length).toBeGreaterThan(0);
@@ -129,7 +131,7 @@ describe('MnTable row actions', () => {
       },
     ]);
 
-    const svgs = fixture.nativeElement.querySelectorAll('tbody button[mnButton] svg');
+    const svgs = fixture.nativeElement.querySelectorAll('tbody button[mnButton]:not(mn-lib-dropdown *) svg');
     expect(svgs.length).toBe(2);
     expect(svgs[0].innerHTML).not.toBe(svgs[1].innerHTML);
   });

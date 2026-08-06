@@ -3,6 +3,11 @@
   tag="mn-lib-dropdown"
   lead="A ⋯ command menu: an anchored popover on desktop, a bottom sheet on mobile. Actions fire and dismiss — it is a command menu, not a value picker."
 >
+  <!-- A custom trigger: any markup, sized by itself (no triggerButton needed). -->
+  <ng-template #avatarTrigger>
+    <span class="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-content text-sm font-semibold">MG</span>
+  </ng-template>
+
   <!-- Action icons, referenced from the props' `actions` config. -->
   <ng-template #editIcon><svg lucidePencil [size]="16"></svg></ng-template>
   <ng-template #duplicateIcon><svg lucideCopy [size]="16"></svg></ng-template>
@@ -16,39 +21,54 @@
   <app-demo-example title="Basic (labels only)" hint="The leanest form — a ⋯ trigger opening a list of commands.">
     <div class="flex items-center gap-3">
       <span class="text-sm text-base-content/60">Actions</span>
-      <mn-lib-dropdown [props]="basicProps"></mn-lib-dropdown>
+      <mn-lib-dropdown [datasource]="basicProps"></mn-lib-dropdown>
     </div>
   </app-demo-example>
 
   <app-demo-example title="With icons" hint="Each action can carry a leading icon template.">
-    <mn-lib-dropdown [props]="iconProps"></mn-lib-dropdown>
+    <mn-lib-dropdown [datasource]="iconProps"></mn-lib-dropdown>
   </app-demo-example>
 
   <app-demo-example title="Danger and disabled states" hint="danger renders a destructive style; disabled items cannot be chosen.">
-    <mn-lib-dropdown [props]="stateProps"></mn-lib-dropdown>
+    <mn-lib-dropdown [datasource]="stateProps"></mn-lib-dropdown>
   </app-demo-example>
 
   <app-demo-example title="Searchable" hint="searchable adds a filter input; actions match on their label and optional keywords, and Enter runs the first visible result.">
-    <mn-lib-dropdown [props]="searchProps"></mn-lib-dropdown>
+    <mn-lib-dropdown [datasource]="searchProps"></mn-lib-dropdown>
   </app-demo-example>
 
   <app-demo-example title="Text trigger" hint="Set triggerLabel to turn the ⋯ into a labelled button; it defaults to a trailing chevron.">
     <div class="flex flex-wrap items-center gap-4">
-      <mn-lib-dropdown [props]="textProps"></mn-lib-dropdown>
-      <mn-lib-dropdown [props]="textOnlyProps"></mn-lib-dropdown>
-      <mn-lib-dropdown [props]="textDotsProps"></mn-lib-dropdown>
+      <mn-lib-dropdown [datasource]="textProps"></mn-lib-dropdown>
+      <mn-lib-dropdown [datasource]="textOnlyProps"></mn-lib-dropdown>
+      <mn-lib-dropdown [datasource]="textDotsProps"></mn-lib-dropdown>
     </div>
   </app-demo-example>
 
+  <app-demo-example title="Button trigger" hint="triggerButton styles the trigger as a full mn-button (variant / color / size / shape). Composes with triggerLabel and triggerIcon.">
+    <div class="flex flex-wrap items-center gap-4">
+      <mn-lib-dropdown [datasource]="buttonProps"></mn-lib-dropdown>
+      <mn-lib-dropdown [datasource]="buttonIconProps"></mn-lib-dropdown>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example title="Custom trigger (avatar)" hint="A custom template trigger sizes itself — no triggerButton to fit it, and no id (auto-generated). Just triggerIcon + actions.">
+    <mn-lib-dropdown [datasource]="avatarProps"></mn-lib-dropdown>
+  </app-demo-example>
+
+  <app-demo-example title="Separators" hint="Add { separator: true } entries to divide the list into groups — e.g. a destructive Logout set off from the rest. Skipped by search and keyboard nav.">
+    <mn-lib-dropdown [datasource]="separatorProps"></mn-lib-dropdown>
+  </app-demo-example>
+
   <app-demo-example title="With a menu heading" hint="menuLabel names the menu — always shown on the mobile sheet, which covers its own trigger.">
-    <mn-lib-dropdown [props]="labelledProps"></mn-lib-dropdown>
+    <mn-lib-dropdown [datasource]="labelledProps"></mn-lib-dropdown>
   </app-demo-example>
 
   <app-demo-example title="Translated labels" hint="labelKey / ariaLabelKey resolve via MnLanguageService, falling back to the literal label when a key is untranslated.">
-    <mn-lib-dropdown [props]="i18nProps"></mn-lib-dropdown>
+    <mn-lib-dropdown [datasource]="i18nProps"></mn-lib-dropdown>
   </app-demo-example>
 
   <app-demo-example title="Mobile presentation" hint="Narrow the window below 640px and open any menu above — it presents as a swipe-to-dismiss bottom sheet instead of a popover.">
-    <mn-lib-dropdown [props]="iconProps"></mn-lib-dropdown>
+    <mn-lib-dropdown [datasource]="iconProps"></mn-lib-dropdown>
   </app-demo-example>
 </app-demo-page>

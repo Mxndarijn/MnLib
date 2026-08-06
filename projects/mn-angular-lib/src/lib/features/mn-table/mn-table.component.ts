@@ -642,17 +642,6 @@ export class MnTable<T = object>
   }
 
   /**
-   * Whether a row's actions should offer the collapsing ⋯ variant: only when it has at
-   * least its threshold's worth of *visible* actions (default 3). Below that, the inline
-   * buttons stay put at every width — one or two fit on a phone. The width switch itself
-   * is a pure container query in the template; this only decides whether to render the ⋯
-   * path at all, per row.
-   */
-  shouldCollapseActions(column: ColumnDefinition<T>, row: T): boolean {
-    return this.visibleRowActions(column, row).length >= (column.actionsCollapseThreshold ?? 3);
-  }
-
-  /**
    * Resolves a {@link MnRowValue}: either the fixed value, or the accessor applied to
    * the row. Every per-row presentation field goes through here so the fixed and derived
    * forms can never drift apart.
