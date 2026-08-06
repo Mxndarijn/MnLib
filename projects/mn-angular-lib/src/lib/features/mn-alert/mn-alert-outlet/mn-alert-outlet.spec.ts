@@ -1,5 +1,5 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MnAlertOutletComponent } from './mn-alert-outlet';
 import { MnAlertStore } from '../mn-alert.store';
@@ -54,7 +54,7 @@ describe('MnAlertOutletComponent', () => {
     expect(titles).toEqual(['A', 'B']);
   });
 
-  it('dismiss in context removes the alert', () => {
+  it('dismiss in context removes the alert once its leave animation finishes', fakeAsync(() => {
     const _id1 = store.show({title: 'A', kind: 'info'});
     store.show({ title: 'B', kind: 'success' });
 
@@ -66,8 +66,12 @@ describe('MnAlertOutletComponent', () => {
 
     fixture.detectChanges();
 
+    // The card animates out before its node is dropped; advance past the exit duration.
+    tick(400);
+    fixture.detectChanges();
+
     const items = queryAllAlerts();
     const titles = items.map(el => el.nativeElement.querySelector('.title')!.textContent.trim());
     expect(titles).toEqual(['B']);
-  });
+  }));
 });
