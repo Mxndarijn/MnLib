@@ -5,7 +5,7 @@
     mnButton
     type="button"
     [id]="resolvedId"
-    [data]="{ size: 'sm', variant: 'text', color: 'gray' }"
+    [data]="triggerData"
     [ngClass]="triggerClasses"
     [attr.aria-label]="triggerLabelText ? null : triggerAriaLabel"
     [attr.aria-haspopup]="'menu'"
@@ -16,10 +16,16 @@
     @if (triggerLabelText) {
       <span class="truncate">{{ triggerLabelText }}</span>
     }
-    @switch (resolvedTriggerIcon) {
-      @case ('dots-vertical') { <svg lucideEllipsisVertical [size]="18"></svg> }
-      @case ('dots-horizontal') { <svg lucideEllipsis [size]="18"></svg> }
-      @case ('chevron') { <svg lucideChevronDown [size]="16" class="opacity-70"></svg> }
+    <!-- One glyph, rendered like a menu item's icon: a caller's template, else lucide data
+         (a preset resolves to its own data). No per-preset switch. -->
+    @if (triggerIconTemplate; as tpl) {
+      <span class="shrink-0 inline-flex items-center">
+        <ng-container [ngTemplateOutlet]="tpl"></ng-container>
+      </span>
+    } @else if (triggerIconData; as glyph) {
+      <span class="shrink-0 inline-flex items-center">
+        <svg [lucideIcon]="glyph.data" [size]="glyph.size" [class.opacity-70]="glyph.dim"></svg>
+      </span>
     }
   </button>
 
@@ -89,30 +95,34 @@
   <!-- The item list, shared verbatim by the sheet and the anchored popover. `sheet`
        only tunes the spacing so touch targets are roomier on mobile. -->
   <ng-template #items let-sheet="sheet">
-    @for (action of filteredActions; track $index) {
-      <button
-        type="button"
-        role="menuitem"
-        [disabled]="action.disabled"
-        [class.opacity-50]="action.disabled"
-        [class.pointer-events-none]="action.disabled"
-        [ngClass]="[actionColorClass(action), sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm']"
-        class="flex w-full shrink-0 items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
-        (click)="select(action)"
-      >
-        @if (action.icon) {
-          <span class="shrink-0 inline-flex items-center">
-            @if (isTemplateRef(action.icon)) {
-              <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
-            } @else {
-              <!-- Data icon: rendered here so the item sizes it to match its own text
-                   (larger in the sheet, where the rows are touch-sized). -->
-              <svg [lucideIcon]="$any(action.icon)" [size]="sheet ? 18 : 16"></svg>
-            }
-          </span>
-        }
-        <span class="truncate">{{ actionLabel(action) }}</span>
-      </button>
+    @for (item of filteredActions; track $index) {
+      @if (asAction(item); as action) {
+        <button
+          type="button"
+          role="menuitem"
+          [disabled]="action.disabled"
+          [class.opacity-50]="action.disabled"
+          [class.pointer-events-none]="action.disabled"
+          [ngClass]="[actionColorClass(action), sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm']"
+          class="flex w-full shrink-0 items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
+          (click)="select(action)"
+        >
+          @if (action.icon) {
+            <span class="shrink-0 inline-flex items-center">
+              @if (isTemplateRef(action.icon)) {
+                <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
+              } @else {
+                <!-- Data icon: rendered here so the item sizes it to match its own text
+                     (larger in the sheet, where the rows are touch-sized). -->
+                <svg [lucideIcon]="$any(action.icon)" [size]="sheet ? 18 : 16"></svg>
+              }
+            </span>
+          }
+          <span class="truncate">{{ actionLabel(action) }}</span>
+        </button>
+      } @else {
+        <hr role="separator" [ngClass]="sheet ? 'mx-4 my-1.5' : 'mx-2 my-1'" class="shrink-0 border-t border-base-300" />
+      }
     }
     @if (isSearchable && filteredActions.length === 0) {
       <div class="flex-1 flex flex-col items-center justify-center gap-2 px-4 py-6 text-center text-base-content/50">

@@ -1,6 +1,6 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {MnDropdown, MnDropdownProps} from 'mn-angular-lib';
-import {LucideCopy, LucidePencil, LucideShare2, LucideTrash2} from '@lucide/angular';
+import {LucideCopy, LucideFilter, LucidePencil, LucideShare2, LucideTrash2} from '@lucide/angular';
 import {DemoPageComponent} from '../shared/demo-page.component';
 import {DemoExampleComponent} from '../shared/demo-example.component';
 
@@ -13,6 +13,7 @@ export class DropdownDemo implements OnInit {
   /** Last chosen command, echoed in each example so the menu feels live. */
   lastAction = '—';
 
+  readonly avatarTrigger = viewChild.required<TemplateRef<unknown>>('avatarTrigger');
   readonly editIcon = viewChild.required<TemplateRef<unknown>>('editIcon');
   readonly duplicateIcon = viewChild.required<TemplateRef<unknown>>('duplicateIcon');
   readonly shareIcon = viewChild.required<TemplateRef<unknown>>('shareIcon');
@@ -28,6 +29,10 @@ export class DropdownDemo implements OnInit {
   textProps!: MnDropdownProps;
   textOnlyProps!: MnDropdownProps;
   textDotsProps!: MnDropdownProps;
+  buttonProps!: MnDropdownProps;
+  buttonIconProps!: MnDropdownProps;
+  separatorProps!: MnDropdownProps;
+  avatarProps!: MnDropdownProps;
 
   private pick(name: string): void {
     this.lastAction = name;
@@ -131,6 +136,61 @@ export class DropdownDemo implements OnInit {
       actions: [
         {label: 'Settings', run: () => this.pick('Settings')},
         {label: 'Help', run: () => this.pick('Help')},
+      ],
+    };
+
+    // Button trigger: triggerButton styles the trigger as a full mn-button. A partial
+    // config merges over the ghost default, so here just the fill variant + colour change.
+    this.buttonProps = {
+      id: 'dd-button',
+      triggerLabel: 'Actions',
+      triggerButton: {variant: 'fill', color: 'primary'},
+      actions: [
+        {label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit')},
+        {label: 'Duplicate', icon: this.duplicateIcon(), run: () => this.pick('Duplicate')},
+        {label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete')},
+      ],
+    };
+
+    // Icon-only button trigger: an outline square button (shape: 'square') with a custom
+    // lucide glyph passed as triggerIcon data — no template needed.
+    this.buttonIconProps = {
+      id: 'dd-button-icon',
+      ariaLabel: 'Filter',
+      triggerIcon: LucideFilter.icon,
+      triggerButton: {variant: 'outline', color: 'gray', shape: 'square'},
+      actions: [
+        {label: 'Newest first', run: () => this.pick('Newest first')},
+        {label: 'Oldest first', run: () => this.pick('Oldest first')},
+        {label: 'A–Z', run: () => this.pick('A–Z')},
+      ],
+    };
+
+    // Separators: `{ separator: true }` entries divide the list into groups — here a
+    // profile menu with navigation set off from a destructive Logout.
+    this.separatorProps = {
+      id: 'dd-separator',
+      triggerLabel: 'Account',
+      menuLabel: 'Signed in as Merijn',
+      actions: [
+        {label: 'Profile', icon: this.editIcon(), run: () => this.pick('Profile')},
+        {label: 'Settings', run: () => this.pick('Settings')},
+        {separator: true},
+        {label: 'Logout', icon: this.deleteIcon(), danger: true, run: () => this.pick('Logout')},
+      ],
+    };
+
+    // Avatar trigger: a custom template sizes the trigger itself, so no triggerButton is
+    // needed to fit the 40px avatar — and no id, which is auto-generated.
+    this.avatarProps = {
+      triggerIcon: this.avatarTrigger(),
+      menuLabel: 'Signed in as Merijn',
+      actions: [
+        {separator: true},
+        {label: 'Profile', icon: this.editIcon(), run: () => this.pick('Profile')},
+        {label: 'Settings', run: () => this.pick('Settings')},
+        {separator: true},
+        {label: 'Logout', icon: this.deleteIcon(), danger: true, run: () => this.pick('Logout')},
       ],
     };
 

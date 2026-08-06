@@ -345,30 +345,24 @@
               >
                 @if (column.actions) {
                   <!-- Actions column: inline command buttons that collapse into a ⋯ menu
-                       once the table is narrower than 450px (container query), but only
-                       when there are enough of them to warrant it. A row with no visible
-                       actions renders nothing — no buttons, no ⋯. -->
+                       once the table is narrower than 450px (container query), for every
+                       row with actions. A row with no visible actions renders nothing. -->
                   @if (hasRowActions(column, row)) {
                   <div class="inline-flex items-center gap-1"
                        [class.justify-end]="(column.align ?? 'left') === 'right'">
-                    @if (shouldCollapseActions(column, row)) {
-                      <span class="hidden items-center gap-1 @min-[450px]:inline-flex">
-                        <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
-                                      [ngTemplateOutlet]="actionButtons"></ng-container>
-                      </span>
-                      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
-                      <span class="@min-[450px]:hidden" (click)="$event.stopPropagation()">
-                        <mn-lib-dropdown [props]="{
-                          id: actionsDropdownId(column, row),
-                          actions: rowDropdownActions(column, row),
-                          menuLabel: $any(column.header),
-                          size: 'sm'
-                        }"></mn-lib-dropdown>
-                      </span>
-                    } @else {
+                    <span class="hidden items-center gap-1 @min-[450px]:inline-flex">
                       <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
                                     [ngTemplateOutlet]="actionButtons"></ng-container>
-                    }
+                    </span>
+                    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+                    <span class="@min-[450px]:hidden" (click)="$event.stopPropagation()">
+                      <mn-lib-dropdown [datasource]="{
+                        id: actionsDropdownId(column, row),
+                        actions: rowDropdownActions(column, row),
+                        menuLabel: $any(column.header),
+                        size: 'sm'
+                      }"></mn-lib-dropdown>
+                    </span>
                   </div>
                   }
                 } @else if (column.cellSm) {

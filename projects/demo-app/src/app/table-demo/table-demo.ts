@@ -522,6 +522,7 @@ export class TableDemo implements OnInit {
   };
   // ── Actions table ──
   actionsDataSource!: TableDataSource<User>;
+  singleActionDataSource!: TableDataSource<User>;
 
   /** Own row stream for the data-icon demo, so promoting a user repaints the table. */
   private roleRows = new BehaviorSubject<User[]>([...SAMPLE_USERS]);
@@ -618,6 +619,28 @@ export class TableDemo implements OnInit {
               run: (row) => this.onAction('Delete', row),
             },
           ],
+        },
+      ],
+    };
+
+    // A single action per row — still collapses into the ⋯ menu below 450px.
+    this.singleActionDataSource = {
+      dataRows: this.roleRows,
+      getID: (row) => row.id,
+      emptyMessage: 'No users found.',
+      state: MnCollectionState.RETRIEVED,
+      canSearch: false,
+      paginationMode: 'none',
+      appearance: {hover: true},
+      columns: [
+        {key: 'name', header: 'Name', cell: (row) => row.name},
+        {key: 'role', header: 'Role', cell: (row) => row.role},
+        {
+          key: 'actions',
+          header: 'Actions',
+          align: 'right',
+          sortType: ColumnSortType.NONE,
+          actions: [{label: 'Edit', icon: LucidePencil.icon, run: (row) => this.onAction('Edit', row)}],
         },
       ],
     };

@@ -17,22 +17,25 @@ import { FormsModule } from '@angular/forms';
 import {
   LucideChevronDown,
   LucideDynamicIcon,
-  LucideEllipsis,
   LucideEllipsisVertical,
+  LucideIconData,
   LucideSearchX,
   LucideX,
 } from '@lucide/angular';
 import { skip } from 'rxjs';
-import { MnButton } from '../mn-button';
+import { MnButton, MnButtonTypes } from '../mn-button';
 import { MnBottomSheet } from '../mn-bottom-sheet';
 import { MnInputField } from '../mn-input-field';
 import { MnConfigService } from '../../config';
 import { MN_INSTANCE_ID, MN_SECTION_PATH } from '../../context';
 import { MnLanguageService } from '../../language';
-import { MnDropdownAction, MnDropdownActionColor, MnDropdownProps, MnDropdownUIConfig } from './mn-dropdownTypes';
+import { MnDropdownAction, MnDropdownActionColor, MnDropdownItem, MnDropdownProps, MnDropdownSeparator, MnDropdownUIConfig } from './mn-dropdownTypes';
 import { mnDropdownTriggerVariants } from './mn-dropdownVariants';
 
 export const MN_DROPDOWN_CONFIG = new InjectionToken<MnDropdownUIConfig>('MN_DROPDOWN_CONFIG');
+
+/** Counter backing the auto-generated {@link MnDropdownProps.id} when a caller omits one. */
+let nextDropdownId = 0;
 
 /** Foreground class per action colour token, matching mn-button's text variants. */
 const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
@@ -59,12 +62,12 @@ const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
 @Component({
   selector: 'mn-lib-dropdown',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, FormsModule, MnButton, MnBottomSheet, MnInputField, LucideEllipsisVertical, LucideEllipsis, LucideChevronDown, LucideX, LucideSearchX, LucideDynamicIcon],
+  imports: [NgClass, NgTemplateOutlet, FormsModule, MnButton, MnBottomSheet, MnInputField, LucideX, LucideSearchX, LucideDynamicIcon],
   templateUrl: './mn-dropdown.html',
   styleUrl: './mn-dropdown.css',
 })
 export class MnDropdown implements OnInit {
-  @Input({ required: true }) props!: MnDropdownProps;
+  @Input({ required: true }) datasource!: MnDropdownProps;
 
   protected uiConfig: MnDropdownUIConfig = {};
 
@@ -136,6 +139,10 @@ export class MnDropdown implements OnInit {
 
   isOpen = false;
 
+  /** Stable fallback id, used when {@link MnDropdownProps.id} is omitted. Generated once per
+   *  instance so the a11y wiring (menu id, `aria-controls`, the search input) stays valid. */
+  private readonly autoId = `mn-dropdown-${++nextDropdownId}`;
+
   /** Current text in the search input, cleared on close. Only meaningful when the menu
    *  is {@link MnDropdownProps.searchable}. */
   searchTerm = '';
@@ -193,7 +200,7 @@ export class MnDropdown implements OnInit {
   }
 
   private resolveConfig(): void {
-    const instanceId = this.explicitInstanceId || `mn-dropdown-${this.props.id}`;
+    const instanceId = this.explicitInstanceId || `mn-dropdown-${this.resolvedId}`;
     this.uiConfig = this.configService.resolve<MnDropdownUIConfig>(
       'mn-dropdown',
       this.sectionPath,
@@ -233,7 +240,7 @@ export class MnDropdown implements OnInit {
       this.close();
       return;
     }
-    if (this.props.actions.length === 0) return;
+    if (this.datasource.actions.length === 0) return;
     this.isOpen = true;
     if (this.isSheet) {
       // A sheet is anchored to the viewport, so it needs no trigger tracking — only a
@@ -258,7 +265,7 @@ export class MnDropdown implements OnInit {
 
   /** Whether the menu should currently render as a bottom sheet. */
   get isSheet(): boolean {
-    return this.props.mobileSheet !== false && this.isNarrowViewport;
+    return this.datasource.mobileSheet !== false && this.isNarrowViewport;
   }
 
   /** Fires an action and closes. Ignores disabled items defensively. */
@@ -272,7 +279,7 @@ export class MnDropdown implements OnInit {
 
   /** Whether the filter input is shown — the explicit `searchable` prop, off by default. */
   get isSearchable(): boolean {
-    return this.props.searchable === true;
+    return this.datasource.searchable === true;
   }
 
   /**
@@ -290,21 +297,26 @@ export class MnDropdown implements OnInit {
    * the menu is not searchable or the box is empty; otherwise those whose resolved label
    * or {@link MnDropdownAction.keywords} contain the (case-insensitive) query.
    */
-  get filteredActions(): MnDropdownAction[] {
+  get filteredActions(): MnDropdownItem[] {
     const term = (this.searchTerm ?? '').trim().toLowerCase();
-    if (!this.isSearchable || !term) return this.props.actions;
-    return this.props.actions.filter(action => {
-      const haystack = `${this.actionLabel(action)} ${action.keywords ?? ''}`.toLowerCase();
+    if (!this.isSearchable || !term) return this.datasource.actions;
+    // While filtering, separators are dropped — a divider stranded between or after hidden
+    // results is meaningless — so match only real actions.
+    return this.datasource.actions.filter(item => {
+      if (this.isSeparator(item)) return false;
+      const haystack = `${this.actionLabel(item)} ${item.keywords ?? ''}`.toLowerCase();
       return haystack.includes(term);
     });
   }
 
   /**
    * Runs the first still-visible, enabled action — the Enter key's target, matching a
-   * help search where Enter opens the top hit. No-op when nothing matches.
+   * help search where Enter opens the top hit. Skips separators. No-op when nothing matches.
    */
   selectFirstVisible(): void {
-    const first = this.filteredActions.find(action => !action.disabled);
+    const first = this.filteredActions.find(
+      (item): item is MnDropdownAction => !this.isSeparator(item) && !item.disabled,
+    );
     if (first) this.select(first);
   }
 
@@ -482,6 +494,22 @@ export class MnDropdown implements OnInit {
     return value instanceof TemplateRef;
   }
 
+  /** Whether a list entry is a {@link MnDropdownSeparator} rather than a command. */
+  isSeparator(item: MnDropdownItem): item is MnDropdownSeparator {
+    return (item as MnDropdownSeparator).separator === true;
+  }
+
+  /**
+   * Narrows a list entry to a command, or null for a separator. Used as `@if (asAction(item);
+   * as action)` in the template so the item loop gets a reliably-typed {@link MnDropdownAction}
+   * without depending on template narrowing of the {@link isSeparator} guard.
+   * @param item The list entry to narrow.
+   * @returns The command, or null when the entry is a separator.
+   */
+  asAction(item: MnDropdownItem): MnDropdownAction | null {
+    return this.isSeparator(item) ? null : item;
+  }
+
   /**
    * Foreground class for an item: an explicit {@link MnDropdownAction.color}, else the
    * destructive red for a {@link MnDropdownAction.danger} item, else the default text.
@@ -494,26 +522,57 @@ export class MnDropdown implements OnInit {
 
   /** Accessible name for the ⋯ trigger button. */
   get triggerAriaLabel(): string {
-    const translated = this.props.ariaLabelKey ? this.lang.translateIfPresent(this.props.ariaLabelKey) : undefined;
-    return translated ?? this.props.ariaLabel ?? this.uiConfig.ariaLabel ?? 'Actions';
+    const translated = this.datasource.ariaLabelKey ? this.lang.translateIfPresent(this.datasource.ariaLabelKey) : undefined;
+    return translated ?? this.datasource.ariaLabel ?? this.uiConfig.ariaLabel ?? 'Actions';
   }
 
   /** The visible text on the trigger, or null for an icon-only ⋯ trigger. */
   get triggerLabelText(): string | null {
-    const translated = this.props.triggerLabelKey ? this.lang.translateIfPresent(this.props.triggerLabelKey) : undefined;
-    return translated ?? this.props.triggerLabel ?? null;
+    const translated = this.datasource.triggerLabelKey ? this.lang.translateIfPresent(this.datasource.triggerLabelKey) : undefined;
+    return translated ?? this.datasource.triggerLabel ?? null;
   }
 
-  /** Which glyph the trigger renders: an explicit choice, else a chevron when the
-   *  trigger is labelled and the vertical dots when it is icon-only. */
-  get resolvedTriggerIcon(): 'dots-vertical' | 'dots-horizontal' | 'chevron' | 'none' {
-    return this.props.triggerIcon ?? (this.triggerLabelText ? 'chevron' : 'dots-vertical');
+  /**
+   * The trigger's glyph, normalised to a single representation so the template renders it
+   * one way — the same template-or-lucide-data path the menu items use — with no per-preset
+   * switch. Resolves, in order: an explicit `'none'` (no glyph); a caller's custom template
+   * or lucide data ({@link MnActionIcon}); otherwise a built-in preset mapped to its own
+   * lucide data (a labelled trigger defaults to the chevron, an icon-only one to the dots).
+   * @returns A template glyph, an icon-data glyph with its render size, or null for none.
+   */
+  private resolveTriggerGlyph():
+    | { template: TemplateRef<unknown> }
+    | { data: LucideIconData; size: number; dim: boolean }
+    | null {
+    const icon = this.datasource.triggerIcon;
+    if (icon === 'none') return null;
+    if (icon instanceof TemplateRef) return { template: icon };
+    if (icon != null && typeof icon !== 'string') return { data: icon, size: 18, dim: false };
+    const preset = typeof icon === 'string' ? icon : this.triggerLabelText ? 'chevron' : 'dots-vertical';
+    // The chevron is a touch smaller and dimmed, matching a select's trailing affordance.
+    return preset === 'chevron'
+      ? { data: LucideChevronDown.icon, size: 16, dim: true }
+      : { data: LucideEllipsisVertical.icon, size: 18, dim: false };
+  }
+
+  /** The trigger glyph when it is a caller's template, else null. Split from
+   *  {@link triggerIconData} so the template narrows without a discriminated union. */
+  get triggerIconTemplate(): TemplateRef<unknown> | null {
+    const glyph = this.resolveTriggerGlyph();
+    return glyph && 'template' in glyph ? glyph.template : null;
+  }
+
+  /** The trigger glyph when it is lucide data (a preset or caller data), with its render
+   *  size and dim flag, else null. */
+  get triggerIconData(): { data: LucideIconData; size: number; dim: boolean } | null {
+    const glyph = this.resolveTriggerGlyph();
+    return glyph && 'data' in glyph ? glyph : null;
   }
 
   /** Heading shown above the menu/sheet, or null when none is configured. */
   get menuLabel(): string | null {
-    const translated = this.props.menuLabelKey ? this.lang.translateIfPresent(this.props.menuLabelKey) : undefined;
-    return translated ?? this.props.menuLabel ?? this.uiConfig.menuLabel ?? null;
+    const translated = this.datasource.menuLabelKey ? this.lang.translateIfPresent(this.datasource.menuLabelKey) : undefined;
+    return translated ?? this.datasource.menuLabel ?? this.uiConfig.menuLabel ?? null;
   }
 
   /** Accessible label for the sheet's close button. */
@@ -523,25 +582,49 @@ export class MnDropdown implements OnInit {
 
   /** Placeholder shown in the search input, preferring a resolved translation key. */
   get searchPlaceholder(): string {
-    const translated = this.props.searchPlaceholderKey ? this.lang.translateIfPresent(this.props.searchPlaceholderKey) : undefined;
-    return translated ?? this.props.searchPlaceholder ?? this.uiConfig.searchPlaceholder ?? 'Search...';
+    const translated = this.datasource.searchPlaceholderKey ? this.lang.translateIfPresent(this.datasource.searchPlaceholderKey) : undefined;
+    return translated ?? this.datasource.searchPlaceholder ?? this.uiConfig.searchPlaceholder ?? 'Search...';
   }
 
   /** Text shown in place of the list when the filter matches no actions. */
   get searchEmptyLabel(): string {
-    const translated = this.props.searchEmptyLabelKey ? this.lang.translateIfPresent(this.props.searchEmptyLabelKey) : undefined;
-    return translated ?? this.props.searchEmptyLabel ?? this.uiConfig.searchEmptyLabel ?? 'No results';
+    const translated = this.datasource.searchEmptyLabelKey ? this.lang.translateIfPresent(this.datasource.searchEmptyLabelKey) : undefined;
+    return translated ?? this.datasource.searchEmptyLabel ?? this.uiConfig.searchEmptyLabel ?? 'No results';
+  }
+
+  /** The ghost look the trigger has always used; a bare or partial `triggerButton` merges
+   *  over this, so opting in without overriding anything keeps the current appearance. */
+  private static readonly DEFAULT_TRIGGER_BUTTON: Partial<MnButtonTypes> = {
+    size: 'sm',
+    variant: 'text',
+    color: 'gray',
+  };
+
+  /** mn-button config for the trigger: the ghost default, overlaid with any
+   *  {@link MnDropdownProps.triggerButton} the caller supplied. */
+  get triggerData(): Partial<MnButtonTypes> {
+    return { ...MnDropdown.DEFAULT_TRIGGER_BUTTON, ...this.datasource.triggerButton };
   }
 
   get triggerClasses(): string {
+    // Button mode: mn-button owns the entire look (fill/outline/size/radius/shape). The
+    // trigger's square-box variants would fight that — `h-7 w-7` overrides its padding,
+    // `text-base-content/80` its text colour — so keep only the label↔icon gap, which
+    // mn-button's base does not provide.
+    if (this.datasource.triggerButton) return 'gap-x-1.5';
+    // A caller's template can be any size (an avatar, a badge) and sizes the trigger itself,
+    // so skip the preset square-box — otherwise its `h-7 w-7` would clip the content, which
+    // is why custom triggers used to need a `triggerButton` just to undo it. (A lucide-data
+    // glyph is preset-sized, so it keeps the box for a consistent tap target.)
+    if (this.datasource.triggerIcon instanceof TemplateRef) return 'gap-x-1.5';
     return mnDropdownTriggerVariants({
-      size: this.props.size,
-      borderRadius: this.props.borderRadius,
+      size: this.datasource.size,
+      borderRadius: this.datasource.borderRadius,
       labeled: !!this.triggerLabelText,
     });
   }
 
   get resolvedId(): string {
-    return this.props.id;
+    return this.datasource.id ?? this.autoId;
   }
 }
