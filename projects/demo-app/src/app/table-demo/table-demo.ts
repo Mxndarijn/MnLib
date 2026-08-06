@@ -1,7 +1,14 @@
 import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ColumnSortType, MnButton, MnCollectionState, MnTable, SortState, TableDataSource} from 'mn-angular-lib';
-import {LucideCopy, LucidePencil, LucideShare2, LucideTrash2} from '@lucide/angular';
+import {
+  LucideCopy,
+  LucidePencil,
+  LucideShare2,
+  LucideShieldCheck,
+  LucideShieldOff,
+  LucideTrash2,
+} from '@lucide/angular';
 import {DemoPageComponent} from '../shared/demo-page.component';
 import {DemoExampleComponent} from '../shared/demo-example.component';
 
@@ -250,6 +257,63 @@ export class TableDemo implements OnInit {
   };
   // ── Actions table ──
   actionsDataSource!: TableDataSource<User>;
+
+  /** Own row stream for the data-icon demo, so promoting a user repaints the table. */
+  private roleRows = new BehaviorSubject<User[]>([...SAMPLE_USERS]);
+
+  /**
+   * An actions column declared entirely in TypeScript: the icons are lucide *data*
+   * (`LucidePencil.icon`) instead of `TemplateRef`s, so this component owns no
+   * `<ng-template>` stubs and no `viewChild` for them. The first action also derives its
+   * label, icon and colour from the row, which is what lets one action cover both sides
+   * of a toggle instead of two `hidden`-gated twins.
+   */
+  dataIconActionsDataSource: TableDataSource<User> = {
+    dataRows: this.roleRows,
+    getID: (row) => row.id,
+    emptyMessage: 'No users found.',
+    canSearch: false,
+    paginationMode: 'none',
+    appearance: {hover: true},
+    columns: [
+      {key: 'name', header: 'Name', cell: (row) => row.name, sortType: ColumnSortType.ALPHABETICAL},
+      {key: 'role', header: 'Role', cell: (row) => row.role},
+      {
+        key: 'actions',
+        header: 'Actions',
+        align: 'right',
+        sortType: ColumnSortType.NONE,
+        actions: [
+          {
+            label: (row) => (row.role === 'Admin' ? 'Demote' : 'Promote'),
+            icon: (row) => (row.role === 'Admin' ? LucideShieldOff.icon : LucideShieldCheck.icon),
+            color: (row) => (row.role === 'Admin' ? 'warning' : 'success'),
+            run: (row) => this.toggleRole(row),
+          },
+          {label: 'Edit', icon: LucidePencil.icon, run: (row) => this.onAction('Edit', row)},
+          {
+            label: 'Delete',
+            icon: LucideTrash2.icon,
+            danger: true,
+            run: (row) => this.onAction('Delete', row),
+          },
+        ],
+      },
+    ],
+  };
+
+  /**
+   * Flips a user between Admin and Editor, re-emitting the rows so the derived label,
+   * icon and colour of the toggle action are re-evaluated.
+   * @param user The user whose role to flip.
+   */
+  private toggleRole(user: User): void {
+    this.roleRows.next(
+      this.roleRows.value.map((row) =>
+        row.id === user.id ? {...row, role: row.role === 'Admin' ? 'Editor' : 'Admin'} : row,
+      ),
+    );
+  }
   // ── Server-side pagination state ──
   private paginatedPage = 1;
   private paginatedSize = 5;

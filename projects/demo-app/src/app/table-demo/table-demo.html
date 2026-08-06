@@ -74,6 +74,17 @@
     <mn-table [dataSource]="actionsDataSource"></mn-table>
   </app-demo-example>
 
+  <app-demo-example title="Actions Without Templates (Data Icons + Per-Row Presentation)">
+    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">The same actions column declared entirely in
+      TypeScript: <code>icon</code> takes lucide icon <em>data</em> (<code>LucidePencil.icon</code>) as well as a
+      <code>TemplateRef</code>, so the host needs no <code>&lt;ng-template&gt;</code> stub or <code>viewChild</code> per
+      glyph — which is what makes shared action factories practical. <code>label</code>, <code>labelKey</code>,
+      <code>icon</code> and <code>color</code> also accept a <code>(row) =&gt; …</code> accessor: the first action is a
+      single Promote/Demote toggle that swaps all three from the row, rather than two <code>hidden</code>-gated twins.
+      Click it to watch the label, icon and colour flip.</p>
+    <mn-table [dataSource]="dataIconActionsDataSource"></mn-table>
+  </app-demo-example>
+
   <app-demo-example title="Multi-Select Table">
     <mn-table [dataSource]="selectionDataSource" (selectionChange)="onSelectionChange($event)"></mn-table>
     <p style="margin-top: 8px; font-size: 14px; color: #666;">Selected: {{ selectedNames }}</p>
