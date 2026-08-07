@@ -48,6 +48,12 @@ export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('M
   standalone: true,
   imports: [CommonModule, NgClass, MnErrorMessage, FormsModule],
   templateUrl: './mn-input-field.html',
+  // The native `type="search"` clear affordance (the ✕) is a shadow pseudo-element, so it
+  // can't take a Tailwind class — give it a pointer cursor here. Only search inputs render
+  // this pseudo, so it needs no type qualifier.
+  styles: [`
+    input::-webkit-search-cancel-button { cursor: pointer; }
+  `],
   host: {
     // Native inputs (notably `type="date"`) have a platform-specific intrinsic width.
     // Without an explicit host width the inline host collapses to that intrinsic size,

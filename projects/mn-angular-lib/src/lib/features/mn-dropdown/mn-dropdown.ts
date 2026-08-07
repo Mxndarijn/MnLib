@@ -126,6 +126,15 @@ export class MnDropdown implements OnInit {
   panelFloorPx: number | null = null;
 
   /**
+   * The anchored popover's opened width, locked for the same reason as {@link panelFloorPx}:
+   * the panel is content-sized between its `min-w`/`max-w` bounds, so a filtered list that
+   * drops the widest item would otherwise shrink the popover mid-type. Captured on the same
+   * next-frame pass as the height, so applying it is jump-free. Null while closed or when the
+   * menu is not searchable, leaving the plain content-width popover untouched.
+   */
+  panelWidthPx: number | null = null;
+
+  /**
    * The mobile sheet's opened height, applied as a `min-height` floor for the same reason
    * as {@link panelFloorPx} — mirroring mn-multi-select's sheet floor. Null while anchored,
    * closed, or non-searchable.
@@ -162,6 +171,7 @@ export class MnDropdown implements OnInit {
       this.capturePanelFloor(el);
     } else if (!el) {
       this.panelFloorPx = null;
+      this.panelWidthPx = null;
     }
   }
 
@@ -258,6 +268,7 @@ export class MnDropdown implements OnInit {
     this.isOpen = false;
     this.searchTerm = '';
     this.panelFloorPx = null;
+    this.panelWidthPx = null;
     this.sheetFloorPx = null;
     this.stopWatchingTrigger();
     this.unlockBodyScroll();
@@ -418,21 +429,24 @@ export class MnDropdown implements OnInit {
   // ── Height floors (searchable only) ──
 
   /**
-   * Records the anchored popover's opened height and locks it via {@link panelFloorPx}.
-   * Measured on the next frame so the read reflects the fully-rendered, unfiltered list
-   * (the search box is empty on open) and never forces a reflow mid change-detection. The
-   * value equals the current height, so applying it is jump-free — it only stops a later,
-   * shorter filtered list from shrinking the panel.
+   * Records the anchored popover's opened height and width, locking them via
+   * {@link panelFloorPx} / {@link panelWidthPx}. Measured on the next frame so the read
+   * reflects the fully-rendered, unfiltered list (the search box is empty on open) and never
+   * forces a reflow mid change-detection. Both values equal the current dimensions, so
+   * applying them is jump-free — they only stop a later, shorter/narrower filtered list from
+   * shrinking the panel.
    */
   private capturePanelFloor(panelEl: HTMLElement): void {
     if (typeof requestAnimationFrame !== 'function') {
       this.panelFloorPx = panelEl.offsetHeight;
+      this.panelWidthPx = panelEl.offsetWidth;
       return;
     }
     requestAnimationFrame(() => {
       // The panel may have closed (or the query cleared) before the frame ran.
       if (!this.isOpen || this.movedPanel !== panelEl) return;
       this.panelFloorPx = panelEl.offsetHeight;
+      this.panelWidthPx = panelEl.offsetWidth;
       this.cdr.markForCheck();
     });
   }
@@ -496,7 +510,7 @@ export class MnDropdown implements OnInit {
 
   /** Whether a list entry is a {@link MnDropdownSeparator} rather than a command. */
   isSeparator(item: MnDropdownItem): item is MnDropdownSeparator {
-    return (item as MnDropdownSeparator).separator === true;
+    return (item as MnDropdownSeparator).separator;
   }
 
   /**
