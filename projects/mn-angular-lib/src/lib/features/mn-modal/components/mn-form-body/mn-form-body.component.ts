@@ -90,6 +90,9 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
   searchable?: boolean;
   searchPlaceholder?: string;
   maxSelections?: number;
+  collapseThreshold?: number;
+  collapsePlaceholder?: string;
+  allSelectedPlaceholder?: string;
   swatches?: string[];
   showValue?: boolean;
   unit?: string;

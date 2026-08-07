@@ -79,6 +79,19 @@ export type MnMultiSelectProps<TValue = unknown> = {
    */
   collapsePlaceholder?: string;
 
+  /**
+   * Summary text shown when **every** option is selected, in place of the count summary.
+   *
+   * "Everything" is a meaningful state at any option count, so setting this collapses the
+   * trigger as soon as the full set is selected regardless of `collapseThreshold` — without
+   * it, a three-option select could never say so under the default threshold of 5.
+   *
+   * Setting this enables collapsing on its own. The `{count}` token is replaced the same way
+   * it is in `collapsePlaceholder`. Ignored while the select has no options at all, where
+   * "all of them" would be a claim about nothing.
+   */
+  allSelectedPlaceholder?: string;
+
   // ========== Styling/Variants ==========
 
   /** Size variant of the multi-select (default: 'md') */

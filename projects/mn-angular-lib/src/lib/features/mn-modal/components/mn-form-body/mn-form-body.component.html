@@ -161,9 +161,13 @@
                 id: asKey(rowField.field.key),
                 label: asField(rowField.field).label,
                 options: getFieldOptions(rowField.field),
+                placeholder: asField(rowField.field).placeholder,
                 searchable: asField(rowField.field).searchable,
                 searchPlaceholder: asField(rowField.field).searchPlaceholder,
                 maxSelections: asField(rowField.field).maxSelections,
+                collapseThreshold: asField(rowField.field).collapseThreshold,
+                collapsePlaceholder: asField(rowField.field).collapsePlaceholder,
+                allSelectedPlaceholder: asField(rowField.field).allSelectedPlaceholder,
                 disabled: isFieldDisabled(rowField.field) || isFieldReadOnly(rowField.field)
               })"
             ></mn-lib-multi-select>

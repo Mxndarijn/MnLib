@@ -494,12 +494,24 @@ export class MnMultiSelect implements OnInit {
   // ========== Collapse Summary ==========
 
   /**
-   * Whether the collapse-to-summary feature is opted into. Active when either
-   * `collapsePlaceholder` or `collapseThreshold` is supplied; existing usages
-   * with neither prop are unaffected.
+   * Whether the collapse-to-summary feature is opted into. Active when any of
+   * `collapsePlaceholder`, `collapseThreshold` or `allSelectedPlaceholder` is
+   * supplied; existing usages with none of them are unaffected.
    */
   get collapseEnabled(): boolean {
-    return this.props.collapsePlaceholder !== undefined || this.props.collapseThreshold !== undefined;
+    return (
+      this.props.collapsePlaceholder !== undefined ||
+      this.props.collapseThreshold !== undefined ||
+      this.props.allSelectedPlaceholder !== undefined
+    );
+  }
+
+  /**
+   * Whether every available option is currently selected. False for an empty select, where
+   * "all of them" would be a claim about nothing.
+   */
+  get allSelected(): boolean {
+    return this.props.options.length > 0 && this.selectedOptions.length === this.props.options.length;
   }
 
   /**
@@ -511,21 +523,26 @@ export class MnMultiSelect implements OnInit {
   }
 
   /**
-   * Whether the trigger should currently render the count summary instead of the
-   * individual chips: only when collapsing is enabled and the number of selected
-   * options exceeds the effective threshold.
+   * Whether the trigger should currently render a summary instead of the individual
+   * chips: when the number of selected options exceeds the effective threshold, or
+   * when every option is selected and a summary for that case was supplied.
    */
   get isCollapsed(): boolean {
-    return this.collapseEnabled && this.selectedOptions.length > this.effectiveCollapseThreshold;
+    if (!this.collapseEnabled) return false;
+    // "Everything is selected" is worth saying at any count, so it collapses on its own rather
+    // than waiting for the threshold a small option list would never reach.
+    if (this.allSelected && this.props.allSelectedPlaceholder !== undefined) return true;
+    return this.selectedOptions.length > this.effectiveCollapseThreshold;
   }
 
   /**
    * The summary text shown while collapsed, with the `{count}` token replaced by
-   * the number of selected options. Falls back to `"{count} selected"` when no
-   * `collapsePlaceholder` is provided.
+   * the number of selected options. `allSelectedPlaceholder` wins while everything
+   * is selected, then `collapsePlaceholder`, then `"{count} selected"`.
    */
   get collapseSummaryText(): string {
-    const template = this.props.collapsePlaceholder ?? '{count} selected';
+    const allSelectedTemplate = this.allSelected ? this.props.allSelectedPlaceholder : undefined;
+    const template = allSelectedTemplate ?? this.props.collapsePlaceholder ?? '{count} selected';
     return template.replace(/\{count}/g, String(this.selectedOptions.length));
   }
 

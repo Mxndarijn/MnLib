@@ -371,6 +371,71 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     expect(component.isCollapsed).toBeTrue();
     expect(component.collapseSummaryText).toBe('4 chosen');
   });
+
+  it('says everything is selected as soon as it is, whatever the threshold', () => {
+    // The whole point of the prop: a short option list never reaches a threshold, so without
+    // this a fully-selected three-option field could only ever render three chips to count.
+    build({allSelectedPlaceholder: 'All selected', collapseThreshold: 99});
+    component.writeValue([1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+
+    expect(component.allSelected).toBeTrue();
+    expect(component.isCollapsed).toBeTrue();
+    expect(component.collapseSummaryText).toBe('All selected');
+    expect(triggerText()).toContain('All selected');
+  });
+
+  it('enables collapsing on its own, with no other collapse prop set', () => {
+    build({allSelectedPlaceholder: 'All selected'});
+
+    expect(component.collapseEnabled).toBeTrue();
+  });
+
+  it('goes back to chips the moment one option is deselected', () => {
+    build({allSelectedPlaceholder: 'All selected'});
+    component.writeValue([1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+    expect(component.isCollapsed).toBeTrue();
+
+    component.writeValue([1, 2, 3, 4, 5]);
+    fixture.detectChanges();
+
+    // Five of six is under the default threshold, so the summary must not linger.
+    expect(component.allSelected).toBeFalse();
+    expect(component.isCollapsed).toBeFalse();
+  });
+
+  it('prefers the all-selected summary over the count one', () => {
+    build({allSelectedPlaceholder: 'All selected', collapsePlaceholder: '{count} selected'});
+    component.writeValue([1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+    expect(component.collapseSummaryText).toBe('All selected');
+
+    // ...and hands back to the count summary below the full set.
+    component.writeValue([1, 2, 3, 4, 5, 6].slice(0, 6));
+    component.writeValue([1, 2, 3, 4, 5]);
+    fixture.detectChanges();
+    expect(component.collapseSummaryText).toBe('5 selected');
+  });
+
+  it('substitutes {count} in the all-selected summary too', () => {
+    build({allSelectedPlaceholder: 'All {count} selected'});
+    component.writeValue([1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+
+    expect(component.collapseSummaryText).toBe('All 6 selected');
+  });
+
+  it('never claims everything is selected when there is nothing to select', () => {
+    // "All of them" is a claim about nothing on an empty select, and an empty selection of
+    // zero options would otherwise satisfy a naive length comparison.
+    build({allSelectedPlaceholder: 'All selected', options: []});
+    component.writeValue([]);
+    fixture.detectChanges();
+
+    expect(component.allSelected).toBeFalse();
+    expect(component.isCollapsed).toBeFalse();
+  });
 });
 
 /**

@@ -455,9 +455,20 @@ export type MultiSelectFieldConfig<TModel = unknown, TValue = unknown> = {
   options: SelectOption<TValue>[];
   validators?: ValidatorFn[];
   asyncValidators?: AsyncValidatorFn[];
+  /** Placeholder shown in the trigger while nothing is selected. */
+  placeholder?: string;
   searchable?: boolean;
   searchPlaceholder?: string;
   maxSelections?: number;
+  /**
+   * Forwarded to the underlying multi-select: once more than this many options are selected the
+   * trigger collapses to a summary instead of rendering every chip.
+   */
+  collapseThreshold?: number;
+  /** Forwarded summary text for the collapsed trigger; `{count}` is interpolated. */
+  collapsePlaceholder?: string;
+  /** Forwarded summary text shown when every option is selected. */
+  allSelectedPlaceholder?: string;
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;
