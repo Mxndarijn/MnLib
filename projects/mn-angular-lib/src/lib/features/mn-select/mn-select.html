@@ -11,7 +11,7 @@
   <select
     (blur)="handleBlur()"
     (change)="onSelectChange($event)"
-    [attr.aria-describedby]="showError ? resolvedId + '-errqor' : null"
+    [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
     [attr.aria-invalid]="showError || null"
     [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || props.label || null"
     [disabled]="isDisabled"
