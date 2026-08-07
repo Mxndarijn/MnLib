@@ -18,7 +18,7 @@
     [id]="resolvedId"
     [name]="resolvedName"
     [ngClass]="selectClasses"
-  >
+  >q
     @if (props.placeholder || uiConfig.placeholder) {
       <option [selected]="selectedValue === null" [value]="''" disabled>
         {{ uiConfig.placeholder || props.placeholder }}
