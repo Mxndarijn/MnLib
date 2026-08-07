@@ -11,7 +11,7 @@
     [attr.aria-haspopup]="'menu'"
     [attr.aria-expanded]="isOpen"
     [attr.aria-controls]="isOpen ? resolvedId + '-menu' : null"
-    (click)="$event.stopPropagation(); toggle()"
+    (click)="toggle()"
   >
     @if (triggerLabelText) {
       <span class="truncate">{{ triggerLabelText }}</span>
