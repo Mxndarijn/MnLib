@@ -1,6 +1,6 @@
 // projects/mn-angular-lib/src/lib/mn-mn-alert/mn-mn-alert.tokens.ts
-import { InjectionToken } from '@angular/core';
-import { MnAlert } from './mn-alert.types';
+import {InjectionToken} from '@angular/core';
+import {MnAlert} from './mn-alert.types';
 
 export type MnAlertKind = 'success' | 'info' | 'warning' | 'error' | 'default';
 
@@ -9,6 +9,11 @@ export type MnAlertConfig = {
   cssClasses?: Partial<Record<MnAlertKind, string>>;
   icons?: Partial<Record<MnAlertKind, unknown>>;
   fallbackDuration?: number | null;
+  /**
+   * How many alerts may be on screen at once. Showing one past this cap drops the oldest
+   * alert still visible, so a burst of alerts never grows into an unreadable stack.
+   */
+  maxVisible?: number;
   finalize?: (a: MnAlert) => MnAlert;
 }
 
@@ -25,5 +30,6 @@ export const DEFAULT_MN_ALERT_CONFIG: Required<MnAlertConfig> = {
   },
   icons: {},
   fallbackDuration: 4000,
+  maxVisible: 3,
   finalize: (a) => a
 };

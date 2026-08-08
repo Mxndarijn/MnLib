@@ -1,0 +1,75 @@
+<!-- The key block. Rendered directly for `inline`, or projected into the sheet below. -->
+<ng-template #keys>
+  <div [attr.aria-label]="labels.keyboard || null" class="mn-keyboard-keys flex flex-col gap-2 p-3" role="group">
+    @for (row of rows; track $index) {
+      <div class="flex justify-center gap-2">
+        @for (key of row; track key) {
+          <button
+            (click)="press(key)"
+            class="mn-keyboard-key flex-1 rounded-lg bg-base-200 py-4 text-xl font-semibold text-base-content transition-colors hover:bg-base-300 active:bg-base-300"
+            type="button"
+          >
+            {{ key }}
+          </button>
+        }
+      </div>
+    }
+
+    <div class="flex justify-center gap-2">
+      <button
+        (click)="backspace()"
+        [attr.aria-label]="labels.backspace"
+        class="mn-keyboard-key mn-keyboard-key-action flex-1 rounded-lg bg-base-200 py-4 text-base font-medium text-base-content transition-colors hover:bg-base-300"
+        type="button"
+      >
+        {{ labels.backspace }}
+      </button>
+
+      @if (spaceVisible) {
+        <button
+          (click)="pressSpace()"
+          [attr.aria-label]="labels.space"
+          class="mn-keyboard-key mn-keyboard-key-space flex-1 rounded-lg bg-base-200 py-4 text-base font-medium text-base-content transition-colors hover:bg-base-300"
+          style="flex-grow: 3"
+          type="button"
+        >
+          {{ labels.space }}
+        </button>
+      }
+
+      <button
+        (click)="clear()"
+        [attr.aria-label]="labels.clear"
+        class="mn-keyboard-key mn-keyboard-key-action flex-1 rounded-lg bg-base-200 py-4 text-base font-medium text-base-content transition-colors hover:bg-base-300"
+        type="button"
+      >
+        {{ labels.clear }}
+      </button>
+
+      @if (showSubmit) {
+        <button
+          (click)="submit()"
+          [attr.aria-label]="labels.submit"
+          [disabled]="submitDisabled"
+          class="mn-keyboard-key mn-keyboard-key-submit flex-1 rounded-lg bg-primary py-4 text-base font-semibold text-primary-content transition-colors hover:opacity-90 disabled:opacity-50"
+          style="flex-grow: 2"
+          type="button"
+        >
+          {{ labels.submit }}
+        </button>
+      }
+    </div>
+  </div>
+</ng-template>
+
+@if (presentation === 'sheet') {
+  <mn-bottom-sheet
+    (dismiss)="onDismiss()"
+    [ariaLabel]="labels.keyboard || undefined"
+    [maxHeightVh]="sheetMaxHeightVh"
+  >
+    <ng-container [ngTemplateOutlet]="keys"></ng-container>
+  </mn-bottom-sheet>
+} @else {
+  <ng-container [ngTemplateOutlet]="keys"></ng-container>
+}

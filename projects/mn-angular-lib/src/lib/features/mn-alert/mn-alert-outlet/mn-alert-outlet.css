@@ -51,6 +51,44 @@
   overflow: hidden;
 }
 
+/* Countdown bar: a hairline track pinned to the card's bottom edge whose fill drains over the
+   alert's lifetime, so the remaining time is visible rather than guessed. The bar runs the full
+   width and the card clips it (`overflow-hidden` on the card in the template), so its ends taper
+   along the card's rounded corners instead of cutting straight across them. The track's own
+   `overflow: hidden` is what clips the draining fill. */
+
+.mn-alert-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  overflow: hidden;
+  background-color: color-mix(in srgb, currentColor 18%, transparent);
+  pointer-events: none;
+}
+
+.mn-alert-progress-bar {
+  display: block;
+  height: 100%;
+  background-color: currentColor;
+  opacity: 0.55;
+  transform-origin: left center;
+  /* Duration is bound per alert from the component; the rest of the timing lives here. */
+  animation-name: mn-alert-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes mn-alert-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mn-alert-item {
     transition: none;

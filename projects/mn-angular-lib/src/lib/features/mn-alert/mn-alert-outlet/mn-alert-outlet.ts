@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  signal,
-  TemplateRef,
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, signal, TemplateRef,} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {MnAlertStore} from '../mn-alert.store';
@@ -143,6 +135,17 @@ export class MnAlertOutletComponent {
 
   getAlertClasses(a: MnAlert) {
     return mnAlertVariants({kind: a.kind, variant: a.variant});
+  }
+
+  /**
+   * The lifetime (ms) to run the countdown bar over, or null when no bar should show: an alert
+   * that never auto-dismisses has nothing to count down, and one already leaving would only
+   * restart the animation mid-exit.
+   */
+  countdownDuration(v: MnAlertView): number | null {
+    if (v.leaving) return null;
+    const duration = v.alert.duration;
+    return typeof duration === 'number' && duration > 0 ? duration : null;
   }
 
   contextFor(a: MnAlert) {

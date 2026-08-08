@@ -100,6 +100,7 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
   multiple?: boolean;
   displayMode?: 'dropzone' | 'thumbnail' | 'list' | 'compact';
   dropzoneHint?: string;
+  dropActiveHint?: string;
   replaceLabel?: string;
   removeLabel?: string;
   currentUrl?: string | null;

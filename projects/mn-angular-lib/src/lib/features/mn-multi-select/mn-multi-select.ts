@@ -60,8 +60,14 @@ export class MnMultiSelect implements OnInit {
   /** Layout classes for the anchored popover panel. The mobile sheet is rendered by
    *  mn-bottom-sheet instead, so it no longer needs a branch here. */
   readonly panelClasses = 'fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+  /** Layout classes for the invisible click shield rendered under the anchored panel.
+   *  One step below the panel's z-index so the panel itself stays clickable, and above
+   *  any modal/drawer chrome (which tops out well under 9998). */
+  readonly shieldClasses = 'fixed inset-0 z-9998';
   /** The anchored popover panel currently moved into `document.body`, if any. */
   private movedPanel: HTMLElement | null = null;
+  /** The click shield currently moved into `document.body`, if any. */
+  private movedShield: HTMLElement | null = null;
 
   /** Option count at which the search input auto-enables when `searchable` is unset. */
   private static readonly DEFAULT_SEARCH_THRESHOLD = 8;
@@ -117,6 +123,15 @@ export class MnMultiSelect implements OnInit {
   @ViewChild('dropdown', {static: false})
   set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
     this.movedPanel = this.portal(ref?.nativeElement ?? null, this.movedPanel);
+  }
+
+  /**
+   * The click shield sitting under the anchored panel, portalled alongside it for the same
+   * reason: `position: fixed` must resolve against the viewport, not a transformed ancestor.
+   */
+  @ViewChild('shield', {static: false})
+  set shieldRef(ref: ElementRef<HTMLElement> | undefined) {
+    this.movedShield = this.portal(ref?.nativeElement ?? null, this.movedShield);
   }
 
   /** Currently selected values */
@@ -201,6 +216,7 @@ export class MnMultiSelect implements OnInit {
       this.unlockBodyScroll();
       // Guarantee the portalled elements never outlive the component.
       this.movedPanel = this.portal(null, this.movedPanel);
+      this.movedShield = this.portal(null, this.movedShield);
       this.movedSheet = this.portal(null, this.movedSheet);
     });
   }
@@ -271,6 +287,20 @@ export class MnMultiSelect implements OnInit {
     if (this.props.searchable !== undefined) return this.props.searchable;
     const threshold = this.props.searchThreshold ?? MnMultiSelect.DEFAULT_SEARCH_THRESHOLD;
     return this.props.options.length >= threshold;
+  }
+
+  /**
+   * Dismisses the anchored panel from a shield click, and stops the event there.
+   *
+   * Swallowing it is the point: the shield spans the viewport, so the click would otherwise
+   * land on whatever the panel was floating over. Inside a modal that is the modal's own
+   * backdrop, and "close the dropdown" would double as "throw away the modal". A first click
+   * that only dismisses the overlay is also how native selects and menus behave.
+   */
+  onShieldClick(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.close();
   }
 
   @HostListener('document:click', ['$event'])

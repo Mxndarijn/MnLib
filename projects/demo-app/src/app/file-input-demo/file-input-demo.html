@@ -15,7 +15,7 @@
   <form (change)="updateSnapshot()" [formGroup]="form" style="display: flex; flex-direction: column; gap: 18px;">
     <app-demo-example
       title="Dropzone (default), single image, required"
-      hint="Default dropzone layout with a required validator and a 2 MB maxSize. Pick a non-image or oversized file to see the inline error."
+      hint="Default dropzone layout with a required validator and a 2 MB maxSize. Drag a file over it to see the release-to-drop state; pick a non-image or oversized file to see the inline error."
     >
       <div style="max-width: 480px;">
         <mn-lib-file-input
@@ -27,7 +27,7 @@
 
     <app-demo-example
       title="Thumbnail grid, multiple (max 4)"
-      hint="displayMode: 'thumbnail' with multiple: true and maxFiles: 4. Selected images render as tiles with a remove action."
+      hint="displayMode: 'thumbnail' with multiple: true and maxFiles: 4. Selected images render as tiles with a remove action. Dragging files over the grid covers it with a release-to-drop overlay."
     >
       <div style="max-width: 480px;">
         <mn-lib-file-input
@@ -39,7 +39,7 @@
 
     <app-demo-example
       title="List mode, documents"
-      hint="displayMode: 'list' with accept: '.pdf,.doc,.docx,.txt'. Non-image files show a file icon, name, and size."
+      hint="displayMode: 'list' with accept: '.pdf,.doc,.docx,.txt'. Non-image files show a file icon, name, and size, and the rows accept a drop too."
     >
       <div style="max-width: 480px;">
         <mn-lib-file-input
@@ -51,7 +51,7 @@
 
     <app-demo-example
       title="Compact inline picker"
-      hint="displayMode: 'compact' renders an inline button plus the current filename."
+      hint="displayMode: 'compact' renders an inline button plus the current filename. It is the one mode that does not accept a drop — the button is too small to aim a drag at."
     >
       <div style="max-width: 480px;">
         <mn-lib-file-input
@@ -63,7 +63,7 @@
 
     <app-demo-example
       title="Existing image via currentUrl"
-      hint="Previews an already-saved image. Removing it emits cleared and leaves the form value untouched (flag a delete on the server)."
+      hint="Previews an already-saved image, with a custom dropActiveHint. Removing it emits cleared and leaves the form value untouched (flag a delete on the server)."
     >
       <div style="max-width: 480px;">
         <mn-lib-file-input

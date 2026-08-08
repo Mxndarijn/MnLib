@@ -12,6 +12,14 @@ function changeEvent(files: File[]): Event {
   return {target: {files, value: ''}} as unknown as Event;
 }
 
+/** Builds a fake drag/drop event carrying the given files (or a non-file payload). */
+function dragEvent(files: File[], types: string[] = ['Files']): DragEvent {
+  return {
+    preventDefault: () => undefined,
+    dataTransfer: {files, types, dropEffect: 'none'},
+  } as unknown as DragEvent;
+}
+
 describe('MnFileInput', () => {
   let fixture: ComponentFixture<MnFileInput>;
   let component: MnFileInput;
@@ -40,6 +48,11 @@ describe('MnFileInput', () => {
   /** Reads the component's transient selection error (protected signal). */
   function internalError(): string | null {
     return (component as unknown as { internalError: () => string | null }).internalError();
+  }
+
+  /** Reads the component's "release to drop" state (protected signal). */
+  function isDragging(): boolean {
+    return (component as unknown as { isDragging: () => boolean }).isDragging();
   }
 
   it('emits a single File and marks touched in single mode', () => {
@@ -126,6 +139,91 @@ describe('MnFileInput', () => {
     init({id: 'f'});
     component.onFileSelected(changeEvent([mockFile('a.pdf', 10, 'application/pdf')]));
     expect(component.displayItems()[0].isImage).toBeFalse();
+  });
+
+  it('arms the release-to-drop state on drag enter and disarms it on leave', () => {
+    init({id: 'f'});
+    component.onDragEnter(dragEvent([]));
+    expect(isDragging()).toBeTrue();
+
+    component.onDragLeave(dragEvent([]));
+    expect(isDragging()).toBeFalse();
+  });
+
+  it('stays armed while the drag crosses child elements of the dropzone', () => {
+    init({id: 'f'});
+    component.onDragEnter(dragEvent([]));
+    component.onDragEnter(dragEvent([]));
+    component.onDragLeave(dragEvent([]));
+
+    expect(isDragging()).toBeTrue();
+  });
+
+  it('marks the drop effect as a copy so the browser fires a drop', () => {
+    init({id: 'f'});
+    const event = dragEvent([]);
+    component.onDragOver(event);
+
+    expect(event.dataTransfer!.dropEffect).toBe('copy');
+    expect(isDragging()).toBeTrue();
+  });
+
+  it('accepts dropped files and disarms the release-to-drop state', () => {
+    init({id: 'f', multiple: true});
+    component.onDragEnter(dragEvent([]));
+    component.onDrop(dragEvent([mockFile('a.pdf', 10), mockFile('b.pdf', 10)]));
+
+    expect((lastValue as File[]).map((f) => f.name)).toEqual(['a.pdf', 'b.pdf']);
+    expect(isDragging()).toBeFalse();
+  });
+
+  it('validates dropped files against accept, like the picker does', () => {
+    init({id: 'f', accept: 'image/*'});
+    component.onDrop(dragEvent([mockFile('a.pdf', 10, 'application/pdf')]));
+
+    expect(lastValue).toBeNull();
+    expect(internalError()).not.toBeNull();
+  });
+
+  it('ignores drags that carry something other than files', () => {
+    init({id: 'f'});
+    component.onDragEnter(dragEvent([], ['text/plain']));
+    expect(isDragging()).toBeFalse();
+
+    component.onDrop(dragEvent([mockFile('a.pdf', 10)], ['text/plain']));
+    expect(lastValue).toBeUndefined();
+  });
+
+  it('accepts drops in thumbnail and list mode too', () => {
+    for (const displayMode of ['thumbnail', 'list'] as const) {
+      init({id: 'f', displayMode, multiple: true});
+      component.writeValue(null);
+      component.onDragEnter(dragEvent([]));
+      expect(isDragging())
+        .withContext(`${displayMode} should arm the release-to-drop state`)
+        .toBeTrue();
+
+      component.onDrop(dragEvent([mockFile('a.pdf', 10)]));
+      expect((lastValue as File[]).map((f) => f.name)).toEqual(['a.pdf']);
+    }
+  });
+
+  it('ignores drags in compact mode, which has no drop target', () => {
+    init({id: 'f', displayMode: 'compact'});
+    component.onDragEnter(dragEvent([]));
+    expect(isDragging()).toBeFalse();
+
+    component.onDrop(dragEvent([mockFile('a.pdf', 10)]));
+    expect(lastValue).toBeUndefined();
+  });
+
+  it('ignores drops on a disabled control', () => {
+    init({id: 'f', disabled: true});
+    component.onDragEnter(dragEvent([]));
+    expect(isDragging()).toBeFalse();
+
+    component.onDrop(dragEvent([mockFile('a.pdf', 10)]));
+    expect(lastValue).toBeUndefined();
   });
 
   it('writeValue accepts a File (single) and an array (multiple)', () => {

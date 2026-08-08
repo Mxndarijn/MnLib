@@ -1,7 +1,7 @@
 <app-demo-page
   title="Alerts"
   tag="mn-alert-outlet"
-  lead="Toast-style alerts raised through MnAlertService, with configurable kinds, durations and style variants."
+  lead="Toast-style alerts raised through MnAlertService, with configurable kinds, durations and style variants. A bar along the bottom edge drains over the alert's lifetime, and only the newest few stay on screen (maxVisible, default 3)."
 >
   <div class="controls mb-6" demo-actions>
     <div class="flex flex-wrap gap-2 items-center">
@@ -12,6 +12,7 @@
       <div class="h-6 w-px bg-gray-200 mx-1"></div>
       <button mnButton [data]="{ variant: 'text', color: 'secondary' }" (click)="showCustomDuration()">Custom Duration</button>
       <button mnButton [data]="{ variant: 'text', color: 'secondary' }" (click)="showCustomClass()">Custom CSS Class</button>
+      <button (click)="showBurst()" [data]="{ variant: 'text', color: 'secondary' }" mnButton>Burst of 5</button>
       <button mnButton [data]="{ variant: 'fill', color: 'danger' }" class="ml-auto" (click)="clearAll()">Clear All</button>
     </div>
   </div>

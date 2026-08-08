@@ -1,0 +1,14 @@
+/* The keys are sized by Tailwind utilities in the template; this file exists for
+   the touch affordances that have no utility equivalent. */
+:host {
+  display: block;
+}
+
+/* A kiosk key is hit with a fingertip, often repeatedly and fast. Suppressing the
+   long-press selection and the tap highlight keeps a rapid entry from selecting
+   the caption text or flashing a native overlay on every press. */
+.mn-keyboard-key {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}

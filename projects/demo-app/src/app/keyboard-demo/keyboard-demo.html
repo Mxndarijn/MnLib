@@ -1,0 +1,86 @@
+<app-demo-page
+  lead="An on-screen keyboard for devices with no keyboard of their own. One component with a layout switch, so the same field can take a membership number or a name. It never owns the text — it reports what the value should become, which is what lets a barcode scanner write the same field without a fight."
+  tag="mn-keyboard"
+  title="Keyboard"
+>
+  <p demo-actions style="font-size: 12px; opacity: 0.55; max-width: 40ch; text-align: right;">
+    Last submitted: <strong>{{ lastSubmitted() }}</strong>
+  </p>
+
+  <!-- Example 1: the alphanumeric layout -->
+  <app-demo-example
+    hint="Digit row above QWERTY — the layout for one field that accepts either a membership number or a name. The value lives in the host's signal and is fed back in, so a scanner can fill the same field."
+    title="Alphanumeric"
+  >
+    <p style="font-family: monospace; min-height: 1.5em;">{{ mixedValue() || ' ' }}</p>
+    <mn-keyboard
+      (submitted)="onSubmitted($event)"
+      (valueChange)="mixedValue.set($event)"
+      [labels]="labels"
+      [maxLength]="32"
+      [submitDisabled]="mixedValue().length === 0"
+      [value]="mixedValue()"
+      layout="alphanumeric"
+    ></mn-keyboard>
+  </app-demo-example>
+
+  <!-- Example 2: the numeric layout -->
+  <app-demo-example
+    hint="A phone-style pad for digits only. The space key is suppressed automatically — a number can never contain one."
+    title="Numeric"
+  >
+    <p style="font-family: monospace; min-height: 1.5em;">{{ numericValue() || ' ' }}</p>
+    <mn-keyboard
+      (submitted)="onSubmitted($event)"
+      (valueChange)="numericValue.set($event)"
+      [labels]="labels"
+      [maxLength]="12"
+      [submitDisabled]="numericValue().length === 0"
+      [value]="numericValue()"
+      layout="numeric"
+    ></mn-keyboard>
+  </app-demo-example>
+
+  <!-- Example 3: letters only, upper-case -->
+  <app-demo-example
+    hint="Letters without the digit row, rendered and typed upper-case. What is displayed is what gets typed."
+    title="Alpha, upper-case"
+  >
+    <p style="font-family: monospace; min-height: 1.5em;">{{ alphaValue() || ' ' }}</p>
+    <mn-keyboard
+      (submitted)="onSubmitted($event)"
+      (valueChange)="alphaValue.set($event)"
+      [labels]="labels"
+      [showSubmit]="false"
+      [uppercase]="true"
+      [value]="alphaValue()"
+      layout="alpha"
+    ></mn-keyboard>
+  </app-demo-example>
+
+  <!-- Example 4: presented as a bottom sheet -->
+  <app-demo-example
+    hint="presentation=&quot;sheet&quot; mounts the keys in an MnBottomSheet, so they rise from the bottom over the page and can be swiped away instead of permanently occupying half the screen. Mount and unmount it the way you would any sheet."
+    title="As a bottom sheet"
+  >
+    <p style="font-family: monospace; min-height: 1.5em;">{{ sheetValue() || ' ' }}</p>
+
+    <button (click)="sheetOpen.set(true)" [data]="{ variant: 'fill', color: 'primary', size: 'sm' }" mnButton
+            type="button">
+      Open keyboard
+    </button>
+
+    @if (sheetOpen()) {
+      <mn-keyboard
+        (dismissed)="sheetOpen.set(false)"
+        (submitted)="onSheetSubmitted($event)"
+        (valueChange)="sheetValue.set($event)"
+        [labels]="labels"
+        [submitDisabled]="sheetValue().length === 0"
+        [value]="sheetValue()"
+        layout="alphanumeric"
+        presentation="sheet"
+      ></mn-keyboard>
+    }
+  </app-demo-example>
+</app-demo-page>

@@ -1,4 +1,15 @@
-<div [class.w-full]="props.fullWidth !== false && displayMode !== 'compact'" class="flex flex-col">
+<!--
+  Drag handling sits on the wrapper so a drop anywhere inside the control counts.
+  onDragEnter/onDragLeave balance out as the drag crosses children, and
+  acceptsDrag() ignores the modes that have no drop target.
+-->
+<div
+  (dragenter)="onDragEnter($event)"
+  (dragleave)="onDragLeave($event)"
+  (dragover)="onDragOver($event)"
+  (drop)="onDrop($event)"
+  [class.w-full]="props.fullWidth !== false && displayMode !== 'compact'"
+  class="flex flex-col">
   <!-- Label -->
   @if (uiConfig.label) {
     <label [attr.for]="resolvedId" class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!">
@@ -58,6 +69,7 @@
 
     <!-- List: compact rows of file icon + name + size -->
     @case ('list') {
+    <div class="relative flex flex-col">
       <button
         (click)="fileInput.click()"
         [disabled]="isDisabled"
@@ -87,11 +99,15 @@
           }
         </div>
       }
+      @if (isDragging()) {
+        <ng-container [ngTemplateOutlet]="dropOverlay"></ng-container>
+      }
+    </div>
     }
 
     <!-- Thumbnail: grid of tiles with overlay remove + add tile -->
     @case ('thumbnail') {
-      <div class="flex flex-wrap gap-3">
+    <div class="relative flex flex-wrap gap-3">
         @for (item of displayItems(); track itemKey(item)) {
           <div class="relative h-24 w-24 overflow-hidden rounded-xl border border-base-300 bg-base-100">
             @if (item.isImage && item.previewUrl) {
@@ -120,6 +136,9 @@
             <svg lucideImagePlus [size]="22"></svg>
           </button>
         }
+      @if (isDragging()) {
+        <ng-container [ngTemplateOutlet]="dropOverlay"></ng-container>
+      }
       </div>
     }
 
@@ -130,8 +149,16 @@
         [disabled]="isDisabled"
         [ngClass]="controlClasses"
         type="button">
-        <svg lucideImagePlus [size]="28" class="text-base-content/40"></svg>
-        <span class="text-sm text-base-content/60">{{ uiConfig.dropzoneHint }}</span>
+        <!-- Inert so a drag crossing the icon/hint never reads as leaving the zone -->
+        <span aria-live="polite" class="pointer-events-none flex flex-col items-center gap-2">
+          @if (isDragging()) {
+            <svg [size]="28" class="animate-bounce text-primary" lucideUpload></svg>
+            <span class="text-sm font-medium text-primary">{{ uiConfig.dropActiveHint }}</span>
+          } @else {
+            <svg [size]="28" class="text-base-content/40" lucideImagePlus></svg>
+            <span class="text-sm text-base-content/60">{{ uiConfig.dropzoneHint }}</span>
+          }
+        </span>
       </button>
       @if (displayItems().length > 0) {
         <div class="mt-2 flex flex-col gap-2">
@@ -149,7 +176,7 @@
               <button
                 (click)="item.existing ? removeExisting(item.index) : removeFile(item.index)"
                 [attr.aria-label]="uiConfig.removeLabel"
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full cursor-pointer transition-colors hover:bg-base-200 text-base-content/60 hover:text-error"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-full cursor-pointer transition-colors text-error hover:bg-error/10"
                 type="button">
                 <svg lucideTrash2 [size]="16"></svg>
               </button>
@@ -178,3 +205,17 @@
     }
   }
 </div>
+
+<!--
+  "Release to drop" cover for the modes that render their own layout instead of a
+  dropzone. Absolutely positioned so arming it never shifts the layout, and inert
+  so the drag keeps reaching the elements underneath.
+-->
+<ng-template #dropOverlay>
+  <div
+    aria-live="polite"
+    class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary bg-base-100/90 text-center">
+    <svg [size]="24" class="animate-bounce text-primary" lucideUpload></svg>
+    <span class="px-2 text-sm font-medium text-primary">{{ uiConfig.dropActiveHint }}</span>
+  </div>
+</ng-template>

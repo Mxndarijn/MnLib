@@ -40,6 +40,10 @@ export type MnFileDisplayItem = {
  * (and a file icon + name for non-images), supports single or multiple selection,
  * several display layouts, and client-side `accept` / `maxSize` / `maxFiles` limits.
  *
+ * Every display mode but `compact` is also a real drop target: dragging files
+ * over it switches the area to a highlighted "release to drop" state, and
+ * dropping runs the files through the same validation as the file picker.
+ *
  * The form control value is the plain selection: `File | null` (single) or
  * `File[]` (multiple). An optional `currentUrl`/`currentUrls` renders an
  * already-saved image; removing it leaves the value untouched and emits `cleared`.
@@ -71,6 +75,8 @@ export class MnFileInput implements OnInit {
   protected uiConfig: MnFileInputUIConfig = {};
   /** Currently selected files (always an array internally). */
   protected readonly files = signal<File[]>([]);
+  /** True while files are dragged over the dropzone ("release to drop" state). */
+  protected readonly isDragging = signal(false);
   /** Transient message for a rejected selection (accept/maxSize/maxFiles). */
   protected readonly internalError = signal<string | null>(null);
   private readonly configService = inject(MnConfigService);
@@ -115,6 +121,11 @@ export class MnFileInput implements OnInit {
   /** Disabled state pushed by the forms API. */
   private formDisabled = false;
   /**
+   * Nesting depth of the current drag, so that moving across child elements of
+   * the dropzone does not flicker {@link isDragging} off and on again.
+   */
+  private dragDepth = 0;
+  /**
    * Built-in default error messages in English.
    * Used when `useBuiltInErrorMessages` is true (default); overridable per-field.
    */
@@ -133,6 +144,14 @@ export class MnFileInput implements OnInit {
   /** The effective display mode. */
   get displayMode(): MnFileInputDisplayMode {
     return this.props.displayMode ?? 'dropzone';
+  }
+
+  /**
+   * Whether the current display mode acts as a drop target. `compact` is an
+   * inline button sized for a form row, too small to aim a drag at.
+   */
+  get supportsDrop(): boolean {
+    return this.displayMode !== 'compact';
   }
 
   /** Whether the control is disabled (via props or the forms API). */
@@ -165,6 +184,7 @@ export class MnFileInput implements OnInit {
       shadow: this.props.shadow,
       fullWidth: this.props.fullWidth ?? (this.displayMode !== 'compact'),
       dropzone: this.displayMode === 'dropzone',
+      dragging: this.isDragging(),
       disabled: this.isDisabled,
     });
   }
@@ -255,6 +275,54 @@ export class MnFileInput implements OnInit {
   }
 
   /**
+   * Arms the "release to drop" state when a file drag enters the dropzone.
+   * @param event The native dragenter event.
+   */
+  onDragEnter(event: DragEvent): void {
+    if (!this.acceptsDrag(event)) return;
+    event.preventDefault();
+    this.dragDepth++;
+    this.isDragging.set(true);
+  }
+
+  /**
+   * Keeps the drop target alive; without a prevented dragover the browser never
+   * fires a drop event.
+   * @param event The native dragover event.
+   */
+  onDragOver(event: DragEvent): void {
+    if (!this.acceptsDrag(event)) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    this.isDragging.set(true);
+  }
+
+  /**
+   * Disarms the "release to drop" state once the drag has left the dropzone
+   * entirely (and not merely crossed into one of its children).
+   * @param event The native dragleave event.
+   */
+  onDragLeave(event: DragEvent): void {
+    if (!this.isDragging()) return;
+    event.preventDefault();
+    this.dragDepth = Math.max(0, this.dragDepth - 1);
+    if (this.dragDepth === 0) this.isDragging.set(false);
+  }
+
+  /**
+   * Accepts the dropped files through the same validation as the file picker.
+   * @param event The native drop event.
+   */
+  onDrop(event: DragEvent): void {
+    if (!this.acceptsDrag(event)) return;
+    event.preventDefault();
+    this.resetDrag();
+    const dropped = Array.from(event.dataTransfer?.files ?? []);
+    if (dropped.length === 0) return;
+    this.addFiles(dropped);
+  }
+
+  /**
    * Removes a newly-selected file by index.
    * @param index Index into the current selection.
    */
@@ -317,6 +385,7 @@ export class MnFileInput implements OnInit {
 
     const builtIn: MnFileInputUIConfig = {
       dropzoneHint: 'Click to upload or drag and drop',
+      dropActiveHint: 'Release to drop',
       replaceLabel: 'Replace',
       removeLabel: 'Remove',
     };
@@ -324,6 +393,7 @@ export class MnFileInput implements OnInit {
     this.uiConfig = {...builtIn, ...resolved};
     if (this.props.label) this.uiConfig = {...this.uiConfig, label: this.props.label};
     if (this.props.dropzoneHint) this.uiConfig = {...this.uiConfig, dropzoneHint: this.props.dropzoneHint};
+    if (this.props.dropActiveHint) this.uiConfig = {...this.uiConfig, dropActiveHint: this.props.dropActiveHint};
     if (this.props.replaceLabel) this.uiConfig = {...this.uiConfig, replaceLabel: this.props.replaceLabel};
     if (this.props.removeLabel) this.uiConfig = {...this.uiConfig, removeLabel: this.props.removeLabel};
   }
@@ -438,6 +508,24 @@ export class MnFileInput implements OnInit {
       });
     }
     return msgDef;
+  }
+
+  /**
+   * Whether a drag event should be treated as a file drop on this control.
+   * Ignores disabled controls, modes without a drop target, and drags that
+   * carry something other than files (selected text, a link, …) so the page
+   * keeps its default behaviour.
+   */
+  private acceptsDrag(event: DragEvent): boolean {
+    if (this.isDisabled || !this.supportsDrop) return false;
+    const types = event.dataTransfer?.types;
+    return !types || Array.from(types).includes('Files');
+  }
+
+  /** Clears the drag state and its nesting counter. */
+  private resetDrag(): void {
+    this.dragDepth = 0;
+    this.isDragging.set(false);
   }
 
   /** Checks a file against the configured `accept` filter (extensions and MIME globs). */

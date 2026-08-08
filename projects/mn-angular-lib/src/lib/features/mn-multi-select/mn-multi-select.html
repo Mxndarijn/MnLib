@@ -39,10 +39,11 @@
         </span>
       } @else {
         @for (opt of selectedOptions; track opt.value) {
-          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+          <!-- Only the × removes. The chip body deliberately carries no handler, so a click
+               anywhere on it bubbles to the trigger and just opens/closes the panel — clicking
+               the trigger to dismiss the dropdown must never silently delete a selection. -->
           <span
-            class="inline-flex items-center gap-x-1 max-w-full min-w-0 bg-base-200 border border-accent text-base-content text-xs pl-2 py-0.5 rounded-md cursor-pointer"
-            (click)="removeOption(opt, $event)">
+            class="inline-flex items-center gap-x-1 max-w-full min-w-0 bg-base-200 border border-accent text-base-content text-xs pl-2 py-0.5 rounded-md">
             <span [attr.title]="opt.label" class="truncate">{{ opt.label }}</span>
             <button
               mnButton
@@ -101,6 +102,19 @@
         </div>
       </mn-bottom-sheet>
     } @else {
+      <!-- A transparent full-viewport shield behind the panel, so "click anywhere to
+           dismiss" is literally true. It also *consumes* that click: without it the click
+           reaches whatever sits underneath — inside a modal that is the modal's own
+           backdrop, so dismissing the dropdown would tear down the whole modal with it.
+           Portalled to document.body for the same reason the panel is. It is aria-hidden
+           and unfocusable: the keyboard equivalent of this click is Escape. -->
+      <div
+        #shield
+        (click)="onShieldClick($event)"
+        [id]="resolvedId + '-shield'"
+        [ngClass]="shieldClasses"
+        aria-hidden="true"
+      ></div>
       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
       <div
         #dropdown

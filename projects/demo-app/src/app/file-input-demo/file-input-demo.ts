@@ -8,6 +8,7 @@ import {DemoExampleComponent} from '../shared/demo-example.component';
  * Demo component showcasing MnFileInput features:
  * - The four display modes (dropzone, thumbnail, list, compact)
  * - Single vs multiple selection
+ * - Drag-and-drop with a "release to drop" state (every mode but compact)
  * - `accept`, `maxSize`, and `maxFiles` client-side limits
  * - Required validation through ReactiveForms
  * - Previewing and clearing an already-saved image via `currentUrl`
@@ -61,11 +62,12 @@ export class FileInputDemo {
     displayMode: 'compact',
     accept: 'image/*',
   } satisfies MnFileInputProps;
-  /** Example 5: Dropzone previewing an already-saved image. */
+  /** Example 5: Dropzone previewing an already-saved image, with a custom drag hint. */
   coverProps = {
     id: 'cover',
     label: 'Cover image',
     accept: 'image/*',
+    dropActiveHint: 'Release to replace the cover',
     currentUrl: 'https://picsum.photos/seed/mnlib/640/360',
   } satisfies MnFileInputProps;
   /** Live snapshot of the form value, shown in the demo output panel. */

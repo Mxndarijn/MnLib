@@ -3,15 +3,11 @@
   "configurations": [
     {
       "name": "mnlib-demo",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "npm",
       "runtimeArgs": [
-        "ng",
-        "serve",
-        "demo-app",
-        "--port",
-        "4400"
+        "start"
       ],
-      "port": 4400
+      "port": 4500
     }
   ]
 }

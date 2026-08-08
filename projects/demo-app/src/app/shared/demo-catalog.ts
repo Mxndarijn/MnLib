@@ -242,6 +242,14 @@ export const DEMOS: DemoEntry[] = [
     abbr: 'BS',
     description: 'Mobile sheet with backdrop, grabber, swipe-to-dismiss, and a guard.',
   },
+  {
+    title: 'Keyboard',
+    path: '/demos/keyboard-demo',
+    category: 'Inputs',
+    color: '#0ea5e9',
+    abbr: 'KB',
+    description: 'On-screen keyboard for kiosks: number, letter, or mixed, inline or as a sheet.',
+  },
 
   // System
   {

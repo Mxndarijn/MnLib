@@ -68,6 +68,11 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     return document.getElementById('test-ms-listbox');
   }
 
+  /** The portalled click shield rendered under the anchored panel. */
+  function shield(): HTMLElement | null {
+    return document.getElementById('test-ms-shield');
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
@@ -83,8 +88,9 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
   });
 
   afterEach(() => {
-    // Defensive: strip any leaked panel so tests stay isolated.
+    // Defensive: strip any leaked overlay so tests stay isolated.
     panel()?.remove();
+    shield()?.remove();
   });
 
   it('renders no panel while closed', () => {
@@ -210,6 +216,62 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
     expect(component.isOpen).toBeTrue();
     expect(panel()).not.toBeNull();
+  });
+
+  it('portals a click shield alongside the panel and tears it down on close', () => {
+    expect(shield()).withContext('no shield while closed').toBeNull();
+
+    component.toggle();
+    fixture.detectChanges();
+
+    const el = shield();
+    expect(el).withContext('shield should be rendered when open').not.toBeNull();
+    // Same escape as the panel: a fixed shield under a transformed ancestor would be
+    // sized and placed against that ancestor instead of the viewport.
+    expect(el!.parentElement).toBe(document.body);
+
+    component.toggle();
+    fixture.detectChanges();
+    expect(shield()).toBeNull();
+  });
+
+  it('removes the shield when the component is destroyed while open', () => {
+    component.toggle();
+    fixture.detectChanges();
+    expect(shield()).not.toBeNull();
+
+    fixture.destroy();
+    expect(shield()).toBeNull();
+  });
+
+  it('closes the dropdown when the shield is clicked', () => {
+    component.toggle();
+    fixture.detectChanges();
+
+    shield()!.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}));
+    fixture.detectChanges();
+
+    expect(component.isOpen).toBeFalse();
+    expect(panel()).toBeNull();
+    expect(shield()).toBeNull();
+  });
+
+  it('swallows the dismissing click instead of letting it reach what is underneath', () => {
+    component.toggle();
+    fixture.detectChanges();
+
+    // Stands in for a modal backdrop's own click handler: it must not fire, or dismissing
+    // the dropdown would tear down the surrounding modal along with it.
+    const underneath = jasmine.createSpy('underneath');
+    document.body.addEventListener('click', underneath);
+
+    const event = new MouseEvent('click', {bubbles: true, cancelable: true});
+    shield()!.dispatchEvent(event);
+    fixture.detectChanges();
+    document.body.removeEventListener('click', underneath);
+
+    expect(underneath).not.toHaveBeenCalled();
+    expect(event.defaultPrevented).toBeTrue();
   });
 
   it('closes the dropdown when the trigger is hidden instead of destroyed', async () => {
@@ -435,6 +497,58 @@ describe('MnMultiSelect (collapse to count summary)', () => {
 
     expect(component.allSelected).toBeFalse();
     expect(component.isCollapsed).toBeFalse();
+  });
+
+  /**
+   * The trigger doubles as the dismiss target for an open panel, so a click on it must be
+   * safe. Removal is the × button's job alone — a chip body that removed on click turned
+   * every attempt to close the dropdown into a silent deletion.
+   */
+  describe('chip removal', () => {
+    /** The × button inside the first rendered chip. */
+    function firstChipRemoveButton(): HTMLElement {
+      return chips()[0].querySelector('button') as HTMLElement;
+    }
+
+    it('keeps the selection when the chip body is clicked', () => {
+      build({});
+      component.writeValue([1, 2]);
+      fixture.detectChanges();
+
+      // The label span, i.e. the bulk of the chip's surface.
+      const label = chips()[0].querySelector('span') as HTMLElement;
+      label.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+      fixture.detectChanges();
+
+      expect(component.selectedValues).toEqual([1, 2]);
+    });
+
+    it('lets a chip-body click through to the trigger so it toggles the panel', () => {
+      build({mobileSheet: false});
+      component.writeValue([1, 2]);
+      fixture.detectChanges();
+
+      chips()[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));
+      fixture.detectChanges();
+
+      expect(component.isOpen).toBeTrue();
+      expect(component.selectedValues).toEqual([1, 2]);
+      component.close();
+      fixture.detectChanges();
+    });
+
+    it('removes the option from the × button, without toggling the panel', () => {
+      build({mobileSheet: false});
+      component.writeValue([1, 2]);
+      fixture.detectChanges();
+
+      firstChipRemoveButton().dispatchEvent(new MouseEvent('click', {bubbles: true}));
+      fixture.detectChanges();
+
+      expect(component.selectedValues).toEqual([2]);
+      // removeOption stops propagation, so the trigger's toggle never sees the click.
+      expect(component.isOpen).toBeFalse();
+    });
   });
 });
 

@@ -19,7 +19,7 @@
             [ngTemplateOutletContext]="contextFor(v.alert)">
           </ng-container>
         } @else {
-          <div [class]="getAlertClasses(v.alert)" [class.extra]="v.alert.cssClass" class="relative">
+          <div [class.extra]="v.alert.cssClass" [class]="getAlertClasses(v.alert)" class="relative overflow-hidden">
             <div class="flex-1 min-w-0 pr-8">
               <h4 class="font-semibold text-sm">{{ v.alert.title }}</h4>
               @if (v.alert.subTitle) {
@@ -36,6 +36,11 @@
             >
               &times;
             </button>
+            @if (countdownDuration(v); as ms) {
+              <span aria-hidden="true" class="mn-alert-progress">
+                <span [style.animation-duration.ms]="ms" class="mn-alert-progress-bar"></span>
+              </span>
+            }
           </div>
         }
       </div>

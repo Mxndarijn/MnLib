@@ -12,7 +12,9 @@ export type MnFileInputErrorMessageData = string | MnErrorMessageFn;
 export type MnFileInputErrorMessagesData = Partial<Record<string, MnFileInputErrorMessageData>>;
 
 /**
- * Controls how the selected file(s) are presented.
+ * Controls how the selected file(s) are presented. Every mode but `compact`
+ * doubles as a drop target and shows a "release to drop" state while files are
+ * dragged over it.
  * - `dropzone` — large dashed drop area with icon + hint, previews/rows below (default).
  * - `thumbnail` — grid of image tiles (file icon for non-images), with an add tile.
  * - `list` — compact rows of file icon + name + size + remove.
@@ -36,6 +38,12 @@ export type MnFileInputProps = {
 
   /** Hint shown inside the empty dropzone (overrides config when provided). */
   dropzoneHint?: string;
+
+  /**
+   * Hint that replaces {@link dropzoneHint} while files are dragged over the
+   * dropzone (overrides config when provided).
+   */
+  dropActiveHint?: string;
 
   /** Label for the "choose/replace file" affordance (overrides config when provided). */
   replaceLabel?: string;
@@ -119,6 +127,9 @@ export type MnFileInputUIConfig = {
 
   /** Hint shown inside the empty dropzone. */
   dropzoneHint?: string;
+
+  /** Hint shown inside the dropzone while files are dragged over it. */
+  dropActiveHint?: string;
 
   /** Label for the "choose/replace file" affordance. */
   replaceLabel?: string;

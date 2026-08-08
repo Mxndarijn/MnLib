@@ -615,6 +615,8 @@ export type FileFieldConfig<TModel = unknown> = {
   displayMode?: 'dropzone' | 'thumbnail' | 'list' | 'compact';
   /** Hint shown inside the empty dropzone */
   dropzoneHint?: string;
+  /** Hint shown inside the dropzone while files are dragged over it */
+  dropActiveHint?: string;
   /** Label for the "choose/replace file" affordance */
   replaceLabel?: string;
   /** Accessible label for the per-file remove button */

@@ -6,10 +6,11 @@ import {tv, type VariantProps} from 'tailwind-variants';
  * Mirrors the styling vocabulary of {@link mnInputFieldVariants} (size,
  * borderRadius, shadow, fullWidth, disabled) so a file input visually matches the
  * rest of the input family, and adds a `dropzone` toggle for the large dashed
- * drop area used by the default display mode.
+ * drop area used by the default display mode plus a `dragging` toggle for the
+ * "release to drop" state while files hover over that dropzone.
  */
 export const mnFileInputVariants = tv({
-  base: 'bg-base-100 border-1 border-base-300 text-base-content text-sm outline-none transition-colors duration-300 ease-in-out',
+  base: 'bg-base-100 border-1 border-base-300 text-base-content text-sm outline-none transition-all duration-300 ease-in-out',
   variants: {
     /** Inner padding scale of the clickable control. */
     size: {
@@ -40,6 +41,10 @@ export const mnFileInputVariants = tv({
     /** Renders the control as a large dashed dropzone with a hover accent. */
     dropzone: {
       true: 'flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed text-center cursor-pointer hover:border-primary',
+    },
+    /** Highlighted "release to drop" appearance while files hover the dropzone. */
+    dragging: {
+      true: 'border-primary bg-primary/10 ring-4 ring-primary/20 scale-[1.01] duration-150',
     },
     /** Dimmed, non-interactive appearance. */
     disabled: {

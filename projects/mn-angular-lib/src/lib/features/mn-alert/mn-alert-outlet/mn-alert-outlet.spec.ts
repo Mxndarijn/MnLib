@@ -1,8 +1,8 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { MnAlertOutletComponent } from './mn-alert-outlet';
-import { MnAlertStore } from '../mn-alert.store';
+import {Component, TemplateRef, ViewChild} from '@angular/core';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {MnAlertOutletComponent} from './mn-alert-outlet';
+import {MnAlertStore} from '../mn-alert.store';
 
 @Component({
   standalone: true,
@@ -20,6 +20,15 @@ import { MnAlertStore } from '../mn-alert.store';
 })
 class HostComponent {
   @ViewChild('tpl', { static: true }) tpl!: TemplateRef<unknown>;
+}
+
+@Component({
+  standalone: true,
+  imports: [MnAlertOutletComponent],
+  template: `
+    <mn-alert-outlet></mn-alert-outlet>`
+})
+class DefaultCardHostComponent {
 }
 
 describe('MnAlertOutletComponent', () => {
@@ -74,4 +83,41 @@ describe('MnAlertOutletComponent', () => {
     const titles = items.map(el => el.nativeElement.querySelector('.title')!.textContent.trim());
     expect(titles).toEqual(['B']);
   }));
+});
+
+describe('MnAlertOutletComponent countdown bar', () => {
+  let fixture: ComponentFixture<DefaultCardHostComponent>;
+  let store: MnAlertStore;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DefaultCardHostComponent],
+      providers: [MnAlertStore]
+    }).compileComponents();
+
+    store = TestBed.inject(MnAlertStore);
+    fixture = TestBed.createComponent(DefaultCardHostComponent);
+  });
+
+  function progressBars(): HTMLElement[] {
+    return fixture.debugElement
+      .queryAll(By.css('.mn-alert-progress-bar'))
+      .map(el => el.nativeElement as HTMLElement);
+  }
+
+  it('runs the bar over the alert lifetime', () => {
+    store.show({title: 'Timed', kind: 'info', duration: 5000});
+    fixture.detectChanges();
+
+    const bars = progressBars();
+    expect(bars.length).toBe(1);
+    expect(bars[0].style.animationDuration).toBe('5000ms');
+  });
+
+  it('omits the bar for an alert that never auto-dismisses', () => {
+    store.show({title: 'Sticky', kind: 'info', duration: 0});
+    fixture.detectChanges();
+
+    expect(progressBars().length).toBe(0);
+  });
 });

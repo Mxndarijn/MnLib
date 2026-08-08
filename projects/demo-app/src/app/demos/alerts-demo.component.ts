@@ -1,28 +1,54 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { DemoPageComponent } from '../shared/demo-page.component';
-import { DemoExampleComponent } from '../shared/demo-example.component';
-import {MnAlertService, MnAlertOutletComponent, provideMnAlerts, MnAlertKind, MnButton} from 'mn-angular-lib';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {DemoPageComponent} from '../shared/demo-page.component';
+import {DemoExampleComponent} from '../shared/demo-example.component';
+import {MnAlertKind, MnAlertOutletComponent, MnAlertService, MnButton, provideMnAlerts,} from 'mn-angular-lib';
 
 @Component({
   selector: 'app-alerts-demo',
   standalone: true,
-  imports: [CommonModule, FormsModule, DemoPageComponent, DemoExampleComponent, MnAlertOutletComponent, MnButton],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DemoPageComponent,
+    DemoExampleComponent,
+    MnAlertOutletComponent,
+    MnButton,
+  ],
   providers: [
     provideMnAlerts({
-      durations: { success: 2500, info: 3500, warning: 6000, error: 8000, default: 4000 }
-    })
+      durations: {success: 2500, info: 3500, warning: 6000, error: 8000, default: 4000},
+    }),
   ],
   templateUrl: './alerts-demo.component.html',
   styles: [
     `
-    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .field { display: flex; flex-direction: column; gap: 4px; }
-    .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-bottom: 12px; }
-    input[type="text"], input[type="number"] { padding: 6px 8px; border-radius: var(--mn-radius); border: 1px solid #e5e7eb; }
-    `
-  ]
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .inputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      input[type='text'],
+      input[type='number'] {
+        padding: 6px 8px;
+        border-radius: var(--mn-radius);
+        border: 1px solid #e5e7eb;
+      }
+    `,
+  ],
 })
 export class AlertsDemoComponent {
   public alerts = inject(MnAlertService);
@@ -44,20 +70,35 @@ export class AlertsDemoComponent {
     }
 
     switch (kind) {
-      case 'success': return this.alerts.success(title, sub, extra);
-      case 'info': return this.alerts.info(title, sub, extra);
-      case 'warning': return this.alerts.warning(title, sub, extra);
-      case 'error': return this.alerts.error(title, sub, extra);
+      case 'success':
+        return this.alerts.success(title, sub, extra);
+      case 'info':
+        return this.alerts.info(title, sub, extra);
+      case 'warning':
+        return this.alerts.warning(title, sub, extra);
+      case 'error':
+        return this.alerts.error(title, sub, extra);
     }
   }
 
   showCustomDuration() {
-    this.alerts.info('Custom duration (1s)', 'Overrides provider default with explicit value', { duration: 1000 });
+    this.alerts.info('Custom duration (1s)', 'Overrides provider default with explicit value', {
+      duration: 1000,
+    });
   }
 
   showCustomClass() {
     this.alerts.warning('Custom class', 'Adds extra CSS class', { cssClass: 'ring-2' });
   }
 
-  clearAll() { this.alerts.clear(); }
+  /** Raises more alerts than the visible cap allows, so the oldest ones drop off the stack. */
+  showBurst() {
+    for (let i = 1; i <= 5; i++) {
+      this.alerts.info(`Burst ${i} of 5`, 'Only the newest few stay on screen (maxVisible).');
+    }
+  }
+
+  clearAll() {
+    this.alerts.clear();
+  }
 }
