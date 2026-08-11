@@ -1,4 +1,4 @@
-﻿import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
+﻿import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Observable, Subject, takeUntil} from 'rxjs';
 import {CalendarEvent} from '../../models/calendar-event.model';
@@ -26,6 +26,7 @@ import {MnLanguageService} from '../../../../language';
 })
 export class CalendarMonthComponent implements OnInit, OnDestroy {
   private readonly lang = inject(MnLanguageService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /**
    * Accessible name for this control. Resolved through the conventional
@@ -68,10 +69,15 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
     this.moreEventsLabel = resolved.moreEventsLabel;
     this.buildMonth();
 
+    // Both subscriptions mark the view: the grid is rebuilt into plain fields, so in a zoneless
+    // app nothing else tells Angular this component has to be re-rendered. Without it a month
+    // whose events arrive from a stream — a fetch, a parent seeding its list — stays blank until
+    // some unrelated interaction happens to trigger change detection.
     if (this.eventsChanged) {
       this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
         this.events = events;
         this.buildMonth();
+        this.cdr.markForCheck();
       });
     }
 
@@ -79,6 +85,7 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
       this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe(date => {
         this.focusDay = date;
         this.buildMonth();
+        this.cdr.markForCheck();
       });
     }
   }

@@ -4,12 +4,15 @@ import {
   DoCheck,
   ElementRef,
   EventEmitter,
+  inject,
   Input,
   isSignal,
   OnDestroy,
   Output,
   ViewChild
 } from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Subscription} from 'rxjs';
 import {MnTranslatePipe} from '../../language';
 import {MnCollectionState} from '../mn-collection';
 import {MnTabDataSource, MnTabItem} from './mn-tab.types';
@@ -20,9 +23,35 @@ import {MnSkeleton} from '../mn-skeleton';
 /** Fallback number of skeleton tabs when no items are known and no count is given. */
 const DEFAULT_SKELETON_TAB_COUNT = 3;
 
+/** Query parameter the active tab is mirrored in unless the data source names another. */
+const DEFAULT_TAB_URL_PARAM = 'tab';
+
+/** Key used for a label that slugs to nothing (e.g. punctuation only). */
+const FALLBACK_TAB_URL_KEY = 'tab';
+
+/**
+ * Slugs a tab label into the value it takes in the URL: the last segment of a
+ * translation key, kebab-cased. `matches.hub.tab.entrants` → `entrants`,
+ * `members.tabMembers` → `tab-members`.
+ * @param label - The tab's label or translation key.
+ */
+function tabUrlKey(label: string): string {
+  const segment = label.split('.').pop() ?? label;
+  const slug = segment
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
+  return slug || FALLBACK_TAB_URL_KEY;
+}
+
 /**
  * Tab component that renders a horizontal tab bar.
  * Supports translation keys for labels via MnTranslatePipe.
+ *
+ * The active tab is mirrored in the URL query string by default, so a reload,
+ * a back button or a shared link lands on the same tab; see
+ * {@link MnTabDataSource.urlParam} to rename that parameter or switch it off.
  */
 @Component({
   selector: 'mn-tab',
@@ -31,6 +60,38 @@ const DEFAULT_SKELETON_TAB_COUNT = 3;
   templateUrl: './mn-tab.component.html',
 })
 export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
+  /**
+   * Router the active tab is written to. Optional: a tab bar used outside a
+   * routed application still works, it just has no URL to mirror into.
+   */
+  private readonly router = inject(Router, {optional: true});
+
+  /** Route the tab value is read back from; absent for the same reason as {@link router}. */
+  private readonly route = inject(ActivatedRoute, {optional: true});
+
+  /** Watches the URL so a deep link, a back button or an in-app link moves the tab bar. */
+  private readonly queryParamsSub?: Subscription;
+
+  /**
+   * URL keys of the current items, memoised on the items array so a slug is
+   * computed once per tab set rather than on every change-detection pass.
+   */
+  private urlKeyCache?: { items: MnTabItem[]; keys: string[] };
+
+  /** URL key of {@link currentActive}, so a rebuilt tab set can be recognised as the same tab. */
+  private currentKey?: string;
+
+  /**
+   * Key of a selection whose URL write has not landed yet. Navigation is
+   * asynchronous, so a consumer that rebuilds its tabs in response to the click
+   * can be resolved against a URL that still names the previous tab; until the
+   * write completes, this is the truth about what the user picked.
+   */
+  private pendingKey?: string;
+
+  /** Set on destroy so a deferred restore can't announce a tab nobody is showing. */
+  private destroyed = false;
+
   /** The horizontally-scrolling wrapper the edge fade is painted onto. */
   @ViewChild('scrollContainer') private scrollContainer?: ElementRef<HTMLElement>;
 
@@ -110,6 +171,16 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
     return Array.from({length: count}, (_, index) => index);
   }
 
+  constructor() {
+    // The URL is a second source of truth for the selection: a deep link, an
+    // in-app link into another tab of the page already on screen, or the back
+    // button all change it without a click landing on this component.
+    this.queryParamsSub = this.route?.queryParamMap.subscribe((params) => {
+      const param = this.urlParam();
+      if (param) this.activateUrlKey(params.get(param));
+    });
+  }
+
   /**
    * Re-resolves the active tab on every change-detection pass.
    *
@@ -148,6 +219,8 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.queryParamsSub?.unsubscribe();
     this.resizeObserver?.disconnect();
     if (this.indicatorFrame !== undefined) cancelAnimationFrame(this.indicatorFrame);
     if (this.slidingTimer !== undefined) clearTimeout(this.slidingTimer);
@@ -178,16 +251,29 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Sets the given tab item as active, invoking deactivate/activate callbacks.
+   * Sets the given tab item as active, invoking deactivate/activate callbacks,
+   * and records the selection in the URL so it survives a reload or a share.
    * @param item - The tab item to activate.
    */
   setActive(item: MnTabItem): void {
     if (this.currentActive === item) {
       return;
     }
+    this.activate(item);
+    this.writeUrl(item);
+  }
+
+  /**
+   * Moves the selection to `item` and tells the consumer about it: the
+   * deactivate/activate/emit sequence a click produces, shared by the click
+   * path and the URL-driven ones (deep link, back button), which owe the
+   * consumer the same notifications.
+   * @param item - The tab item to activate.
+   */
+  private activate(item: MnTabItem): void {
     this.currentActive?.onDeactivate?.();
     item.onClick?.();
-    this.currentActive = item;
+    this.select(item);
     this.activeChange.emit(item);
     // Slide the underline to the new tab. Measure on the next frame, after
     // change detection has applied the active tab's `font-bold` (which widens
@@ -263,14 +349,16 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
 
   /**
    * Ensures {@link currentActive} references a tab that still exists in the data
-   * source, falling back to the configured default tab when the current
-   * selection is missing or stale (e.g. after the items array is replaced).
+   * source, preferring the tab named in the URL and falling back to the
+   * configured default tab when the current selection is missing or stale
+   * (e.g. after the items array is replaced).
    */
   private syncActiveTab(): void {
     const items = this.dataSource?.items;
     if (!items || items.length === 0) {
       if (this.currentActive !== undefined) {
         this.currentActive = undefined;
+        this.currentKey = undefined;
         this.scheduleIndicator(false);
       }
       return;
@@ -281,8 +369,127 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
     const defaultIndex = this.dataSource.defaultActive;
     const index =
       defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0;
-    this.currentActive = items[index];
+    const fallback = items[index];
+    const restored = this.itemFromUrl(items);
+    const previousKey = this.currentKey;
+    this.select(restored ?? fallback);
     // Selection resolved from data (not a user click): snap, don't slide.
     this.scheduleIndicator(false);
+    if (restored && restored !== fallback && this.currentKey !== previousKey) {
+      // The URL asks for a tab the consumer has not rendered, so this selection
+      // has to be announced like a click's would be — but only the first time,
+      // or a consumer that rebuilds its items array would re-run the tab's
+      // callbacks on every rebuild. Deferred out of the change-detection pass
+      // that resolved it: the consumer will flip its own state in response, and
+      // doing that mid-pass writes to bindings that have already been checked.
+      queueMicrotask(() => this.announceRestored(restored));
+    }
+  }
+
+  /**
+   * Records `item` as the selection, remembering its URL key so the same tab is
+   * recognised after the consumer rebuilds the items array.
+   * @param item - The newly selected tab.
+   */
+  private select(item: MnTabItem): void {
+    const items = this.dataSource.items;
+    this.currentActive = item;
+    this.currentKey = this.urlKeys(items)[items.indexOf(item)];
+  }
+
+  /**
+   * Runs the restored tab's callbacks a change-detection pass later, unless the
+   * selection moved on in the meantime (a click, or another tab set arriving).
+   * @param item - The tab restored from the URL.
+   */
+  private announceRestored(item: MnTabItem): void {
+    if (this.destroyed || this.currentActive !== item) return;
+    item.onClick?.();
+    this.activeChange.emit(item);
+  }
+
+  /**
+   * Activates the tab a URL value names, when it is not the tab already on
+   * screen. Values naming no known tab are ignored: another tab bar on the page
+   * may own that parameter, and a stale link should leave the default standing.
+   * @param key - The value read from the query parameter, if any.
+   */
+  private activateUrlKey(key: string | null): void {
+    const items = this.dataSource?.items;
+    if (!key || !items?.length) return;
+    const item = items[this.urlKeys(items).indexOf(key)];
+    if (!item || item === this.currentActive) return;
+    this.activate(item);
+  }
+
+  /**
+   * The query parameter this tab bar mirrors into, or undefined when there is
+   * nothing to mirror into (no router) or the consumer switched it off.
+   */
+  private urlParam(): string | undefined {
+    if (!this.router || !this.route) return undefined;
+    const param = this.dataSource?.urlParam ?? DEFAULT_TAB_URL_PARAM;
+    return param === false || param === '' ? undefined : param;
+  }
+
+  /**
+   * The tab the current URL asks for, if it names one of `items`.
+   * @param items - The tab set to resolve the URL value against.
+   */
+  private itemFromUrl(items: MnTabItem[]): MnTabItem | undefined {
+    const param = this.urlParam();
+    if (!param) return undefined;
+    const key = this.pendingKey ?? this.route?.snapshot.queryParamMap.get(param);
+    if (!key) return undefined;
+    const index = this.urlKeys(items).indexOf(key);
+    return index === -1 ? undefined : items[index];
+  }
+
+  /**
+   * Records the active tab in the query string, replacing the current history
+   * entry: switching tabs is not a navigation to walk back through, and back
+   * should leave the page rather than retrace its tabs.
+   * @param item - The tab that just became active.
+   */
+  private writeUrl(item: MnTabItem): void {
+    const param = this.urlParam();
+    if (!param || !this.router) return;
+    const items = this.dataSource.items;
+    const key = this.urlKeys(items)[items.indexOf(item)];
+    if (!key) return;
+    this.pendingKey = key;
+    // No path commands and no `relativeTo`, so only the query string changes.
+    // That holds wherever the tab bar sits, including a modal body, which has
+    // no route of its own to be relative to.
+    void this.router
+      .navigate([], {
+        queryParams: {[param]: key},
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      })
+      .catch(() => undefined)
+      .then(() => {
+        // Only clear our own write; a later click already owns the pending key.
+        if (this.pendingKey === key) this.pendingKey = undefined;
+      });
+  }
+
+  /**
+   * The URL key of every tab, in item order: the item's `id`, else a slug of
+   * its label. Repeats are numbered so each tab still round-trips through the
+   * URL; give such tabs an explicit `id` to choose the value yourself.
+   * @param items - The tab set to key.
+   */
+  private urlKeys(items: MnTabItem[]): string[] {
+    if (this.urlKeyCache?.items === items) return this.urlKeyCache.keys;
+    const used = new Map<string, number>();
+    const keys = items.map((item) => {
+      const base = item.id ?? tabUrlKey(item.label);
+      const taken = used.get(base) ?? 0;
+      used.set(base, taken + 1);
+      return taken === 0 ? base : `${base}-${taken + 1}`;
+    });
+    this.urlKeyCache = {items, keys};
+    return keys;
   }
 }

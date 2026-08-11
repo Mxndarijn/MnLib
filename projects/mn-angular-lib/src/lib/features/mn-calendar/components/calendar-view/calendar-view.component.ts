@@ -1,4 +1,5 @@
 ﻿import {
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   EventEmitter,
@@ -128,6 +129,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private readonly mnConfigRef: CalendarConfig | null;
   private readonly destroyRef = inject(DestroyRef);
   private readonly lang = inject(MnLanguageService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor() {
     const mnConfig = inject<CalendarConfig | null>(MN_CALENDAR_CONFIG, {optional: true});
@@ -148,9 +150,12 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.rebuildFromConfig();
 
-    // Re-resolve config when locale changes (supports $translate in mn-config).
+    // Re-resolve config when locale changes (supports $translate in mn-config). Marked because
+    // the labels it rebuilds are plain fields: a locale switch arrives on a stream, which in a
+    // zoneless app is not by itself a reason for Angular to re-render the toolbar.
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.rebuildFromConfig();
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
 

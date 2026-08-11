@@ -1,4 +1,5 @@
 ﻿import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   inject,
@@ -28,6 +29,7 @@ import {MnLanguageService} from '../../../../language';
 })
 export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
   private readonly lang = inject(MnLanguageService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /**
    * Accessible name for this control. Resolved through the conventional
@@ -70,6 +72,9 @@ export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
     this.title = resolved.upcomingEventsTitle;
     this.noEventsMessage = resolved.noUpcomingEvents;
 
+    // Marked because the list is a plain field: in a zoneless app a stream emission is not by
+    // itself a reason for Angular to re-render, so the sidebar would keep showing the events it
+    // was first given.
     if (this.eventsChanged) {
       this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
         const now = new Date();
@@ -77,6 +82,7 @@ export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
           .filter(e => e.endTime > now)
           .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
           .slice(0, 10);
+        this.cdr.markForCheck();
       });
     }
   }

@@ -6,7 +6,7 @@
         @for (key of row; track key) {
           <button
             (click)="press(key)"
-            class="mn-keyboard-key flex-1 rounded-lg bg-base-200 py-4 text-xl font-semibold text-base-content transition-colors hover:bg-base-300 active:bg-base-300"
+            class="mn-keyboard-key flex-1 rounded-lg border border-base-300 bg-base-100 py-4 text-xl font-semibold text-base-content shadow-sm transition-colors hover:bg-base-200 active:bg-base-300"
             type="button"
           >
             {{ key }}
@@ -19,7 +19,7 @@
       <button
         (click)="backspace()"
         [attr.aria-label]="labels.backspace"
-        class="mn-keyboard-key mn-keyboard-key-action flex-1 rounded-lg bg-base-200 py-4 text-base font-medium text-base-content transition-colors hover:bg-base-300"
+        class="mn-keyboard-key mn-keyboard-key-action flex-1 rounded-lg border border-base-300 bg-base-200 py-4 text-base font-medium text-base-content shadow-sm transition-colors hover:bg-base-300"
         type="button"
       >
         {{ labels.backspace }}
@@ -29,7 +29,7 @@
         <button
           (click)="pressSpace()"
           [attr.aria-label]="labels.space"
-          class="mn-keyboard-key mn-keyboard-key-space flex-1 rounded-lg bg-base-200 py-4 text-base font-medium text-base-content transition-colors hover:bg-base-300"
+          class="mn-keyboard-key mn-keyboard-key-space flex-1 rounded-lg border border-base-300 bg-base-200 py-4 text-base font-medium text-base-content shadow-sm transition-colors hover:bg-base-300"
           style="flex-grow: 3"
           type="button"
         >
@@ -40,7 +40,7 @@
       <button
         (click)="clear()"
         [attr.aria-label]="labels.clear"
-        class="mn-keyboard-key mn-keyboard-key-action flex-1 rounded-lg bg-base-200 py-4 text-base font-medium text-base-content transition-colors hover:bg-base-300"
+        class="mn-keyboard-key mn-keyboard-key-action flex-1 rounded-lg border border-base-300 bg-base-200 py-4 text-base font-medium text-base-content shadow-sm transition-colors hover:bg-base-300"
         type="button"
       >
         {{ labels.clear }}
@@ -51,7 +51,7 @@
           (click)="submit()"
           [attr.aria-label]="labels.submit"
           [disabled]="submitDisabled"
-          class="mn-keyboard-key mn-keyboard-key-submit flex-1 rounded-lg bg-primary py-4 text-base font-semibold text-primary-content transition-colors hover:opacity-90 disabled:opacity-50"
+          class="mn-keyboard-key mn-keyboard-key-submit flex-1 rounded-lg bg-primary py-4 text-base font-semibold text-primary-content shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
           style="flex-grow: 2"
           type="button"
         >
