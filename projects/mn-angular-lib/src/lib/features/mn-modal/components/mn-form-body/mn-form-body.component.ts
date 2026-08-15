@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   inject,
@@ -125,6 +126,17 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
 })
 export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements OnInit, OnDestroy, AfterViewInit {
   private fb = inject(FormBuilder);
+
+  /**
+   * Change detector used to announce state this component mutates outside an Angular
+   * event handler — after an `await`, or from an RxJS subscription. Consuming apps run
+   * zoneless, where such a write notifies nothing: the view is never marked dirty, so it
+   * keeps rendering the stale value and `checkNoChanges` then reports it as NG0100
+   * (e.g. the submit button staying disabled on "Submitting..." after a failed submit).
+   * Every async mutation of {@link isSubmitting}, {@link fieldLoading}, {@link fieldOptions}
+   * and {@link formErrors} must be followed by `markForCheck()`.
+   */
+  private readonly cdr = inject(ChangeDetectorRef);
 
   @Input() config!: FormModalConfig<TModel, TResult>;
   @Input() modalRef!: MnModalRef<TResult>;
@@ -613,13 +625,17 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
 
   private async loadFieldOptions(key: string, dataSource: FieldDataSource, formValue: Partial<TModel>): Promise<void> {
     this.fieldLoading[key] = true;
+    this.cdr.markForCheck();
     try {
       this.fieldOptions[key] = await dataSource.load(formValue);
     } catch (error) {
       console.error(`Failed to load options for field '${key}':`, error);
       this.fieldOptions[key] = [];
     } finally {
+      // Resolved after an `await`, so nothing has told Angular the spinner can go and the
+      // options have arrived. Without this the field renders "Loading options..." forever.
       this.fieldLoading[key] = false;
+      this.cdr.markForCheck();
     }
   }
 
@@ -784,6 +800,11 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
 
       // Emit status change
       this.formStatusChange.emit(this.form.status);
+
+      // `valueChanges` can fire from outside an Angular event handler (a CVA writing on
+      // init, or a caller patching the form), and the callbacks above rewrite visibility,
+      // required-state and cross-field errors that the template reads.
+      this.cdr.markForCheck();
     });
   }
 
@@ -860,8 +881,11 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel> implements 
       }
       this.modalRef.close(formValue);
     } catch (error) {
-      // Always allow retry on error, regardless of submit mode
+      // Always allow retry on error, regardless of submit mode. This runs after an `await`,
+      // so it must announce itself: otherwise the button stays disabled on "Submitting..."
+      // and the user can never retry the action that just failed.
       this.isSubmitting = false;
+      this.cdr.markForCheck();
       console.error('Form submission error:', error);
     }
   }
