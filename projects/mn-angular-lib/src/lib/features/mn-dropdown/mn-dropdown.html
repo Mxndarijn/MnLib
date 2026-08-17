@@ -44,17 +44,10 @@
         [minHeightPx]="sheetFloorPx"
       >
         <div [id]="resolvedId + '-menu'" role="menu" class="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <!-- The sheet covers its own trigger, so it needs a header and an explicit way out. -->
-          <div class="flex items-center justify-between gap-x-2 px-4 pt-1 pb-2 shrink-0">
+          <!-- The sheet covers its own trigger, so it carries a header to name itself; the
+               way out is the grabber (swipe-to-dismiss) and a backdrop tap. -->
+          <div class="px-4 pt-1 pb-2 shrink-0">
             <p class="text-base font-bold text-base-content truncate">{{ menuLabel || triggerAriaLabel }}</p>
-            <button
-              mnButton
-              type="button"
-              [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
-              class="shrink-0 cursor-pointer"
-              (click)="close()"
-              [attr.aria-label]="closeLabel"
-            ><svg lucideX [size]="20"></svg></button>
           </div>
           <ng-container [ngTemplateOutlet]="searchBox" [ngTemplateOutletContext]="{ sheet: true }"></ng-container>
           <div class="flex-1 flex flex-col overflow-auto overscroll-contain">

@@ -202,8 +202,6 @@ export type MnDropdownUIConfig = {
   ariaLabel?: string;
   /** Default heading for the menu/sheet. */
   menuLabel?: string;
-  /** Accessible label for the mobile sheet's close button (falls back to "Close"). */
-  closeLabel?: string;
   /** Default placeholder for the search input (falls back to "Search..."). */
   searchPlaceholder?: string;
   /** Default empty-state text when the filter matches nothing (falls back to "No results"). */

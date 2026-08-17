@@ -20,7 +20,6 @@ import {
   LucideEllipsisVertical,
   LucideIconData,
   LucideSearchX,
-  LucideX,
 } from '@lucide/angular';
 import { skip } from 'rxjs';
 import { MnButton, MnButtonTypes } from '../mn-button';
@@ -62,7 +61,7 @@ const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
 @Component({
   selector: 'mn-lib-dropdown',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, FormsModule, MnButton, MnBottomSheet, MnInputField, LucideX, LucideSearchX, LucideDynamicIcon],
+  imports: [NgClass, NgTemplateOutlet, FormsModule, MnButton, MnBottomSheet, MnInputField, LucideSearchX, LucideDynamicIcon],
   templateUrl: './mn-dropdown.html',
   styleUrl: './mn-dropdown.css',
 })
@@ -587,11 +586,6 @@ export class MnDropdown implements OnInit {
   get menuLabel(): string | null {
     const translated = this.datasource.menuLabelKey ? this.lang.translateIfPresent(this.datasource.menuLabelKey) : undefined;
     return translated ?? this.datasource.menuLabel ?? this.uiConfig.menuLabel ?? null;
-  }
-
-  /** Accessible label for the sheet's close button. */
-  get closeLabel(): string {
-    return this.uiConfig.closeLabel ?? 'Close';
   }
 
   /** Placeholder shown in the search input, preferring a resolved translation key. */

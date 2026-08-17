@@ -83,20 +83,12 @@
           class="flex flex-col flex-1 min-h-0 overflow-hidden"
           role="listbox"
         >
-          <!-- The sheet covers its own trigger, so it needs a header to name the field and
-               an explicit way out — tapping the trigger again is not reachable here. -->
-          <div class="flex items-center justify-between gap-x-2 px-4 pt-1 pb-2 shrink-0">
+          <!-- The sheet covers its own trigger, so it carries a header to name the field; the
+               way out is the grabber (swipe-to-dismiss) and a backdrop tap. -->
+          <div class="px-4 pt-1 pb-2 shrink-0">
             <p class="text-base font-medium text-base-content truncate">
               {{ uiConfig.label || props.label || uiConfig.placeholder || props.placeholder || '' }}
             </p>
-            <button
-              mnButton
-              [data]="{ size: 'sm', variant: 'text', color: 'secondary' }"
-              type="button"
-              class="shrink-0 cursor-pointer"
-              (click)="close()"
-              [attr.aria-label]="uiConfig.closeLabel || 'Close'"
-            ><svg lucideX [size]="20"></svg></button>
           </div>
           <ng-container [ngTemplateOutlet]="panelBody"></ng-container>
         </div>

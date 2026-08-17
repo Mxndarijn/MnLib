@@ -142,7 +142,4 @@ export type MnMultiSelectUIConfig = {
 
   /** Text shown when no options match the search filter */
   noOptionsFound?: string;
-
-  /** Accessible label for the mobile sheet's close button (falls back to 'Close') */
-  closeLabel?: string;
 }
