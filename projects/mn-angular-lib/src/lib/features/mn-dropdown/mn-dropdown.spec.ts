@@ -734,3 +734,91 @@ describe('MnDropdown (searchable)', () => {
     expect(component.searchTerm).toBe('');
   });
 });
+
+describe('MnDropdown (active item)', () => {
+  @Component({
+    standalone: true,
+    imports: [MnDropdown],
+    template: `<mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>`,
+  })
+  class ActiveHostComponent {
+    props: MnDropdownProps = {
+      id: 'active-dd',
+      mobileSheet: false,
+      actions: [
+        {label: 'English', run: () => undefined},
+        {label: 'Nederlands', active: true, run: () => undefined},
+        {label: 'Deutsch', run: () => undefined},
+      ],
+    };
+  }
+
+  let fixture: ComponentFixture<ActiveHostComponent>;
+  let component: MnDropdown;
+
+  function menu(): HTMLElement | null {
+    return document.getElementById('active-dd-menu');
+  }
+
+  function items(): HTMLButtonElement[] {
+    return Array.from(menu()?.querySelectorAll('[role="menuitem"]') ?? []) as HTMLButtonElement[];
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ActiveHostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+
+    stubViewport(false);
+    fixture = TestBed.createComponent(ActiveHostComponent);
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
+    component.toggle();
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    menu()?.remove();
+  });
+
+  it('marks only the active row with aria-current and a trailing check', () => {
+    const rows = items();
+    // aria-current is set on the active row alone; the others carry no marker.
+    expect(rows.map(r => r.getAttribute('aria-current'))).toEqual([null, 'true', null]);
+    // The check svg renders inside the active row only.
+    expect(rows[0].querySelector('svg')).toBeNull();
+    expect(rows[1].querySelector('svg')).withContext('active row shows a check').not.toBeNull();
+    expect(rows[2].querySelector('svg')).toBeNull();
+  });
+
+  it('highlights the active row distinctly from the hover background', () => {
+    const active = items()[1];
+    // The active highlight must not reuse the hover/focus background, or the active row
+    // and a hovered row would be indistinguishable.
+    expect(active.classList.contains('bg-primary/10')).toBeTrue();
+    expect(active.classList.contains('font-medium')).toBeTrue();
+  });
+
+  it('still fires and closes on choosing the active item — it is not a toggle', () => {
+    const run = jasmine.createSpy('run');
+    fixture.componentInstance.props = {
+      ...fixture.componentInstance.props,
+      actions: [{label: 'English', active: true, run}],
+    };
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+
+    items()[0].click();
+    fixture.detectChanges();
+
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(component.isOpen).toBeFalse();
+  });
+});

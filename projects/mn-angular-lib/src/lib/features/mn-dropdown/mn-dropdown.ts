@@ -15,6 +15,7 @@ import {
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
+  LucideCheck,
   LucideChevronDown,
   LucideDynamicIcon,
   LucideEllipsisVertical,
@@ -69,6 +70,9 @@ export class MnDropdown implements OnInit {
   @Input({ required: true }) datasource!: MnDropdownProps;
 
   protected uiConfig: MnDropdownUIConfig = {};
+
+  /** Lucide data for the trailing check shown on the {@link MnDropdownAction.active} row. */
+  protected readonly checkIcon = LucideCheck.icon;
 
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];

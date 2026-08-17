@@ -135,7 +135,7 @@ export type MnTableRowAction<T> = {
   /** Predicate deciding whether the action is disabled (shown but non-interactive) for a row. */
   disabled?: (row: T) => boolean;
   /**
-   * Tints the action's button and its ⋯-menu item. Defaults to `'secondary'` (or
+   * Tints the action's button and its ⋯-menu item. Defaults to `'primary'` (or
    * `'danger'` when {@link danger} is set), matching the built-in look. Whatever colour
    * an action shows inline is carried into the collapsed bottom-sheet item too.
    */

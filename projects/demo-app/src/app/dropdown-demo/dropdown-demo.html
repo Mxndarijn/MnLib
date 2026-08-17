@@ -64,6 +64,10 @@
     <mn-lib-dropdown [datasource]="labelledProps"></mn-lib-dropdown>
   </app-demo-example>
 
+  <app-demo-example title="Active item (language selector)" hint="Flag an action active to mark the current choice — it renders highlighted with a trailing check. Here each pick moves the marker and updates the trigger label, so the selected language is always visible.">
+    <mn-lib-dropdown [datasource]="languageProps"></mn-lib-dropdown>
+  </app-demo-example>
+
   <app-demo-example title="Translated labels" hint="labelKey / ariaLabelKey resolve via MnLanguageService, falling back to the literal label when a key is untranslated.">
     <mn-lib-dropdown [datasource]="i18nProps"></mn-lib-dropdown>
   </app-demo-example>

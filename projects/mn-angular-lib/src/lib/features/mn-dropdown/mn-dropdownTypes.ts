@@ -55,6 +55,16 @@ export type MnDropdownAction = {
   disabled?: boolean;
 
   /**
+   * Marks this item as the current choice — e.g. the active language in a language
+   * picker. Display-only: the item still {@link run}s and closes on choice like any
+   * other, but it renders highlighted with a trailing check so the user can see which
+   * one is selected without reading. The caller owns the flag (there is no single
+   * source of truth inside this command menu, which holds no value); typically at most
+   * one action carries it, though the component does not enforce that.
+   */
+  active?: boolean;
+
+  /**
    * Tints the item's label and icon. When omitted the item uses the default foreground
    * ({@link danger} still forces the destructive red). Lets a host carry a per-item
    * colour — e.g. an mn-table actions column keeps the same colours it shows inline.

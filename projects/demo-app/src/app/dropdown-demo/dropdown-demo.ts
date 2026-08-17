@@ -13,6 +13,11 @@ export class DropdownDemo implements OnInit {
   /** Last chosen command, echoed in each example so the menu feels live. */
   lastAction = '—';
 
+  /** Currently-active language for the language-selector example. Drives both the
+   *  trigger label and which row carries the `active` marker, rebuilt on each pick. */
+  private activeLanguage = 'English';
+  private readonly languages = ['English', 'Nederlands', 'Deutsch', 'Français', 'Español'];
+
   readonly avatarTrigger = viewChild.required<TemplateRef<unknown>>('avatarTrigger');
   readonly editIcon = viewChild.required<TemplateRef<unknown>>('editIcon');
   readonly duplicateIcon = viewChild.required<TemplateRef<unknown>>('duplicateIcon');
@@ -33,12 +38,38 @@ export class DropdownDemo implements OnInit {
   buttonIconProps!: MnDropdownProps;
   separatorProps!: MnDropdownProps;
   avatarProps!: MnDropdownProps;
+  languageProps!: MnDropdownProps;
 
   private pick(name: string): void {
     this.lastAction = name;
   }
 
+  /** Sets the active language and rebuilds the props so the `active` marker (and the
+   *  trigger label) move to the newly-chosen row. */
+  private pickLanguage(name: string): void {
+    this.activeLanguage = name;
+    this.pick(name);
+    this.buildLanguageProps();
+  }
+
+  /** A value picker built on the command menu: the trigger shows the current language
+   *  and the matching row is flagged `active`, so the choice is visible at a glance. */
+  private buildLanguageProps(): void {
+    this.languageProps = {
+      id: 'dd-language',
+      triggerLabel: this.activeLanguage,
+      menuLabel: 'Language',
+      actions: this.languages.map(name => ({
+        label: name,
+        active: name === this.activeLanguage,
+        run: () => this.pickLanguage(name),
+      })),
+    };
+  }
+
   ngOnInit(): void {
+    this.buildLanguageProps();
+
     // Labels only — the leanest form.
     this.basicProps = {
       id: 'dd-basic',

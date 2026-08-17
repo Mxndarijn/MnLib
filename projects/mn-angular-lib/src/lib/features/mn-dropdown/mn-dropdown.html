@@ -95,9 +95,10 @@
           type="button"
           role="menuitem"
           [disabled]="action.disabled"
+          [attr.aria-current]="action.active ? 'true' : null"
           [class.opacity-50]="action.disabled"
           [class.pointer-events-none]="action.disabled"
-          [ngClass]="[actionColorClass(action), sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm']"
+          [ngClass]="[actionColorClass(action), sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm', action.active ? 'bg-primary/10 font-medium' : '']"
           class="flex w-full shrink-0 items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
           (click)="select(action)"
         >
@@ -112,7 +113,17 @@
               }
             </span>
           }
-          <span class="truncate">{{ actionLabel(action) }}</span>
+          <span class="truncate min-w-0">{{ actionLabel(action) }}</span>
+          <!-- The current choice's marker (e.g. the active language). Decorative: the
+               state is conveyed to assistive tech by `aria-current` on the row. -->
+          @if (action.active) {
+            <svg
+              [lucideIcon]="checkIcon"
+              [size]="sheet ? 18 : 16"
+              class="ml-auto shrink-0 text-primary"
+              aria-hidden="true"
+            ></svg>
+          }
         </button>
       } @else {
         <hr role="separator" [ngClass]="sheet ? 'mx-4 my-1.5' : 'mx-2 my-1'" class="shrink-0 border-t border-base-300" />

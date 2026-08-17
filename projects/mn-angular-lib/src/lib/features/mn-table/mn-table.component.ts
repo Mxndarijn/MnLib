@@ -685,10 +685,10 @@ export class MnTable<T = object>
   /**
    * The effective colour for an action, used identically by the inline button and the
    * collapsed ⋯-menu item so the two never diverge: an explicit `color`, else `'danger'`
-   * for a destructive action, else the default `'secondary'`.
+   * for a destructive action, else the default `'primary'`.
    */
   rowActionColor(action: MnTableRowAction<T>, row: T): MnDropdownActionColor {
-    return this.resolveRowValue(action.color, row) ?? (action.danger ? 'danger' : 'secondary');
+    return this.resolveRowValue(action.color, row) ?? (action.danger ? 'danger' : 'primary');
   }
 
   /** Invokes an action for a row. */
