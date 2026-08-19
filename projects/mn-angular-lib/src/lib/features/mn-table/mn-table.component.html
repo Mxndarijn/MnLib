@@ -110,7 +110,7 @@
         class="w-full @min-[420px]:w-auto gap-1.5"
         [attr.aria-expanded]="filtersPanelOpen"
         aria-controls="mn-table-filters-panel"
-        (click)="toggleFiltersPanel()"
+        (click)="openFiltersPanel()"
       >
         <svg lucideFunnel [size]="15"></svg>
         <span>{{ filtersButtonLabel }}</span>
@@ -120,50 +120,63 @@
 </div>
 }
 
-<!-- Small-screen filter panel: stacked, full-width fields decoupled from column widths -->
-@if (hasColumnFilters && filtersCollapsed) {
-  <div
-    id="mn-table-filters-panel"
-    class="grid transition-all duration-200 ease-out motion-reduce:transition-none"
-    [style.grid-template-rows]="filtersPanelOpen ? '1fr' : '0fr'"
+<!-- Small-screen filters: full-width fields decoupled from column widths, presented
+     as a bottom sheet so they overlay rather than push the table down. -->
+@if (hasColumnFilters && filtersCollapsed && filtersPanelOpen) {
+  <mn-bottom-sheet
+    #filtersSheet
+    (dismiss)="filtersPanelOpen = false"
+    [ariaLabel]="filtersButtonLabel"
+    [growWithKeyboard]="true"
+    [maxHeightVh]="80"
   >
-    <div class="overflow-hidden" [attr.inert]="filtersPanelOpen ? null : ''">
-      <div class="flex flex-col gap-3 rounded-md border border-base-300 bg-base-100 p-3 mb-3">
-        @for (column of dataSource.columns; track column.key) {
-          @if (column.filterable) {
-            <div class="flex flex-col gap-1">
-              <label
-                class="text-xs font-medium text-base-content/70"
-                [attr.for]="'mn-table-filter-' + column.key"
-              >
-                @if (isTemplateRef(column.header)) {
-                  <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
-                } @else {
-                  {{ column.header }}
-                }
-              </label>
-              <ng-container
-                [ngTemplateOutletContext]="{ $implicit: column, idScope: 'panel' }"
-                [ngTemplateOutlet]="filterField"
-              ></ng-container>
-            </div>
-          }
+    <div id="mn-table-filters-panel" class="flex flex-col gap-3 px-4 pb-4">
+      <span class="text-base font-semibold text-base-content">{{ filtersButtonLabel }}</span>
+      @for (column of dataSource.columns; track column.key) {
+        @if (column.filterable) {
+          <div class="flex flex-col gap-1">
+            <label
+              class="text-xs font-medium text-base-content/70"
+              [attr.for]="'mn-table-filter-panel-' + column.key"
+            >
+              @if (isTemplateRef(column.header)) {
+                <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
+              } @else {
+                {{ column.header }}
+              }
+            </label>
+            <ng-container
+              [ngTemplateOutletContext]="{ $implicit: column, idScope: 'panel' }"
+              [ngTemplateOutlet]="filterField"
+            ></ng-container>
+          </div>
         }
-        @if (hasActiveFilters) {
-          <button
-            type="button"
-            mnButton
-            [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
-            class="self-start gap-1"
-            (click)="clearAllFilters()"
-          >
-            <svg lucideX [size]="14"></svg>
-            <span>{{ clearFiltersButtonLabel }}</span>
-          </button>
-        }
+      }
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          mnButton
+          [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
+          class="self-start gap-1"
+          (click)="clearAllFilters()"
+        >
+          <svg lucideX [size]="14"></svg>
+          <span>{{ clearFiltersButtonLabel }}</span>
+        </button>
+      }
+      <div class="mt-1 flex min-[400px]:justify-end">
+        <button
+          type="button"
+          mnButton
+          [data]="{ variant: 'fill', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
+          class="w-full min-[400px]:w-auto"
+          (click)="closeFiltersPanel()"
+        >
+          <span>{{ filtersCloseLabel }}</span>
+        </button>
       </div>
     </div>
-  </div>
+  </mn-bottom-sheet>
 }
 
 <!-- Table wrapper with horizontal scroll -->

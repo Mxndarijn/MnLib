@@ -40,12 +40,13 @@ import {MnInputField} from '../mn-input-field';
 import {FormsModule} from '@angular/forms';
 import {MnCollectionPagination, MnSelectableCollectionBase} from '../mn-collection';
 import {MnButton} from '../mn-button';
+import {MnBottomSheet} from '../mn-bottom-sheet';
 import {LucideDynamicIcon, LucideFilter, LucideFunnel, LucideX} from '@lucide/angular';
 
 @Component({
   selector: 'mn-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnDropdown, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
+  imports: [NgClass, NgTemplateOutlet, MnCheckbox, MnHiddenBelowDirective, MnShowAboveDirective, MnShowBelowDirective, MnInputField, MnSelect, MnMultiSelect, MnDropdown, MnSkeleton, FormsModule, MnCollectionPagination, MnButton, MnBottomSheet, LucideFilter, LucideX, LucideFunnel, LucideDynamicIcon],
   templateUrl: './mn-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Block-level so the host has a definite width for the @container chrome inside it.
@@ -71,8 +72,11 @@ export class MnTable<T = object>
    */
   protected filtersCollapsed = false;
 
-  /** Whether the small-screen filter panel is currently expanded. */
+  /** Whether the small-screen filter bottom sheet is currently open. */
   protected filtersPanelOpen = false;
+
+  /** Small-screen filter sheet, held so the close button can play its exit. */
+  @ViewChild('filtersSheet') protected filtersSheet?: MnBottomSheet;
 
   protected override readonly componentName = 'MnTable';
 
@@ -217,6 +221,11 @@ export class MnTable<T = object>
     return this.resolveLabel(this.dataSource.clearFiltersLabelKey, 'mnCollection.clearAll', this.dataSource.clearFiltersLabel ?? 'Clear all');
   }
 
+  /** Accessible label for the filter sheet's close button. */
+  get filtersCloseLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.close', 'Close');
+  }
+
   /** Heading for the selection summary, with the count filled in. */
   get selectionSummaryTitle(): string {
     const labels = this.dataSource.selectionSummaryLabels;
@@ -230,9 +239,16 @@ export class MnTable<T = object>
     return this.resolveLabel(labels?.clearAllKey, 'mnCollection.clearAll', labels?.clearAll ?? 'Clear all');
   }
 
-  /** Opens/closes the stacked filter panel shown on small screens. */
-  toggleFiltersPanel(): void {
-    this.filtersPanelOpen = !this.filtersPanelOpen;
+  /** Opens the small-screen filter bottom sheet. */
+  openFiltersPanel(): void {
+    this.filtersPanelOpen = true;
+  }
+
+  /** Plays the sheet's slide-down exit, then unmounts it. */
+  async closeFiltersPanel(): Promise<void> {
+    await this.filtersSheet?.startClosing();
+    this.filtersPanelOpen = false;
+    this.cdr.markForCheck();
   }
   private readonly baseTableClasses = 'w-full border-collapse overflow-y-hidden';
   /**
