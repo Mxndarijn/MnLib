@@ -109,8 +109,8 @@ export class MnMultiSelect implements OnInit {
    * card) used to leave the portalled panel floating at its stale coordinates.
    */
   private scrollCapture: ((event: Event) => void) | null = null;
-  /** The bottom-sheet host currently moved into `document.body`, if any. */
-  private movedSheet: HTMLElement | null = null;
+  /** The bottom-sheet host, for outside-click tests. The sheet owns its own placement. */
+  private sheetHost: HTMLElement | null = null;
 
   /**
    * The dropdown panel element, queried while it is rendered by the `@if` block.
@@ -156,15 +156,14 @@ export class MnMultiSelect implements OnInit {
   }
 
   /**
-   * The bottom-sheet host, read as an `ElementRef` so it can be relocated to
-   * `document.body` — its `position: fixed` children (backdrop + container) must anchor
-   * to the viewport, not to any transformed/filtered ancestor of this component. On open
-   * its container height is captured as the sheet's `min-height` floor.
+   * The bottom-sheet host, kept as a reference for outside-click tests. The sheet
+   * relocates itself to `document.body`, so nothing is moved here. On open its
+   * container height is captured as the sheet's `min-height` floor.
    */
   @ViewChild('sheet', {static: false, read: ElementRef})
   set sheetRef(ref: ElementRef<HTMLElement> | undefined) {
     const el = ref?.nativeElement ?? null;
-    this.movedSheet = this.portal(el, this.movedSheet);
+    this.sheetHost = el;
     if (el) {
       this.captureSheetFloor(el);
     } else {
@@ -217,7 +216,7 @@ export class MnMultiSelect implements OnInit {
       // Guarantee the portalled elements never outlive the component.
       this.movedPanel = this.portal(null, this.movedPanel);
       this.movedShield = this.portal(null, this.movedShield);
-      this.movedSheet = this.portal(null, this.movedSheet);
+      this.sheetHost = null;
     });
   }
 
@@ -312,7 +311,7 @@ export class MnMultiSelect implements OnInit {
     const insidePanel = !!target && !!this.movedPanel && this.movedPanel.contains(target);
     // In sheet mode the backdrop tap is handled by mn-bottom-sheet's own (dismiss); the
     // sheet host counts as "inside" here so this listener never double-fires the close.
-    const insideSheet = !!target && !!this.movedSheet && this.movedSheet.contains(target);
+    const insideSheet = !!target && !!this.sheetHost && this.sheetHost.contains(target);
     if (!insideHost && !insidePanel && !insideSheet) {
       this.close();
     }
@@ -339,7 +338,7 @@ export class MnMultiSelect implements OnInit {
     }
     requestAnimationFrame(() => {
       // The sheet may have closed before the frame ran; don't strand a stale floor.
-      if (!this.isOpen || this.movedSheet !== hostEl) return;
+      if (!this.isOpen || this.sheetHost !== hostEl) return;
       this.sheetFloorPx = measure();
       this.cdr.markForCheck();
     });

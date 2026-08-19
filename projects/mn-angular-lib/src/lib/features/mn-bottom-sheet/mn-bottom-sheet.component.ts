@@ -6,6 +6,8 @@ import {
   HostBinding,
   inject,
   Input,
+  OnDestroy,
+  OnInit,
   Output,
   viewChild,
 } from '@angular/core';
@@ -22,10 +24,17 @@ import {NgClass} from '@angular/common';
  * dismissal is reported through {@link dismiss} for the host to act on (run a close
  * guard, tear down its overlay, …) rather than being handled here.
  *
- * Positioning is `position: fixed` against the viewport, so a consumer whose sheet
- * lives inside a `transform`/`filter` ancestor (which would otherwise become the
- * containing block) must relocate this host to `document.body` — as the
- * multi-select does with its portal helper.
+ * Positioning is `position: fixed` against the viewport, so the host relocates itself
+ * to `document.body` on init and blocks scrolling behind it while open. Both are
+ * unconditional: rendering viewport-fixed chrome in place made correctness depend on
+ * where a consumer happened to write the tag. A `transform`/`filter`/`contain`
+ * ancestor becomes the containing block and pushes the sheet to the middle of the
+ * screen — which a *stacked* modal did to its own sheet — and, because `position:
+ * fixed` moves where an element paints but not where it sits in the DOM, a gesture on
+ * the backdrop still scrolled whichever ancestor was the scroll container.
+ *
+ * The multi-select and dropdown used to do the relocating themselves; that is why the
+ * behaviour reads as new here but is not new to them.
  */
 @Component({
   selector: 'mn-bottom-sheet',
@@ -34,7 +43,7 @@ import {NgClass} from '@angular/common';
   templateUrl: './mn-bottom-sheet.component.html',
   styleUrl: './mn-bottom-sheet.component.css',
 })
-export class MnBottomSheet {
+export class MnBottomSheet implements OnInit, OnDestroy {
   /** Tailwind's `sm` breakpoint — at or below this the swipe gesture is armed.
    *  Kept in step with the same constant in the modal shell and multi-select. */
   private static readonly SHEET_MAX_WIDTH = 639.98;
@@ -106,6 +115,73 @@ export class MnBottomSheet {
   /** In-flight exit animation, so a swipe-dismiss and a follow-up programmatic
    *  {@link startClosing} share one glide instead of re-triggering it. */
   private exitPromise: Promise<void> | null = null;
+
+  /** The host node once moved to `document.body`, so it is only detached if we moved it. */
+  private portalledHost: HTMLElement | null = null;
+
+  /** Blocks scroll gestures aimed at anything behind the sheet, while it is open. */
+  private scrollGuard: ((event: Event) => void) | null = null;
+
+  /** Moves the host out to `document.body` and stops the page behind scrolling. */
+  ngOnInit(): void {
+    if (typeof document === 'undefined') return;
+    const host = this.el.nativeElement;
+    document.body.appendChild(host);
+    this.portalledHost = host;
+    this.lockScroll();
+  }
+
+  /**
+   * Stops pointer scrolling behind the sheet for as long as it is open.
+   *
+   * Cancels the gesture rather than setting `overflow: hidden` on `document.body`: an
+   * app whose scroll container is a layout element (a `<main>`, a drawer body) leaves
+   * `body` unscrollable, so locking it there is a no-op and the page still slides about
+   * under the sheet. Cancelling `wheel` and `touchmove` before anything acts on them
+   * holds regardless of which element does the scrolling.
+   *
+   * Gestures that begin inside the sheet are let through so its own content still
+   * scrolls; `overscroll-behavior: contain` keeps those from chaining out at the ends.
+   *
+   * Pointer input only. Page Down and the arrows still reach the page behind when focus
+   * is left there — closing that needs either a key filter or moving focus into the
+   * sheet, and neither belongs in this change.
+   */
+  private lockScroll(): void {
+    const guard = (event: Event): void => {
+      const target = event.target as Node | null;
+      const container = this.containerRef()?.nativeElement;
+      if (container && target && container.contains(target)) return;
+      // Only cancellable events can be stopped; a passive listener elsewhere in the
+      // chain would otherwise log a console error for a no-op preventDefault.
+      if (event.cancelable) event.preventDefault();
+    };
+    // Capture phase, so the gesture is cancelled before any scroller sees it.
+    document.addEventListener('wheel', guard, {capture: true, passive: false});
+    document.addEventListener('touchmove', guard, {capture: true, passive: false});
+    this.scrollGuard = guard;
+  }
+
+  /** Releases the scroll guard. Idempotent. */
+  private unlockScroll(): void {
+    if (!this.scrollGuard) return;
+    document.removeEventListener('wheel', this.scrollGuard, {capture: true});
+    document.removeEventListener('touchmove', this.scrollGuard, {capture: true});
+    this.scrollGuard = null;
+  }
+
+  /**
+   * Detaches the relocated host.
+   *
+   * Angular tears a view down by removing the nodes it created from their parent; a
+   * host we moved to `body` is no longer among the parent's children, so without
+   * this the sheet would outlive the view that declared it.
+   */
+  ngOnDestroy(): void {
+    this.unlockScroll();
+    this.portalledHost?.remove();
+    this.portalledHost = null;
+  }
 
   @HostBinding('class') get hostClasses(): string {
     return `mn-bottom-sheet${this.isDismissing ? ' is-dismissing' : ''}`

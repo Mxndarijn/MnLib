@@ -51,16 +51,23 @@ describe('MnBottomSheet', () => {
   /** Original innerWidth, restored after tests that force the narrow breakpoint. */
   let originalWidth: number;
 
+  /** The sheet host, which the component relocates to `document.body` on init. */
+  function sheetEl(): HTMLElement {
+    const el = document.body.querySelector<HTMLElement>(':scope > mn-bottom-sheet');
+    if (!el) throw new Error('bottom sheet was not attached to document.body');
+    return el;
+  }
+
   function container(): HTMLElement | null {
-    return fixture.nativeElement.querySelector('.mn-sheet-container');
+    return sheetEl().querySelector('.mn-sheet-container');
   }
 
   function backdrop(): HTMLElement | null {
-    return fixture.nativeElement.querySelector('.mn-sheet-backdrop');
+    return sheetEl().querySelector('.mn-sheet-backdrop');
   }
 
   function grabber(): HTMLElement | null {
-    return fixture.nativeElement.querySelector('.cursor-grab');
+    return sheetEl().querySelector('.cursor-grab');
   }
 
   /** Forces the viewport to the narrow width the swipe gesture requires to arm. */
@@ -84,7 +91,7 @@ describe('MnBottomSheet', () => {
     expect(container()).not.toBeNull();
     expect(backdrop()).not.toBeNull();
     expect(grabber()).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.projected-body')).not.toBeNull();
+    expect(sheetEl().querySelector('.projected-body')).not.toBeNull();
   });
 
   it('hides the backdrop when showBackdrop is false', () => {
@@ -186,4 +193,44 @@ describe('MnBottomSheet', () => {
     tick(700);
     expect(resolved).toBeTrue();
   }));
+
+  describe('placement', () => {
+    it('relocates the host to document.body, out of any page scroll container', () => {
+      const sheet = sheetEl();
+      expect(sheet.parentElement).toBe(document.body);
+      expect(fixture.nativeElement.contains(sheet)).toBeFalse();
+    });
+
+    it('detaches the relocated host when the declaring view is destroyed', () => {
+      expect(document.body.querySelectorAll(':scope > mn-bottom-sheet').length).toBe(1);
+
+      fixture.destroy();
+
+      expect(document.body.querySelectorAll(':scope > mn-bottom-sheet').length).toBe(0);
+    });
+  });
+
+  describe('scroll lock', () => {
+    /** Dispatches a cancellable wheel from a node and reports whether it was blocked. */
+    function wheelFrom(node: EventTarget): boolean {
+      const event = new WheelEvent('wheel', {bubbles: true, cancelable: true});
+      node.dispatchEvent(event);
+      return event.defaultPrevented;
+    }
+
+    it('cancels a wheel aimed at the page behind the sheet', () => {
+      expect(wheelFrom(document.body)).toBeTrue();
+    });
+
+    it('lets the sheet scroll its own content', () => {
+      const body = sheetEl().querySelector('.projected-body')!;
+      expect(body).not.toBeNull();
+      expect(wheelFrom(body)).toBeFalse();
+    });
+
+    it('releases the page once the sheet is destroyed', () => {
+      fixture.destroy();
+      expect(wheelFrom(document.body)).toBeFalse();
+    });
+  });
 });

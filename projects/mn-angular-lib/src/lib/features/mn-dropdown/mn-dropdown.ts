@@ -107,8 +107,8 @@ export class MnDropdown implements OnInit {
 
   /** The anchored popover panel currently moved into `document.body`, if any. */
   private movedPanel: HTMLElement | null = null;
-  /** The bottom-sheet host currently moved into `document.body`, if any. */
-  private movedSheet: HTMLElement | null = null;
+  /** The bottom-sheet host, for outside-click tests. The sheet owns its own placement. */
+  private sheetHost: HTMLElement | null = null;
 
   /** Whether the viewport is currently narrow enough for the sheet layout. */
   private isNarrowViewport = false;
@@ -185,7 +185,7 @@ export class MnDropdown implements OnInit {
   @ViewChild('sheet', { static: false, read: ElementRef })
   set sheetRef(ref: ElementRef<HTMLElement> | undefined) {
     const el = ref?.nativeElement ?? null;
-    this.movedSheet = this.portal(el, this.movedSheet);
+    this.sheetHost = el;
     if (el && this.isSearchable) {
       this.captureSheetFloor(el);
     } else if (!el) {
@@ -208,7 +208,7 @@ export class MnDropdown implements OnInit {
       this.unlockBodyScroll();
       // Guarantee the portalled elements never outlive the component.
       this.movedPanel = this.portal(null, this.movedPanel);
-      this.movedSheet = this.portal(null, this.movedSheet);
+      this.sheetHost = null;
     });
   }
 
@@ -387,7 +387,7 @@ export class MnDropdown implements OnInit {
     const target = event.target as Node | null;
     const insideHost = !!target && this.elRef.nativeElement.contains(target);
     const insidePanel = !!target && !!this.movedPanel && this.movedPanel.contains(target);
-    const insideSheet = !!target && !!this.movedSheet && this.movedSheet.contains(target);
+    const insideSheet = !!target && !!this.sheetHost && this.sheetHost.contains(target);
     if (!insideHost && !insidePanel && !insideSheet) {
       this.close();
     }
@@ -469,7 +469,7 @@ export class MnDropdown implements OnInit {
       return;
     }
     requestAnimationFrame(() => {
-      if (!this.isOpen || this.movedSheet !== hostEl) return;
+      if (!this.isOpen || this.sheetHost !== hostEl) return;
       this.sheetFloorPx = measure();
       this.cdr.markForCheck();
     });

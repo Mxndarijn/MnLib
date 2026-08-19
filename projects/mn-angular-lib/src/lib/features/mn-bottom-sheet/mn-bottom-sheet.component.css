@@ -13,6 +13,11 @@
      so this is a no-op outside the native shell. */
   padding-bottom: env(safe-area-inset-bottom);
 
+  /* Scrolling the sheet's own content to either end must not hand the remaining delta
+     to whatever is behind it. The component's guard blocks gestures that start outside
+     the sheet; this stops the ones that start inside it from chaining out. */
+  overscroll-behavior: contain;
+
   /* Defined resting floor so the keyboard-grow (min-height -> max) animates from a set
      value instead of jumping from `auto`. A consumer-supplied `minHeightPx` (inline
      style) overrides this without disturbing the transition. */
