@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   DestroyRef,
@@ -34,6 +35,7 @@ export const MN_MULTI_SELECT_CONFIG = new InjectionToken<MnMultiSelectUIConfig>(
 
 @Component({
   selector: 'mn-lib-multi-select',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [NgClass, NgTemplateOutlet, FormsModule, MnErrorMessage, MnButton, MnInputField, MnBottomSheet, LucideX, LucideChevronDown],
   templateUrl: './mn-multi-select.html',
@@ -207,6 +209,9 @@ export class MnMultiSelect implements OnInit {
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // The locale stream fires outside an Angular event handler; under OnPush (and in a
+      // zoneless app) the re-resolved label/placeholder must be announced explicitly.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => {
       sub.unsubscribe();
@@ -240,6 +245,9 @@ export class MnMultiSelect implements OnInit {
 
   writeValue(val: unknown): void {
     this.selectedValues = Array.isArray(val) ? val : [];
+    // A programmatic form write (setValue/patchValue/reset) does not schedule change
+    // detection under OnPush, so the trigger chips would keep showing the old selection.
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: (val: unknown) => void): void {
@@ -252,6 +260,9 @@ export class MnMultiSelect implements OnInit {
 
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // Called by the forms module outside an Angular event handler; under OnPush the
+    // disabled styling would otherwise not reflect a programmatic enable/disable.
+    this.cdr.markForCheck();
   }
 
   // ========== Dropdown Logic ==========

@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component, Type} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {Subject} from 'rxjs';
@@ -17,6 +17,19 @@ import {MnLanguageService} from '../../language';
  * resolve against the viewport again. These specs assert the portal behaviour
  * plus the preserved open/close semantics.
  */
+
+/**
+ * Renders after an imperative state change on the OnPush child. Calling a method directly
+ * (`component.toggle()`, …) does not mark the child dirty, so a top-down
+ * `fixture.detectChanges()` from the Default test host skips it — whereas the real
+ * `(click)`/DOM event does mark it in the app. Marking the child here mirrors production.
+ * When there is no child (a directly-created OnPush root renders on its own) it degrades to
+ * a plain detect, so it is safe to use in every block.
+ */
+function syncCd(fx: ComponentFixture<unknown>, dir: Type<unknown>): void {
+  fx.debugElement.query(By.directive(dir))?.injector.get(ChangeDetectorRef).markForCheck();
+  fx.detectChanges();
+}
 
 /** Minimal config stub — the component only calls `resolve()`, which returns an empty config here. */
 const configStub: Partial<MnConfigService> = {
@@ -83,7 +96,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
   });
 
@@ -99,7 +112,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('portals the panel to document.body (not the transformed ancestor) when opened', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     const el = panel();
     expect(el).withContext('panel should be rendered when open').not.toBeNull();
@@ -112,7 +125,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('positions the panel from the trigger rect with a fixed layout', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     const el = panel()!;
     // Uses the `fixed` utility so the (now body-anchored) panel tracks the viewport.
@@ -127,17 +140,17 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('removes the portalled panel from the DOM when closed', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(panel()).not.toBeNull();
 
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(panel()).toBeNull();
   });
 
   it('removes the portalled panel when the component is destroyed while open', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(panel()).not.toBeNull();
 
     fixture.destroy();
@@ -146,11 +159,11 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('keeps the dropdown open when clicking inside the portalled panel', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     const el = panel()!;
     el.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).toBeTrue();
     expect(panel()).not.toBeNull();
@@ -158,11 +171,11 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('closes the dropdown on an outside document click', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.isOpen).toBeTrue();
 
     document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).toBeFalse();
     expect(panel()).toBeNull();
@@ -170,11 +183,11 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('closes the dropdown on Escape', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.isOpen).toBeTrue();
 
     document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).toBeFalse();
     expect(panel()).toBeNull();
@@ -182,11 +195,11 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('closes the dropdown on window scroll', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.isOpen).toBeTrue();
 
     component.onWindowScrollOrResize();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).toBeFalse();
     expect(panel()).toBeNull();
@@ -194,14 +207,14 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('closes the dropdown when an inner scroll container scrolls', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.isOpen).toBeTrue();
 
     // `window:scroll` never fires for a nested scroller (a modal body, a scrollable
     // card), which used to leave the portalled panel floating at stale coordinates.
     const scroller = fixture.nativeElement.querySelector('.transformed-ancestor') as HTMLElement;
     scroller.dispatchEvent(new Event('scroll'));
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).toBeFalse();
     expect(panel()).toBeNull();
@@ -209,10 +222,10 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('keeps the dropdown open when the panel\'s own option list is scrolled', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     panel()!.dispatchEvent(new Event('scroll'));
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).toBeTrue();
     expect(panel()).not.toBeNull();
@@ -222,7 +235,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     expect(shield()).withContext('no shield while closed').toBeNull();
 
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     const el = shield();
     expect(el).withContext('shield should be rendered when open').not.toBeNull();
@@ -231,13 +244,13 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     expect(el!.parentElement).toBe(document.body);
 
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(shield()).toBeNull();
   });
 
   it('removes the shield when the component is destroyed while open', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(shield()).not.toBeNull();
 
     fixture.destroy();
@@ -246,10 +259,10 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('closes the dropdown when the shield is clicked', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     shield()!.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}));
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).toBeFalse();
     expect(panel()).toBeNull();
@@ -258,7 +271,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('swallows the dismissing click instead of letting it reach what is underneath', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     // Stands in for a modal backdrop's own click handler: it must not fire, or dismissing
     // the dropdown would tear down the surrounding modal along with it.
@@ -267,7 +280,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
     const event = new MouseEvent('click', {bubbles: true, cancelable: true});
     shield()!.dispatchEvent(event);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     document.body.removeEventListener('click', underneath);
 
     expect(underneath).not.toHaveBeenCalled();
@@ -276,7 +289,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
 
   it('closes the dropdown when the trigger is hidden instead of destroyed', async () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(panel()).not.toBeNull();
 
     // Guard against a vacuous pass: a visible trigger must survive the observer's
@@ -291,7 +304,7 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     wrapper.style.display = 'none';
 
     await waitForIntersectionObserver();
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isOpen).withContext('hidden trigger must close its panel').toBeFalse();
     expect(panel()).toBeNull();
@@ -359,7 +372,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     fixture = TestBed.createComponent(CollapseHostComponent);
     host = fixture.componentInstance;
     host.props = {...host.props, ...props};
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
   }
 
@@ -376,7 +389,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
   it('renders individual chips (feature off) by default when no collapse props are set', () => {
     build({});
     component.writeValue([1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.collapseEnabled).toBeFalse();
     expect(component.isCollapsed).toBeFalse();
@@ -387,7 +400,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     build({collapsePlaceholder: '{count} selected'});
     // Exactly 5 selected == default threshold; collapse only triggers when strictly greater.
     component.writeValue([1, 2, 3, 4, 5]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isCollapsed).toBeFalse();
     expect(chips().length).toBe(5);
@@ -396,7 +409,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
   it('collapses to the summary with the custom placeholder above the threshold', () => {
     build({collapsePlaceholder: '{count} selected'});
     component.writeValue([1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.isCollapsed).toBeTrue();
     expect(chips().length).toBe(1);
@@ -407,7 +420,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
   it('substitutes every {count} token in the placeholder', () => {
     build({collapsePlaceholder: '{count} of many ({count})'});
     component.writeValue([1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.collapseSummaryText).toBe('6 of many (6)');
   });
@@ -415,7 +428,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
   it('falls back to "{count} selected" when collapse is enabled via threshold only', () => {
     build({collapseThreshold: 2});
     component.writeValue([1, 2, 3]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.collapseEnabled).toBeTrue();
     expect(component.isCollapsed).toBeTrue();
@@ -425,11 +438,11 @@ describe('MnMultiSelect (collapse to count summary)', () => {
   it('honours an explicit collapseThreshold instead of the default', () => {
     build({collapseThreshold: 3, collapsePlaceholder: '{count} chosen'});
     component.writeValue([1, 2, 3]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.isCollapsed).toBeFalse();
 
     component.writeValue([1, 2, 3, 4]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.isCollapsed).toBeTrue();
     expect(component.collapseSummaryText).toBe('4 chosen');
   });
@@ -439,7 +452,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     // this a fully-selected three-option field could only ever render three chips to count.
     build({allSelectedPlaceholder: 'All selected', collapseThreshold: 99});
     component.writeValue([1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.allSelected).toBeTrue();
     expect(component.isCollapsed).toBeTrue();
@@ -456,11 +469,11 @@ describe('MnMultiSelect (collapse to count summary)', () => {
   it('goes back to chips the moment one option is deselected', () => {
     build({allSelectedPlaceholder: 'All selected'});
     component.writeValue([1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.isCollapsed).toBeTrue();
 
     component.writeValue([1, 2, 3, 4, 5]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     // Five of six is under the default threshold, so the summary must not linger.
     expect(component.allSelected).toBeFalse();
@@ -470,20 +483,20 @@ describe('MnMultiSelect (collapse to count summary)', () => {
   it('prefers the all-selected summary over the count one', () => {
     build({allSelectedPlaceholder: 'All selected', collapsePlaceholder: '{count} selected'});
     component.writeValue([1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.collapseSummaryText).toBe('All selected');
 
     // ...and hands back to the count summary below the full set.
     component.writeValue([1, 2, 3, 4, 5, 6].slice(0, 6));
     component.writeValue([1, 2, 3, 4, 5]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     expect(component.collapseSummaryText).toBe('5 selected');
   });
 
   it('substitutes {count} in the all-selected summary too', () => {
     build({allSelectedPlaceholder: 'All {count} selected'});
     component.writeValue([1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.collapseSummaryText).toBe('All 6 selected');
   });
@@ -493,7 +506,7 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     // zero options would otherwise satisfy a naive length comparison.
     build({allSelectedPlaceholder: 'All selected', options: []});
     component.writeValue([]);
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
 
     expect(component.allSelected).toBeFalse();
     expect(component.isCollapsed).toBeFalse();
@@ -513,12 +526,12 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     it('keeps the selection when the chip body is clicked', () => {
       build({});
       component.writeValue([1, 2]);
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       // The label span, i.e. the bulk of the chip's surface.
       const label = chips()[0].querySelector('span') as HTMLElement;
       label.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.selectedValues).toEqual([1, 2]);
     });
@@ -526,24 +539,24 @@ describe('MnMultiSelect (collapse to count summary)', () => {
     it('lets a chip-body click through to the trigger so it toggles the panel', () => {
       build({mobileSheet: false});
       component.writeValue([1, 2]);
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       chips()[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isOpen).toBeTrue();
       expect(component.selectedValues).toEqual([1, 2]);
       component.close();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
     });
 
     it('removes the option from the × button, without toggling the panel', () => {
       build({mobileSheet: false});
       component.writeValue([1, 2]);
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       firstChipRemoveButton().dispatchEvent(new MouseEvent('click', {bubbles: true}));
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.selectedValues).toEqual([2]);
       // removeOption stops propagation, so the trigger's toggle never sees the click.
@@ -635,7 +648,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
   function build(props: Partial<MnMultiSelectProps>): void {
     fixture = TestBed.createComponent(SheetHostComponent);
     fixture.componentInstance.props = {...fixture.componentInstance.props, ...props};
-    fixture.detectChanges();
+    syncCd(fixture, MnMultiSelect);
     component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
   }
 
@@ -662,7 +675,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('hides the search input just below the default threshold of 8', () => {
       build({options: optionsOfLength(7)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSearchable).toBeFalse();
       expect(searchInput()).toBeNull();
@@ -671,7 +684,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('auto-enables the search input at the default threshold of 8', () => {
       build({options: optionsOfLength(8)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSearchable).toBeTrue();
       expect(searchInput()).not.toBeNull();
@@ -680,7 +693,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('lets an explicit searchable:false suppress search on a long list', () => {
       build({options: optionsOfLength(20), searchable: false});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSearchable).toBeFalse();
       expect(searchInput()).toBeNull();
@@ -689,7 +702,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('lets an explicit searchable:true force search on a short list', () => {
       build({options: optionsOfLength(2), searchable: true});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSearchable).toBeTrue();
       expect(searchInput()).not.toBeNull();
@@ -698,7 +711,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('honours a custom searchThreshold instead of the default', () => {
       build({options: optionsOfLength(3), searchThreshold: 3});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSearchable).toBeTrue();
       expect(searchInput()).not.toBeNull();
@@ -708,7 +721,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
       component.onSearch('Option 1');
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       // "Option 1" and "Option 10" — a substring match, so both survive.
       expect(component.filteredOptions.map(o => o.label)).toEqual(['Option 1', 'Option 10']);
@@ -721,7 +734,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('renders the panel as a sheet with a backdrop', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSheet).toBeTrue();
       expect(sheet()).not.toBeNull();
@@ -731,7 +744,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('portals the sheet host to document.body so its fixed chrome anchors to the viewport', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       // The whole mn-bottom-sheet host (backdrop + container) is relocated as one unit.
       expect(sheetHost()!.parentElement).toBe(document.body);
@@ -742,7 +755,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('drops the trigger-relative inline position that only the anchored panel needs', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       const el = panel()!;
       expect(el.style.top).toBe('');
@@ -753,12 +766,12 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('stays open on scroll and resize, which the soft keyboard triggers', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       // Focusing the search field fires `resize` on Android; closing there would
       // dismiss the sheet the instant the user tries to search.
       component.onWindowScrollOrResize();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isOpen).toBeTrue();
       expect(panel()).not.toBeNull();
@@ -767,10 +780,10 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('closes on an outside click and tears down both overlays', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isOpen).toBeFalse();
       expect(panel()).toBeNull();
@@ -780,7 +793,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('removes both overlays when destroyed while open', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       fixture.destroy();
 
@@ -793,11 +806,11 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
       build({options: optionsOfLength(10)});
 
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
       expect(document.body.style.overflow).toBe('hidden');
 
       component.close();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
       expect(document.body.style.overflow).toBe('auto');
 
       document.body.style.overflow = '';
@@ -806,13 +819,13 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('captures a min-height floor once the sheet has opened', async () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       // The floor is measured on the next frame, so it is still null synchronously.
       expect(component.sheetFloorPx).toBeNull();
 
       await new Promise<void>(r => requestAnimationFrame(() => r()));
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.sheetFloorPx).not.toBeNull();
       expect(component.sheetFloorPx!).toBeGreaterThanOrEqual(0);
@@ -821,11 +834,11 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('clears the floor when the sheet closes so the next open re-measures', async () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
       await new Promise<void>(r => requestAnimationFrame(() => r()));
 
       component.close();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.sheetFloorPx).toBeNull();
     });
@@ -833,7 +846,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('keeps the anchored panel when mobileSheet is disabled', () => {
       build({options: optionsOfLength(10), mobileSheet: false});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSheet).toBeFalse();
       expect(backdrop()).toBeNull();
@@ -847,7 +860,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('keeps the trigger-anchored panel and renders no backdrop', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.isSheet).toBeFalse();
       expect(sheet()).toBeNull();
@@ -858,7 +871,7 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('leaves body scroll untouched', () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(document.body.style.overflow).toBe('');
     });
@@ -866,9 +879,9 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
     it('never captures a sheet floor for the anchored panel', async () => {
       build({options: optionsOfLength(10)});
       component.toggle();
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
       await new Promise<void>(r => requestAnimationFrame(() => r()));
-      fixture.detectChanges();
+      syncCd(fixture, MnMultiSelect);
 
       expect(component.sheetFloorPx).toBeNull();
     });

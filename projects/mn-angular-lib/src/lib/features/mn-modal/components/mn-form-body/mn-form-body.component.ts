@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -119,6 +120,7 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
 
 @Component({
   selector: 'mn-form-body',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MnButton, MnInputField, MnCheckbox, MnDatetime, MnMultiSelect, MnTextarea, MnFileInput, MnSelect, MnCustomFieldHostDirective, MnTable, MnCustomBodyHostComponent, LucideDynamicIcon],
   templateUrl: './mn-form-body.component.html',

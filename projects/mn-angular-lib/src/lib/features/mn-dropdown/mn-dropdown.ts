@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   DestroyRef,
@@ -61,6 +62,7 @@ const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
  */
 @Component({
   selector: 'mn-lib-dropdown',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [NgClass, NgTemplateOutlet, FormsModule, MnButton, MnBottomSheet, MnInputField, LucideSearchX, LucideDynamicIcon],
   templateUrl: './mn-dropdown.html',

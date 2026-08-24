@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -38,6 +39,7 @@ import {NgClass} from '@angular/common';
  */
 @Component({
   selector: 'mn-bottom-sheet',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [NgClass],
   templateUrl: './mn-bottom-sheet.component.html',
