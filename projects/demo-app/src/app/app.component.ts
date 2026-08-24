@@ -1,13 +1,14 @@
-import {Component, computed, signal} from '@angular/core';
-import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
-import {ThemeToggleComponent} from './shared/theme-toggle.component';
-import {DEMOS, groupDemos} from './shared/demo-catalog';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ThemeToggleComponent } from './shared/theme-toggle.component';
+import { DEMOS, groupDemos } from './shared/demo-catalog';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.css',
 })
 export class AppComponent {
@@ -24,8 +25,8 @@ export class AppComponent {
     const q = this.query().toLowerCase().trim();
     const matches = q
       ? DEMOS.filter(
-        (d) => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q),
-      )
+          (d) => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q),
+        )
       : DEMOS;
     return groupDemos(matches);
   });

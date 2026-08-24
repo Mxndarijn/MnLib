@@ -1,8 +1,18 @@
-import {AfterViewInit, Component, computed, DestroyRef, ElementRef, inject, signal, viewChild} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MnButton, MnDateSelectorBar} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MnButton, MnDateSelectorBar } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 /** A locale preset offered by the "Locale and labels" section. */
 type LocalePreset = {
@@ -27,65 +37,119 @@ type AgendaItem = {
   standalone: true,
   imports: [CommonModule, MnDateSelectorBar, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './date-selector-bar-demo.html',
-  styles: [`
-    /* The app's reset strips heading margins, so the page sets its own rhythm —
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      /* The app's reset strips heading margins, so the page sets its own rhythm —
        without it the section headings read as body copy. */
-    h2 { font-size: 24px; font-weight: 700; margin: 0 0 8px; }
-    h3 { font-size: 17px; font-weight: 600; margin: 0 0 6px; }
-    .bar-frame {
-      border: 1px solid var(--color-base-300);
-      border-radius: var(--mn-radius, 12px);
-      background: var(--color-base-200);
-      margin-top: 12px;
-      overflow: hidden;
-    }
-    .readout {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 8px 16px;
-      margin-top: 12px;
-      font-size: 13px;
-    }
-    .readout-label { opacity: 0.55; }
-    .readout-value { font-weight: 600; font-variant-numeric: tabular-nums; }
-    .locale-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .agenda {
-      margin-top: 16px;
-      border: 1px solid var(--color-base-300);
-      border-radius: var(--mn-radius, 12px);
-      overflow: hidden;
-    }
-    .agenda-row {
-      display: grid;
-      grid-template-columns: 84px 1fr;
-      gap: 12px;
-      padding: 12px 16px;
-      font-size: 14px;
-    }
-    .agenda-row + .agenda-row { border-top: 1px solid var(--color-base-300); }
-    .agenda-time { font-variant-numeric: tabular-nums; opacity: 0.6; }
-    .agenda-empty { padding: 24px 16px; font-size: 14px; opacity: 0.5; }
-    /* A genuinely resizable frame: the bar sizes to this box, not to the window. */
-    .resizable {
-      resize: horizontal;
-      overflow: auto;
-      min-width: 280px;
-      max-width: 100%;
-      width: 100%;
-      border: 1px dashed var(--color-base-300);
-      border-radius: var(--mn-radius, 12px);
-      background: var(--color-base-200);
-      margin-top: 12px;
-      padding: 4px;
-    }
-    .jump-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .log { margin-top: 12px; font-size: 13px; }
-    .log-row { display: flex; gap: 12px; padding: 6px 0; font-variant-numeric: tabular-nums; }
-    .log-index { opacity: 0.4; min-width: 24px; }
-    .log-empty { opacity: 0.5; padding: 6px 0; }
-    .note { font-size: 13px; opacity: 0.6; line-height: 1.6; margin-top: 8px; }
-  `],
+      h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 0 0 6px;
+      }
+      .bar-frame {
+        border: 1px solid var(--color-base-300);
+        border-radius: var(--mn-radius, 12px);
+        background: var(--color-base-200);
+        margin-top: 12px;
+        overflow: hidden;
+      }
+      .readout {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 8px 16px;
+        margin-top: 12px;
+        font-size: 13px;
+      }
+      .readout-label {
+        opacity: 0.55;
+      }
+      .readout-value {
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .locale-switch {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .agenda {
+        margin-top: 16px;
+        border: 1px solid var(--color-base-300);
+        border-radius: var(--mn-radius, 12px);
+        overflow: hidden;
+      }
+      .agenda-row {
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        gap: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      .agenda-row + .agenda-row {
+        border-top: 1px solid var(--color-base-300);
+      }
+      .agenda-time {
+        font-variant-numeric: tabular-nums;
+        opacity: 0.6;
+      }
+      .agenda-empty {
+        padding: 24px 16px;
+        font-size: 14px;
+        opacity: 0.5;
+      }
+      /* A genuinely resizable frame: the bar sizes to this box, not to the window. */
+      .resizable {
+        resize: horizontal;
+        overflow: auto;
+        min-width: 280px;
+        max-width: 100%;
+        width: 100%;
+        border: 1px dashed var(--color-base-300);
+        border-radius: var(--mn-radius, 12px);
+        background: var(--color-base-200);
+        margin-top: 12px;
+        padding: 4px;
+      }
+      .jump-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .log {
+        margin-top: 12px;
+        font-size: 13px;
+      }
+      .log-row {
+        display: flex;
+        gap: 12px;
+        padding: 6px 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .log-index {
+        opacity: 0.4;
+        min-width: 24px;
+      }
+      .log-empty {
+        opacity: 0.5;
+        padding: 6px 0;
+      }
+      .note {
+        font-size: 13px;
+        opacity: 0.6;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+    `,
+  ],
 })
 export class DateSelectorBarDemo implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
@@ -100,10 +164,10 @@ export class DateSelectorBarDemo implements AfterViewInit {
 
   // --- Section 3: locale and labels -------------------------------------------
   readonly localePresets: LocalePreset[] = [
-    {locale: 'en-US', name: 'English', todayLabel: 'Today', pickDateLabel: 'Pick a date'},
-    {locale: 'nl-NL', name: 'Nederlands', todayLabel: 'Vandaag', pickDateLabel: 'Kies een datum'},
-    {locale: 'de-DE', name: 'Deutsch', todayLabel: 'Heute', pickDateLabel: 'Datum wählen'},
-    {locale: 'ja-JP', name: '日本語', todayLabel: '今日', pickDateLabel: '日付を選択'},
+    { locale: 'en-US', name: 'English', todayLabel: 'Today', pickDateLabel: 'Pick a date' },
+    { locale: 'nl-NL', name: 'Nederlands', todayLabel: 'Vandaag', pickDateLabel: 'Kies een datum' },
+    { locale: 'de-DE', name: 'Deutsch', todayLabel: 'Heute', pickDateLabel: 'Datum wählen' },
+    { locale: 'ja-JP', name: '日本語', todayLabel: '今日', pickDateLabel: '日付を選択' },
   ];
   readonly activePreset = signal<LocalePreset>(this.localePresets[0]);
   readonly localeDate = signal<Date>(this.startOfToday());
@@ -145,7 +209,12 @@ export class DateSelectorBarDemo implements AfterViewInit {
   /** Records an emitted date so the log section can show emit behaviour. */
   recordEmit(date: Date): void {
     this.logDate.set(date);
-    const stamp = date.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'});
+    const stamp = date.toLocaleDateString('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
     this.emitLog.update((entries) => [stamp, ...entries].slice(0, 8));
   }
 
@@ -156,7 +225,12 @@ export class DateSelectorBarDemo implements AfterViewInit {
 
   /** Formats a date for the readout lines. */
   format(date: Date, locale = 'en-GB'): string {
-    return date.toLocaleDateString(locale, {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+    return date.toLocaleDateString(locale, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
   /** Returns today at midnight. */
@@ -176,18 +250,18 @@ export class DateSelectorBarDemo implements AfterViewInit {
 
     const pools: AgendaItem[][] = [
       [
-        {time: '09:00', title: 'Sprint planning'},
-        {time: '11:30', title: 'Design review — date selector'},
-        {time: '15:00', title: 'Pairing on the calendar week view'},
+        { time: '09:00', title: 'Sprint planning' },
+        { time: '11:30', title: 'Design review — date selector' },
+        { time: '15:00', title: 'Pairing on the calendar week view' },
       ],
       [
-        {time: '10:00', title: 'Library release checklist'},
-        {time: '14:00', title: 'Accessibility pass on form controls'},
+        { time: '10:00', title: 'Library release checklist' },
+        { time: '14:00', title: 'Accessibility pass on form controls' },
       ],
       [
-        {time: '08:30', title: 'Standup'},
-        {time: '13:00', title: 'Component API review'},
-        {time: '16:30', title: 'Docs and demo cleanup'},
+        { time: '08:30', title: 'Standup' },
+        { time: '13:00', title: 'Component API review' },
+        { time: '16:30', title: 'Docs and demo cleanup' },
       ],
     ];
 

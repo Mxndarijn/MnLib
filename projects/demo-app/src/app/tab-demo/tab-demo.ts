@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
-import {MnTabComponent, MnTabDataSource, MnTabItem} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { MnTabComponent, MnTabDataSource, MnTabItem } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-tab-demo',
   standalone: true,
   imports: [MnTabComponent, DemoPageComponent, DemoExampleComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './tab-demo.html',
 })
 export class TabDemo {

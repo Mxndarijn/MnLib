@@ -1,19 +1,24 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import {MnBreadcrumbs} from './mn-breadcrumbs';
-import {MnBreadcrumbItem, MnBreadcrumbsData} from './mn-breadcrumbsTypes';
+import { MnBreadcrumbs } from './mn-breadcrumbs';
+import { MnBreadcrumbItem, MnBreadcrumbsData } from './mn-breadcrumbsTypes';
 
 /** Minimal host so the element-selector component can be driven and observed. */
 @Component({
   standalone: true,
   imports: [MnBreadcrumbs],
-  template: `<mn-breadcrumbs [data]="data" (crumbClick)="onCrumb($event)" (back)="onBack()"></mn-breadcrumbs>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `<mn-breadcrumbs
+    [data]="data"
+    (crumbClick)="onCrumb($event)"
+    (back)="onBack()"
+  ></mn-breadcrumbs>`,
 })
 class HostComponent {
-  data: MnBreadcrumbsData = {items: []};
+  data: MnBreadcrumbsData = { items: [] };
   clicked?: MnBreadcrumbItem;
   backCount = 0;
 
@@ -44,14 +49,14 @@ describe('MnBreadcrumbs', () => {
    * page (a real navigation reloads the runner and disconnects the browser).
    */
   const clickNoNav = (el: HTMLElement): void => {
-    el.addEventListener('click', (e) => e.preventDefault(), {once: true});
+    el.addEventListener('click', (e) => e.preventDefault(), { once: true });
     el.click();
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);
@@ -64,7 +69,13 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('renders one crumb per item with separators between them', () => {
-    host.data = {items: [{label: 'Home', href: '/'}, {label: 'Library', href: '/lib'}, {label: 'Current'}]};
+    host.data = {
+      items: [
+        { label: 'Home', href: '/' },
+        { label: 'Library', href: '/lib' },
+        { label: 'Current' },
+      ],
+    };
     fixture.detectChanges();
 
     expect(crumbs().length).toBe(3);
@@ -73,7 +84,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('marks the last crumb as the current page and never a link', () => {
-    host.data = {items: [{label: 'Home', href: '/'}, {label: 'Current'}]};
+    host.data = { items: [{ label: 'Home', href: '/' }, { label: 'Current' }] };
     fixture.detectChanges();
 
     const last = crumbs()[1].querySelector('span[aria-current="page"]');
@@ -82,7 +93,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('renders a linked crumb as an anchor carrying its href', () => {
-    host.data = {items: [{label: 'Home', href: '/home'}, {label: 'Current'}]};
+    host.data = { items: [{ label: 'Home', href: '/home' }, { label: 'Current' }] };
     fixture.detectChanges();
 
     const anchor = crumbs()[0].querySelector('a');
@@ -92,7 +103,7 @@ describe('MnBreadcrumbs', () => {
 
   it('emits crumbClick and runs the crumb callback on click', () => {
     const spy = jasmine.createSpy('onClick');
-    host.data = {items: [{label: 'Home', onClick: spy}, {label: 'Current'}]};
+    host.data = { items: [{ label: 'Home', onClick: spy }, { label: 'Current' }] };
     fixture.detectChanges();
 
     crumbs()[0].querySelector('button')!.click();
@@ -101,7 +112,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('degrades to a Back control when no crumbs are given', () => {
-    host.data = {items: []};
+    host.data = { items: [] };
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('ol')).toBeNull();
@@ -109,7 +120,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('renders the Back control as an anchor when a backHref is set', () => {
-    host.data = {items: [], backHref: '/parent'};
+    host.data = { items: [], backHref: '/parent' };
     fixture.detectChanges();
 
     const control = backControl();
@@ -119,7 +130,7 @@ describe('MnBreadcrumbs', () => {
 
   it('emits back without touching history when a backHref is set', () => {
     const backSpy = spyOn(window.history, 'back');
-    host.data = {items: [], backHref: '/parent'};
+    host.data = { items: [], backHref: '/parent' };
     fixture.detectChanges();
 
     clickNoNav(backControl()!);
@@ -129,7 +140,7 @@ describe('MnBreadcrumbs', () => {
 
   it('emits back and steps through history when no backHref is set', () => {
     const backSpy = spyOn(window.history, 'back');
-    host.data = {items: []};
+    host.data = { items: [] };
     fixture.detectChanges();
 
     backControl()!.click();

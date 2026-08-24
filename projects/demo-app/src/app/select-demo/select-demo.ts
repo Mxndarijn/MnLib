@@ -1,18 +1,26 @@
-import {Component} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnButton, MnSectionDirective, MnSelect, MnSelectProps} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MnButton, MnSectionDirective, MnSelect, MnSelectProps } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-select-demo',
   standalone: true,
-  imports: [MnSelect, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
+  imports: [
+    MnSelect,
+    ReactiveFormsModule,
+    MnSectionDirective,
+    MnButton,
+    DemoPageComponent,
+    DemoExampleComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './select-demo.html',
 })
 export class SelectDemo {
   form = new FormGroup({
-    country: new FormControl('', {validators: [Validators.required]}),
+    country: new FormControl('', { validators: [Validators.required] }),
     size: new FormControl(''),
     priority: new FormControl(''),
   });
@@ -23,11 +31,11 @@ export class SelectDemo {
     label: 'Country',
     placeholder: 'Select a country...',
     options: [
-      {label: 'Netherlands', value: 'nl'},
-      {label: 'Germany', value: 'de'},
-      {label: 'France', value: 'fr'},
-      {label: 'Belgium', value: 'be'},
-      {label: 'United Kingdom', value: 'uk'},
+      { label: 'Netherlands', value: 'nl' },
+      { label: 'Germany', value: 'de' },
+      { label: 'France', value: 'fr' },
+      { label: 'Belgium', value: 'be' },
+      { label: 'United Kingdom', value: 'uk' },
     ],
     fullWidth: true,
   };
@@ -38,12 +46,12 @@ export class SelectDemo {
     label: 'T-Shirt Size',
     placeholder: 'Pick a size...',
     options: [
-      {label: 'XS', value: 'xs'},
-      {label: 'S', value: 's'},
-      {label: 'M', value: 'm'},
-      {label: 'L', value: 'l'},
-      {label: 'XL', value: 'xl'},
-      {label: 'XXL (sold out)', value: 'xxl', disabled: true},
+      { label: 'XS', value: 'xs' },
+      { label: 'S', value: 's' },
+      { label: 'M', value: 'm' },
+      { label: 'L', value: 'l' },
+      { label: 'XL', value: 'xl' },
+      { label: 'XXL (sold out)', value: 'xxl', disabled: true },
     ],
     size: 'lg',
     borderRadius: 'lg',
@@ -56,10 +64,10 @@ export class SelectDemo {
     label: 'Priority',
     placeholder: 'Choose priority...',
     options: [
-      {label: 'Low', value: 'low'},
-      {label: 'Medium', value: 'medium'},
-      {label: 'High', value: 'high'},
-      {label: 'Critical', value: 'critical'},
+      { label: 'Low', value: 'low' },
+      { label: 'Medium', value: 'medium' },
+      { label: 'High', value: 'high' },
+      { label: 'Critical', value: 'critical' },
     ],
     fullWidth: true,
     errorMessages: {

@@ -1,13 +1,14 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {MnButton} from './mn-button';
-import {MnButtonTypes} from './mn-buttonTypes';
+import { MnButton } from './mn-button';
+import { MnButtonTypes } from './mn-buttonTypes';
 
 /** Minimal host that renders an `mnButton` so the attribute-selector component can be tested. */
 @Component({
   standalone: true,
   imports: [MnButton],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<button mnButton [data]="data">Label</button>`,
 })
 class HostComponent {
@@ -19,8 +20,7 @@ describe('MnButton', () => {
   let host: HostComponent;
 
   /** Returns the rendered `<button>` element. */
-  const button = (): HTMLButtonElement =>
-    fixture.nativeElement.querySelector('button');
+  const button = (): HTMLButtonElement => fixture.nativeElement.querySelector('button');
 
   /** Returns the injected spinner element, if present. */
   const spinner = (): HTMLElement | null =>
@@ -43,7 +43,7 @@ describe('MnButton', () => {
   });
 
   it('shows a spinner and blocks interaction while loading', () => {
-    host.data = {loading: true};
+    host.data = { loading: true };
     fixture.detectChanges();
 
     expect(spinner()).not.toBeNull();
@@ -53,7 +53,7 @@ describe('MnButton', () => {
   });
 
   it('blocks interaction when disabled without marking it busy', () => {
-    host.data = {disabled: true};
+    host.data = { disabled: true };
     fixture.detectChanges();
 
     expect(spinner()).toBeNull();
@@ -63,9 +63,9 @@ describe('MnButton', () => {
   });
 
   it('removes the spinner and unblocks when loading clears', () => {
-    host.data = {loading: true};
+    host.data = { loading: true };
     fixture.detectChanges();
-    host.data = {loading: false};
+    host.data = { loading: false };
     fixture.detectChanges();
 
     expect(spinner()).toBeNull();
@@ -74,7 +74,7 @@ describe('MnButton', () => {
   });
 
   it('renders a circular icon button: square, padding-free, fully rounded', () => {
-    host.data = {shape: 'circle', size: 'md'};
+    host.data = { shape: 'circle', size: 'md' };
     fixture.detectChanges();
 
     const cls = button().className;
@@ -85,7 +85,7 @@ describe('MnButton', () => {
   });
 
   it('sizes a square icon button off `size`', () => {
-    host.data = {shape: 'square', size: 'sm'};
+    host.data = { shape: 'square', size: 'sm' };
     fixture.detectChanges();
 
     const cls = button().className;
@@ -95,7 +95,7 @@ describe('MnButton', () => {
   });
 
   it('renders a ghost button transparent with a hover surface', () => {
-    host.data = {variant: 'ghost', color: 'gray'};
+    host.data = { variant: 'ghost', color: 'gray' };
     fixture.detectChanges();
 
     const cls = button().className;

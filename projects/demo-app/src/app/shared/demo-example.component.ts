@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 /**
  * One example: a small label + optional hint, then the live component in open
@@ -10,6 +10,7 @@ import {Component, Input} from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './demo-example.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .specimen {

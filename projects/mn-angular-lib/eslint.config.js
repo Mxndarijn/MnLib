@@ -35,6 +35,17 @@ module.exports = defineConfig([
     },
   },
   {
+    // Inline test-host components in specs exist only to mount the component under test.
+    // Their change-detection strategy is a harness detail, not a shipped concern, so the
+    // OnPush-preference rule (which stays enforced on every real component) is off here.
+    // The Angular 22 update marks these hosts `ChangeDetectionStrategy.Eager`; several
+    // specs mutate host state and re-read the DOM, which relies on that eager checking.
+    files: ["**/*.spec.ts"],
+    rules: {
+      "@angular-eslint/prefer-on-push-component-change-detection": "off",
+    },
+  },
+  {
     files: ["**/*.html"],
     rules: {},
   }

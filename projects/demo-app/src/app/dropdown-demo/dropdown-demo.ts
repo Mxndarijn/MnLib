@@ -1,12 +1,27 @@
-import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
-import {MnDropdown, MnDropdownProps} from 'mn-angular-lib';
-import {LucideCopy, LucideFilter, LucidePencil, LucideShare2, LucideTrash2} from '@lucide/angular';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, OnInit, TemplateRef, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { MnDropdown, MnDropdownProps } from 'mn-angular-lib';
+import {
+  LucideCopy,
+  LucideFilter,
+  LucidePencil,
+  LucideShare2,
+  LucideTrash2,
+} from '@lucide/angular';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-dropdown-demo',
-  imports: [MnDropdown, DemoPageComponent, DemoExampleComponent, LucidePencil, LucideCopy, LucideShare2, LucideTrash2],
+  imports: [
+    MnDropdown,
+    DemoPageComponent,
+    DemoExampleComponent,
+    LucidePencil,
+    LucideCopy,
+    LucideShare2,
+    LucideTrash2,
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dropdown-demo.html',
 })
 export class DropdownDemo implements OnInit {
@@ -59,7 +74,7 @@ export class DropdownDemo implements OnInit {
       id: 'dd-language',
       triggerLabel: this.activeLanguage,
       menuLabel: 'Language',
-      actions: this.languages.map(name => ({
+      actions: this.languages.map((name) => ({
         label: name,
         active: name === this.activeLanguage,
         run: () => this.pickLanguage(name),
@@ -75,9 +90,9 @@ export class DropdownDemo implements OnInit {
       id: 'dd-basic',
       ariaLabel: 'Row actions',
       actions: [
-        {label: 'Edit', run: () => this.pick('Edit')},
-        {label: 'Duplicate', run: () => this.pick('Duplicate')},
-        {label: 'Archive', run: () => this.pick('Archive')},
+        { label: 'Edit', run: () => this.pick('Edit') },
+        { label: 'Duplicate', run: () => this.pick('Duplicate') },
+        { label: 'Archive', run: () => this.pick('Archive') },
       ],
     };
 
@@ -86,10 +101,10 @@ export class DropdownDemo implements OnInit {
       id: 'dd-icons',
       ariaLabel: 'Row actions',
       actions: [
-        {label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit')},
-        {label: 'Duplicate', icon: this.duplicateIcon(), run: () => this.pick('Duplicate')},
-        {label: 'Share', icon: this.shareIcon(), run: () => this.pick('Share')},
-        {label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete')},
+        { label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit') },
+        { label: 'Duplicate', icon: this.duplicateIcon(), run: () => this.pick('Duplicate') },
+        { label: 'Share', icon: this.shareIcon(), run: () => this.pick('Share') },
+        { label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete') },
       ],
     };
 
@@ -98,9 +113,14 @@ export class DropdownDemo implements OnInit {
       id: 'dd-states',
       ariaLabel: 'Row actions',
       actions: [
-        {label: 'Rename', icon: this.editIcon(), run: () => this.pick('Rename')},
-        {label: 'Duplicate (disabled)', icon: this.duplicateIcon(), disabled: true, run: () => this.pick('Duplicate')},
-        {label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete')},
+        { label: 'Rename', icon: this.editIcon(), run: () => this.pick('Rename') },
+        {
+          label: 'Duplicate (disabled)',
+          icon: this.duplicateIcon(),
+          disabled: true,
+          run: () => this.pick('Duplicate'),
+        },
+        { label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete') },
       ],
     };
 
@@ -110,9 +130,9 @@ export class DropdownDemo implements OnInit {
       ariaLabel: 'Row actions',
       menuLabel: 'Manage user',
       actions: [
-        {label: 'View profile', run: () => this.pick('View profile')},
-        {label: 'Reset password', run: () => this.pick('Reset password')},
-        {label: 'Suspend', danger: true, run: () => this.pick('Suspend')},
+        { label: 'View profile', run: () => this.pick('View profile') },
+        { label: 'Reset password', run: () => this.pick('Reset password') },
+        { label: 'Suspend', danger: true, run: () => this.pick('Suspend') },
       ],
     };
 
@@ -126,14 +146,44 @@ export class DropdownDemo implements OnInit {
       searchable: true,
       searchPlaceholder: 'Search commands...',
       actions: [
-        {label: 'Edit', icon: this.editIcon(), keywords: 'modify change update', run: () => this.pick('Edit')},
-        {label: 'Duplicate', icon: this.duplicateIcon(), keywords: 'copy clone', run: () => this.pick('Duplicate')},
-        {label: 'Share', icon: this.shareIcon(), keywords: 'send invite link', run: () => this.pick('Share')},
-        {label: 'Rename', icon: this.editIcon(), keywords: 'title name', run: () => this.pick('Rename')},
-        {label: 'Move to folder', keywords: 'organise organize file', run: () => this.pick('Move to folder')},
-        {label: 'Archive', keywords: 'store hide', run: () => this.pick('Archive')},
-        {label: 'Export', keywords: 'download save csv', run: () => this.pick('Export')},
-        {label: 'Delete', icon: this.deleteIcon(), danger: true, keywords: 'remove destroy', run: () => this.pick('Delete')},
+        {
+          label: 'Edit',
+          icon: this.editIcon(),
+          keywords: 'modify change update',
+          run: () => this.pick('Edit'),
+        },
+        {
+          label: 'Duplicate',
+          icon: this.duplicateIcon(),
+          keywords: 'copy clone',
+          run: () => this.pick('Duplicate'),
+        },
+        {
+          label: 'Share',
+          icon: this.shareIcon(),
+          keywords: 'send invite link',
+          run: () => this.pick('Share'),
+        },
+        {
+          label: 'Rename',
+          icon: this.editIcon(),
+          keywords: 'title name',
+          run: () => this.pick('Rename'),
+        },
+        {
+          label: 'Move to folder',
+          keywords: 'organise organize file',
+          run: () => this.pick('Move to folder'),
+        },
+        { label: 'Archive', keywords: 'store hide', run: () => this.pick('Archive') },
+        { label: 'Export', keywords: 'download save csv', run: () => this.pick('Export') },
+        {
+          label: 'Delete',
+          icon: this.deleteIcon(),
+          danger: true,
+          keywords: 'remove destroy',
+          run: () => this.pick('Delete'),
+        },
       ],
     };
 
@@ -142,9 +192,9 @@ export class DropdownDemo implements OnInit {
       id: 'dd-text',
       triggerLabel: 'Actions',
       actions: [
-        {label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit')},
-        {label: 'Duplicate', icon: this.duplicateIcon(), run: () => this.pick('Duplicate')},
-        {label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete')},
+        { label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit') },
+        { label: 'Duplicate', icon: this.duplicateIcon(), run: () => this.pick('Duplicate') },
+        { label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete') },
       ],
     };
 
@@ -154,8 +204,8 @@ export class DropdownDemo implements OnInit {
       triggerLabel: 'More',
       triggerIcon: 'none',
       actions: [
-        {label: 'Rename', run: () => this.pick('Rename')},
-        {label: 'Move', run: () => this.pick('Move')},
+        { label: 'Rename', run: () => this.pick('Rename') },
+        { label: 'Move', run: () => this.pick('Move') },
       ],
     };
 
@@ -165,8 +215,8 @@ export class DropdownDemo implements OnInit {
       triggerLabel: 'Options',
       triggerIcon: 'dots-vertical',
       actions: [
-        {label: 'Settings', run: () => this.pick('Settings')},
-        {label: 'Help', run: () => this.pick('Help')},
+        { label: 'Settings', run: () => this.pick('Settings') },
+        { label: 'Help', run: () => this.pick('Help') },
       ],
     };
 
@@ -175,11 +225,11 @@ export class DropdownDemo implements OnInit {
     this.buttonProps = {
       id: 'dd-button',
       triggerLabel: 'Actions',
-      triggerButton: {variant: 'fill', color: 'primary'},
+      triggerButton: { variant: 'fill', color: 'primary' },
       actions: [
-        {label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit')},
-        {label: 'Duplicate', icon: this.duplicateIcon(), run: () => this.pick('Duplicate')},
-        {label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete')},
+        { label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit') },
+        { label: 'Duplicate', icon: this.duplicateIcon(), run: () => this.pick('Duplicate') },
+        { label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete') },
       ],
     };
 
@@ -189,11 +239,11 @@ export class DropdownDemo implements OnInit {
       id: 'dd-button-icon',
       ariaLabel: 'Filter',
       triggerIcon: LucideFilter.icon,
-      triggerButton: {variant: 'outline', color: 'gray', shape: 'square'},
+      triggerButton: { variant: 'outline', color: 'gray', shape: 'square' },
       actions: [
-        {label: 'Newest first', run: () => this.pick('Newest first')},
-        {label: 'Oldest first', run: () => this.pick('Oldest first')},
-        {label: 'A–Z', run: () => this.pick('A–Z')},
+        { label: 'Newest first', run: () => this.pick('Newest first') },
+        { label: 'Oldest first', run: () => this.pick('Oldest first') },
+        { label: 'A–Z', run: () => this.pick('A–Z') },
       ],
     };
 
@@ -204,10 +254,10 @@ export class DropdownDemo implements OnInit {
       triggerLabel: 'Account',
       menuLabel: 'Signed in as Merijn',
       actions: [
-        {label: 'Profile', icon: this.editIcon(), run: () => this.pick('Profile')},
-        {label: 'Settings', run: () => this.pick('Settings')},
-        {separator: true},
-        {label: 'Logout', icon: this.deleteIcon(), danger: true, run: () => this.pick('Logout')},
+        { label: 'Profile', icon: this.editIcon(), run: () => this.pick('Profile') },
+        { label: 'Settings', run: () => this.pick('Settings') },
+        { separator: true },
+        { label: 'Logout', icon: this.deleteIcon(), danger: true, run: () => this.pick('Logout') },
       ],
     };
 
@@ -217,11 +267,11 @@ export class DropdownDemo implements OnInit {
       triggerIcon: this.avatarTrigger(),
       menuLabel: 'Signed in as Merijn',
       actions: [
-        {separator: true},
-        {label: 'Profile', icon: this.editIcon(), run: () => this.pick('Profile')},
-        {label: 'Settings', run: () => this.pick('Settings')},
-        {separator: true},
-        {label: 'Logout', icon: this.deleteIcon(), danger: true, run: () => this.pick('Logout')},
+        { separator: true },
+        { label: 'Profile', icon: this.editIcon(), run: () => this.pick('Profile') },
+        { label: 'Settings', run: () => this.pick('Settings') },
+        { separator: true },
+        { label: 'Logout', icon: this.deleteIcon(), danger: true, run: () => this.pick('Logout') },
       ],
     };
 
@@ -232,8 +282,19 @@ export class DropdownDemo implements OnInit {
       ariaLabelKey: 'demo.dropdown.aria',
       ariaLabel: 'Row actions',
       actions: [
-        {labelKey: 'demo.dropdown.edit', label: 'Edit', icon: this.editIcon(), run: () => this.pick('Edit')},
-        {labelKey: 'demo.dropdown.delete', label: 'Delete', icon: this.deleteIcon(), danger: true, run: () => this.pick('Delete')},
+        {
+          labelKey: 'demo.dropdown.edit',
+          label: 'Edit',
+          icon: this.editIcon(),
+          run: () => this.pick('Edit'),
+        },
+        {
+          labelKey: 'demo.dropdown.delete',
+          label: 'Delete',
+          icon: this.deleteIcon(),
+          danger: true,
+          run: () => this.pick('Delete'),
+        },
       ],
     };
   }

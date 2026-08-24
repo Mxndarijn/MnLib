@@ -1,15 +1,15 @@
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {BehaviorSubject} from 'rxjs';
-import {ColumnDefinition, MnColumnFilter, MnTable, TableDataSource} from 'mn-angular-lib';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { ColumnDefinition, MnColumnFilter, MnTable, TableDataSource } from 'mn-angular-lib';
 
 /** Minimal row shape used by the column-filter tests. */
 type Row = {
   id: string;
   name: string;
   age: number;
-}
+};
 
 /**
  * Covers {@link MnTable}'s per-column filtering: local filtering when the table
@@ -22,9 +22,9 @@ describe('MnTable column filters', () => {
   let rows: BehaviorSubject<Row[]>;
 
   const ROWS: Row[] = [
-    {id: '1', name: 'Ada', age: 36},
-    {id: '2', name: 'Grace', age: 45},
-    {id: '3', name: 'Alan', age: 41},
+    { id: '1', name: 'Ada', age: 36 },
+    { id: '2', name: 'Grace', age: 45 },
+    { id: '3', name: 'Alan', age: 41 },
   ];
 
   /** Builds a data source with the given columns, optionally server-filtered. */
@@ -44,7 +44,7 @@ describe('MnTable column filters', () => {
 
   /** A plain text-filterable name column. */
   function nameColumn(): ColumnDefinition<Row> {
-    return {key: 'name', header: 'Name', cell: (row) => row.name, filterable: true};
+    return { key: 'name', header: 'Name', cell: (row) => row.name, filterable: true };
   }
 
   /**
@@ -65,8 +65,9 @@ describe('MnTable column filters', () => {
     }
 
     // The heading row itself must stay bold.
-    const header: HTMLTableCellElement =
-      fixture.nativeElement.querySelector('thead tr:first-child th[data-column-key]');
+    const header: HTMLTableCellElement = fixture.nativeElement.querySelector(
+      'thead tr:first-child th[data-column-key]',
+    );
     expect(header.classList).not.toContain('font-normal');
   });
 
@@ -80,9 +81,9 @@ describe('MnTable column filters', () => {
       filterable: true,
       filterType: 'multi-select',
       filterOptions: [
-        {label: '36', value: '36'},
-        {label: '41', value: '41'},
-        {label: '45', value: '45'},
+        { label: '36', value: '36' },
+        { label: '41', value: '41' },
+        { label: '45', value: '45' },
       ],
     };
   }
@@ -91,7 +92,7 @@ describe('MnTable column filters', () => {
     rows = new BehaviorSubject<Row[]>(ROWS);
     await TestBed.configureTestingModule({
       imports: [MnTable],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
     fixture = TestBed.createComponent(MnTable<Row>);
   });
@@ -103,10 +104,10 @@ describe('MnTable column filters', () => {
     fixture.detectChanges();
 
     component.onColumnFilter(columns[0], 'a');
-    expect(component.filteredItems.map(r => r.name)).toEqual(['Ada', 'Grace', 'Alan']);
+    expect(component.filteredItems.map((r) => r.name)).toEqual(['Ada', 'Grace', 'Alan']);
 
     component.onColumnFilter(columns[0], 'al');
-    expect(component.filteredItems.map(r => r.name)).toEqual(['Alan']);
+    expect(component.filteredItems.map((r) => r.name)).toEqual(['Alan']);
   });
 
   it('combines filters across columns', () => {
@@ -117,20 +118,20 @@ describe('MnTable column filters', () => {
 
     component.onColumnFilter(columns[0], 'a');
     component.onColumnFilter(columns[1], ['45', '41']);
-    expect(component.filteredItems.map(r => r.name)).toEqual(['Grace', 'Alan']);
+    expect(component.filteredItems.map((r) => r.name)).toEqual(['Grace', 'Alan']);
   });
 
   it('delegates to onColumnFilterChange instead of filtering locally', fakeAsync(() => {
     const component = fixture.componentInstance;
     const received: MnColumnFilter[][] = [];
     const columns = [ageColumn()];
-    component.dataSource = makeDataSource(columns, filters => received.push(filters));
+    component.dataSource = makeDataSource(columns, (filters) => received.push(filters));
     fixture.detectChanges();
 
     component.onColumnFilter(columns[0], ['45']);
     tick();
 
-    expect(received).toEqual([[{key: 'age', type: 'multi-select', value: ['45']}]]);
+    expect(received).toEqual([[{ key: 'age', type: 'multi-select', value: ['45'] }]]);
     // The rows the consumer supplied must be left untouched — they are already the
     // filtered page, and filtering them again here would drop rows a second time.
     expect(component.filteredItems.length).toBe(3);
@@ -140,7 +141,7 @@ describe('MnTable column filters', () => {
     const component = fixture.componentInstance;
     const received: MnColumnFilter[][] = [];
     const columns = [nameColumn(), ageColumn()];
-    component.dataSource = makeDataSource(columns, filters => received.push(filters));
+    component.dataSource = makeDataSource(columns, (filters) => received.push(filters));
     fixture.detectChanges();
 
     component.onColumnFilter(columns[0], 'a');
@@ -156,8 +157,8 @@ describe('MnTable column filters', () => {
     expect(received.length).toBe(2);
     // One request for the whole run of keystrokes, carrying the final text.
     expect(received[1]).toEqual([
-      {key: 'name', type: 'text', value: 'ada'},
-      {key: 'age', type: 'multi-select', value: ['45']},
+      { key: 'name', type: 'text', value: 'ada' },
+      { key: 'age', type: 'multi-select', value: ['45'] },
     ]);
   }));
 
@@ -165,7 +166,7 @@ describe('MnTable column filters', () => {
     const component = fixture.componentInstance;
     const received: MnColumnFilter[][] = [];
     const columns = [nameColumn(), ageColumn()];
-    component.dataSource = makeDataSource(columns, filters => received.push(filters));
+    component.dataSource = makeDataSource(columns, (filters) => received.push(filters));
     fixture.detectChanges();
 
     component.onColumnFilter(columns[1], ['45']);
@@ -190,7 +191,7 @@ describe('MnTable column filters', () => {
     const component = fixture.componentInstance;
     const received: MnColumnFilter[][] = [];
     const columns = [nameColumn(), ageColumn()];
-    component.dataSource = makeDataSource(columns, filters => received.push(filters));
+    component.dataSource = makeDataSource(columns, (filters) => received.push(filters));
     fixture.detectChanges();
 
     component.onColumnFilter(columns[1], ['45']);
@@ -244,7 +245,7 @@ describe('MnTable column filters', () => {
     expect(inputs.length).toBeGreaterThan(0);
 
     for (const input of inputs) {
-      const event = new KeyboardEvent('keydown', {key: 'Enter', bubbles: true, cancelable: true});
+      const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
       input.dispatchEvent(event);
       expect(event.defaultPrevented)
         .withContext(`Enter in ${input.type} input must not submit`)

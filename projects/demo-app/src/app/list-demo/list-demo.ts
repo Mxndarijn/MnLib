@@ -1,8 +1,8 @@
-import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {ListDataSource, MnButton, MnCollectionState, MnList, MnSkeleton} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, OnInit, TemplateRef, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { ListDataSource, MnButton, MnCollectionState, MnList, MnSkeleton } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 type User = {
   id: string;
@@ -11,38 +11,179 @@ type User = {
   role: string;
   age: number;
   joinedAt: string;
-}
+};
 
 const SAMPLE_USERS: User[] = [
-  {id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', age: 32, joinedAt: '2023-01-15'},
-  {id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'Editor', age: 28, joinedAt: '2023-03-22'},
-  {id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'Viewer', age: 45, joinedAt: '2022-11-01'},
-  {id: '4', name: 'Diana Prince', email: 'diana@example.com', role: 'Admin', age: 30, joinedAt: '2024-06-10'},
-  {id: '5', name: 'Eve Davis', email: 'eve@example.com', role: 'Editor', age: 27, joinedAt: '2024-01-05'},
+  {
+    id: '1',
+    name: 'Alice Johnson',
+    email: 'alice@example.com',
+    role: 'Admin',
+    age: 32,
+    joinedAt: '2023-01-15',
+  },
+  {
+    id: '2',
+    name: 'Bob Smith',
+    email: 'bob@example.com',
+    role: 'Editor',
+    age: 28,
+    joinedAt: '2023-03-22',
+  },
+  {
+    id: '3',
+    name: 'Charlie Brown',
+    email: 'charlie@example.com',
+    role: 'Viewer',
+    age: 45,
+    joinedAt: '2022-11-01',
+  },
+  {
+    id: '4',
+    name: 'Diana Prince',
+    email: 'diana@example.com',
+    role: 'Admin',
+    age: 30,
+    joinedAt: '2024-06-10',
+  },
+  {
+    id: '5',
+    name: 'Eve Davis',
+    email: 'eve@example.com',
+    role: 'Editor',
+    age: 27,
+    joinedAt: '2024-01-05',
+  },
 ];
 
 const ALL_USERS: User[] = [
-  {id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', age: 32, joinedAt: '2023-01-15'},
-  {id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'Editor', age: 28, joinedAt: '2023-03-22'},
-  {id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'Viewer', age: 45, joinedAt: '2022-11-01'},
-  {id: '4', name: 'Diana Prince', email: 'diana@example.com', role: 'Admin', age: 30, joinedAt: '2024-06-10'},
-  {id: '5', name: 'Eve Davis', email: 'eve@example.com', role: 'Editor', age: 27, joinedAt: '2024-01-05'},
-  {id: '6', name: 'Frank Miller', email: 'frank@example.com', role: 'Viewer', age: 38, joinedAt: '2024-08-20'},
-  {id: '7', name: 'Grace Lee', email: 'grace@example.com', role: 'Editor', age: 29, joinedAt: '2024-09-12'},
-  {id: '8', name: 'Hank Wilson', email: 'hank@example.com', role: 'Viewer', age: 41, joinedAt: '2023-05-18'},
-  {id: '9', name: 'Ivy Chen', email: 'ivy@example.com', role: 'Admin', age: 26, joinedAt: '2024-02-14'},
-  {id: '10', name: 'Jack Turner', email: 'jack@example.com', role: 'Editor', age: 35, joinedAt: '2023-07-30'},
-  {id: '11', name: 'Karen White', email: 'karen@example.com', role: 'Viewer', age: 33, joinedAt: '2022-12-05'},
-  {id: '12', name: 'Leo Martinez', email: 'leo@example.com', role: 'Admin', age: 40, joinedAt: '2023-09-01'},
-  {id: '13', name: 'Mia Robinson', email: 'mia@example.com', role: 'Editor', age: 24, joinedAt: '2024-04-22'},
-  {id: '14', name: 'Noah Clark', email: 'noah@example.com', role: 'Viewer', age: 37, joinedAt: '2023-11-10'},
-  {id: '15', name: 'Olivia Hall', email: 'olivia@example.com', role: 'Admin', age: 31, joinedAt: '2024-07-03'},
+  {
+    id: '1',
+    name: 'Alice Johnson',
+    email: 'alice@example.com',
+    role: 'Admin',
+    age: 32,
+    joinedAt: '2023-01-15',
+  },
+  {
+    id: '2',
+    name: 'Bob Smith',
+    email: 'bob@example.com',
+    role: 'Editor',
+    age: 28,
+    joinedAt: '2023-03-22',
+  },
+  {
+    id: '3',
+    name: 'Charlie Brown',
+    email: 'charlie@example.com',
+    role: 'Viewer',
+    age: 45,
+    joinedAt: '2022-11-01',
+  },
+  {
+    id: '4',
+    name: 'Diana Prince',
+    email: 'diana@example.com',
+    role: 'Admin',
+    age: 30,
+    joinedAt: '2024-06-10',
+  },
+  {
+    id: '5',
+    name: 'Eve Davis',
+    email: 'eve@example.com',
+    role: 'Editor',
+    age: 27,
+    joinedAt: '2024-01-05',
+  },
+  {
+    id: '6',
+    name: 'Frank Miller',
+    email: 'frank@example.com',
+    role: 'Viewer',
+    age: 38,
+    joinedAt: '2024-08-20',
+  },
+  {
+    id: '7',
+    name: 'Grace Lee',
+    email: 'grace@example.com',
+    role: 'Editor',
+    age: 29,
+    joinedAt: '2024-09-12',
+  },
+  {
+    id: '8',
+    name: 'Hank Wilson',
+    email: 'hank@example.com',
+    role: 'Viewer',
+    age: 41,
+    joinedAt: '2023-05-18',
+  },
+  {
+    id: '9',
+    name: 'Ivy Chen',
+    email: 'ivy@example.com',
+    role: 'Admin',
+    age: 26,
+    joinedAt: '2024-02-14',
+  },
+  {
+    id: '10',
+    name: 'Jack Turner',
+    email: 'jack@example.com',
+    role: 'Editor',
+    age: 35,
+    joinedAt: '2023-07-30',
+  },
+  {
+    id: '11',
+    name: 'Karen White',
+    email: 'karen@example.com',
+    role: 'Viewer',
+    age: 33,
+    joinedAt: '2022-12-05',
+  },
+  {
+    id: '12',
+    name: 'Leo Martinez',
+    email: 'leo@example.com',
+    role: 'Admin',
+    age: 40,
+    joinedAt: '2023-09-01',
+  },
+  {
+    id: '13',
+    name: 'Mia Robinson',
+    email: 'mia@example.com',
+    role: 'Editor',
+    age: 24,
+    joinedAt: '2024-04-22',
+  },
+  {
+    id: '14',
+    name: 'Noah Clark',
+    email: 'noah@example.com',
+    role: 'Viewer',
+    age: 37,
+    joinedAt: '2023-11-10',
+  },
+  {
+    id: '15',
+    name: 'Olivia Hall',
+    email: 'olivia@example.com',
+    role: 'Admin',
+    age: 31,
+    joinedAt: '2024-07-03',
+  },
 ];
 
 @Component({
   selector: 'app-list-demo',
   standalone: true,
   imports: [MnList, MnButton, MnSkeleton, DemoPageComponent, DemoExampleComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './list-demo.html',
 })
 export class ListDemo implements OnInit {
@@ -54,7 +195,8 @@ export class ListDemo implements OnInit {
   readonly selectionItemTpl = viewChild.required<TemplateRef<unknown>>('selectionItemTpl');
   readonly searchItemTpl = viewChild.required<TemplateRef<unknown>>('searchItemTpl');
   readonly paginatedItemTpl = viewChild.required<TemplateRef<unknown>>('paginatedItemTpl');
-  readonly clientPaginatedItemTpl = viewChild.required<TemplateRef<unknown>>('clientPaginatedItemTpl');
+  readonly clientPaginatedItemTpl =
+    viewChild.required<TemplateRef<unknown>>('clientPaginatedItemTpl');
   // ── Searchable + load more list (server-side) ──
   searchDataSource!: ListDataSource<User>;
   // ── Paginated list (server-side) ──
@@ -78,9 +220,9 @@ export class ListDemo implements OnInit {
   emptyDataSource!: ListDataSource<User>;
 
   // ── Loading skeleton lists ──
-  defaultSkeletonDataSource!: ListDataSource<User>;   // no skeleton config (default two bars)
-  linesSkeletonDataSource!: ListDataSource<User>;     // custom skeleton.lines
-  templateSkeletonDataSource!: ListDataSource<User>;  // custom skeleton TemplateRef (avatar profile)
+  defaultSkeletonDataSource!: ListDataSource<User>; // no skeleton config (default two bars)
+  linesSkeletonDataSource!: ListDataSource<User>; // custom skeleton.lines
+  templateSkeletonDataSource!: ListDataSource<User>; // custom skeleton TemplateRef (avatar profile)
 
   readonly listSkeletonTpl = viewChild.required<TemplateRef<unknown>>('listSkeletonTpl');
 
@@ -93,7 +235,7 @@ export class ListDemo implements OnInit {
       state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true, dividers: true},
+      appearance: { hover: true, dividers: true },
     };
 
     this.selectionDataSource = {
@@ -106,7 +248,7 @@ export class ListDemo implements OnInit {
       paginationMode: 'none',
       selectionMode: 'multi',
       selectedRows: new BehaviorSubject<User[]>([]),
-      appearance: {hover: true, dividers: true},
+      appearance: { hover: true, dividers: true },
     };
 
     this.searchDataSource = {
@@ -125,7 +267,7 @@ export class ListDemo implements OnInit {
         this.loadMoreLoaded = 5;
         this.fetchLoadMoreBatch(true);
       },
-      appearance: {hover: true, compact: true, dividers: true},
+      appearance: { hover: true, compact: true, dividers: true },
     };
 
     this.paginatedDataSource = {
@@ -154,7 +296,7 @@ export class ListDemo implements OnInit {
         this.paginatedPage = 1;
         this.fetchPaginatedPage();
       },
-      appearance: {hover: true, dividers: true, bordered: true},
+      appearance: { hover: true, dividers: true, bordered: true },
     };
 
     this.clientPaginatedDataSource = {
@@ -165,11 +307,12 @@ export class ListDemo implements OnInit {
       state: MnCollectionState.RETRIEVED,
       canSearch: true,
       searchPlaceholder: 'Search client-side...',
-      isInSearch: (row, term) => row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
+      isInSearch: (row, term) =>
+        row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
       paginationMode: 'client-side-pagination',
       pageSize: 5,
       pageSizeOptions: [5, 10, 15],
-      appearance: {hover: true, dividers: true, bordered: true},
+      appearance: { hover: true, dividers: true, bordered: true },
     };
 
     this.emptyDataSource = {
@@ -191,7 +334,7 @@ export class ListDemo implements OnInit {
       skeletonRowCount: 4,
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true, dividers: true},
+      appearance: { hover: true, dividers: true },
     };
 
     this.linesSkeletonDataSource = {
@@ -204,14 +347,14 @@ export class ListDemo implements OnInit {
       // Three stacked lines instead of the default two.
       skeleton: {
         lines: [
-          {shape: 'text', width: '40%'},
-          {shape: 'text', width: '80%', height: '0.75rem'},
-          {shape: 'text', width: '60%', height: '0.75rem'},
+          { shape: 'text', width: '40%' },
+          { shape: 'text', width: '80%', height: '0.75rem' },
+          { shape: 'text', width: '60%', height: '0.75rem' },
         ],
       },
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true, dividers: true},
+      appearance: { hover: true, dividers: true },
     };
 
     this.templateSkeletonDataSource = {
@@ -225,7 +368,7 @@ export class ListDemo implements OnInit {
       skeleton: this.listSkeletonTpl(),
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true, dividers: true},
+      appearance: { hover: true, dividers: true },
     };
 
     // Initialize server-side data
@@ -238,20 +381,20 @@ export class ListDemo implements OnInit {
     // mn-list is OnPush: replace each dataSource reference so the new state is detected.
     this.defaultSkeletonDataSource = {
       ...this.defaultSkeletonDataSource,
-      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED,
     };
     this.linesSkeletonDataSource = {
       ...this.linesSkeletonDataSource,
-      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED,
     };
     this.templateSkeletonDataSource = {
       ...this.templateSkeletonDataSource,
-      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED
+      state: loading ? MnCollectionState.LOADING : MnCollectionState.RETRIEVED,
     };
   }
 
   onSelectionChange(selected: User[]): void {
-    this.selectedNames = selected.length > 0 ? selected.map(u => u.name).join(', ') : 'none';
+    this.selectedNames = selected.length > 0 ? selected.map((u) => u.name).join(', ') : 'none';
   }
 
   onItemClicked(user: User): void {
@@ -263,7 +406,9 @@ export class ListDemo implements OnInit {
   private getFilteredUsers(search: string): User[] {
     if (!search) return ALL_USERS;
     const term = search.toLowerCase();
-    return ALL_USERS.filter(u => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+    return ALL_USERS.filter(
+      (u) => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term),
+    );
   }
 
   private fetchPaginatedPage(): void {

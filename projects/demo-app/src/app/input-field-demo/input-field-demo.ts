@@ -1,8 +1,15 @@
-import { Component } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import {MnButton, MnInputField, MnInputProps, MnSectionDirective} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
+import { MnButton, MnInputField, MnInputProps, MnSectionDirective } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 /**
  * Custom validator: disallows the letter 'x' in the input value
@@ -24,21 +31,31 @@ function noXAllowedValidator(control: AbstractControl): ValidationErrors | null 
 @Component({
   selector: 'app-input-field-demo',
   standalone: true,
-  imports: [MnInputField, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
+  imports: [
+    MnInputField,
+    ReactiveFormsModule,
+    MnSectionDirective,
+    MnButton,
+    DemoPageComponent,
+    DemoExampleComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './input-field-demo.html',
 })
 export class InputFieldDemo {
   form = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
     email: new FormControl('', { validators: [Validators.required, Validators.email] }),
-    username: new FormControl('', { validators: [Validators.required, Validators.minLength(3), noXAllowedValidator] }),
+    username: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(3), noXAllowedValidator],
+    }),
     password: new FormControl('', {
       validators: [
         Validators.required,
         Validators.minLength(8),
         Validators.maxLength(20),
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-      ]
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
+      ],
     }),
     disabledField: new FormControl({ value: 'Cannot edit this', disabled: true }),
   });
@@ -80,9 +97,14 @@ export class InputFieldDemo {
     size: 'md',
     borderRadius: 'md',
     errorMessages: {
-      noXAllowed: (args: unknown) => `Username cannot contain 'x' (you entered: ${(args as {
-        actual: string
-      }).actual})`,
+      noXAllowed: (args: unknown) =>
+        `Username cannot contain 'x' (you entered: ${
+          (
+            args as {
+              actual: string;
+            }
+          ).actual
+        })`,
       required: 'Username is required',
       minlength: 'Username must be at least 3 characters',
     },

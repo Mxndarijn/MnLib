@@ -1,4 +1,4 @@
-import { Component, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   CalendarViewComponent,
@@ -8,15 +8,21 @@ import {
   CALENDAR_CONFIG,
   MnTabComponent,
   MnTabDataSource,
-  MnTabItem
+  MnTabItem,
 } from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-calendar-demo',
   standalone: true,
-  imports: [CommonModule, CalendarViewComponent, MnTabComponent, DemoPageComponent, DemoExampleComponent],
+  imports: [
+    CommonModule,
+    CalendarViewComponent,
+    MnTabComponent,
+    DemoPageComponent,
+    DemoExampleComponent,
+  ],
   providers: [
     { provide: CALENDAR_DATE_FORMATTER, useClass: DefaultCalendarDateFormatter },
     {
@@ -28,23 +34,30 @@ import {DemoExampleComponent} from '../shared/demo-example.component';
         todayLabel: 'Today',
         upcomingEventsTitle: 'Upcoming events',
         viewLabels: { MONTH: 'Month', WEEK: 'Week', DAY: 'Day' },
-        mobileBreakpoint: 768
-      }
-    }
+        mobileBreakpoint: 768,
+      },
+    },
   ],
   templateUrl: './calendar-demo.html',
-  styles: [`
-    :host { display: block; }
-    .calendar-demo-body { min-height: 800px; }
-    .calendar-demo-clicked {
-      padding: 6px 12px;
-      background: #f0f9ff;
-      border-radius: 8px;
-      border: 1px solid #bae6fd;
-      font-size: 13px;
-      margin-top: 4px;
-    }
-  `]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+      .calendar-demo-body {
+        min-height: 800px;
+      }
+      .calendar-demo-clicked {
+        padding: 6px 12px;
+        background: #f0f9ff;
+        border-radius: 8px;
+        border: 1px solid #bae6fd;
+        font-size: 13px;
+        margin-top: 4px;
+      }
+    `,
+  ],
 })
 export class CalendarDemo {
   eventsEmitter = new EventEmitter<CalendarEvent[]>();
@@ -53,11 +66,8 @@ export class CalendarDemo {
   activeTabIndex = 0;
 
   tabDataSource: MnTabDataSource = {
-    items: [
-      { label: 'Calendar Demo' },
-      { label: 'Calendar in Tab' }
-    ],
-    defaultActive: 0
+    items: [{ label: 'Calendar Demo' }, { label: 'Calendar in Tab' }],
+    defaultActive: 0,
   };
 
   private sampleEvents: CalendarEvent[] = [];
@@ -106,10 +116,10 @@ export class CalendarDemo {
     const today = new Date();
     const colors = [
       { id: '1', colorName: 'Blue', primaryColor: '#1e40af', secondaryColor: '#bfdbfe' },
-    { id: '2', colorName: 'Green', primaryColor: '#15803d', secondaryColor: '#bbf7d0' },
-    { id: '3', colorName: 'Red', primaryColor: '#b91c1c', secondaryColor: '#fecaca' },
-    { id: '4', colorName: 'Purple', primaryColor: '#7e22ce', secondaryColor: '#e9d5ff' },
-    { id: '5', colorName: 'Orange', primaryColor: '#c2410c', secondaryColor: '#fed7aa' }
+      { id: '2', colorName: 'Green', primaryColor: '#15803d', secondaryColor: '#bbf7d0' },
+      { id: '3', colorName: 'Red', primaryColor: '#b91c1c', secondaryColor: '#fecaca' },
+      { id: '4', colorName: 'Purple', primaryColor: '#7e22ce', secondaryColor: '#e9d5ff' },
+      { id: '5', colorName: 'Orange', primaryColor: '#c2410c', secondaryColor: '#fed7aa' },
     ];
 
     const makeDate = (dayOffset: number, hour: number, minute = 0): Date => {
@@ -120,16 +130,86 @@ export class CalendarDemo {
     };
 
     this.sampleEvents = [
-      { id: '1', title: 'Team Standup', description: 'Daily sync', startTime: makeDate(0, 9, 0), endTime: makeDate(0, 9, 30), color: colors[0] },
-      { id: '2', title: 'Design Review', description: 'Review new mockups', startTime: makeDate(0, 10, 0), endTime: makeDate(0, 11, 30), color: colors[1] },
-      { id: '3', title: 'Lunch Meeting', description: 'With client', startTime: makeDate(0, 12, 0), endTime: makeDate(0, 13, 0), color: colors[2] },
-      { id: '4', title: 'Sprint Planning', description: 'Next sprint items', startTime: makeDate(1, 14, 0), endTime: makeDate(1, 15, 30), color: colors[3] },
-      { id: '5', title: 'Code Review', description: 'PR #42', startTime: makeDate(1, 10, 0), endTime: makeDate(1, 11, 0), color: colors[0] },
-      { id: '6', title: 'Workshop', description: 'Angular best practices', startTime: makeDate(2, 9, 0), endTime: makeDate(2, 12, 0), color: colors[4] },
-      { id: '7', title: '1:1 with Manager', description: '', startTime: makeDate(-1, 15, 0), endTime: makeDate(-1, 15, 30), color: colors[1] },
-      { id: '8', title: 'Release Deploy', description: 'v2.1.0', startTime: makeDate(3, 16, 0), endTime: makeDate(3, 17, 0), color: colors[2] },
-      { id: '9', title: 'Overlapping Event A', description: 'Tests overlap layout', startTime: makeDate(0, 14, 0), endTime: makeDate(0, 15, 30), color: colors[3] },
-      { id: '10', title: 'Overlapping Event B', description: 'Tests overlap layout', startTime: makeDate(0, 14, 30), endTime: makeDate(0, 16, 0), color: colors[4] },
+      {
+        id: '1',
+        title: 'Team Standup',
+        description: 'Daily sync',
+        startTime: makeDate(0, 9, 0),
+        endTime: makeDate(0, 9, 30),
+        color: colors[0],
+      },
+      {
+        id: '2',
+        title: 'Design Review',
+        description: 'Review new mockups',
+        startTime: makeDate(0, 10, 0),
+        endTime: makeDate(0, 11, 30),
+        color: colors[1],
+      },
+      {
+        id: '3',
+        title: 'Lunch Meeting',
+        description: 'With client',
+        startTime: makeDate(0, 12, 0),
+        endTime: makeDate(0, 13, 0),
+        color: colors[2],
+      },
+      {
+        id: '4',
+        title: 'Sprint Planning',
+        description: 'Next sprint items',
+        startTime: makeDate(1, 14, 0),
+        endTime: makeDate(1, 15, 30),
+        color: colors[3],
+      },
+      {
+        id: '5',
+        title: 'Code Review',
+        description: 'PR #42',
+        startTime: makeDate(1, 10, 0),
+        endTime: makeDate(1, 11, 0),
+        color: colors[0],
+      },
+      {
+        id: '6',
+        title: 'Workshop',
+        description: 'Angular best practices',
+        startTime: makeDate(2, 9, 0),
+        endTime: makeDate(2, 12, 0),
+        color: colors[4],
+      },
+      {
+        id: '7',
+        title: '1:1 with Manager',
+        description: '',
+        startTime: makeDate(-1, 15, 0),
+        endTime: makeDate(-1, 15, 30),
+        color: colors[1],
+      },
+      {
+        id: '8',
+        title: 'Release Deploy',
+        description: 'v2.1.0',
+        startTime: makeDate(3, 16, 0),
+        endTime: makeDate(3, 17, 0),
+        color: colors[2],
+      },
+      {
+        id: '9',
+        title: 'Overlapping Event A',
+        description: 'Tests overlap layout',
+        startTime: makeDate(0, 14, 0),
+        endTime: makeDate(0, 15, 30),
+        color: colors[3],
+      },
+      {
+        id: '10',
+        title: 'Overlapping Event B',
+        description: 'Tests overlap layout',
+        startTime: makeDate(0, 14, 30),
+        endTime: makeDate(0, 16, 0),
+        color: colors[4],
+      },
     ];
   }
 
@@ -148,9 +228,30 @@ export class CalendarDemo {
     };
 
     this.asyncEvents = [
-      { id: '11', title: 'Async: Client Call', description: 'Loaded after 5s', startTime: makeDate(0, 16, 0), endTime: makeDate(0, 17, 0), color: colors[0] },
-      { id: '12', title: 'Async: Team Retro', description: 'Loaded after 5s', startTime: makeDate(1, 11, 0), endTime: makeDate(1, 12, 0), color: colors[1] },
-      { id: '13', title: 'Async: Deployment Review', description: 'Loaded after 5s', startTime: makeDate(2, 14, 0), endTime: makeDate(2, 15, 30), color: colors[0] },
+      {
+        id: '11',
+        title: 'Async: Client Call',
+        description: 'Loaded after 5s',
+        startTime: makeDate(0, 16, 0),
+        endTime: makeDate(0, 17, 0),
+        color: colors[0],
+      },
+      {
+        id: '12',
+        title: 'Async: Team Retro',
+        description: 'Loaded after 5s',
+        startTime: makeDate(1, 11, 0),
+        endTime: makeDate(1, 12, 0),
+        color: colors[1],
+      },
+      {
+        id: '13',
+        title: 'Async: Deployment Review',
+        description: 'Loaded after 5s',
+        startTime: makeDate(2, 14, 0),
+        endTime: makeDate(2, 15, 30),
+        color: colors[0],
+      },
     ];
   }
 }

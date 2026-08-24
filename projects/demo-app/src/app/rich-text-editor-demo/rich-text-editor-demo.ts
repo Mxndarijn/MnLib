@@ -1,8 +1,8 @@
-import {Component, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MnButton, MnRichTextEditor, MnRichTextEditorLabels} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MnButton, MnRichTextEditor, MnRichTextEditorLabels } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 /** A seed a visitor can push into the editor from outside it. */
 type Seed = {
@@ -17,6 +17,7 @@ type Seed = {
   standalone: true,
   imports: [CommonModule, MnRichTextEditor, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './rich-text-editor-demo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       /* The app's reset strips heading margins, so the page sets its own rhythm. */
@@ -59,8 +60,8 @@ export class RichTextEditorDemo {
 
   /** Seeds shown as buttons, to show that reseeding never fights the caret. */
   readonly seeds: Seed[] = [
-    {name: 'Agenda outline', html: '<h2>Opening</h2><p><br></p><h2>Closing</h2>'},
-    {name: 'Empty', html: ''},
+    { name: 'Agenda outline', html: '<h2>Opening</h2><p><br></p><h2>Closing</h2>' },
+    { name: 'Empty', html: '' },
   ];
 
   /** Literal Dutch labels for the second editor's toolbar. */

@@ -1,13 +1,14 @@
-import {Component} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnButton, MnCheckbox, MnCheckboxProps} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MnButton, MnCheckbox, MnCheckboxProps } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-checkbox-demo',
   standalone: true,
   imports: [MnCheckbox, ReactiveFormsModule, MnButton, DemoPageComponent, DemoExampleComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './checkbox-demo.html',
 })
 export class CheckboxDemo {
@@ -17,42 +18,50 @@ export class CheckboxDemo {
 
   // Reactive form
   form = new FormGroup({
-    terms: new FormControl(false, {validators: [Validators.requiredTrue]}),
+    terms: new FormControl(false, { validators: [Validators.requiredTrue] }),
     newsletter: new FormControl(false),
-    disabled: new FormControl({value: true, disabled: true}),
+    disabled: new FormControl({ value: true, disabled: true }),
   });
 
   // Sizes
   sizeChecked = true;
 
   // Props
-  optionAProps: MnCheckboxProps = {id: 'option-a', label: 'Option A', hover: true};
-  optionBProps: MnCheckboxProps = {id: 'option-b', label: 'Option B (starts checked)', hover: true};
+  optionAProps: MnCheckboxProps = { id: 'option-a', label: 'Option A', hover: true };
+  optionBProps: MnCheckboxProps = {
+    id: 'option-b',
+    label: 'Option B (starts checked)',
+    hover: true,
+  };
 
   termsProps: MnCheckboxProps = {
     id: 'terms',
     label: 'I accept the terms and conditions',
-    errorMessages: {required: 'You must accept the terms to continue'},
+    errorMessages: { required: 'You must accept the terms to continue' },
   };
-  newsletterProps: MnCheckboxProps = {id: 'newsletter', label: 'Subscribe to newsletter', hover: true};
-  disabledProps: MnCheckboxProps = {id: 'disabled-cb', label: 'Disabled option (pre-checked)'};
+  newsletterProps: MnCheckboxProps = {
+    id: 'newsletter',
+    label: 'Subscribe to newsletter',
+    hover: true,
+  };
+  disabledProps: MnCheckboxProps = { id: 'disabled-cb', label: 'Disabled option (pre-checked)' };
 
-  xsProps: MnCheckboxProps = {id: 'size-xs', label: 'Extra small', size: 'xs'};
-  smProps: MnCheckboxProps = {id: 'size-sm', label: 'Small', size: 'sm'};
-  mdProps: MnCheckboxProps = {id: 'size-md', label: 'Medium (default)', size: 'md'};
-  lgProps: MnCheckboxProps = {id: 'size-lg', label: 'Large', size: 'lg'};
-  xlProps: MnCheckboxProps = {id: 'size-xl', label: 'Extra large', size: 'xl'};
+  xsProps: MnCheckboxProps = { id: 'size-xs', label: 'Extra small', size: 'xs' };
+  smProps: MnCheckboxProps = { id: 'size-sm', label: 'Small', size: 'sm' };
+  mdProps: MnCheckboxProps = { id: 'size-md', label: 'Medium (default)', size: 'md' };
+  lgProps: MnCheckboxProps = { id: 'size-lg', label: 'Large', size: 'lg' };
+  xlProps: MnCheckboxProps = { id: 'size-xl', label: 'Extra large', size: 'xl' };
 
   // Colors
   colorChecked = true;
   colorProps: MnCheckboxProps[] = [
-    {id: 'color-primary', label: 'Primary', color: 'primary'},
-    {id: 'color-secondary', label: 'Secondary', color: 'secondary'},
-    {id: 'color-accent', label: 'Accent', color: 'accent'},
-    {id: 'color-neutral', label: 'Neutral', color: 'neutral'},
-    {id: 'color-info', label: 'Info', color: 'info'},
-    {id: 'color-success', label: 'Success', color: 'success'},
-    {id: 'color-warning', label: 'Warning', color: 'warning'},
-    {id: 'color-error', label: 'Error', color: 'error'},
+    { id: 'color-primary', label: 'Primary', color: 'primary' },
+    { id: 'color-secondary', label: 'Secondary', color: 'secondary' },
+    { id: 'color-accent', label: 'Accent', color: 'accent' },
+    { id: 'color-neutral', label: 'Neutral', color: 'neutral' },
+    { id: 'color-info', label: 'Info', color: 'info' },
+    { id: 'color-success', label: 'Success', color: 'success' },
+    { id: 'color-warning', label: 'Warning', color: 'warning' },
+    { id: 'color-error', label: 'Error', color: 'error' },
   ];
 }
