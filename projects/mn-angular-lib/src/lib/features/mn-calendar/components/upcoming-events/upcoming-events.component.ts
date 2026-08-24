@@ -1,4 +1,5 @@
 ﻿import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -23,6 +24,7 @@ import {MnLanguageService} from '../../../../language';
  */
 @Component({
   selector: 'mn-upcoming-events',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, UpcomingEventRowComponent],
   templateUrl: './upcoming-events.component.html',

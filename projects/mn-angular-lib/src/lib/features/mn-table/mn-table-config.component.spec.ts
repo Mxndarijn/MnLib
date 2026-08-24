@@ -1,14 +1,14 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {BehaviorSubject} from 'rxjs';
-import {MnCollectionState, MnTable, TableDataSource} from 'mn-angular-lib';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { MnCollectionState, MnTable, TableDataSource } from 'mn-angular-lib';
 
 /** Minimal row shape used by the configuration tests. */
 type Row = {
   id: string;
   name: string;
-}
+};
 
 /**
  * Covers what {@link MnTable} does with a *misconfigured* data source.
@@ -26,8 +26,8 @@ describe('MnTable data source configuration', () => {
   let rows: BehaviorSubject<Row[]>;
 
   const ROWS: Row[] = [
-    {id: '1', name: 'Alice'},
-    {id: '2', name: 'Bob'},
+    { id: '1', name: 'Alice' },
+    { id: '2', name: 'Bob' },
   ];
 
   /** Builds a table data source with the given overrides applied. */
@@ -35,7 +35,7 @@ describe('MnTable data source configuration', () => {
     return {
       dataRows: rows,
       getID: (row) => row.id,
-      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
       emptyMessage: 'No items',
       state: MnCollectionState.RETRIEVED,
       canSearch: false,
@@ -48,13 +48,16 @@ describe('MnTable data source configuration', () => {
     spyOn(console, 'error');
     await TestBed.configureTestingModule({
       imports: [MnTable],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
     fixture = TestBed.createComponent(MnTable<Row>);
   });
 
   it('still renders its rows when paginated is missing onPageChange and totalItems', () => {
-    fixture.componentInstance.dataSource = makeDataSource({paginationMode: 'paginated', pageSize: 5});
+    fixture.componentInstance.dataSource = makeDataSource({
+      paginationMode: 'paginated',
+      pageSize: 5,
+    });
 
     expect(() => fixture.detectChanges()).not.toThrow();
 
@@ -65,7 +68,7 @@ describe('MnTable data source configuration', () => {
   });
 
   it('degrades a server-paginated source with no callbacks to client-side pagination', () => {
-    const ds = makeDataSource({paginationMode: 'paginated', pageSize: 5});
+    const ds = makeDataSource({ paginationMode: 'paginated', pageSize: 5 });
     fixture.componentInstance.dataSource = ds;
     fixture.detectChanges();
 
@@ -102,7 +105,7 @@ describe('MnTable data source configuration', () => {
   });
 
   it('degrades load-more with no load mechanism to no pagination', () => {
-    const ds = makeDataSource({paginationMode: 'load-more'});
+    const ds = makeDataSource({ paginationMode: 'load-more' });
     fixture.componentInstance.dataSource = ds;
 
     expect(() => fixture.detectChanges()).not.toThrow();
@@ -112,7 +115,7 @@ describe('MnTable data source configuration', () => {
   });
 
   it('applies table-fixed only for the fixed column layout', () => {
-    fixture.componentInstance.dataSource = makeDataSource({appearance: {layout: 'fixed'}});
+    fixture.componentInstance.dataSource = makeDataSource({ appearance: { layout: 'fixed' } });
     fixture.detectChanges();
 
     const table: HTMLTableElement = fixture.nativeElement.querySelector('table');
@@ -127,10 +130,10 @@ describe('MnTable data source configuration', () => {
   it('hides responsive columns behind container queries, not viewport ones', () => {
     fixture.componentInstance.dataSource = makeDataSource({
       columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name},
-        {key: 'sm', header: 'Sm', cell: () => 'sm', hiddenBelow: 'sm'},
-        {key: 'md', header: 'Md', cell: () => 'md', hiddenBelow: 'md'},
-        {key: 'lg', header: 'Lg', cell: () => 'lg', hiddenBelow: 'lg'},
+        { key: 'name', header: 'Name', cell: (row) => row.name },
+        { key: 'sm', header: 'Sm', cell: () => 'sm', hiddenBelow: 'sm' },
+        { key: 'md', header: 'Md', cell: () => 'md', hiddenBelow: 'md' },
+        { key: 'lg', header: 'Lg', cell: () => 'lg', hiddenBelow: 'lg' },
       ],
     });
     fixture.detectChanges();
@@ -160,7 +163,7 @@ describe('MnTable data source configuration', () => {
   });
 
   it('leaves column widths content-driven for the explicit auto layout', () => {
-    fixture.componentInstance.dataSource = makeDataSource({appearance: {layout: 'auto'}});
+    fixture.componentInstance.dataSource = makeDataSource({ appearance: { layout: 'auto' } });
     fixture.detectChanges();
 
     const table: HTMLTableElement = fixture.nativeElement.querySelector('table');
@@ -180,7 +183,7 @@ describe('MnTable data source configuration', () => {
   it('measures widths with the automatic layout before pinning them', () => {
     // While the rows are still loading there is nothing worth measuring: the
     // skeleton placeholders would pin the bars' widths instead of the data's.
-    fixture.componentInstance.dataSource = makeDataSource({state: MnCollectionState.LOADING});
+    fixture.componentInstance.dataSource = makeDataSource({ state: MnCollectionState.LOADING });
     fixture.detectChanges();
 
     const table: HTMLTableElement = fixture.nativeElement.querySelector('table');
@@ -191,8 +194,12 @@ describe('MnTable data source configuration', () => {
   it('pins the measured widths once real rows are on screen', async () => {
     fixture.componentInstance.dataSource = makeDataSource({
       columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name},
-        {key: 'note', header: 'Note', cell: () => 'a considerably longer cell value than the name'},
+        { key: 'name', header: 'Name', cell: (row) => row.name },
+        {
+          key: 'note',
+          header: 'Note',
+          cell: () => 'a considerably longer cell value than the name',
+        },
       ],
     });
     fixture.detectChanges();
@@ -206,8 +213,9 @@ describe('MnTable data source configuration', () => {
 
     // A concrete pixel width, captured from the automatic pass — not an even split,
     // and no longer following the content.
-    const headers: HTMLTableCellElement[] =
-      Array.from(fixture.nativeElement.querySelectorAll('thead th[data-column-key]'));
+    const headers: HTMLTableCellElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('thead th[data-column-key]'),
+    );
     const pinned = headers.filter((th) => th.style.width !== '');
     expect(pinned.length).toBe(1);
     expect(pinned[0].style.width).toMatch(/^\d+px$/);
@@ -226,9 +234,13 @@ describe('MnTable data source configuration', () => {
   it('never lets the pinned widths overflow the table', async () => {
     fixture.componentInstance.dataSource = makeDataSource({
       columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name},
-        {key: 'email', header: 'Email', cell: () => 'someone.with.a.long.address@example-company.com'},
-        {key: 'role', header: 'Role', cell: () => 'Developer', width: '140px'},
+        { key: 'name', header: 'Name', cell: (row) => row.name },
+        {
+          key: 'email',
+          header: 'Email',
+          cell: () => 'someone.with.a.long.address@example-company.com',
+        },
+        { key: 'role', header: 'Role', cell: () => 'Developer', width: '140px' },
       ],
     });
     fixture.detectChanges();
@@ -243,16 +255,21 @@ describe('MnTable data source configuration', () => {
   it('lets a declared width win over a pinned one', async () => {
     fixture.componentInstance.dataSource = makeDataSource({
       columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name, width: '123px'},
-        {key: 'note', header: 'Note', cell: () => 'a much longer value that will be the widest column'},
+        { key: 'name', header: 'Name', cell: (row) => row.name, width: '123px' },
+        {
+          key: 'note',
+          header: 'Note',
+          cell: () => 'a much longer value that will be the widest column',
+        },
       ],
     });
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const header: HTMLTableCellElement =
-      fixture.nativeElement.querySelector('thead th[data-column-key="name"]');
+    const header: HTMLTableCellElement = fixture.nativeElement.querySelector(
+      'thead th[data-column-key="name"]',
+    );
     expect(header.style.width).toBe('123px');
   });
 
@@ -262,13 +279,16 @@ describe('MnTable data source configuration', () => {
    * has to survive the rows themselves being replaced.
    */
   it('keeps showing a selected row after its page is replaced', async () => {
-    const rows = new BehaviorSubject<Row[]>([{id: '1', name: 'Alice'}, {id: '2', name: 'Bob'}]);
+    const rows = new BehaviorSubject<Row[]>([
+      { id: '1', name: 'Alice' },
+      { id: '2', name: 'Bob' },
+    ]);
     fixture.componentInstance.dataSource = makeDataSource({
       dataRows: rows,
       selectionMode: 'multi',
       selectionSummary: true,
       initialSelectedIds: ['1'],
-      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
     });
     fixture.detectChanges();
     await fixture.whenStable();
@@ -279,7 +299,10 @@ describe('MnTable data source configuration', () => {
     expect(summaryText()).toContain('Alice');
 
     // Page 2 arrives: Alice is no longer among the loaded rows.
-    rows.next([{id: '3', name: 'Charlie'}, {id: '4', name: 'Dana'}]);
+    rows.next([
+      { id: '3', name: 'Charlie' },
+      { id: '4', name: 'Dana' },
+    ]);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -305,7 +328,7 @@ describe('MnTable data source configuration', () => {
       selectionMode: 'multi',
       selectionSummary: true,
       initialSelectedIds: ['1'],
-      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
     });
     fixture.detectChanges();
     await fixture.whenStable();
@@ -321,14 +344,14 @@ describe('MnTable data source configuration', () => {
   });
 
   it('lets the data source override the responsive tag limit', async () => {
-    const many: Row[] = Array.from({length: 30}, (_, i) => ({id: String(i), name: `Row ${i}`}));
+    const many: Row[] = Array.from({ length: 30 }, (_, i) => ({ id: String(i), name: `Row ${i}` }));
     fixture.componentInstance.dataSource = makeDataSource({
       dataRows: new BehaviorSubject<Row[]>(many),
       selectionMode: 'multi',
       selectionSummary: true,
       selectionSummaryLimit: 2,
       initialSelectedIds: many.map((row) => row.id),
-      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
     });
     fixture.detectChanges();
     await fixture.whenStable();
@@ -341,20 +364,19 @@ describe('MnTable data source configuration', () => {
   });
 
   it('collapses a large selection behind a show-more control', async () => {
-    const many: Row[] = Array.from({length: 30}, (_, i) => ({id: String(i), name: `Row ${i}`}));
+    const many: Row[] = Array.from({ length: 30 }, (_, i) => ({ id: String(i), name: `Row ${i}` }));
     fixture.componentInstance.dataSource = makeDataSource({
       dataRows: new BehaviorSubject<Row[]>(many),
       selectionMode: 'multi',
       selectionSummary: true,
       initialSelectedIds: many.map((row) => row.id),
-      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
     });
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const tags = (): number =>
-      fixture.nativeElement.querySelectorAll('ul li span.truncate').length;
+    const tags = (): number => fixture.nativeElement.querySelectorAll('ul li span.truncate').length;
 
     // 30 selected, but only the default 8 tags render, so the summary cannot grow
     // without bound and shove the table off screen.
@@ -370,11 +392,12 @@ describe('MnTable data source configuration', () => {
   });
 
   it('gives the select-all header the same background as the rest of the header row', () => {
-    fixture.componentInstance.dataSource = makeDataSource({selectionMode: 'multi'});
+    fixture.componentInstance.dataSource = makeDataSource({ selectionMode: 'multi' });
     fixture.detectChanges();
 
-    const headers: HTMLTableCellElement[] =
-      Array.from(fixture.nativeElement.querySelectorAll('thead tr:first-child th'));
+    const headers: HTMLTableCellElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('thead tr:first-child th'),
+    );
     // The checkbox cell used to paint itself base-200 while every neighbour stayed
     // transparent over the row's base-100, leaving a lighter patch in the corner.
     for (const header of headers) {

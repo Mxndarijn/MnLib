@@ -1,5 +1,8 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  inject,
   Input,
   OnInit,
   Type,
@@ -14,6 +17,7 @@ import { CustomModalConfig } from '../../mn-modal.types';
 
 @Component({
   selector: 'mn-custom-body-host',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule],
   template: '<ng-container #container></ng-container>',
@@ -25,6 +29,7 @@ export class MnCustomBodyHostComponent implements OnInit {
   @ViewChild('container', { read: ViewContainerRef }) container!: ViewContainerRef;
 
   private componentRef?: ComponentRef<unknown>;
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     setTimeout(() => this.loadContent(), 0);
@@ -40,6 +45,10 @@ export class MnCustomBodyHostComponent implements OnInit {
     } else if (this.config.template) {
       this.attachTemplate(this.config.template);
     }
+
+    // Content is attached from a setTimeout (outside any Angular event), so under OnPush
+    // nothing has marked this host dirty for the CD pass that would render the inserted view.
+    this.cdr.markForCheck();
   }
 
   attachComponent(component: Type<unknown>): void {

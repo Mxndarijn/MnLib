@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, EventEmitter, inject, Input, OnInit, Output, signal,} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, EventEmitter, inject, Input, OnInit, Output, signal,} from '@angular/core';
 import {CommonModule, NgClass} from '@angular/common';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
 import {skip} from 'rxjs';
@@ -59,6 +59,7 @@ export type MnFileDisplayItem = {
  */
 @Component({
   selector: 'mn-lib-file-input',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, NgClass, MnErrorMessage, LucideFile, LucideImagePlus, LucideTrash2, LucideUpload, LucideX],
   templateUrl: './mn-file-input.html',
@@ -84,6 +85,7 @@ export class MnFileInput implements OnInit {
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, {optional: true});
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
   /** Object-URL previews aligned to {@link files}; null for non-image entries. */
   private readonly previewUrls = signal<(string | null)[]>([]);
   /** True once the user removed the single existing image. */
@@ -219,7 +221,12 @@ export class MnFileInput implements OnInit {
   ngOnInit(): void {
     this.resolveConfig();
 
-    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => this.resolveConfig());
+    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveConfig();
+      // uiConfig is a plain field (not a signal), so a locale-driven re-resolve must be
+      // announced explicitly for OnPush to re-render the labels/hints.
+      this.cdr.markForCheck();
+    });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
     this.destroyRef.onDestroy(() => this.revokeAll());
   }
@@ -259,6 +266,10 @@ export class MnFileInput implements OnInit {
    */
   setDisabledState(isDisabled: boolean): void {
     this.formDisabled = isDisabled;
+    // formDisabled is a plain field read through the isDisabled getter; the forms module
+    // sets it outside any Angular event, so OnPush needs an explicit nudge to restyle.
+    // (writeValue needs no such call — it writes the `files` signal, which self-notifies.)
+    this.cdr.markForCheck();
   }
 
   /**

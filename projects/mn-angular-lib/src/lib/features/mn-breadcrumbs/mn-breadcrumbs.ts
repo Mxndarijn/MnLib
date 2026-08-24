@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
 import { MnTranslatePipe } from '../../language';
 import { MnBreadcrumbItem, MnBreadcrumbsData } from './mn-breadcrumbsTypes';
@@ -20,6 +20,7 @@ import { mnBreadcrumbsVariants } from './mn-breadcrumbsVariants';
  */
 @Component({
   selector: 'mn-breadcrumbs',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [MnTranslatePipe, LucideChevronLeft, LucideChevronRight],
   templateUrl: './mn-breadcrumbs.html',

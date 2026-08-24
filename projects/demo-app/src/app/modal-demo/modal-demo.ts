@@ -1,6 +1,6 @@
-import {Component, inject, TemplateRef, ViewChild} from '@angular/core';
-import {NgClass} from '@angular/common';
-import {Validators} from '@angular/forms';
+import { Component, inject, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Validators } from '@angular/forms';
 import {
   ActionStyle,
   CloseMode,
@@ -20,9 +20,9 @@ import {
   WizardFlowMode,
   WizardResult,
 } from 'mn-angular-lib';
-import {BehaviorSubject} from 'rxjs';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { BehaviorSubject } from 'rxjs';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 type UserFormModel = {
   firstName: string;
@@ -47,6 +47,7 @@ type UserFormModel = {
   standalone: true,
   imports: [NgClass, MnButton, DemoPageComponent, DemoExampleComponent],
   templateUrl: './modal-demo.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./modal-demo.css'],
 })
 export class ModalDemo {
@@ -221,19 +222,19 @@ export class ModalDemo {
             await new Promise((r) => setTimeout(r, 500));
             const cities: Record<string, { label: string; value: string }[]> = {
               nl: [
-                {label: 'Amsterdam', value: 'ams'},
-                {label: 'Rotterdam', value: 'rtd'},
-                {label: 'Utrecht', value: 'utr'},
+                { label: 'Amsterdam', value: 'ams' },
+                { label: 'Rotterdam', value: 'rtd' },
+                { label: 'Utrecht', value: 'utr' },
               ],
               de: [
-                {label: 'Berlin', value: 'ber'},
-                {label: 'Munich', value: 'muc'},
-                {label: 'Hamburg', value: 'ham'},
+                { label: 'Berlin', value: 'ber' },
+                { label: 'Munich', value: 'muc' },
+                { label: 'Hamburg', value: 'ham' },
               ],
               be: [
-                {label: 'Brussels', value: 'bru'},
-                {label: 'Antwerp', value: 'ant'},
-                {label: 'Ghent', value: 'gnt'},
+                { label: 'Brussels', value: 'bru' },
+                { label: 'Antwerp', value: 'ant' },
+                { label: 'Ghent', value: 'gnt' },
               ],
             };
             return cities[formValue.country as string] || [];
@@ -337,7 +338,7 @@ export class ModalDemo {
               validate: async () => {
                 console.log('Simulating Async Verification...');
                 await new Promise((resolve) => setTimeout(resolve, 1000));
-                return {status: ValidationStatus.VALID};
+                return { status: ValidationStatus.VALID };
               },
             },
           ]);
@@ -395,14 +396,14 @@ export class ModalDemo {
             key: 'tags',
             label: 'Tags',
             options: [
-              {label: 'Accessibility', value: 'a11y'},
-              {label: 'Backend', value: 'backend'},
-              {label: 'Design', value: 'design'},
-              {label: 'Documentation', value: 'docs'},
-              {label: 'Frontend', value: 'frontend'},
-              {label: 'Performance', value: 'perf'},
-              {label: 'Security', value: 'security'},
-              {label: 'Tooling', value: 'tooling'},
+              { label: 'Accessibility', value: 'a11y' },
+              { label: 'Backend', value: 'backend' },
+              { label: 'Design', value: 'design' },
+              { label: 'Documentation', value: 'docs' },
+              { label: 'Frontend', value: 'frontend' },
+              { label: 'Performance', value: 'perf' },
+              { label: 'Security', value: 'security' },
+              { label: 'Tooling', value: 'tooling' },
             ],
             searchable: true,
           })
@@ -741,7 +742,7 @@ export class ModalDemo {
     const DEPARTMENTS = ['Engineering', 'Design', 'Quality', 'Operations'];
     // Deliberately mixes very short and very long values so column widths would
     // otherwise change from page to page.
-    const ALL: Employee[] = Array.from({length: 43}, (_, i) => ({
+    const ALL: Employee[] = Array.from({ length: 43 }, (_, i) => ({
       id: String(i + 1),
       name: i % 4 === 0 ? `Al ${i + 1}` : `Alexandra Bartholomew-Fitzgerald ${i + 1}`,
       email:
@@ -790,7 +791,7 @@ export class ModalDemo {
       initialSelectedRows: ALL.slice(0, 14),
       // No `layout` set: exercises the default `stable` mode. `hover` alone, with no
       // striping, matches how the library is actually consumed in product.
-      appearance: {hover: true},
+      appearance: { hover: true },
       paginationMode: 'paginated',
       pageSize: 5,
       pageSizeOptions: [5, 10, 25],
@@ -823,7 +824,7 @@ export class ModalDemo {
           filterable: true,
           filterPlaceholder: 'Filter name…',
         },
-        {key: 'email', header: 'Email', cell: (r) => r.email, hiddenBelow: 'sm'},
+        { key: 'email', header: 'Email', cell: (r) => r.email, hiddenBelow: 'sm' },
         {
           key: 'role',
           header: 'Role',
@@ -832,7 +833,7 @@ export class ModalDemo {
           filterable: true,
           filterType: 'select',
           filterPlaceholder: 'All roles',
-          filterOptions: ROLES.map((r) => ({label: r, value: r})),
+          filterOptions: ROLES.map((r) => ({ label: r, value: r })),
         },
         {
           key: 'department',
@@ -843,7 +844,7 @@ export class ModalDemo {
           filterable: true,
           filterType: 'multi-select',
           filterPlaceholder: 'Departments',
-          filterOptions: DEPARTMENTS.map((d) => ({label: d, value: d})),
+          filterOptions: DEPARTMENTS.map((d) => ({ label: d, value: d })),
         },
       ],
     };
@@ -890,9 +891,9 @@ export class ModalDemo {
     this.modalService.open(config);
   }
 
-  @ViewChild('customHeader', {static: true}) customHeader!: TemplateRef<unknown>;
-  @ViewChild('confirmationDetail', {static: true}) confirmationDetail!: TemplateRef<unknown>;
-  @ViewChild('wizardHeader', {static: true}) wizardHeader!: TemplateRef<unknown>;
+  @ViewChild('customHeader', { static: true }) customHeader!: TemplateRef<unknown>;
+  @ViewChild('confirmationDetail', { static: true }) confirmationDetail!: TemplateRef<unknown>;
+  @ViewChild('wizardHeader', { static: true }) wizardHeader!: TemplateRef<unknown>;
 
   openHybridModal() {
     type HybridModel = {
@@ -941,9 +942,9 @@ export class ModalDemo {
               key: 'priority',
               label: 'Priority',
               options: [
-                {label: 'Low', value: 'low'},
-                {label: 'Medium', value: 'medium'},
-                {label: 'High', value: 'high'},
+                { label: 'Low', value: 'low' },
+                { label: 'Medium', value: 'medium' },
+                { label: 'High', value: 'high' },
               ],
               validators: [Validators.required],
             });
@@ -975,12 +976,12 @@ export class ModalDemo {
       .template(this.wizardHeader)
       .addStep<WizardHeaderModel>('Step 1', (s) => {
         s.body('This wizard has a custom header visualization across all steps.')
-          .field({kind: FieldKind.TEXT, key: 'data1', label: 'Field 1'})
+          .field({ kind: FieldKind.TEXT, key: 'data1', label: 'Field 1' })
           .nextLabel('Go to Step 2');
       })
       .addStep<WizardHeaderModel>('Step 2', (s) => {
         s.body('Still here!')
-          .field({kind: FieldKind.TEXT, key: 'data2', label: 'Field 2'})
+          .field({ kind: FieldKind.TEXT, key: 'data2', label: 'Field 2' })
           .backLabel('Go back to 1')
           .nextLabel('Finish');
       })
@@ -1150,9 +1151,9 @@ export class ModalDemo {
             key: 'role',
             label: 'Role',
             options: [
-              {label: 'User', value: 'user'},
-              {label: 'Editor', value: 'editor'},
-              {label: 'Admin', value: 'admin'},
+              { label: 'User', value: 'user' },
+              { label: 'Editor', value: 'editor' },
+              { label: 'Admin', value: 'admin' },
             ],
             validators: [Validators.required],
           }).field({

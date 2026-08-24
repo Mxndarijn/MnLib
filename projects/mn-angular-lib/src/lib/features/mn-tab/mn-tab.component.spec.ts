@@ -1,12 +1,18 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {ActivatedRoute, convertToParamMap, ParamMap, provideRouter, Router} from '@angular/router';
-import {RouterTestingHarness} from '@angular/router/testing';
-import {BehaviorSubject} from 'rxjs';
-import {MnTabComponent} from 'mn-angular-lib';
-import {MnTabDataSource, MnTabItem} from './mn-tab.types';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import {
+  ActivatedRoute,
+  convertToParamMap,
+  ParamMap,
+  provideRouter,
+  Router,
+} from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+import { BehaviorSubject } from 'rxjs';
+import { MnTabComponent } from 'mn-angular-lib';
+import { MnTabDataSource, MnTabItem } from './mn-tab.types';
 
 /**
  * Builds a data source with the given labels and an optional default index.
@@ -15,7 +21,7 @@ import {MnTabDataSource, MnTabItem} from './mn-tab.types';
  */
 function dataSource(labels: string[], defaultActive = 0): MnTabDataSource {
   return {
-    items: labels.map((label) => ({label})),
+    items: labels.map((label) => ({ label })),
     defaultActive,
   };
 }
@@ -27,7 +33,7 @@ describe('MnTabComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MnTabComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MnTabComponent);
@@ -108,10 +114,10 @@ describe('MnTabComponent', () => {
     const onClick = jasmine.createSpy('onClick');
     const onDeactivate = jasmine.createSpy('onDeactivate');
     const items: MnTabItem[] = [
-      {label: 'One', onDeactivate},
-      {label: 'Two', onClick},
+      { label: 'One', onDeactivate },
+      { label: 'Two', onClick },
     ];
-    component.dataSource = {items, defaultActive: 0};
+    component.dataSource = { items, defaultActive: 0 };
     fixture.detectChanges();
 
     const emitted: MnTabItem[] = [];
@@ -127,8 +133,8 @@ describe('MnTabComponent', () => {
 
   it('does nothing when re-selecting the already active tab', () => {
     const onClick = jasmine.createSpy('onClick');
-    const items: MnTabItem[] = [{label: 'One', onClick}];
-    component.dataSource = {items, defaultActive: 0};
+    const items: MnTabItem[] = [{ label: 'One', onClick }];
+    component.dataSource = { items, defaultActive: 0 };
     fixture.detectChanges();
 
     const emit = jasmine.createSpy('emit');
@@ -168,10 +174,10 @@ describe('MnTabComponent URL sync', () => {
     await TestBed.configureTestingModule({
       imports: [MnTabComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
-        {provide: Router, useValue: {navigate}},
-        {provide: ActivatedRoute, useValue: route},
+        { provide: Router, useValue: { navigate } },
+        { provide: ActivatedRoute, useValue: route },
       ],
     }).compileComponents();
 
@@ -185,14 +191,14 @@ describe('MnTabComponent URL sync', () => {
   }
 
   it('restores the tab the URL names, slugging the label key', async () => {
-    await setup({tab: 'tab-invites'});
+    await setup({ tab: 'tab-invites' });
     const onClick = jasmine.createSpy('onClick');
     const items: MnTabItem[] = [
-      {label: 'members.tabMembers'},
-      {label: 'members.tabInvites', onClick},
+      { label: 'members.tabMembers' },
+      { label: 'members.tabInvites', onClick },
     ];
     const emitted: MnTabItem[] = [];
-    component.dataSource = {items, defaultActive: 0};
+    component.dataSource = { items, defaultActive: 0 };
     component.activeChange.subscribe((item) => emitted.push(item));
     fixture.detectChanges();
 
@@ -205,10 +211,13 @@ describe('MnTabComponent URL sync', () => {
   });
 
   it('stays quiet when the URL names the tab that is default anyway', async () => {
-    await setup({tab: 'one'});
+    await setup({ tab: 'one' });
     const onClick = jasmine.createSpy('onClick');
     const emit = jasmine.createSpy('emit');
-    component.dataSource = {items: [{label: 'One', onClick}, {label: 'Two'}], defaultActive: 0};
+    component.dataSource = {
+      items: [{ label: 'One', onClick }, { label: 'Two' }],
+      defaultActive: 0,
+    };
     component.activeChange.subscribe(emit);
     fixture.detectChanges();
     await flushRestore();
@@ -218,7 +227,7 @@ describe('MnTabComponent URL sync', () => {
   });
 
   it('ignores a URL value that names no tab, leaving the default standing', async () => {
-    await setup({tab: 'gone'});
+    await setup({ tab: 'gone' });
     component.dataSource = dataSource(['One', 'Two']);
     fixture.detectChanges();
     await flushRestore();
@@ -234,34 +243,34 @@ describe('MnTabComponent URL sync', () => {
     component.setActive(component.dataSource.items[1]);
 
     expect(navigate).toHaveBeenCalledWith([], {
-      queryParams: {tab: 'two'},
+      queryParams: { tab: 'two' },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
   });
 
   it('prefers an explicit id over the slugged label', async () => {
-    await setup({tab: 'entrants'});
+    await setup({ tab: 'entrants' });
     const items: MnTabItem[] = [
-      {label: 'matches.hub.tab.overview', id: 'overview'},
-      {label: 'matches.hub.tab.deelnemers', id: 'entrants'},
+      { label: 'matches.hub.tab.overview', id: 'overview' },
+      { label: 'matches.hub.tab.deelnemers', id: 'entrants' },
     ];
-    component.dataSource = {items, defaultActive: 0};
+    component.dataSource = { items, defaultActive: 0 };
     fixture.detectChanges();
 
     expect(component.currentActive).toBe(items[1]);
 
     component.setActive(items[0]);
     expect(navigate).toHaveBeenCalledWith([], {
-      queryParams: {tab: 'overview'},
+      queryParams: { tab: 'overview' },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
   });
 
   it('uses the configured parameter name', async () => {
-    await setup({tab: 'two', sub: 'three'});
-    component.dataSource = {...dataSource(['One', 'Two', 'Three']), urlParam: 'sub'};
+    await setup({ tab: 'two', sub: 'three' });
+    component.dataSource = { ...dataSource(['One', 'Two', 'Three']), urlParam: 'sub' };
     fixture.detectChanges();
 
     // `tab` belongs to another tab bar on the page; only `sub` is ours.
@@ -269,15 +278,15 @@ describe('MnTabComponent URL sync', () => {
 
     component.setActive(component.dataSource.items[0]);
     expect(navigate).toHaveBeenCalledWith([], {
-      queryParams: {sub: 'one'},
+      queryParams: { sub: 'one' },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
   });
 
   it('stays out of the URL entirely when urlParam is false', async () => {
-    await setup({tab: 'two'});
-    component.dataSource = {...dataSource(['One', 'Two']), urlParam: false};
+    await setup({ tab: 'two' });
+    component.dataSource = { ...dataSource(['One', 'Two']), urlParam: false };
     fixture.detectChanges();
     await flushRestore();
 
@@ -288,13 +297,13 @@ describe('MnTabComponent URL sync', () => {
   });
 
   it('follows a URL change made after render, as a back button or deep link does', async () => {
-    await setup({tab: 'one'});
+    await setup({ tab: 'one' });
     const onClick = jasmine.createSpy('onClick');
-    const items: MnTabItem[] = [{label: 'One'}, {label: 'Two', onClick}];
-    component.dataSource = {items, defaultActive: 0};
+    const items: MnTabItem[] = [{ label: 'One' }, { label: 'Two', onClick }];
+    component.dataSource = { items, defaultActive: 0 };
     fixture.detectChanges();
 
-    queryParams.next(convertToParamMap({tab: 'two'}));
+    queryParams.next(convertToParamMap({ tab: 'two' }));
 
     expect(component.currentActive).toBe(items[1]);
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -315,16 +324,22 @@ describe('MnTabComponent URL sync', () => {
   });
 
   it('announces a restored tab once, not on every items rebuild', async () => {
-    await setup({tab: 'two'});
+    await setup({ tab: 'two' });
     const onClick = jasmine.createSpy('onClick');
-    component.dataSource = {items: [{label: 'One'}, {label: 'Two', onClick}], defaultActive: 0};
+    component.dataSource = {
+      items: [{ label: 'One' }, { label: 'Two', onClick }],
+      defaultActive: 0,
+    };
     fixture.detectChanges();
     await flushRestore();
     expect(onClick).toHaveBeenCalledTimes(1);
 
     // A consumer whose data source is a computed rebuilds its items on any
     // unrelated change (a badge count, say); the same tab must not reload.
-    component.dataSource = {items: [{label: 'One'}, {label: 'Two', onClick}], defaultActive: 0};
+    component.dataSource = {
+      items: [{ label: 'One' }, { label: 'Two', onClick }],
+      defaultActive: 0,
+    };
     fixture.detectChanges();
     await flushRestore();
 
@@ -333,16 +348,16 @@ describe('MnTabComponent URL sync', () => {
   });
 
   it('numbers repeated slugs so every tab still round-trips', async () => {
-    await setup({tab: 'open-2'});
-    const items: MnTabItem[] = [{label: 'requests.open'}, {label: 'invites.open'}];
-    component.dataSource = {items, defaultActive: 0};
+    await setup({ tab: 'open-2' });
+    const items: MnTabItem[] = [{ label: 'requests.open' }, { label: 'invites.open' }];
+    component.dataSource = { items, defaultActive: 0 };
     fixture.detectChanges();
 
     expect(component.currentActive).toBe(items[1]);
 
     component.setActive(items[0]);
     expect(navigate).toHaveBeenCalledWith([], {
-      queryParams: {tab: 'open'},
+      queryParams: { tab: 'open' },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
@@ -353,6 +368,7 @@ describe('MnTabComponent URL sync', () => {
 @Component({
   selector: 'mn-lib-tab-host',
   imports: [MnTabComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: '<mn-tab [dataSource]="ds"></mn-tab>',
 })
 class TabHostComponent {
@@ -364,9 +380,9 @@ describe('MnTabComponent URL sync (routed)', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
-        provideRouter([{path: 'members', component: TabHostComponent}]),
+        provideRouter([{ path: 'members', component: TabHostComponent }]),
       ],
     }).compileComponents();
   });

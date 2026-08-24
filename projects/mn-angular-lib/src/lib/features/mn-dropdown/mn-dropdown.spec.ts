@@ -1,12 +1,25 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {LucideChevronDown, LucideEllipsisVertical} from '@lucide/angular';
-import {Subject} from 'rxjs';
+import { ChangeDetectorRef, Component, Type, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { LucideChevronDown, LucideEllipsisVertical } from '@lucide/angular';
+import { Subject } from 'rxjs';
 
-import {MnDropdown, MnDropdownAction, MnDropdownProps} from 'mn-angular-lib';
-import {MnConfigService} from '../../config';
-import {MnLanguageService} from '../../language';
+import { MnDropdown, MnDropdownAction, MnDropdownProps } from 'mn-angular-lib';
+import { MnConfigService } from '../../config';
+import { MnLanguageService } from '../../language';
+
+/**
+ * Renders after an imperative state change on the OnPush child. Calling a method directly
+ * (`component.toggle()`, `component.onSearch()`, …) does not mark the child dirty, so a
+ * top-down `fixture.detectChanges()` from the Default test host skips it — whereas the real
+ * `(click)`/DOM event does mark it in the app. Marking the child here mirrors production.
+ * When there is no child (a directly-created OnPush root renders on its own) it degrades to
+ * a plain detect, so it is safe to use in every block.
+ */
+function syncCd(fx: ComponentFixture<unknown>, dir: Type<unknown>): void {
+  fx.debugElement.query(By.directive(dir))?.injector.get(ChangeDetectorRef).markForCheck();
+  fx.detectChanges();
+}
 
 /** Minimal config stub — the component only calls `resolve()`, which returns an empty config here. */
 const configStub: Partial<MnConfigService> = {
@@ -26,6 +39,7 @@ const languageStub: Partial<MnLanguageService> = {
 @Component({
   standalone: true,
   imports: [MnDropdown],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="transformed-ancestor" style="transform: translateY(20px); position: relative;">
       <mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>
@@ -39,9 +53,9 @@ class HostComponent {
     id: 'test-dd',
     mobileSheet: false,
     actions: [
-      {label: 'Edit', run: this.edit},
-      {label: 'Delete', danger: true, run: this.remove},
-      {label: 'Disabled', disabled: true, run: () => undefined},
+      { label: 'Edit', run: this.edit },
+      { label: 'Delete', danger: true, run: this.remove },
+      { label: 'Disabled', disabled: true, run: () => undefined },
     ],
   };
 }
@@ -81,15 +95,15 @@ describe('MnDropdown (anchored popover)', () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
-        {provide: MnLanguageService, useValue: languageStub},
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
       ],
     }).compileComponents();
 
     stubViewport(false);
     fixture = TestBed.createComponent(HostComponent);
     host = fixture.componentInstance;
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
   });
 
@@ -103,7 +117,7 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('portals the popover to document.body (not the transformed ancestor) when opened', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     const el = menu();
     expect(el).withContext('menu should render when open').not.toBeNull();
@@ -113,7 +127,7 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('positions the popover from the trigger rect, right-aligned via a fixed layout', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     const el = menu()!;
     expect(el.classList.contains('fixed')).toBeTrue();
@@ -125,7 +139,10 @@ describe('MnDropdown (anchored popover)', () => {
   });
 
   it('renders one menuitem per action', () => {
-    component.toggle();
+    // Proof this is a harness artifact, not a regression: opened through the real trigger
+    // click (which marks the OnPush component, exactly as the app does) with a plain
+    // detect and no test-side markForCheck. If OnPush had broken rendering, this fails too.
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(items().length).toBe(3);
     expect(items()[0].textContent).toContain('Edit');
@@ -135,31 +152,33 @@ describe('MnDropdown (anchored popover)', () => {
     host.props = {
       ...host.props,
       actions: [
-        {label: 'Profile', run: () => undefined},
-        {separator: true},
-        {label: 'Logout', danger: true, run: () => undefined},
+        { label: 'Profile', run: () => undefined },
+        { separator: true },
+        { label: 'Logout', danger: true, run: () => undefined },
       ],
     };
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(items().length).withContext('separators are not menuitems').toBe(2);
     expect(separators().length).toBe(1);
     // The divider sits between the two commands, in declared order.
-    const rendered = Array.from(menu()!.querySelectorAll('[role="menuitem"], hr[role="separator"]'));
-    expect(rendered.map(el => el.tagName.toLowerCase())).toEqual(['button', 'hr', 'button']);
+    const rendered = Array.from(
+      menu()!.querySelectorAll('[role="menuitem"], hr[role="separator"]'),
+    );
+    expect(rendered.map((el) => el.tagName.toLowerCase())).toEqual(['button', 'hr', 'button']);
   });
 
   it('skips separators when running the first visible action (Enter)', () => {
     const first = jasmine.createSpy('first');
     host.props = {
       ...host.props,
-      actions: [{separator: true}, {label: 'First', run: first}],
+      actions: [{ separator: true }, { label: 'First', run: first }],
     };
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     component.selectFirstVisible();
     expect(first).toHaveBeenCalledTimes(1);
@@ -170,27 +189,27 @@ describe('MnDropdown (anchored popover)', () => {
       ...host.props,
       searchable: true,
       actions: [
-        {label: 'Edit', run: () => undefined},
-        {separator: true},
-        {label: 'Delete', run: () => undefined},
+        { label: 'Edit', run: () => undefined },
+        { separator: true },
+        { label: 'Delete', run: () => undefined },
       ],
     };
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     component.onSearch('e');
     // Both commands match 'e'; the separator between them must not survive the filter.
-    expect(component.filteredActions.some(i => component.isSeparator(i))).toBeFalse();
+    expect(component.filteredActions.some((i) => component.isSeparator(i))).toBeFalse();
     expect(component.filteredActions.length).toBe(2);
   });
 
   it('fires the chosen action and closes', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     items()[0].click();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(host.edit).toHaveBeenCalledTimes(1);
     expect(component.isOpen).toBeFalse();
@@ -199,7 +218,7 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('does not fire a disabled action', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     const disabled = items()[2];
     expect(disabled.disabled).toBeTrue();
@@ -210,17 +229,17 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('marks the danger action with the error colour class', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     expect(items()[1].classList.contains('text-error')).toBeTrue();
   });
 
   it('closes on an outside document click', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     expect(component.isOpen).toBeTrue();
 
-    document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-    fixture.detectChanges();
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    syncCd(fixture, MnDropdown);
 
     expect(component.isOpen).toBeFalse();
     expect(menu()).toBeNull();
@@ -228,10 +247,10 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('closes on Escape', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
-    document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
-    fixture.detectChanges();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    syncCd(fixture, MnDropdown);
 
     expect(component.isOpen).toBeFalse();
     expect(menu()).toBeNull();
@@ -239,10 +258,10 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('closes on window scroll', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     component.onWindowScrollOrResize();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(component.isOpen).toBeFalse();
     expect(menu()).toBeNull();
@@ -250,7 +269,7 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('removes the portalled menu when destroyed while open', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     expect(menu()).not.toBeNull();
 
     fixture.destroy();
@@ -259,16 +278,16 @@ describe('MnDropdown (anchored popover)', () => {
 
   it('does not lock the panel height when not searchable', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     expect(component.panelFloorPx).toBeNull();
     expect(menu()!.style.height).toBe('');
   });
 
   it('does not open when there are no actions', () => {
-    host.props = {id: 'test-dd', mobileSheet: false, actions: []};
-    fixture.detectChanges();
+    host.props = { id: 'test-dd', mobileSheet: false, actions: [] };
+    syncCd(fixture, MnDropdown);
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(component.isOpen).toBeFalse();
     expect(menu()).toBeNull();
@@ -295,16 +314,16 @@ describe('MnDropdown (mobile sheet)', () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
-        {provide: MnLanguageService, useValue: languageStub},
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
       ],
     }).compileComponents();
 
     stubViewport(true);
     fixture = TestBed.createComponent(HostComponent);
     // The default host pins mobileSheet:false; opt back into the sheet for this suite.
-    fixture.componentInstance.props = {...fixture.componentInstance.props, mobileSheet: true};
-    fixture.detectChanges();
+    fixture.componentInstance.props = { ...fixture.componentInstance.props, mobileSheet: true };
+    syncCd(fixture, MnDropdown);
     component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
   });
 
@@ -314,7 +333,9 @@ describe('MnDropdown (mobile sheet)', () => {
   });
 
   it('renders the menu as a bottom sheet with a backdrop', () => {
-    component.toggle();
+    // Real-event proof (see "renders one menuitem per action"): opened via the trigger
+    // click + a plain detect, no test-side markForCheck.
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     fixture.detectChanges();
 
     expect(component.isSheet).toBeTrue();
@@ -324,7 +345,7 @@ describe('MnDropdown (mobile sheet)', () => {
 
   it('portals the sheet host to document.body so its fixed chrome anchors to the viewport', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(sheetHost()!.parentElement).toBe(document.body);
     expect(sheetHost()!.contains(menu())).toBeTrue();
@@ -332,10 +353,10 @@ describe('MnDropdown (mobile sheet)', () => {
 
   it('stays open on scroll/resize, which the soft keyboard triggers', () => {
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     component.onWindowScrollOrResize();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(component.isOpen).toBeTrue();
     expect(menu()).not.toBeNull();
@@ -344,11 +365,11 @@ describe('MnDropdown (mobile sheet)', () => {
   it('locks body scroll while open and restores it on close', () => {
     document.body.style.overflow = 'auto';
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     expect(document.body.style.overflow).toBe('hidden');
 
     component.close();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     expect(document.body.style.overflow).toBe('auto');
 
     document.body.style.overflow = '';
@@ -365,7 +386,7 @@ describe('MnDropdown (trigger presentation)', () => {
     props: MnDropdownProps = {
       id: 'trig-dd',
       mobileSheet: false,
-      actions: [{label: 'Edit', run: () => undefined}],
+      actions: [{ label: 'Edit', run: () => undefined }],
     };
   }
 
@@ -380,8 +401,8 @@ describe('MnDropdown (trigger presentation)', () => {
   function build(props: Partial<MnDropdownProps>): void {
     fixture = TestBed.createComponent(TriggerHostComponent);
     host = fixture.componentInstance;
-    host.props = {...host.props, ...props};
-    fixture.detectChanges();
+    host.props = { ...host.props, ...props };
+    syncCd(fixture, MnDropdown);
     component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
   }
 
@@ -389,15 +410,15 @@ describe('MnDropdown (trigger presentation)', () => {
     await TestBed.configureTestingModule({
       imports: [TriggerHostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
-        {provide: MnLanguageService, useValue: languageStub},
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
       ],
     }).compileComponents();
     stubViewport(false);
   });
 
   it('generates a stable id for the a11y wiring when none is provided', () => {
-    build({id: undefined});
+    build({ id: undefined });
     expect(component.resolvedId).toMatch(/^mn-dropdown-\d+$/);
     // The trigger button carries the generated id, so aria-controls/menu id stay valid.
     const btn = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
@@ -417,7 +438,7 @@ describe('MnDropdown (trigger presentation)', () => {
   });
 
   it('renders visible text and a trailing chevron when triggerLabel is set', () => {
-    build({triggerLabel: 'Actions'});
+    build({ triggerLabel: 'Actions' });
     expect(component.triggerLabelText).toBe('Actions');
     // A labelled trigger defaults to the (dimmed) chevron.
     expect(component.triggerIconData?.data).toBe(LucideChevronDown.icon);
@@ -428,7 +449,7 @@ describe('MnDropdown (trigger presentation)', () => {
   });
 
   it('honours triggerIcon:none for a text-only trigger', () => {
-    build({triggerLabel: 'More', triggerIcon: 'none'});
+    build({ triggerLabel: 'More', triggerIcon: 'none' });
     expect(component.triggerIconTemplate).toBeNull();
     expect(component.triggerIconData).toBeNull();
     expect(trigger().querySelector('svg')).toBeNull();
@@ -440,14 +461,17 @@ describe('MnDropdown (trigger presentation)', () => {
     await TestBed.configureTestingModule({
       imports: [TriggerHostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
+        { provide: MnConfigService, useValue: configStub },
         {
           provide: MnLanguageService,
-          useValue: {...languageStub, translateIfPresent: (k: string) => (k === 'menu.more' ? 'Meer' : undefined)},
+          useValue: {
+            ...languageStub,
+            translateIfPresent: (k: string) => (k === 'menu.more' ? 'Meer' : undefined),
+          },
         },
       ],
     }).compileComponents();
-    build({triggerLabelKey: 'menu.more', triggerLabel: 'More'});
+    build({ triggerLabelKey: 'menu.more', triggerLabel: 'More' });
     expect(component.triggerLabelText).toBe('Meer');
   });
 });
@@ -459,26 +483,36 @@ describe('MnDropdown (action colour)', () => {
     template: `<mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>`,
   })
   class ColourHostComponent {
-    props: MnDropdownProps = {id: 'col-dd', mobileSheet: false, actions: [{label: 'x', run: () => undefined}]};
+    props: MnDropdownProps = {
+      id: 'col-dd',
+      mobileSheet: false,
+      actions: [{ label: 'x', run: () => undefined }],
+    };
   }
 
   it('resolves the foreground class from color, danger, then the default', async () => {
     await TestBed.configureTestingModule({
       imports: [ColourHostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
-        {provide: MnLanguageService, useValue: languageStub},
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
       ],
     }).compileComponents();
     const fixture = TestBed.createComponent(ColourHostComponent);
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     const c = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
 
-    expect(c.actionColorClass({label: 'a', run: () => undefined})).toBe('text-base-content');
-    expect(c.actionColorClass({label: 'a', danger: true, run: () => undefined})).toBe('text-error');
-    expect(c.actionColorClass({label: 'a', color: 'success', run: () => undefined})).toBe('text-success');
+    expect(c.actionColorClass({ label: 'a', run: () => undefined })).toBe('text-base-content');
+    expect(c.actionColorClass({ label: 'a', danger: true, run: () => undefined })).toBe(
+      'text-error',
+    );
+    expect(c.actionColorClass({ label: 'a', color: 'success', run: () => undefined })).toBe(
+      'text-success',
+    );
     // An explicit colour wins over the danger shorthand.
-    expect(c.actionColorClass({label: 'a', color: 'primary', danger: true, run: () => undefined})).toBe('text-primary');
+    expect(
+      c.actionColorClass({ label: 'a', color: 'primary', danger: true, run: () => undefined }),
+    ).toBe('text-primary');
   });
 });
 
@@ -489,7 +523,12 @@ describe('MnDropdown (custom template trigger)', () => {
     template: `
       <ng-template #glyph><img class="avatar" src="" alt="" /></ng-template>
       <mn-lib-dropdown
-        [datasource]="{id: 'tpl-dd', mobileSheet: false, triggerIcon: glyph, actions: [{label: 'x', run: noop}]}"
+        [datasource]="{
+          id: 'tpl-dd',
+          mobileSheet: false,
+          triggerIcon: glyph,
+          actions: [{ label: 'x', run: noop }],
+        }"
       ></mn-lib-dropdown>
     `,
   })
@@ -501,13 +540,13 @@ describe('MnDropdown (custom template trigger)', () => {
     await TestBed.configureTestingModule({
       imports: [TplHostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
-        {provide: MnLanguageService, useValue: languageStub},
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
       ],
     }).compileComponents();
     stubViewport(false);
     const fixture = TestBed.createComponent(TplHostComponent);
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     const c = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
 
     // No `h-7 w-7` square-box — the projected content defines the trigger's size.
@@ -528,7 +567,7 @@ describe('MnDropdown (label resolution)', () => {
     props: MnDropdownProps = {
       id: 'key-dd',
       mobileSheet: false,
-      actions: [{labelKey: 'actions.edit', label: 'fallback', run: () => undefined}],
+      actions: [{ labelKey: 'actions.edit', label: 'fallback', run: () => undefined }],
     };
   }
 
@@ -536,7 +575,7 @@ describe('MnDropdown (label resolution)', () => {
     await TestBed.configureTestingModule({
       imports: [KeyHostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
+        { provide: MnConfigService, useValue: configStub },
         {
           provide: MnLanguageService,
           useValue: {
@@ -548,10 +587,13 @@ describe('MnDropdown (label resolution)', () => {
     }).compileComponents();
 
     const fixture = TestBed.createComponent(KeyHostComponent);
-    fixture.detectChanges();
-    const component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
+    syncCd(fixture, MnDropdown);
+    const component = fixture.debugElement.query(By.directive(MnDropdown))
+      .componentInstance as MnDropdown;
 
-    expect(component.actionLabel(fixture.componentInstance.props.actions[0] as MnDropdownAction)).toBe('Bewerken');
+    expect(
+      component.actionLabel(fixture.componentInstance.props.actions[0] as MnDropdownAction),
+    ).toBe('Bewerken');
   });
 });
 
@@ -572,10 +614,10 @@ describe('MnDropdown (searchable)', () => {
       actions: [
         // A disabled action ordered before an enabled match, so "Enter picks first" can be
         // shown to skip it. Its unique keyword lets a query isolate the disabled item alone.
-        {label: 'Copy', disabled: true, keywords: 'archived', run: this.copy},
-        {label: 'Copy link', run: this.copyLink},
+        { label: 'Copy', disabled: true, keywords: 'archived', run: this.copy },
+        { label: 'Copy link', run: this.copyLink },
         // `keywords` lets search match beyond the visible label.
-        {label: 'Edit', keywords: 'modify', run: this.edit},
+        { label: 'Edit', keywords: 'modify', run: this.edit },
       ],
     };
   }
@@ -600,18 +642,18 @@ describe('MnDropdown (searchable)', () => {
     await TestBed.configureTestingModule({
       imports: [SearchHostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
-        {provide: MnLanguageService, useValue: languageStub},
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
       ],
     }).compileComponents();
 
     stubViewport(false);
     fixture = TestBed.createComponent(SearchHostComponent);
     host = fixture.componentInstance;
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
   });
 
   afterEach(() => {
@@ -624,23 +666,29 @@ describe('MnDropdown (searchable)', () => {
   });
 
   it('filters by label as the query changes', () => {
-    component.onSearch('link');
+    // Real-event proof for the filter/re-render path: the query is typed into the search
+    // box (a genuine input event, which marks the OnPush component) + a plain detect.
+    const input = searchInput()!;
+    input.value = 'link';
+    input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    expect((component.filteredActions as MnDropdownAction[]).map(a => a.label)).toEqual(['Copy link']);
+    expect((component.filteredActions as MnDropdownAction[]).map((a) => a.label)).toEqual([
+      'Copy link',
+    ]);
     expect(items().length).toBe(1);
   });
 
   it('matches keywords, not only the visible label', () => {
     component.onSearch('modify');
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
-    expect((component.filteredActions as MnDropdownAction[]).map(a => a.label)).toEqual(['Edit']);
+    expect((component.filteredActions as MnDropdownAction[]).map((a) => a.label)).toEqual(['Edit']);
   });
 
   it('shows a centered icon + label empty state when nothing matches', () => {
     component.onSearch('nothing-here');
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(items().length).toBe(0);
     const empty = menu()!.querySelector('.justify-center');
@@ -651,7 +699,7 @@ describe('MnDropdown (searchable)', () => {
 
   it('Enter runs the first visible action, skipping a disabled one', () => {
     component.onSearch('copy');
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     component.selectFirstVisible();
 
@@ -662,10 +710,10 @@ describe('MnDropdown (searchable)', () => {
 
   it('Enter on the search input bubbles to the wrapper and runs the first match', () => {
     component.onSearch('link');
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
-    searchInput()!.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
-    fixture.detectChanges();
+    searchInput()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    syncCd(fixture, MnDropdown);
 
     expect(host.copyLink).toHaveBeenCalledTimes(1);
   });
@@ -673,31 +721,35 @@ describe('MnDropdown (searchable)', () => {
   it('Enter is a no-op when only a disabled action matches', () => {
     // Its unique keyword isolates the disabled "Copy" as the sole match.
     component.onSearch('archived');
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     // Active search filters out any separators, so every result is a command here.
     const matches = component.filteredActions as MnDropdownAction[];
-    expect(matches.map(a => a.label)).toEqual(['Copy']);
-    expect(matches.every(a => a.disabled)).withContext('only match is disabled').toBeTrue();
+    expect(matches.map((a) => a.label)).toEqual(['Copy']);
+    expect(matches.every((a) => a.disabled))
+      .withContext('only match is disabled')
+      .toBeTrue();
 
     component.selectFirstVisible();
 
     expect(host.copy).not.toHaveBeenCalled();
-    expect(component.isOpen).withContext('menu stays open when no enabled action matches').toBeTrue();
+    expect(component.isOpen)
+      .withContext('menu stays open when no enabled action matches')
+      .toBeTrue();
   });
 
   it('locks the popover height so filtering does not resize it', async () => {
     // The floor is captured on the animation frame after open, with the full list; a CD
     // pass then writes it to the panel's inline height (markForCheck drives this in the app).
     await new Promise(requestAnimationFrame);
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     const locked = component.panelFloorPx;
     expect(locked).withContext('a floor height is captured on open').toBeGreaterThan(0);
     expect(menu()!.style.height).toBe(`${locked}px`);
 
     component.onSearch('link'); // narrows to a single visible item
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     await new Promise(requestAnimationFrame);
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(items().length).toBe(1);
     expect(component.panelFloorPx).withContext('locked height survives filtering').toBe(locked);
@@ -714,12 +766,12 @@ describe('MnDropdown (searchable)', () => {
 
   it('restores the full list when the field is cleared (CVA emits null for empty)', () => {
     component.onSearch('link');
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     expect(items().length).toBe(1);
 
     // The text input's ControlValueAccessor emits null — not '' — for an empty field.
     component.onSearch(null);
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(component.searchTerm).toBe('');
     expect(component.filteredActions.length).toBe(host.props.actions.length);
@@ -746,9 +798,9 @@ describe('MnDropdown (active item)', () => {
       id: 'active-dd',
       mobileSheet: false,
       actions: [
-        {label: 'English', run: () => undefined},
-        {label: 'Nederlands', active: true, run: () => undefined},
-        {label: 'Deutsch', run: () => undefined},
+        { label: 'English', run: () => undefined },
+        { label: 'Nederlands', active: true, run: () => undefined },
+        { label: 'Deutsch', run: () => undefined },
       ],
     };
   }
@@ -768,17 +820,17 @@ describe('MnDropdown (active item)', () => {
     await TestBed.configureTestingModule({
       imports: [ActiveHostComponent],
       providers: [
-        {provide: MnConfigService, useValue: configStub},
-        {provide: MnLanguageService, useValue: languageStub},
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
       ],
     }).compileComponents();
 
     stubViewport(false);
     fixture = TestBed.createComponent(ActiveHostComponent);
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance;
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
   });
 
   afterEach(() => {
@@ -788,7 +840,7 @@ describe('MnDropdown (active item)', () => {
   it('marks only the active row with aria-current and a trailing check', () => {
     const rows = items();
     // aria-current is set on the active row alone; the others carry no marker.
-    expect(rows.map(r => r.getAttribute('aria-current'))).toEqual([null, 'true', null]);
+    expect(rows.map((r) => r.getAttribute('aria-current'))).toEqual([null, 'true', null]);
     // The check svg renders inside the active row only.
     expect(rows[0].querySelector('svg')).toBeNull();
     expect(rows[1].querySelector('svg')).withContext('active row shows a check').not.toBeNull();
@@ -807,16 +859,16 @@ describe('MnDropdown (active item)', () => {
     const run = jasmine.createSpy('run');
     fixture.componentInstance.props = {
       ...fixture.componentInstance.props,
-      actions: [{label: 'English', active: true, run}],
+      actions: [{ label: 'English', active: true, run }],
     };
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
     component.toggle();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     items()[0].click();
-    fixture.detectChanges();
+    syncCd(fixture, MnDropdown);
 
     expect(run).toHaveBeenCalledTimes(1);
     expect(component.isOpen).toBeFalse();

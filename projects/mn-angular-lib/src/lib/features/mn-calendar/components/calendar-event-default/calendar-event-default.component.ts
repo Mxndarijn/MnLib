@@ -1,4 +1,4 @@
-﻿import {ChangeDetectorRef, Component, OnInit, inject} from '@angular/core';
+﻿import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarEventData } from '../../models/calendar-event-data.model';
 import { CalendarEvent } from '../../models/calendar-event.model';
@@ -13,6 +13,7 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
  */
 @Component({
   selector: 'mn-calendar-event-default',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-event-default.component.html',

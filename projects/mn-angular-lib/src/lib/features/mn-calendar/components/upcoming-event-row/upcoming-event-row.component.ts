@@ -1,4 +1,4 @@
-﻿import {Component, Input, OnInit, Output, EventEmitter, inject} from '@angular/core';
+﻿import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, Output, EventEmitter, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarEvent } from '../../models/calendar-event.model';
 import { CALENDAR_DATE_FORMATTER, CalendarDateFormatter } from '../../services/calendar-date-formatter';
@@ -10,6 +10,7 @@ import { DefaultCalendarDateFormatter } from '../../services/default-calendar-da
  */
 @Component({
   selector: 'mn-upcoming-event-row',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule],
   templateUrl: './upcoming-event-row.component.html',
@@ -23,6 +24,7 @@ export class UpcomingEventRowComponent implements OnInit {
   formattedDate = '';
 
   private formatter: CalendarDateFormatter;
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor() {
     const formatter = inject<CalendarDateFormatter | null>(CALENDAR_DATE_FORMATTER, {optional: true});
@@ -35,6 +37,9 @@ export class UpcomingEventRowComponent implements OnInit {
       const start = await this.formatter.formatTime(this.event.startTime);
       const end = await this.formatter.formatTime(this.event.endTime);
       this.formattedDate = `${start} - ${end}`;
+      // formattedDate is set after an await, so under OnPush the row would otherwise
+      // render blank until some unrelated change detection happened to run.
+      this.cdr.markForCheck();
     }
   }
 }

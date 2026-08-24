@@ -1,13 +1,21 @@
-import {Component, Input} from '@angular/core';
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MnModalRef, MnWizardBodyComponent, ModalKind, WizardFlowMode, WizardModalConfig, WizardResult,} from '../..';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import {
+  MnModalRef,
+  MnWizardBodyComponent,
+  ModalKind,
+  WizardFlowMode,
+  WizardModalConfig,
+  WizardResult,
+} from '../..';
 
 /** Minimal step-body component used to assert input + modalRef wiring. */
 @Component({
   selector: 'mn-lib-test-step-body',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: '<div class="test-step-body">{{ associationId }}</div>',
 })
 class TestStepBodyComponent {
@@ -23,8 +31,7 @@ function createMockModalRef(): MnModalRef<unknown> {
     close: jasmine.createSpy('close'),
     dismiss: jasmine.createSpy('dismiss'),
     afterClosed$: {
-      subscribe: () => {
-      }
+      subscribe: () => {},
     },
   } as unknown as MnModalRef<unknown>;
 }
@@ -51,21 +58,26 @@ describe('MnWizardBodyComponent', () => {
     setup({
       kind: ModalKind.WIZARD,
       steps: [
-        {id: 'preview', title: 'Preview', body: TestStepBodyComponent, bodyInputs: {associationId: 'assoc-1'}},
+        {
+          id: 'preview',
+          title: 'Preview',
+          body: TestStepBodyComponent,
+          bodyInputs: { associationId: 'assoc-1' },
+        },
       ],
     } as WizardModalConfig);
 
     const built = component.stepBodyConfigs['preview'];
     expect(built).toBeTruthy();
     expect(built.component).toBe(TestStepBodyComponent);
-    expect(built.inputs).toEqual({associationId: 'assoc-1'});
+    expect(built.inputs).toEqual({ associationId: 'assoc-1' });
     expect(built.template).toBeUndefined();
   });
 
   it('does not pre-build a host config for a plain-string body step', () => {
     setup({
       kind: ModalKind.WIZARD,
-      steps: [{id: 'intro', title: 'Intro', body: 'Just some text'}],
+      steps: [{ id: 'intro', title: 'Intro', body: 'Just some text' }],
     } as WizardModalConfig);
 
     expect(component.stepBodyConfigs['intro']).toBeUndefined();
@@ -75,7 +87,11 @@ describe('MnWizardBodyComponent', () => {
     setup({
       kind: ModalKind.WIZARD,
       steps: [
-        {id: 'form', title: 'Form', fields: [{kind: 'text', key: 'name', label: 'Name'} as never]},
+        {
+          id: 'form',
+          title: 'Form',
+          fields: [{ kind: 'text', key: 'name', label: 'Name' } as never],
+        },
       ],
     } as WizardModalConfig);
 
@@ -86,7 +102,12 @@ describe('MnWizardBodyComponent', () => {
     setup({
       kind: ModalKind.WIZARD,
       steps: [
-        {id: 'preview', title: 'Preview', body: TestStepBodyComponent, bodyInputs: {associationId: 'assoc-42'}},
+        {
+          id: 'preview',
+          title: 'Preview',
+          body: TestStepBodyComponent,
+          bodyInputs: { associationId: 'assoc-42' },
+        },
       ],
     } as WizardModalConfig);
 
@@ -116,9 +137,9 @@ describe('MnWizardBodyComponent', () => {
         kind: ModalKind.WIZARD,
         flow: WizardFlowMode.FREE,
         steps: [
-          {id: 'one', title: 'One', body: 'First step'},
-          {id: 'two', title: 'Two', body: 'Second step'},
-          {id: 'three', title: 'Three', body: 'Third step'},
+          { id: 'one', title: 'One', body: 'First step' },
+          { id: 'two', title: 'Two', body: 'Second step' },
+          { id: 'three', title: 'Three', body: 'Third step' },
         ],
       } as WizardModalConfig);
 
@@ -135,7 +156,9 @@ describe('MnWizardBodyComponent', () => {
     it('scrolls back to the top when advancing to the next step', async () => {
       const scroller = setupScrollable();
       scroller.scrollTop = 200;
-      expect(scroller.scrollTop).withContext('harness must actually be scrollable').toBeGreaterThan(0);
+      expect(scroller.scrollTop)
+        .withContext('harness must actually be scrollable')
+        .toBeGreaterThan(0);
 
       await component.next();
       fixture.detectChanges();

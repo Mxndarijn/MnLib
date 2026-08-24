@@ -1,4 +1,4 @@
-import {Component, inject, InjectionToken} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, InjectionToken} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import { MnDualHorizontalImageTypes } from './mn-dual-horizontal-imageTypes';
 import {provideMnComponentConfig} from '../../config';
@@ -13,6 +13,7 @@ export const MN_LIB_DUAL_HORIZONTAL_IMAGE = new InjectionToken<MnDualHorizontalI
 
 @Component({
   selector: 'mn-lib-dual-horizontal-image',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     NgOptimizedImage

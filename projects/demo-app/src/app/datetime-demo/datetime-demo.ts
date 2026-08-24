@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MnButton, MnDatetime, MnDatetimeProps } from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-datetime-demo',
   standalone: true,
   imports: [MnDatetime, ReactiveFormsModule, MnButton, DemoPageComponent, DemoExampleComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './datetime-demo.html',
 })
 export class DatetimeDemo {

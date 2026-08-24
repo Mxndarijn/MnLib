@@ -1,14 +1,14 @@
-import {TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {ActionStyle, MnModalService, ModalBuilder} from '.';
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ActionStyle, MnModalService, ModalBuilder } from '.';
 
 describe('MnModalService', () => {
   let service: MnModalService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     service = TestBed.inject(MnModalService);
   });
@@ -22,7 +22,7 @@ describe('MnModalService', () => {
 
     const ref = service.open(config);
     expect(() =>
-      ref.update({footerActions: [{label: 'OK', style: ActionStyle.PRIMARY}]}),
+      ref.update({ footerActions: [{ label: 'OK', style: ActionStyle.PRIMARY }] }),
     ).not.toThrow();
 
     const shell = ref.component as { config: { footerActions?: unknown[] } };

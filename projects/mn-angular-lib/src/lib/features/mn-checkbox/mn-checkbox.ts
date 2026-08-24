@@ -1,4 +1,6 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   EventEmitter,
@@ -23,6 +25,7 @@ export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHE
 
 @Component({
   selector: 'mn-lib-checkbox',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-checkbox.html',
@@ -46,6 +49,7 @@ export class MnCheckbox implements OnInit, OnChanges {
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   value = false;
   isDisabled = false;
@@ -67,6 +71,9 @@ export class MnCheckbox implements OnInit, OnChanges {
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // The locale stream fires outside an Angular event handler; under OnPush the
+      // re-resolved label must be announced explicitly.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
@@ -88,6 +95,9 @@ export class MnCheckbox implements OnInit, OnChanges {
 
   writeValue(val: unknown): void {
     this.value = !!val;
+    // A programmatic form write does not schedule change detection under OnPush, so the
+    // checkbox would otherwise keep showing the old checked state.
+    this.cdr.markForCheck();
   }
 
   /** Sync value from checked input when not using forms */
@@ -107,6 +117,9 @@ export class MnCheckbox implements OnInit, OnChanges {
 
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // Called by the forms module outside an Angular event handler; under OnPush the
+    // disabled styling would otherwise not reflect a programmatic enable/disable.
+    this.cdr.markForCheck();
   }
 
   // ========== Event Handlers ==========

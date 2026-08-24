@@ -1,14 +1,15 @@
-import {Component} from '@angular/core';
-import {RouterLink} from '@angular/router';
-import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {MnInputField, MnInputProps} from 'mn-angular-lib';
-import {DEMOS, DemoGroup, groupDemos} from '../shared/demo-catalog';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MnInputField, MnInputProps } from 'mn-angular-lib';
+import { DEMOS, DemoGroup, groupDemos } from '../shared/demo-catalog';
 
 @Component({
   selector: 'app-demo-list',
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, MnInputField],
   templateUrl: './demo-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {
@@ -111,7 +112,10 @@ import {DEMOS, DemoGroup, groupDemos} from '../shared/demo-catalog';
         border-radius: 12px;
         text-decoration: none;
         color: inherit;
-        transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+        transition:
+          border-color 0.16s ease,
+          transform 0.16s ease,
+          box-shadow 0.16s ease;
       }
 
       .home-card:hover {
@@ -179,8 +183,8 @@ export class DemoListComponent {
     const q = (this.searchControl.value ?? '').toLowerCase().trim();
     const matches = q
       ? DEMOS.filter(
-        (d) => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q),
-      )
+          (d) => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q),
+        )
       : DEMOS;
     return groupDemos(matches);
   }

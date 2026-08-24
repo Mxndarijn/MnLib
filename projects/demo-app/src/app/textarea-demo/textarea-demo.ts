@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MnButton, MnTextarea, MnTextareaProps, MnSectionDirective } from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 /**
  * Demo component showcasing MnTextarea features:
@@ -14,13 +14,23 @@ import {DemoExampleComponent} from '../shared/demo-example.component';
 @Component({
   selector: 'app-textarea-demo',
   standalone: true,
-  imports: [MnTextarea, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
+  imports: [
+    MnTextarea,
+    ReactiveFormsModule,
+    MnSectionDirective,
+    MnButton,
+    DemoPageComponent,
+    DemoExampleComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './textarea-demo.html',
 })
 export class TextareaDemo {
   form = new FormGroup({
     description: new FormControl('', { validators: [Validators.required] }),
-    bio: new FormControl('', { validators: [Validators.required, Validators.minLength(10), Validators.maxLength(200)] }),
+    bio: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(10), Validators.maxLength(200)],
+    }),
     notes: new FormControl('', { validators: [Validators.required, Validators.minLength(5)] }),
   });
 

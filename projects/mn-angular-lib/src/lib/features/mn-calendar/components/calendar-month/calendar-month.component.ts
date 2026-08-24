@@ -1,4 +1,4 @@
-﻿import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
+﻿import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Observable, Subject, takeUntil} from 'rxjs';
 import {CalendarEvent} from '../../models/calendar-event.model';
@@ -20,6 +20,7 @@ import {MnLanguageService} from '../../../../language';
  */
 @Component({
   selector: 'mn-calendar-month',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-month.component.html',

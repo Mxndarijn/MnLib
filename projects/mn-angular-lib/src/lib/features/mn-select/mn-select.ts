@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnSelectErrorMessageData, MnSelectOption, MnSelectProps, MnSelectUIConfig} from './mn-selectTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -13,6 +13,7 @@ export const MN_SELECT_CONFIG = new InjectionToken<MnSelectUIConfig>('MN_SELECT_
 
 @Component({
   selector: 'mn-lib-select',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-select.html',
@@ -37,6 +38,7 @@ export class MnSelect implements OnInit {
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, {optional: true});
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly builtInErrorMessages: Record<string, MnSelectErrorMessageData> = {
     required: 'Please select an option',
   };
@@ -97,6 +99,9 @@ export class MnSelect implements OnInit {
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // The locale stream fires outside an Angular event handler; under OnPush the
+      // re-resolved label/placeholder must be announced explicitly.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
@@ -104,6 +109,9 @@ export class MnSelect implements OnInit {
   writeValue(val: unknown): void {
     // Treat empty string as null so the placeholder is shown and the control stays properly invalid
     this.selectedValue = (val === '' || val == null) ? null : val;
+    // A programmatic form write (setValue/patchValue/reset) does not schedule change
+    // detection under OnPush, so the shown selection would otherwise stay stale.
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: (val: unknown) => void): void {
@@ -116,6 +124,9 @@ export class MnSelect implements OnInit {
 
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // Called by the forms module outside an Angular event handler; under OnPush the
+    // disabled styling would otherwise not reflect a programmatic enable/disable.
+    this.cdr.markForCheck();
   }
 
   // ========== Error Handling ==========

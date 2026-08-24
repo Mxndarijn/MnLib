@@ -1,7 +1,7 @@
-import {Component, signal} from '@angular/core';
-import {MnButton, MnKeyboard, MnKeyboardLabels} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { MnButton, MnKeyboard, MnKeyboardLabels } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 /**
  * Showcases {@link MnKeyboard}: the on-screen keyboard for touch devices that have
@@ -17,6 +17,7 @@ import {DemoExampleComponent} from '../shared/demo-example.component';
   selector: 'app-keyboard-demo',
   standalone: true,
   imports: [MnKeyboard, MnButton, DemoPageComponent, DemoExampleComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './keyboard-demo.html',
 })
 export class KeyboardDemo {

@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 
@@ -16,6 +16,7 @@ type Row = { id: string; name: string };
 @Component({
   standalone: true,
   imports: [MnList],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <ng-template #item let-row>
       <span class="item">{{ row.name }}</span>
@@ -103,7 +104,9 @@ describe('MnList toolbar slots', () => {
     const legacy = el.querySelector('.legacy-slot');
     const search = el.querySelector('input');
     expect(legacy).not.toBeNull();
-    expect(search!.compareDocumentPosition(legacy!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      search!.compareDocumentPosition(legacy!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it('prefers toolbarRightTemplate over the deprecated toolbarTemplate', () => {

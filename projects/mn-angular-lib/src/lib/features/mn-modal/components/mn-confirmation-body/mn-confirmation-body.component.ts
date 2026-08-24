@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MnModalRef} from '../../mn-modal-ref';
@@ -12,6 +12,7 @@ import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-acti
 
 @Component({
   selector: 'mn-confirmation-body',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, ReactiveFormsModule, LucideDynamicIcon, LucideTriangleAlert, LucideCircleAlert],
   templateUrl: './mn-confirmation-body.component.html',

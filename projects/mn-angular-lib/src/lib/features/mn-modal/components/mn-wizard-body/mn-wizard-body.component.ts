@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -44,6 +45,7 @@ import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-acti
 
 @Component({
   selector: 'mn-wizard-body',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, MnFooterActionsComponent, LucideDynamicIcon],
   templateUrl: './mn-wizard-body.component.html',

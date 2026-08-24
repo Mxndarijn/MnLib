@@ -1,16 +1,17 @@
-import {Component, signal} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import Quill from 'quill';
 
-import {MnRichTextEditor} from './mn-rich-text-editor.component';
-import {MnRichTextEditorLabels} from './mn-rich-text-editor.types';
-import {MnLanguageService} from '../../language';
+import { MnRichTextEditor } from './mn-rich-text-editor.component';
+import { MnRichTextEditorLabels } from './mn-rich-text-editor.types';
+import { MnLanguageService } from '../../language';
 
 /** Host that drives the editor the way a page would. */
 @Component({
   standalone: true,
   imports: [MnRichTextEditor],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mn-rich-text-editor
       [content]="content()"
@@ -18,7 +19,8 @@ import {MnLanguageService} from '../../language';
       [ariaLabel]="ariaLabel"
       [labels]="labels"
       [labelKeys]="labelKeys"
-      (contentChange)="onContentChange($event)">
+      (contentChange)="onContentChange($event)"
+    >
     </mn-rich-text-editor>
   `,
 })
@@ -79,7 +81,7 @@ describe('MnRichTextEditor', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHttpClient()],
+      providers: [provideHttpClient(withXhr())],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);
@@ -155,9 +157,9 @@ describe('MnRichTextEditor', () => {
 
   it('prefers a translated key, then a literal label, over the default', async () => {
     const lang = TestBed.inject(MnLanguageService);
-    lang.registerTranslations('en', {'editor.bold': 'Vet'});
-    host.labelKeys = {bold: 'editor.bold', italic: 'editor.missing'};
-    host.labels = {italic: 'Schuin', link: 'Koppeling'};
+    lang.registerTranslations('en', { 'editor.bold': 'Vet' });
+    host.labelKeys = { bold: 'editor.bold', italic: 'editor.missing' };
+    host.labels = { italic: 'Schuin', link: 'Koppeling' };
     await render();
 
     const tip = (selector: string): string | null =>

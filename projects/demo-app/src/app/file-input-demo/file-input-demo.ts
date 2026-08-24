@@ -1,8 +1,8 @@
-import {Component, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnButton, MnFileInput, MnFileInputProps} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MnButton, MnFileInput, MnFileInputProps } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 /**
  * Demo component showcasing MnFileInput features:
@@ -17,11 +17,12 @@ import {DemoExampleComponent} from '../shared/demo-example.component';
   selector: 'app-file-input-demo',
   standalone: true,
   imports: [MnFileInput, ReactiveFormsModule, MnButton, DemoPageComponent, DemoExampleComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './file-input-demo.html',
 })
 export class FileInputDemo {
   form = new FormGroup({
-    avatar: new FormControl<File | null>(null, {validators: [Validators.required]}),
+    avatar: new FormControl<File | null>(null, { validators: [Validators.required] }),
     gallery: new FormControl<File[]>([]),
     documents: new FormControl<File[]>([]),
     attachment: new FormControl<File | null>(null),
@@ -77,7 +78,7 @@ export class FileInputDemo {
 
   /** Refreshes the JSON snapshot of the current form value. */
   protected updateSnapshot(): void {
-    const {avatar, gallery, documents, attachment, cover} = this.form.getRawValue();
+    const { avatar, gallery, documents, attachment, cover } = this.form.getRawValue();
     const describe = (file: File | null) => (file ? `${file.name} (${file.size} B)` : null);
     const describeMany = (files: File[] | null) => (files ?? []).map((f) => f.name);
 
@@ -105,7 +106,7 @@ export class FileInputDemo {
 
   /** Resets the form and demo state. */
   protected reset(): void {
-    this.form.reset({avatar: null, gallery: [], documents: [], attachment: null, cover: null});
+    this.form.reset({ avatar: null, gallery: [], documents: [], attachment: null, cover: null });
     this.coverCleared.set(false);
     this.snapshot.set('');
   }

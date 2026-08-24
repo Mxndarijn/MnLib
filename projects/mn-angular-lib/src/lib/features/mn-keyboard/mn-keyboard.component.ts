@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostBinding, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {MnBottomSheet} from '../mn-bottom-sheet';
 import {MnKeyboardLabels, MnKeyboardLayout, MnKeyboardPresentation} from './mn-keyboard.types';
@@ -43,6 +43,7 @@ const NUMERIC_ROWS: readonly string[][] = [
  */
 @Component({
   selector: 'mn-keyboard',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [MnBottomSheet, NgTemplateOutlet],
   templateUrl: './mn-keyboard.component.html',

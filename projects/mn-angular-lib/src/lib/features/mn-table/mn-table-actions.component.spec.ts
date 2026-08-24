@@ -1,9 +1,9 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {BehaviorSubject} from 'rxjs';
-import {LucidePencil, LucideTrash2} from '@lucide/angular';
-import {ColumnDefinition, MnTable, MnTableRowAction, TableDataSource} from 'mn-angular-lib';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { LucidePencil, LucideTrash2 } from '@lucide/angular';
+import { ColumnDefinition, MnTable, MnTableRowAction, TableDataSource } from 'mn-angular-lib';
 
 /** Minimal row shape used by the actions-column tests. */
 type Row = {
@@ -27,8 +27,8 @@ describe('MnTable row actions', () => {
 
   /** The two rows every test renders: one active, one not. */
   const DATA: Row[] = [
-    {id: '1', name: 'Alpha', active: true},
-    {id: '2', name: 'Beta', active: false},
+    { id: '1', name: 'Alpha', active: true },
+    { id: '2', name: 'Beta', active: false },
   ];
 
   /**
@@ -44,8 +44,8 @@ describe('MnTable row actions', () => {
       dataRows: rows,
       getID: (row) => row.id,
       columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name},
-        {key: 'actions', header: 'Actions', actions, ...overrides} as ColumnDefinition<Row>,
+        { key: 'name', header: 'Name', cell: (row) => row.name },
+        { key: 'actions', header: 'Actions', actions, ...overrides } as ColumnDefinition<Row>,
       ],
       emptyMessage: 'No items',
       canSearch: false,
@@ -70,27 +70,23 @@ describe('MnTable row actions', () => {
     rows = new BehaviorSubject<Row[]>(DATA);
     await TestBed.configureTestingModule({
       imports: [MnTable],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
     fixture = TestBed.createComponent(MnTable<Row>);
   });
 
   it('drops an action only for the rows its hidden predicate rejects', () => {
     const buttons = renderActions([
-      {label: 'Deactivate', hidden: (row) => !row.active, run: () => undefined},
-      {label: 'Delete', run: () => undefined},
+      { label: 'Deactivate', hidden: (row) => !row.active, run: () => undefined },
+      { label: 'Delete', run: () => undefined },
     ]);
 
     // Row 1 (active) gets both; row 2 gets only Delete — three buttons, not four.
-    expect(buttons.map((b) => b.textContent?.trim())).toEqual([
-      'Deactivate',
-      'Delete',
-      'Delete',
-    ]);
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual(['Deactivate', 'Delete', 'Delete']);
   });
 
   it('leaves a row cell empty when every action is hidden for it', () => {
-    renderActions([{label: 'Delete', hidden: (row) => !row.active, run: () => undefined}]);
+    renderActions([{ label: 'Delete', hidden: (row) => !row.active, run: () => undefined }]);
 
     const actionCells = fixture.nativeElement.querySelectorAll('tbody tr td:nth-child(2)');
     expect(actionCells[0].textContent.trim()).toBe('Delete');
@@ -114,9 +110,11 @@ describe('MnTable row actions', () => {
   });
 
   it('renders a lucide data icon without the caller owning a template', () => {
-    renderActions([{label: 'Edit', icon: LucidePencil.icon, run: () => undefined}]);
+    renderActions([{ label: 'Edit', icon: LucidePencil.icon, run: () => undefined }]);
 
-    const svgs = fixture.nativeElement.querySelectorAll('tbody button[mnButton]:not(mn-lib-dropdown *) svg');
+    const svgs = fixture.nativeElement.querySelectorAll(
+      'tbody button[mnButton]:not(mn-lib-dropdown *) svg',
+    );
     expect(svgs.length).toBe(2);
     // Rendered from the data, not an empty placeholder: the glyph has real geometry.
     expect(svgs[0].innerHTML.trim().length).toBeGreaterThan(0);
@@ -131,15 +129,17 @@ describe('MnTable row actions', () => {
       },
     ]);
 
-    const svgs = fixture.nativeElement.querySelectorAll('tbody button[mnButton]:not(mn-lib-dropdown *) svg');
+    const svgs = fixture.nativeElement.querySelectorAll(
+      'tbody button[mnButton]:not(mn-lib-dropdown *) svg',
+    );
     expect(svgs.length).toBe(2);
     expect(svgs[0].innerHTML).not.toBe(svgs[1].innerHTML);
   });
 
   it("keeps the label as the accessible name and tooltip in 'icon' mode", () => {
     const buttons = renderActions(
-      [{label: 'Edit', icon: LucidePencil.icon, run: () => undefined}],
-      {actionsInline: 'icon'},
+      [{ label: 'Edit', icon: LucidePencil.icon, run: () => undefined }],
+      { actionsInline: 'icon' },
     );
 
     expect(buttons[0].getAttribute('aria-label')).toBe('Edit');
@@ -148,7 +148,7 @@ describe('MnTable row actions', () => {
   });
 
   it("still shows the text in 'icon' mode when an action has no icon, so it is never blank", () => {
-    const buttons = renderActions([{label: 'Edit', run: () => undefined}], {
+    const buttons = renderActions([{ label: 'Edit', run: () => undefined }], {
       actionsInline: 'icon',
     });
 
@@ -157,7 +157,7 @@ describe('MnTable row actions', () => {
 
   it('invokes run with the row the action was chosen on', () => {
     const chosen: Row[] = [];
-    const buttons = renderActions([{label: 'Delete', run: (row) => chosen.push(row)}]);
+    const buttons = renderActions([{ label: 'Delete', run: (row) => chosen.push(row) }]);
 
     buttons[1].click();
 
@@ -166,7 +166,7 @@ describe('MnTable row actions', () => {
 
   it('disables an action per row without hiding it', () => {
     const buttons = renderActions([
-      {label: 'Delete', disabled: (row) => row.active, run: () => undefined},
+      { label: 'Delete', disabled: (row) => row.active, run: () => undefined },
     ]);
 
     expect(buttons.length).toBe(2);
