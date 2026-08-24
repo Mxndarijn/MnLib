@@ -1,4 +1,5 @@
 ﻿import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -39,6 +40,7 @@ type DisplayHourRow = {
  */
 @Component({
   selector: 'mn-calendar-day',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, CalendarEventComponent],
   templateUrl: './calendar-day.component.html',
@@ -227,5 +229,9 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
       this.isToday = false;
       this.currentTimeLabel = '';
     }
+    // Driven by a setInterval (out of band): under OnPush the synchronous now-line move
+    // — and the midnight roll-off in the else branch — must be announced. (The async label
+    // in the if branch marks again when it resolves.)
+    this.cdr.markForCheck();
   }
 }

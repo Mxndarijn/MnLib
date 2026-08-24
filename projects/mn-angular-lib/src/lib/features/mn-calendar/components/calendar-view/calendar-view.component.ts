@@ -1,4 +1,5 @@
 ﻿import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   DestroyRef,
@@ -63,6 +64,7 @@ let instanceCounter = 0;
  */
 @Component({
   selector: 'mn-calendar-view',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

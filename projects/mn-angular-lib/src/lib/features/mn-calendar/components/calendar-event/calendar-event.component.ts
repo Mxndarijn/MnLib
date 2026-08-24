@@ -1,4 +1,5 @@
 ﻿import {
+  ChangeDetectionStrategy,
   Component, Input, Output, EventEmitter, ViewChild, ViewContainerRef,
   AfterViewInit, Type, OnChanges, SimpleChanges
 } from '@angular/core';
@@ -18,6 +19,7 @@ import { CalendarEventDefaultComponent } from '../calendar-event-default/calenda
  */
 @Component({
   selector: 'mn-calendar-event',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-event.component.html',
