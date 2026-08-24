@@ -728,7 +728,7 @@ describe('Feature 13: Color Picker / Rating / Slider Fields', () => {
 });
 
 // =============================================================
-// Feature 11: Select field i18n placeholder (raw select still used)
+// Feature 11: Select field i18n placeholder (shown in the custom select trigger)
 // =============================================================
 describe('Feature 11: Select Field i18n Integration', () => {
   let component: MnFormBodyComponent;
@@ -757,8 +757,8 @@ describe('Feature 11: Select Field i18n Integration', () => {
     fixture.detectChanges();
 
     const el = fixture.nativeElement as HTMLElement;
-    const placeholderOption = el.querySelector('option[disabled]');
-    expect(placeholderOption?.textContent?.trim()).toContain('Kies...');
+    const trigger = el.querySelector('mn-lib-select [role="combobox"]');
+    expect(trigger?.textContent?.trim()).toContain('Kies...');
   });
 
   it('should use default Select... placeholder when no i18n', () => {
@@ -777,8 +777,8 @@ describe('Feature 11: Select Field i18n Integration', () => {
     fixture.detectChanges();
 
     const el = fixture.nativeElement as HTMLElement;
-    const placeholderOption = el.querySelector('option[disabled]');
-    expect(placeholderOption?.textContent?.trim()).toContain('Select...');
+    const trigger = el.querySelector('mn-lib-select [role="combobox"]');
+    expect(trigger?.textContent?.trim()).toContain('Select...');
   });
 });
 

@@ -15,6 +15,7 @@ export class SelectDemo {
     country: new FormControl('', {validators: [Validators.required]}),
     size: new FormControl(''),
     priority: new FormControl(''),
+    timezone: new FormControl(''),
   });
 
   // Example 1: Basic required select with placeholder
@@ -67,6 +68,29 @@ export class SelectDemo {
     },
   };
 
+  // Example 4: Long list that auto-enables search (and opens as a sheet on mobile)
+  timezoneProps: MnSelectProps = {
+    id: 'timezone',
+    label: 'Timezone',
+    placeholder: 'Select a timezone...',
+    searchPlaceholder: 'Search timezones...',
+    options: [
+      {label: 'UTC−08:00 — Los Angeles', value: 'la'},
+      {label: 'UTC−05:00 — New York', value: 'ny'},
+      {label: 'UTC−03:00 — São Paulo', value: 'sp'},
+      {label: 'UTC±00:00 — London', value: 'lon'},
+      {label: 'UTC+01:00 — Amsterdam', value: 'ams'},
+      {label: 'UTC+02:00 — Athens', value: 'ath'},
+      {label: 'UTC+03:00 — Istanbul', value: 'ist'},
+      {label: 'UTC+05:30 — Mumbai', value: 'mum'},
+      {label: 'UTC+08:00 — Singapore', value: 'sin'},
+      {label: 'UTC+09:00 — Tokyo', value: 'tok'},
+      {label: 'UTC+10:00 — Sydney', value: 'syd'},
+      {label: 'UTC+12:00 — Auckland', value: 'akl'},
+    ],
+    fullWidth: true,
+  };
+
   get selectedCountry(): string {
     return this.form.get('country')?.value || '(none)';
   }
@@ -77,5 +101,9 @@ export class SelectDemo {
 
   get selectedPriority(): string {
     return this.form.get('priority')?.value || '(none)';
+  }
+
+  get selectedTimezone(): string {
+    return this.form.get('timezone')?.value || '(none)';
   }
 }

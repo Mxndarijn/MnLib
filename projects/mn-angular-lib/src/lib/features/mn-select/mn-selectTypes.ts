@@ -32,6 +32,32 @@ export type MnSelectProps<TValue = unknown> = {
   /** Available options to select from */
   options: MnSelectOption<TValue>[];
 
+  /**
+   * Whether to show a search/filter input at the top of the panel. When omitted, search
+   * auto-enables once the number of options reaches `searchThreshold`, so long lists stay
+   * filterable without every call site having to opt in. Set explicitly to force it on or off.
+   */
+  searchable?: boolean;
+
+  /**
+   * Number of options at which the search input auto-enables (default: 8).
+   * Ignored when `searchable` is set explicitly.
+   */
+  searchThreshold?: number;
+
+  /** Placeholder text for the search input */
+  searchPlaceholder?: string;
+
+  /**
+   * Whether the option panel renders as a bottom sheet on small screens (< 640px).
+   * Defaults to true. Set to false to keep the trigger-anchored panel on mobile.
+   *
+   * The anchored panel sits at the trigger's bottom edge, which puts it directly in
+   * the path of the soft keyboard as soon as the search input takes focus. The sheet
+   * is anchored to the viewport instead, so the list stays reachable.
+   */
+  mobileSheet?: boolean;
+
   // ========== Styling/Variants ==========
 
   /** Size variant of the select (default: 'md') */
@@ -79,4 +105,7 @@ export type MnSelectUIConfig = {
    * These override built-in error messages but are overridden by props.errorMessages.
    */
   errorMessages?: Record<string, string>;
+
+  /** Text shown when no options match the search filter */
+  noOptionsFound?: string;
 }

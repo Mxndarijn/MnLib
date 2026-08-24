@@ -1,7 +1,7 @@
 <app-demo-page
   title="Select"
   tag="mn-select"
-  lead="Native browser select with ControlValueAccessor, validation, and tailwind-variants styling."
+  lead="Custom single-value picker: an anchored popover on desktop, the shared bottom sheet on mobile (< 640px). ControlValueAccessor, validation, optional search, and tailwind-variants styling. Resize the window below 640px to see the sheet."
 >
   <div demo-actions style="display: flex; gap: 10px;">
     <button mnButton [data]="{ variant: 'outline', color: 'primary', size: 'sm' }" (click)="form.markAllAsTouched()" type="button">
@@ -49,6 +49,19 @@
       ></mn-lib-select>
       <p style="margin-top: 8px; font-size: 14px; color: gray;">
         Selected: <strong>{{ selectedPriority }}</strong>
+      </p>
+    </app-demo-example>
+
+    <app-demo-example
+      title="Searchable long list"
+      hint="A long option list auto-enables the search input (default threshold: 8). On mobile the same list opens as a bottom sheet."
+    >
+      <mn-lib-select [props]="timezoneProps"
+                     class="block w-[300px] max-w-full"
+                     formControlName="timezone"
+      ></mn-lib-select>
+      <p style="margin-top: 8px; font-size: 14px; color: gray;">
+        Selected: <strong>{{ selectedTimezone }}</strong>
       </p>
     </app-demo-example>
   </form>

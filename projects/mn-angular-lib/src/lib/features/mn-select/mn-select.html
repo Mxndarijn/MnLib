@@ -1,4 +1,4 @@
-﻿<div [class.is-fullwidth]="props.fullWidth" class="flex flex-col h-full">
+<div [class.is-fullwidth]="props.fullWidth" class="flex flex-col h-full">
   @if (uiConfig.label || props.label) {
     <label [attr.for]="resolvedId" class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!">
       <p>{{ uiConfig.label || props.label }}</p>
@@ -8,31 +8,164 @@
     </label>
   }
 
-  <select
+  <!-- Trigger -->
+  <div
+    #trigger
     (blur)="handleBlur()"
-    (change)="onSelectChange($event)"
+    (click)="toggle()"
+    (keydown.enter)="toggle()"
+    (keydown.space)="toggle(); $event.preventDefault()"
+    [attr.aria-controls]="isOpen ? resolvedId + '-listbox' : null"
     [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
+    [attr.aria-disabled]="isDisabled || null"
+    [attr.aria-expanded]="isOpen"
     [attr.aria-invalid]="showError || null"
     [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || props.label || null"
-    [disabled]="isDisabled"
+    [class.cursor-not-allowed]="isDisabled"
+    [class.opacity-60]="isDisabled"
     [id]="resolvedId"
-    [name]="resolvedName"
-    [ngClass]="selectClasses"
+    [ngClass]="triggerClasses"
+    [tabindex]="isDisabled ? -1 : 0"
+    aria-haspopup="listbox"
+    class="relative"
+    role="combobox"
   >
-    @if (props.placeholder || uiConfig.placeholder) {
-      <option [selected]="selectedValue === null" [value]="''" disabled>
-        {{ uiConfig.placeholder || props.placeholder }}
-      </option>
+    <!-- `pr-6` reserves the gutter the caret is absolutely positioned in (right-2 + w-4),
+         so the value can never render underneath it. `min-w-0` lets the label shrink below
+         its content width, which is what makes truncation possible. -->
+    <div class="flex flex-row items-center min-h-6 min-w-0 pr-6">
+      <span
+        [attr.title]="selectedOption?.label"
+        [ngClass]="selectedOption ? 'text-base-content' : 'text-base-content/50'"
+        class="truncate"
+      >{{ displayText }}</span>
+    </div>
+    <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+      <svg [size]="16" class="text-base-content/50" lucideChevronDown></svg>
+    </div>
+  </div>
+
+  <!-- Dropdown -->
+  @if (isOpen) {
+    @if (isSheet) {
+      <!-- On mobile the panel is presented as a shared bottom sheet: the sheet chrome
+           (backdrop, grabber, swipe/flick-to-dismiss, slide animation) lives in
+           mn-bottom-sheet; this component only projects the field's content into it. The
+           sheet host is portalled to document.body (see the `sheet` ViewChild) so its
+           `position: fixed` anchors to the viewport, not a transformed ancestor. -->
+      <mn-bottom-sheet
+        #sheet
+        (dismiss)="close()"
+        [ariaLabel]="uiConfig.ariaLabel || uiConfig.label || props.label || uiConfig.placeholder || props.placeholder"
+        [maxHeightVh]="80"
+        [minHeightPx]="sheetFloorPx"
+      >
+        <div
+          [id]="resolvedId + '-listbox'"
+          class="flex flex-col flex-1 min-h-0 overflow-hidden"
+          role="listbox"
+        >
+          <!-- The sheet covers its own trigger, so it carries a header to name the field; the
+               way out is the grabber (swipe-to-dismiss) and a backdrop tap. -->
+          <div class="px-4 pt-1 pb-2 shrink-0">
+            <p class="text-base font-medium text-base-content truncate">
+              {{ uiConfig.label || props.label || uiConfig.placeholder || props.placeholder || '' }}
+            </p>
+          </div>
+          <ng-container [ngTemplateOutlet]="panelBody"></ng-container>
+        </div>
+      </mn-bottom-sheet>
+    } @else {
+      <!-- A transparent full-viewport shield behind the panel, so "click anywhere to dismiss"
+           is literally true. It also *consumes* that click: without it the click reaches
+           whatever sits underneath — inside a modal that is the modal's own backdrop, so
+           dismissing the dropdown would tear down the whole modal with it. Portalled to
+           document.body for the same reason the panel is. It is aria-hidden and unfocusable:
+           the keyboard equivalent of this click is Escape. -->
+      <div
+        #shield
+        (click)="onShieldClick($event)"
+        [id]="resolvedId + '-shield'"
+        [ngClass]="shieldClasses"
+        aria-hidden="true"
+      ></div>
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <div
+        #dropdown
+        (click)="$event.stopPropagation()"
+        [id]="resolvedId + '-listbox'"
+        [ngClass]="panelClasses"
+        [style.left]="dropdownStyle.left"
+        [style.top]="dropdownStyle.top"
+        [style.width]="dropdownStyle.width"
+        role="listbox"
+      >
+        <ng-container [ngTemplateOutlet]="panelBody"></ng-container>
+      </div>
     }
-    @for (opt of props.options; track opt.value) {
-      <option
-        [disabled]="opt.disabled"
-        [selected]="isSelected(opt)"
-        [value]="optionIndex(opt)"
-      >{{ opt.label }}
-      </option>
+  }
+
+  <!-- The search box + option list, shared verbatim by the sheet and the anchored popover.
+       `isSheet` only tunes spacing/sizing and which element scrolls: in sheet mode the list
+       is the flex scroller; anchored, the popover itself scrolls. -->
+  <ng-template #panelBody>
+    @if (isSearchable) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <div
+        (click)="$event.stopPropagation()"
+        [ngClass]="isSheet ? 'px-4 py-2' : 'p-2'"
+        class="border-b border-base-300 shrink-0"
+      >
+        <mn-lib-input-field
+          (ngModelChange)="onSearch($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [ngModel]="searchTerm"
+          [props]="{
+            id: resolvedId + '-search',
+            type: 'search',
+            placeholder: props.searchPlaceholder || 'Search...',
+            ariaLabel: props.searchPlaceholder || 'Search...',
+            fullWidth: true,
+            size: 'sm',
+            autoFocus: !isSheet
+          }"
+        ></mn-lib-input-field>
+      </div>
     }
-  </select>
+    <div [ngClass]="isSheet ? 'flex-1 overflow-auto overscroll-contain' : ''">
+      @for (opt of filteredOptions; track opt.value) {
+        <div
+          (click)="selectOption(opt); $event.stopPropagation()"
+          (keyup.enter)="selectOption(opt)"
+          (keyup.space)="selectOption(opt)"
+          [attr.aria-selected]="isSelected(opt)"
+          [class.opacity-50]="opt.disabled"
+          [class.pointer-events-none]="opt.disabled"
+          [ngClass]="[isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm', isSelected(opt) ? 'bg-primary/10 font-medium' : '']"
+          class="flex items-center gap-x-2.5 cursor-pointer text-base-content hover:bg-base-200 transition-colors"
+          role="option"
+          tabindex="0"
+        >
+          <span class="truncate min-w-0">{{ opt.label }}</span>
+          <!-- The current choice's marker. Decorative: the state is conveyed to assistive
+               tech by `aria-selected` on the row. -->
+          @if (isSelected(opt)) {
+            <svg
+              [lucideIcon]="checkIcon"
+              [size]="isSheet ? 18 : 16"
+              aria-hidden="true"
+              class="ml-auto shrink-0 text-primary"
+            ></svg>
+          }
+        </div>
+      }
+      @if (filteredOptions.length === 0) {
+        <div [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'" class="text-base-content/50">
+          {{ uiConfig.noOptionsFound || 'No options found' }}
+        </div>
+      }
+    </div>
+  </ng-template>
 
   @if (showError) {
     @if (props.showAllErrors) {
