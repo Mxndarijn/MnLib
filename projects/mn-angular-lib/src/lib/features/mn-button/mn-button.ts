@@ -1,9 +1,10 @@
-import {Component, HostBinding, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostBinding, Input} from '@angular/core';
 import {MnButtonTypes} from './mn-buttonTypes';
 import {mnButtonVariants} from './mn-buttonVariants';
 
 @Component({
   selector: 'button[mnButton], a[mnButton]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   templateUrl: './mn-button.html',
 })

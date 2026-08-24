@@ -1,10 +1,11 @@
-import {Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {MnInformationCardData} from './mn-information-cardTypes';
 import {mnInformationCardVariants} from './mn-information-cardVariants';
 import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'mn-lib-information-card',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     NgClass

@@ -1,7 +1,8 @@
-﻿import { Component } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'mn-lib',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
   template: `
     <p>

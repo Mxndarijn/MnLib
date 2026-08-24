@@ -1,9 +1,10 @@
-import {Component, HostBinding, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostBinding, Input} from '@angular/core';
 import {MnSkeletonProps} from './mn-skeletonTypes';
 import {mnSkeletonVariants} from './mn-skeletonVariants';
 
 @Component({
   selector: 'mn-skeleton',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   templateUrl: './mn-skeleton.html',
   styleUrls: ['./mn-skeleton.css'],

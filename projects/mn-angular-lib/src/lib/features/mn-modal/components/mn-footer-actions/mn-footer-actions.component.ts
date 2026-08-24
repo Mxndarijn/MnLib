@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
 import {MnButton, MnButtonTypes} from '../../../mn-button';
@@ -7,6 +7,7 @@ import {defaultIconForStyle, MODAL_ACTION_ICON_SIZE} from '../../mn-modal-action
 
 @Component({
   selector: 'mn-footer-actions',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, MnButton, LucideDynamicIcon],
   host: { class: 'contents' },

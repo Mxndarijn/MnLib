@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnChanges, OnInit, inject, ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, Input, OnChanges, OnInit, inject, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MnIconTypes } from './mn-iconTypes';
 import { mnIconVariants } from './mn-iconVariants';
@@ -6,6 +6,7 @@ import { MN_ICON_MAP } from './mn-icon-map';
 
 @Component({
   selector: 'mn-icon',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   templateUrl: './mn-icon.html',
 })
