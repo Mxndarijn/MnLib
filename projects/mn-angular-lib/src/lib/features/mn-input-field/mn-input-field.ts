@@ -1,4 +1,4 @@
-import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {CommonModule, NgClass} from '@angular/common';
 import {MnErrorMessageData, MnInputFieldUIConfig, MnInputProps} from './mn-input-fieldTypes';
 import {AbstractControl, FormsModule, NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -45,6 +45,7 @@ export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('M
  */
 @Component({
   selector: 'mn-lib-input-field',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, NgClass, MnErrorMessage, FormsModule],
   templateUrl: './mn-input-field.html',
@@ -81,6 +82,7 @@ export class MnInputField implements OnInit {
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /** Current raw string value of the input element */
   value: string | null = null;
@@ -123,6 +125,9 @@ export class MnInputField implements OnInit {
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // The locale stream fires outside an Angular event handler; under OnPush the
+      // re-resolved label/placeholder must be announced explicitly.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
 
@@ -177,6 +182,9 @@ export class MnInputField implements OnInit {
    */
   writeValue(val: unknown): void {
     this.value = this.adapter.format(val);
+    // A programmatic form write does not schedule change detection under OnPush, so the
+    // input would otherwise keep displaying the old value.
+    this.cdr.markForCheck();
   }
 
   /**
@@ -204,6 +212,9 @@ export class MnInputField implements OnInit {
    */
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // Called by the forms module outside an Angular event handler; under OnPush the
+    // disabled styling would otherwise not reflect a programmatic enable/disable.
+    this.cdr.markForCheck();
   }
 
   // ========== Event Handlers ==========

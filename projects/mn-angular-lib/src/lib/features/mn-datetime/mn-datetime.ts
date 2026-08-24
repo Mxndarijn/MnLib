@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {LucideCalendarDays} from '@lucide/angular';
 import {MnDatetimeErrorMessageData, MnDatetimeMode, MnDatetimeProps, MnDatetimeUIConfig} from './mn-datetimeTypes';
@@ -14,6 +14,7 @@ export const MN_DATETIME_CONFIG = new InjectionToken<MnDatetimeUIConfig>('MN_DAT
 
 @Component({
   selector: 'mn-lib-datetime',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [NgClass, NgTemplateOutlet, MnErrorMessage, LucideCalendarDays],
   templateUrl: './mn-datetime.html',
@@ -68,6 +69,7 @@ export class MnDatetime implements OnInit {
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   value: string | null = null;
   isDisabled = false;
@@ -91,6 +93,9 @@ export class MnDatetime implements OnInit {
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // The locale stream fires outside an Angular event handler; under OnPush the
+      // re-resolved label/placeholder must be announced explicitly.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
@@ -128,6 +133,9 @@ export class MnDatetime implements OnInit {
     } else {
       this.value = null;
     }
+    // A programmatic form write does not schedule change detection under OnPush, so the
+    // input would otherwise keep displaying the old value.
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: (val: unknown) => void): void {
@@ -140,6 +148,9 @@ export class MnDatetime implements OnInit {
 
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // Called by the forms module outside an Angular event handler; under OnPush the
+    // disabled styling would otherwise not reflect a programmatic enable/disable.
+    this.cdr.markForCheck();
   }
 
   // ========== Event Handlers ==========

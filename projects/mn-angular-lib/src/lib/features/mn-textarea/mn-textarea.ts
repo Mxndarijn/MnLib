@@ -1,4 +1,4 @@
-import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {MnTextareaErrorMessageData, MnTextareaProps, MnTextareaUIConfig} from './mn-textareaTypes';
 import {NgControl, ValidationErrors, Validators} from '@angular/forms';
@@ -44,6 +44,7 @@ export const MN_TEXTAREA_CONFIG = new InjectionToken<MnTextareaUIConfig>('MN_TEX
  */
 @Component({
   selector: 'mn-lib-textarea',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [NgClass, MnErrorMessage],
   templateUrl: './mn-textarea.html',
@@ -64,6 +65,7 @@ export class MnTextarea implements OnInit {
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /** Current raw string value of the textarea element */
   value: string | null = null;
@@ -103,6 +105,9 @@ export class MnTextarea implements OnInit {
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // The locale stream fires outside an Angular event handler; under OnPush the
+      // re-resolved label/placeholder must be announced explicitly.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
 
@@ -145,6 +150,9 @@ export class MnTextarea implements OnInit {
    */
   writeValue(val: unknown): void {
     this.value = val != null ? String(val) : null;
+    // A programmatic form write does not schedule change detection under OnPush, so the
+    // textarea would otherwise keep displaying the old value.
+    this.cdr.markForCheck();
   }
 
   /**
@@ -172,6 +180,9 @@ export class MnTextarea implements OnInit {
    */
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // Called by the forms module outside an Angular event handler; under OnPush the
+    // disabled styling would otherwise not reflect a programmatic enable/disable.
+    this.cdr.markForCheck();
   }
 
   // ========== Event Handlers ==========

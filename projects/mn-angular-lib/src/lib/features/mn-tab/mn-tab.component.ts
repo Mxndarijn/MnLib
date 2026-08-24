@@ -1,5 +1,7 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DoCheck,
   ElementRef,
@@ -55,6 +57,7 @@ function tabUrlKey(label: string): string {
  */
 @Component({
   selector: 'mn-tab',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [MnTranslatePipe, CommonModule, MnBadge, MnSkeleton],
   templateUrl: './mn-tab.component.html',
@@ -68,6 +71,8 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
 
   /** Route the tab value is read back from; absent for the same reason as {@link router}. */
   private readonly route = inject(ActivatedRoute, {optional: true});
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /** Watches the URL so a deep link, a back button or an in-app link moves the tab bar. */
   private readonly queryParamsSub?: Subscription;
@@ -178,6 +183,9 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
     this.queryParamsSub = this.route?.queryParamMap.subscribe((params) => {
       const param = this.urlParam();
       if (param) this.activateUrlKey(params.get(param));
+      // The query-param stream fires outside an Angular event (deep link, back button,
+      // in-app navigation); under OnPush the active-tab highlight must be announced.
+      this.cdr.markForCheck();
     });
   }
 
