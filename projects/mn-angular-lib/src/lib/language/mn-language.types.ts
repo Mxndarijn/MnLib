@@ -16,10 +16,12 @@ export type MnTranslatable = {
 export type MnConfigValue<T = string> = T | MnTranslatable;
 
 /**
- * A flat key-value map of translations for a single locale.
- * Supports nested keys via dot notation: "form.email.label"
+ * Translations for a single locale, as a tree of keys.
+ *
+ * Both shapes resolve through the same dotted lookup: a bundle may nest
+ * (`{ form: { email: { label } } }`), flatten (`{ "form.email.label": … }`), or mix the two.
  */
-export type MnTranslationMap = Record<string, string>;
+export type MnTranslationMap = { [key: string]: string | MnTranslationMap };
 
 /**
  * All loaded translations keyed by locale code (e.g. "en", "nl", "de").

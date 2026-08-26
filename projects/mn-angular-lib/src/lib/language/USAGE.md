@@ -93,6 +93,43 @@ class MyComponent {
 <p>{{ 'greeting' | mnTranslate:{ name: userName } }}</p>
 ```
 
+### Counts (singular / plural)
+
+A `count` param selects the wording that agrees with it. Write the plural under the key and
+the singular under the same key plus `One`:
+
+```json
+{
+  "shift": {
+    "asked": "{{count}} members are notified and can accept or decline.",
+    "askedOne": "{{count}} member is notified and can accept or decline."
+  }
+}
+```
+
+```ts
+lang.translate('shift.asked', { count: 3 }); // 3 members are notified and can accept or decline.
+lang.translate('shift.asked', { count: 1 }); // 1 member is notified and can accept or decline.
+```
+
+```html
+<p>{{ 'shift.asked' | mnTranslate: { count: selected().length } }}</p>
+```
+
+Notes:
+
+- **Write each form as a whole sentence, not a swapped noun.** Most languages change the verb
+  too — Dutch "3 leden **krijgen** bericht" becomes "1 lid **krijgt** bericht", English
+  "are notified" becomes "is notified".
+- **Nothing opts in.** A key with no `One` sibling resolves exactly as before, so adding a
+  count param to an existing string is safe.
+- **`…One` plus the base key is the whole story** for `en` and `nl`: CLDR gives both exactly
+  the two categories `one` and `other`. The category is chosen with `Intl.PluralRules` for
+  the active locale, so a language with `few`/`many` can be supported by adding a suffix to
+  `PLURAL_SUFFIX` — until then those counts resolve to the plural.
+- A numeric string (`{ count: "1" }`) counts as its number, since payload values often arrive
+  that way.
+
 ### Register translations from code (no HTTP)
 
 ```ts
