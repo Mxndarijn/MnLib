@@ -193,6 +193,14 @@ export const DEMOS: DemoEntry[] = [
     description: 'Tab bar with a data source, active state, and callbacks.',
   },
   {
+    title: 'Segmented',
+    path: '/demos/segmented-demo',
+    category: 'Navigation',
+    color: '#7c3aed',
+    abbr: 'SG',
+    description: 'Single-choice switch for how one pane is rendered.',
+  },
+  {
     title: 'Date Selector Bar',
     path: '/demos/date-selector-bar-demo',
     category: 'Navigation',

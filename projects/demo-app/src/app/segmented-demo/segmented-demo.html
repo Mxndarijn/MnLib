@@ -1,0 +1,71 @@
+<app-demo-page
+  title="Segmented"
+  tag="mn-segmented"
+  lead="A single-choice switch: two or three options sharing one track, of which exactly one is active. The selection is controlled — the component renders the value you give it and emits the one that was clicked."
+>
+  <app-demo-example
+    title="View switch"
+    hint="Label and icon per segment. The host owns the value; the control emits and re-renders."
+  >
+    <div class="flex flex-col gap-2">
+      <mn-segmented
+        [dataSource]="viewSwitch"
+        [value]="view()"
+        (valueChange)="view.set($event)"
+      ></mn-segmented>
+      <p class="opacity-70">Active: {{ view() }}</p>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example title="Three choices, small" hint="Labels only, at the smaller scale.">
+    <div class="flex flex-col gap-2">
+      <mn-segmented
+        [dataSource]="scopeSwitch"
+        [value]="scope()"
+        (valueChange)="scope.set($event)"
+      ></mn-segmented>
+      <p class="opacity-70">Active: {{ scope() }}</p>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example
+    title="Icon-only and disabled"
+    hint="An icon names nothing, so an icon-only segment carries an ariaLabel. The third choice is unavailable."
+  >
+    <mn-segmented
+      [dataSource]="layoutSwitch"
+      [value]="layout()"
+      (valueChange)="layout.set($event)"
+    ></mn-segmented>
+  </app-demo-example>
+
+  <app-demo-example
+    title="Border radius"
+    hint="borderRadius takes mn-button's tokens plus 'full' for a pill; the segments follow one step tighter, so the active one nests inside the track."
+  >
+    <div class="flex flex-wrap items-center gap-3">
+      <mn-segmented
+        [dataSource]="pillSwitch"
+        [value]="view()"
+        (valueChange)="view.set($event)"
+      ></mn-segmented>
+      <mn-segmented
+        [dataSource]="squareSwitch"
+        [value]="view()"
+        (valueChange)="view.set($event)"
+      ></mn-segmented>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example
+    title="Justified"
+    hint="[justified]=&quot;true&quot; stretches the track to its container and shares the width evenly — what you want on a narrow screen."
+  >
+    <mn-segmented
+      [dataSource]="viewSwitch"
+      [justified]="true"
+      [value]="view()"
+      (valueChange)="view.set($event)"
+    ></mn-segmented>
+  </app-demo-example>
+</app-demo-page>

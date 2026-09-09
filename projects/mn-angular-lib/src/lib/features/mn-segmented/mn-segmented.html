@@ -1,0 +1,32 @@
+<!-- One control, one answer: `role="group"` with `aria-pressed` per segment, so
+     the picked choice is announced as pressed rather than as a plain button
+     nobody can tell the state of. Not a radiogroup — these are buttons that act
+     immediately, not a value being edited inside a form. -->
+<div [attr.aria-label]="groupLabel" [class]="styles.root()" role="group">
+  @for (item of dataSource.items; track item.value) {
+    <button
+      (click)="select(item)"
+      [attr.aria-label]="segmentLabel(item)"
+      [attr.aria-pressed]="isActive(item)"
+      [class]="segmentClass(item)"
+      [disabled]="item.disabled ?? false"
+      type="button"
+    >
+      @if (item.icon; as icon) {
+        <span class="inline-flex shrink-0 items-center">
+          <!-- A caller's template, else lucide data rendered at the size that
+               matches this control's text — the same icon convention the
+               dropdown's actions use. -->
+          @if (isTemplateRef(icon)) {
+            <ng-container [ngTemplateOutlet]="icon"></ng-container>
+          } @else {
+            <svg [lucideIcon]="$any(icon)" [size]="iconSize"></svg>
+          }
+        </span>
+      }
+      @if (item.label; as label) {
+        <span class="truncate">{{ label | mnTranslate }}</span>
+      }
+    </button>
+  }
+</div>

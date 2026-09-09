@@ -28,6 +28,7 @@ import {BreadcrumbsDemo} from './breadcrumbs-demo/breadcrumbs-demo';
 import {BottomSheetDemo} from './bottom-sheet-demo/bottom-sheet-demo';
 import {DropdownDemo} from './dropdown-demo/dropdown-demo';
 import {KeyboardDemo} from './keyboard-demo/keyboard-demo';
+import {SegmentedDemo} from './segmented-demo/segmented-demo';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demos' },
@@ -76,4 +77,5 @@ export const routes: Routes = [
   {path: 'demos/breadcrumbs-demo', component: BreadcrumbsDemo, title: 'Breadcrumbs Demo'},
   {path: 'demos/bottom-sheet-demo', component: BottomSheetDemo, title: 'Bottom Sheet Demo'},
   {path: 'demos/keyboard-demo', component: KeyboardDemo, title: 'Keyboard Demo'},
+  {path: 'demos/segmented-demo', component: SegmentedDemo, title: 'Segmented Demo'},
 ];
