@@ -151,6 +151,9 @@ describe('MnSegmented', () => {
     fixture.detectChanges();
 
     expect(segments()[0].className).toContain('flex-1');
+    // A justified segment still keeps its automatic minimum, so its label is
+    // never truncated by a parent that sized itself to the track.
+    expect(segments()[0].className).not.toContain('min-w-0');
     expect(group().className).toContain('w-full');
   });
 });

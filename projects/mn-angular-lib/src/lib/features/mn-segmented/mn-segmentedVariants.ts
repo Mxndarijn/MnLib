@@ -41,9 +41,16 @@ export const mnSegmentedVariants = tv({
       sm: { segment: 'px-2.5 py-1 text-sm' },
       md: { segment: 'px-3 py-1.5 text-base' },
     },
-    /** Stretch the track and share its width evenly between the segments. */
+    /**
+     * Stretch the track and share its width evenly between the segments.
+     *
+     * The segments grow from a zero basis but keep their automatic minimum, so a
+     * justified control inside an auto-width parent still asks for the room its
+     * labels need. Letting them shrink below their content (`min-w-0`) made the
+     * parent resolve to a narrower box and truncated the labels instead.
+     */
     justified: {
-      true: { root: 'flex w-full', segment: 'flex-1 min-w-0' },
+      true: { root: 'flex w-full', segment: 'flex-1' },
       false: {},
     },
     /**
