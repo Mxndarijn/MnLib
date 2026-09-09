@@ -112,7 +112,7 @@
         <mn-lib-checkbox
           (checkedChange)="toggleAll()"
           [checked]="allSelected"
-          [props]="{ id: 'mn-list-select-all', label: 'Select all', size: 'sm' }"
+          [props]="{ id: 'mn-list-select-all', label: selectAllLabel, size: 'sm' }"
         ></mn-lib-checkbox>
       </div>
       @if (dataSource.appearance?.dividers !== false) {

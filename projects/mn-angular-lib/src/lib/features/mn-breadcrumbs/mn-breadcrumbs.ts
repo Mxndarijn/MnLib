@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
-import { MnTranslatePipe } from '../../language';
-import { MnBreadcrumbItem, MnBreadcrumbsData } from './mn-breadcrumbsTypes';
-import { mnBreadcrumbsVariants } from './mn-breadcrumbsVariants';
+import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {LucideChevronLeft, LucideChevronRight} from '@lucide/angular';
+import {MnLanguageService, MnTranslatePipe} from '../../language';
+import {MnBreadcrumbItem, MnBreadcrumbsData} from './mn-breadcrumbsTypes';
+import {mnBreadcrumbsVariants} from './mn-breadcrumbsVariants';
 
 /**
  * A flexible breadcrumb trail.
@@ -34,12 +34,27 @@ export class MnBreadcrumbs {
   /** Emits when the fallback "Back" control is activated. */
   @Output() back = new EventEmitter<void>();
 
-  /** Default translation key / literal for the Back control's label. */
-  private static readonly DEFAULT_BACK_LABEL = 'back';
+  /** Conventional key an app defines to translate the Back control's label. */
+  private static readonly BACK_LABEL_KEY = 'mnBreadcrumbs.back';
+  /** Conventional key an app defines to name the navigation landmark. */
+  private static readonly NAV_LABEL_KEY = 'mnBreadcrumbs.label';
+  /** Resolves this component's own labels against the app's bundle. */
+  private readonly lang = inject(MnLanguageService);
 
   /** Resolved tailwind-variants slot functions for the current size. */
   get styles() {
     return mnBreadcrumbsVariants({ size: this.data.size });
+  }
+
+  /**
+   * Accessible name of the `<nav>` landmark.
+   *
+   * A landmark's name is announced verbatim, so leaving it as a hardcoded English
+   * "Breadcrumb" put one English word into every page of a translated app — in the
+   * one place only screen-reader users hear.
+   */
+  get navLabel(): string {
+    return this.lang.translateIfPresent(MnBreadcrumbs.NAV_LABEL_KEY) ?? 'Breadcrumb';
   }
 
   /** Whether a linkable trail should render (vs the Back fallback). */
@@ -47,9 +62,20 @@ export class MnBreadcrumbs {
     return (this.data.items?.length ?? 0) > 0;
   }
 
-  /** Label for the Back control — the configured key/literal, or the default. */
+  /**
+   * Text of the Back control, already translated.
+   *
+   * `data.backLabel` is a key (or a literal, which `translate` passes through
+   * unchanged). Without one this falls back to the conventional key and then to
+   * English — never to a raw key: the old default was the bare key `'back'`, which
+   * the template's translate pipe echoed as lowercase "back" in every app that had
+   * not happened to define it.
+   */
   get backLabel(): string {
-    return this.data.backLabel ?? MnBreadcrumbs.DEFAULT_BACK_LABEL;
+    if (this.data.backLabel) {
+      return this.lang.translate(this.data.backLabel);
+    }
+    return this.lang.translateIfPresent(MnBreadcrumbs.BACK_LABEL_KEY) ?? 'Back';
   }
 
   /** The last crumb is the current page and is rendered as plain text. */

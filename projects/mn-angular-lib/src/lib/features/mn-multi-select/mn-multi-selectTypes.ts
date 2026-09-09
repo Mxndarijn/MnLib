@@ -142,4 +142,7 @@ export type MnMultiSelectUIConfig = {
 
   /** Text shown when no options match the search filter */
   noOptionsFound?: string;
+
+  /** Placeholder and accessible name for the dropdown's search input */
+  searchPlaceholder?: string;
 }

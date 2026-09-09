@@ -1,10 +1,11 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
+import {Component, TemplateRef, ViewChild} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {BehaviorSubject} from 'rxjs';
 
-import { MnList } from './mn-list.component';
-import { ListDataSource } from './mn-list.types';
-import { MnCollectionState } from '../mn-collection';
+import {MnList} from './mn-list.component';
+import {ListDataSource} from './mn-list.types';
+import {MnCollectionState} from '../mn-collection';
+import {MnLanguageService} from '../../language';
 
 /** One row of test data. */
 type Row = { id: string; name: string };
@@ -128,5 +129,79 @@ describe('MnList toolbar slots', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('.left-slot')).not.toBeNull();
     expect(el.querySelector('.right-slot')).not.toBeNull();
+  });
+});
+
+/**
+ * The multi-select header checkbox is the one label mn-list renders on its own
+ * behalf and no data source can supply, so until it went through `resolveLabel` a
+ * consumer had no way at all to translate it — it was a literal in the template.
+ */
+describe('MnList select-all label', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let host: HostComponent;
+
+  /** Translations the language stub reports as defined for the current test. */
+  let bundle: Record<string, string>;
+
+  /** The label rendered on the header checkbox, or null when it is not shown. */
+  const selectAllLabel = (): string | null => {
+    const el: HTMLElement | null = fixture.nativeElement.querySelector(
+      'label[for="mn-list-select-all"], #mn-list-select-all',
+    );
+    return el ? (el.closest('label')?.textContent ?? el.textContent)?.trim() ?? null : null;
+  };
+
+  beforeEach(async () => {
+    bundle = {};
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        imports: [HostComponent],
+        providers: [
+          {
+            provide: MnLanguageService,
+            useValue: {
+              locale$: new BehaviorSubject<string>('en').asObservable(),
+              translate: (key: string) => bundle[key] ?? key,
+              t: (key: string) => bundle[key] ?? key,
+              translateIfPresent: (key: string) => bundle[key],
+            } as Partial<MnLanguageService>,
+          },
+        ],
+      })
+      .compileComponents();
+    fixture = TestBed.createComponent(HostComponent);
+    host = fixture.componentInstance;
+  });
+
+  /**
+   * Builds a multi-select data source with one row.
+   * @returns The data source.
+   */
+  function multiSelectSource(): ListDataSource<Row> {
+    return {
+      dataRows: new BehaviorSubject<Row[]>([{id: '1', name: 'Alpha'}]),
+      itemTemplate: host.item,
+      getID: (row: Row) => row.id,
+      emptyMessage: '',
+      state: MnCollectionState.RETRIEVED,
+      canSearch: false,
+      selectionMode: 'multi',
+    } as ListDataSource<Row>;
+  }
+
+  it('falls back to English when the conventional key is not defined', () => {
+    host.dataSource = multiSelectSource();
+    fixture.detectChanges();
+
+    expect(selectAllLabel()).toBe('Select all');
+  });
+
+  it('uses mnCollection.selectAll once the app defines it', () => {
+    bundle = {'mnCollection.selectAll': 'Alles selecteren'};
+    host.dataSource = multiSelectSource();
+    fixture.detectChanges();
+
+    expect(selectAllLabel()).toBe('Alles selecteren');
   });
 });

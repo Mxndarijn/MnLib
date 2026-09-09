@@ -84,4 +84,9 @@ export class MnList<T = unknown>
   get listRegionLabel(): string {
     return this.resolveLabel(undefined, 'mnCollection.dataList', 'Data list');
   }
+
+  /** Label on the header checkbox that selects or clears every visible row. */
+  get selectAllLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.selectAll', 'Select all');
+  }
 }

@@ -23,11 +23,16 @@ const configStub: Partial<MnConfigService> = {
   resolve: () => ({}) as never,
 };
 
-/** Language stub with a never-emitting locale stream and identity translation. */
+/**
+ * Language stub with a never-emitting locale stream and identity translation.
+ * `translateIfPresent` answers "not defined" for every key, which is what puts the
+ * component on its English defaults — the state the label specs below contrast against.
+ */
 const languageStub: Partial<MnLanguageService> = {
   locale$: new Subject<string>().asObservable(),
   translate: (key: string) => key,
   t: (key: string) => key,
+  translateIfPresent: () => undefined,
 };
 
 /** Host that places the multi-select inside a `transform`ed ancestor — the exact bug trigger. */
@@ -872,5 +877,121 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
 
       expect(component.sheetFloorPx).toBeNull();
     });
+  });
+});
+
+/**
+ * Label resolution for the strings the component renders itself.
+ *
+ * These are the labels no call site is forced to pass: search auto-enables at
+ * `searchThreshold` options, so its placeholder appears on screen without anyone
+ * opting in, and the trigger's empty text and the "nothing matched" line likewise.
+ * Each has to resolve through the config layer and a conventional translation key
+ * before falling back to English, or an app can only translate them by repeating the
+ * same literal at every instance — which is how they stayed English here.
+ */
+describe('MnMultiSelect (own labels)', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let component: MnMultiSelect;
+
+  /** Translations the language stub reports as defined for this spec. */
+  let bundle: Record<string, string>;
+
+  /** Config the config stub resolves for the multi-select in this spec. */
+  let config: Record<string, string>;
+
+  /** Builds the component with the current `bundle`/`config`, opened and rendered. */
+  async function build(props?: Partial<MnMultiSelectProps>): Promise<void> {
+    await TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: {resolve: () => config as never}},
+        {
+          provide: MnLanguageService,
+          useValue: {
+            locale$: new Subject<string>().asObservable(),
+            translate: (key: string) => bundle[key] ?? key,
+            t: (key: string) => bundle[key] ?? key,
+            translateIfPresent: (key: string) => bundle[key],
+          } as Partial<MnLanguageService>,
+        },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(HostComponent);
+    if (props) {
+      fixture.componentInstance.props = {...fixture.componentInstance.props, ...props};
+    }
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
+  }
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    bundle = {};
+    config = {};
+  });
+
+  afterEach(() => {
+    document.getElementById('test-ms-listbox')?.remove();
+    document.getElementById('test-ms-shield')?.remove();
+  });
+
+  it('falls back to English when nothing is configured and no key is defined', async () => {
+    await build();
+
+    expect(component.searchPlaceholderLabel).toBe('Search...');
+    expect(component.placeholderLabel).toBe('Select...');
+    expect(component.noOptionsLabel).toBe('No options found');
+  });
+
+  it('uses the conventional keys once the app defines them', async () => {
+    bundle = {
+      'mnMultiSelect.search': 'Zoeken...',
+      'mnMultiSelect.placeholder': 'Selecteer...',
+      'mnMultiSelect.noOptions': 'Geen opties gevonden',
+    };
+    await build();
+
+    expect(component.searchPlaceholderLabel).toBe('Zoeken...');
+    expect(component.placeholderLabel).toBe('Selecteer...');
+    expect(component.noOptionsLabel).toBe('Geen opties gevonden');
+  });
+
+  it('prefers resolved config over the conventional key', async () => {
+    bundle = {'mnMultiSelect.search': 'from key'};
+    config = {searchPlaceholder: 'from config'};
+    await build();
+
+    expect(component.searchPlaceholderLabel).toBe('from config');
+  });
+
+  it('prefers an explicit prop over both config and the key', async () => {
+    bundle = {'mnMultiSelect.search': 'from key'};
+    config = {searchPlaceholder: 'from config'};
+    await build({searchPlaceholder: 'from props'});
+
+    expect(component.searchPlaceholderLabel).toBe('from props');
+  });
+
+  it('puts the resolved search placeholder on the rendered input', async () => {
+    bundle = {'mnMultiSelect.search': 'Zoeken...'};
+    await build();
+    component.toggle();
+    fixture.detectChanges();
+
+    const input = document.getElementById('test-ms-search') as HTMLInputElement | null;
+    expect(input).withContext('search input should render when searchable').not.toBeNull();
+    expect(input!.getAttribute('placeholder')).toBe('Zoeken...');
+    expect(input!.getAttribute('aria-label')).toBe('Zoeken...');
+  });
+
+  it('resolves the collapsed summary through the key, keeping the count token', async () => {
+    bundle = {'mnMultiSelect.selectedCount': '{count} geselecteerd'};
+    await build({collapseThreshold: 1});
+    component.toggleOption({label: 'Alpha', value: 'a'} as MnMultiSelectOption);
+    component.toggleOption({label: 'Beta', value: 'b'} as MnMultiSelectOption);
+
+    expect(component.collapseSummaryText).toBe('2 geselecteerd');
   });
 });

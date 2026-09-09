@@ -123,8 +123,8 @@
           [props]="{
             id: resolvedId + '-search',
             type: 'search',
-            placeholder: props.searchPlaceholder || 'Search...',
-            ariaLabel: props.searchPlaceholder || 'Search...',
+            placeholder: searchPlaceholderLabel,
+            ariaLabel: searchPlaceholderLabel,
             fullWidth: true,
             size: 'sm',
             autoFocus: !isSheet
@@ -161,7 +161,7 @@
       }
       @if (filteredOptions.length === 0) {
         <div [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'" class="text-base-content/50">
-          {{ uiConfig.noOptionsFound || 'No options found' }}
+          {{ noOptionsLabel }}
         </div>
       }
     </div>

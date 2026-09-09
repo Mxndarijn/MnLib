@@ -3,6 +3,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideHttpClient} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 
+import {MnLanguageService} from '../../language';
 import {MnBreadcrumbs} from './mn-breadcrumbs';
 import {MnBreadcrumbItem, MnBreadcrumbsData} from './mn-breadcrumbsTypes';
 
@@ -135,5 +136,40 @@ describe('MnBreadcrumbs', () => {
     backControl()!.click();
     expect(host.backCount).toBe(1);
     expect(backSpy).toHaveBeenCalledTimes(1);
+  });
+
+  // The two strings this component renders on its own behalf. Both used to be
+  // untranslatable: the landmark name was a hardcoded "Breadcrumb" in the template,
+  // and the Back control defaulted to the bare key `back`, which the translate pipe
+  // echoed verbatim as lowercase "back" in any app that had not defined it.
+  it('labels the Back control in English when no key is defined', () => {
+    host.data = {items: []};
+    fixture.detectChanges();
+
+    expect(backControl()!.textContent!.trim()).toBe('Back');
+  });
+
+  it('translates the landmark and the Back control through their conventional keys', () => {
+    TestBed.inject(MnLanguageService).registerTranslations('en', {
+      'mnBreadcrumbs.label': 'Kruimelpad',
+      'mnBreadcrumbs.back': 'Terug',
+    });
+    host.data = {items: []};
+    fixture.detectChanges();
+
+    expect(root().getAttribute('aria-label')).toBe('Kruimelpad');
+    expect(backControl()!.textContent!.trim()).toBe('Terug');
+  });
+
+  it('translates a caller-supplied backLabel key, and passes a literal through', () => {
+    TestBed.inject(MnLanguageService).registerTranslations('en', {'nav.parent': 'Naar boven'});
+
+    host.data = {items: [], backLabel: 'nav.parent'};
+    fixture.detectChanges();
+    expect(backControl()!.textContent!.trim()).toBe('Naar boven');
+
+    host.data = {items: [], backLabel: 'Overzicht'};
+    fixture.detectChanges();
+    expect(backControl()!.textContent!.trim()).toBe('Overzicht');
   });
 });

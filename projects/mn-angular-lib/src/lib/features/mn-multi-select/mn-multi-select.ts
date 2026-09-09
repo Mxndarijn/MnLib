@@ -571,8 +571,71 @@ export class MnMultiSelect implements OnInit {
    */
   get collapseSummaryText(): string {
     const allSelectedTemplate = this.allSelected ? this.props.allSelectedPlaceholder : undefined;
-    const template = allSelectedTemplate ?? this.props.collapsePlaceholder ?? '{count} selected';
+    const template =
+      allSelectedTemplate ??
+      this.props.collapsePlaceholder ??
+      this.resolveLabel(undefined, 'mnMultiSelect.selectedCount', '{count} selected');
     return template.replace(/\{count}/g, String(this.selectedOptions.length));
+  }
+
+  /** Trigger text shown while nothing is selected. */
+  get placeholderLabel(): string {
+    return this.resolveLabel(
+      this.props.placeholder,
+      'mnMultiSelect.placeholder',
+      'Select...',
+      this.uiConfig.placeholder,
+    );
+  }
+
+  /**
+   * Placeholder and accessible name of the dropdown's search input.
+   *
+   * Search auto-enables at `searchThreshold` options, so this box appears without any
+   * call site opting in — which is exactly why it must be translatable without one.
+   */
+  get searchPlaceholderLabel(): string {
+    return this.resolveLabel(
+      this.props.searchPlaceholder,
+      'mnMultiSelect.search',
+      'Search...',
+      this.uiConfig.searchPlaceholder,
+    );
+  }
+
+  /** Empty text shown when the search filters every option away. */
+  get noOptionsLabel(): string {
+    return this.resolveLabel(
+      undefined,
+      'mnMultiSelect.noOptions',
+      'No options found',
+      this.uiConfig.noOptionsFound,
+    );
+  }
+
+  /**
+   * Resolves one of the component's own labels, preferring what the caller gave it
+   * and falling back through the config layer, a conventional translation key and
+   * finally a readable English default.
+   *
+   * Mirrors `MnCollectionBase.resolveLabel`. Every string this component puts on
+   * screen that is not caller data goes through here: without the key step a
+   * consumer could only translate these by repeating the same literal at every call
+   * site, which is how "Search..." ends up in English on an otherwise Dutch page.
+   *
+   * @param explicit The label the caller passed through `props`, if any.
+   * @param key The conventional translation key to try next.
+   * @param fallback The English text used when neither resolves.
+   * @param configured The value the config layer resolved, if any.
+   * @returns The resolved label.
+   */
+  private resolveLabel(
+    explicit: string | undefined,
+    key: string,
+    fallback: string,
+    configured?: string,
+  ): string {
+    return explicit ?? configured ?? this.lang.translateIfPresent(key) ?? fallback;
   }
 
   handleBlur(): void {

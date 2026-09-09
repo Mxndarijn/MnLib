@@ -195,8 +195,63 @@ export class MnSelect implements OnInit {
 
   /** The label shown in the trigger: the selected option, else the placeholder. */
   get displayText(): string {
-    return this.selectedOption?.label
-      ?? this.uiConfig.placeholder ?? this.props.placeholder ?? 'Select...';
+    return this.selectedOption?.label ?? this.placeholderLabel;
+  }
+
+  /** Trigger text shown while no option is selected. */
+  get placeholderLabel(): string {
+    return this.resolveLabel(
+      this.props.placeholder,
+      'mnSelect.placeholder',
+      'Select...',
+      this.uiConfig.placeholder,
+    );
+  }
+
+  /** Placeholder and accessible name of the dropdown's search input. */
+  get searchPlaceholderLabel(): string {
+    return this.resolveLabel(
+      this.props.searchPlaceholder,
+      'mnSelect.search',
+      'Search...',
+      this.uiConfig.searchPlaceholder,
+    );
+  }
+
+  /** Empty text shown when the search filters every option away. */
+  get noOptionsLabel(): string {
+    return this.resolveLabel(
+      undefined,
+      'mnSelect.noOptions',
+      'No options found',
+      this.uiConfig.noOptionsFound,
+    );
+  }
+
+  /**
+   * Resolves one of the component's own labels, preferring what the caller gave it
+   * and falling back through the config layer, a conventional translation key and
+   * finally a readable English default.
+   *
+   * Mirrors `MnCollectionBase.resolveLabel` and its twin in `MnMultiSelect`. Without
+   * the key step a consumer could only translate these by repeating the same literal
+   * at every call site, and the search box in particular auto-enables on option
+   * count — it appears without anyone asking for it, so it must be translatable
+   * without anyone asking either.
+   *
+   * @param explicit The label the caller passed through `props`, if any.
+   * @param key The conventional translation key to try next.
+   * @param fallback The English text used when neither resolves.
+   * @param configured The value the config layer resolved, if any.
+   * @returns The resolved label.
+   */
+  private resolveLabel(
+    explicit: string | undefined,
+    key: string,
+    fallback: string,
+    configured?: string,
+  ): string {
+    return explicit ?? configured ?? this.lang.translateIfPresent(key) ?? fallback;
   }
 
   get showError(): boolean {
