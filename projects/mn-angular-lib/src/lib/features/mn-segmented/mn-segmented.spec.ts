@@ -131,6 +131,31 @@ describe('MnSegmented', () => {
     expect(segments()[1].getAttribute('aria-label')).toBeNull();
   });
 
+  it('renders each segment as an mn-button, filled when active and ghost otherwise', () => {
+    // The active segment wears mn-button's filled primary look; the rest are
+    // ghost buttons that only reveal a surface on hover. Neither look is
+    // re-derived here — a change to mn-button's palette reaches the control.
+    expect(segments()[0].className).toContain('bg-primary');
+    expect(segments()[0].className).not.toContain('hover:brightness');
+    expect(segments()[1].className).toContain('bg-transparent');
+    expect(segments()[1].className).toContain('hover:bg-base-content/10');
+    expect(segments()[1].className).not.toContain('bg-primary');
+    // Both sit on the same box: the ghost keeps a transparent border where the
+    // fill carries a coloured one, so switching never shifts the neighbours.
+    expect(segments()[0].className).toContain('border-primary');
+    expect(segments()[1].className).toContain('border-transparent');
+  });
+
+  it('sizes the segments through mn-button', () => {
+    expect(segments()[0].className).toContain('text-base');
+
+    host.dataSource = { ...host.dataSource, size: 'sm' };
+    fixture.detectChanges();
+
+    expect(segments()[0].className).toContain('text-sm');
+    expect(segments()[0].className).not.toContain('text-base');
+  });
+
   it('rounds the track and nests the segments one step tighter', () => {
     // Default: an 8px track holding 6px segments.
     expect(group().className).toContain('rounded-lg');

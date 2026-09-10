@@ -4,12 +4,16 @@
      immediately, not a value being edited inside a form. -->
 <div [attr.aria-label]="groupLabel" [class]="styles.root()" role="group">
   @for (item of dataSource.items; track item.value) {
+    <!-- Each segment is an mn-button: the active one a filled primary button, the
+         rest ghost buttons, so the control shares the button's sizes, colours and
+         disabled look instead of re-deriving them. -->
     <button
+      mnButton
       (click)="select(item)"
       [attr.aria-label]="segmentLabel(item)"
       [attr.aria-pressed]="isActive(item)"
       [class]="segmentClass(item)"
-      [disabled]="item.disabled ?? false"
+      [data]="segmentButton(item)"
       type="button"
     >
       @if (item.icon; as icon) {

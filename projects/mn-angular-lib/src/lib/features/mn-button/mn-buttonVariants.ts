@@ -40,6 +40,9 @@ export const mnButtonVariants = tv({
       two_xl: 'rounded-2xl',
       three_xl: 'rounded-3xl',
       four_xl: 'rounded-4xl',
+      // A pill. Also what a fully-rounded container (e.g. a segmented track)
+      // hands its segments, since there is no tighter step below it.
+      full: 'rounded-full',
     },
     // Icon-button shape. `circle`/`square` drop the text padding and make the button a
     // fixed square sized off `size` (see compoundVariants), overriding `borderRadius`.

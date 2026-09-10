@@ -8,38 +8,37 @@ import { tv, type VariantProps } from 'tailwind-variants';
  * row of loose buttons: the segments share one bordered surface, so they read as
  * one control with one answer instead of several independent actions. Theme
  * tokens only, so it holds up in both light and dark.
+ *
+ * Each segment is an `mnButton`, which owns its own size, colour, radius and
+ * disabled look; the `segment` slot adds only what the button does not know
+ * about — how it sits inside the track.
  */
 export const mnSegmentedVariants = tv({
   slots: {
     root: 'inline-flex items-center gap-0.5 border border-base-300 bg-base-200 p-0.5',
     segment:
-      'inline-flex items-center justify-center gap-1.5 cursor-pointer select-none ' +
-      'whitespace-nowrap border border-transparent transition-colors ' +
-      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ' +
-      'disabled:opacity-50 disabled:pointer-events-none',
+      'gap-1.5 select-none ' +
+      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
   },
   variants: {
     /**
-     * Corner rounding of the track, with the segments rounded one step tighter so
-     * a filled segment nests inside the track's own corner instead of poking out
-     * of it. Token names match mn-button's; `full` makes a pill, where track and
-     * segment share the same fully-rounded ends.
+     * Corner rounding of the track. The segments are rounded one step tighter
+     * (see `SEGMENT_RADIUS` on the component) so a filled segment nests inside
+     * the track's own corner instead of poking out of it. Token names match
+     * mn-button's; `full` makes a pill, where track and segment share the same
+     * fully-rounded ends.
      */
     borderRadius: {
-      none: { root: 'rounded-none', segment: 'rounded-none' },
-      xs: { root: 'rounded-xs', segment: 'rounded-none' },
-      sm: { root: 'rounded-sm', segment: 'rounded-xs' },
-      md: { root: 'rounded-md', segment: 'rounded-sm' },
-      lg: { root: 'rounded-lg', segment: 'rounded-md' },
-      xl: { root: 'rounded-xl', segment: 'rounded-lg' },
-      two_xl: { root: 'rounded-2xl', segment: 'rounded-xl' },
-      three_xl: { root: 'rounded-3xl', segment: 'rounded-2xl' },
-      four_xl: { root: 'rounded-4xl', segment: 'rounded-3xl' },
-      full: { root: 'rounded-full', segment: 'rounded-full' },
-    },
-    size: {
-      sm: { segment: 'px-2.5 py-1 text-sm' },
-      md: { segment: 'px-3 py-1.5 text-base' },
+      none: { root: 'rounded-none' },
+      xs: { root: 'rounded-xs' },
+      sm: { root: 'rounded-sm' },
+      md: { root: 'rounded-md' },
+      lg: { root: 'rounded-lg' },
+      xl: { root: 'rounded-xl' },
+      two_xl: { root: 'rounded-2xl' },
+      three_xl: { root: 'rounded-3xl' },
+      four_xl: { root: 'rounded-4xl' },
+      full: { root: 'rounded-full' },
     },
     /**
      * Stretch the track and share its width evenly between the segments.
@@ -54,17 +53,17 @@ export const mnSegmentedVariants = tv({
       false: {},
     },
     /**
-     * The picked segment. Filled rather than merely tinted: the control is often
-     * the only thing on its row, so the answer has to be readable at a glance
-     * without comparing two subtle shades.
+     * Whether the segment is the picked one. The colours come from the button
+     * itself (a filled primary button when active, a ghost one otherwise); this
+     * only keeps an inactive segment's box the same size as an active one, whose
+     * fill variant carries a real border.
      */
     active: {
-      true: { segment: 'bg-primary text-primary-content' },
-      false: { segment: 'bg-transparent text-base-content hover:bg-base-content/10' },
+      true: {},
+      false: { segment: 'border border-transparent' },
     },
   },
   defaultVariants: {
-    size: 'md',
     borderRadius: 'lg',
     justified: false,
     active: false,
