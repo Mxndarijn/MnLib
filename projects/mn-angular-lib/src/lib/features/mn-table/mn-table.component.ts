@@ -658,6 +658,19 @@ export class MnTable<T = object>
   }
 
   /**
+   * Whether a row's actions fold into the ⋯ menu below 450px. They do unless the row has
+   * exactly one visible action that renders as a bare icon: that button is narrower than the
+   * ⋯ trigger it would hide behind, so collapsing it only puts a second tap in front of the
+   * one command the row has.
+   */
+  collapsesRowActions(column: ColumnDefinition<T>, row: T): boolean {
+    const visible = this.visibleRowActions(column, row);
+    if (visible.length !== 1) return true;
+    const [only] = visible;
+    return this.showActionLabel(column, only, row);
+  }
+
+  /**
    * Resolves a {@link MnRowValue}: either the fixed value, or the accessor applied to
    * the row. Every per-row presentation field goes through here so the fixed and derived
    * forms can never drift apart.

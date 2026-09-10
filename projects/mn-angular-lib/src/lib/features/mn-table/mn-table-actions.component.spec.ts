@@ -155,6 +155,34 @@ describe('MnTable row actions', () => {
     expect(buttons[0].textContent?.trim()).toBe('Edit');
   });
 
+  it("keeps a lone icon-only action inline instead of folding it into the ⋯ menu", () => {
+    // One icon button is narrower than the ⋯ trigger; collapsing it would only add a tap.
+    renderActions([{label: 'Edit', icon: LucidePencil.icon, run: () => undefined}], {
+      actionsInline: 'icon',
+    });
+
+    expect(fixture.nativeElement.querySelectorAll('tbody mn-lib-dropdown').length).toBe(0);
+  });
+
+  it('still offers the ⋯ menu when a row has more than one action', () => {
+    renderActions(
+      [
+        {label: 'Edit', icon: LucidePencil.icon, run: () => undefined},
+        {label: 'Delete', icon: LucideTrash2.icon, run: () => undefined},
+      ],
+      {actionsInline: 'icon'},
+    );
+
+    expect(fixture.nativeElement.querySelectorAll('tbody mn-lib-dropdown').length).toBe(2);
+  });
+
+  it('still offers the ⋯ menu for a lone action that renders its text', () => {
+    // Text can be as wide as the row; only a bare icon is guaranteed to fit beside it.
+    renderActions([{label: 'Deactivate', run: () => undefined}]);
+
+    expect(fixture.nativeElement.querySelectorAll('tbody mn-lib-dropdown').length).toBe(2);
+  });
+
   it('invokes run with the row the action was chosen on', () => {
     const chosen: Row[] = [];
     const buttons = renderActions([{label: 'Delete', run: (row) => chosen.push(row)}]);
