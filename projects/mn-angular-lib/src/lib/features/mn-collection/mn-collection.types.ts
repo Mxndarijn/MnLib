@@ -111,7 +111,19 @@ export type MnCollectionDataSource<T> = {
   errorTemplate?: TemplateRef<unknown>;
 
   // Search
-  canSearch: boolean;
+  /**
+   * Whether to show the search box in the toolbar. When omitted, search auto-enables once
+   * the collection holds at least {@link searchThreshold} rows *and* a way to search exists
+   * ({@link isInSearch} or {@link onServerSearch}) — the same rule mn-select and
+   * mn-multi-select apply to their option lists, so long collections stay filterable
+   * without every call site opting in. Set explicitly to force it on or off.
+   */
+  canSearch?: boolean;
+  /**
+   * Number of rows at which the search box auto-enables (default: 8). Ignored when
+   * {@link canSearch} is set explicitly. Server-paginated sources count {@link totalItems}.
+   */
+  searchThreshold?: number;
   searchPlaceholder?: string;
   /** Translation key for the search placeholder. When set, the component resolves it via MnLanguageService. */
   searchPlaceholderKey?: string;

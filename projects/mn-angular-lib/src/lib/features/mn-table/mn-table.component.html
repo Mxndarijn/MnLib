@@ -65,7 +65,7 @@
 
   <!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
        so an unsearchable table without toolbar templates emits no empty spacer. -->
-@if (dataSource.canSearch || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
+@if (isSearchable || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
   <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
     <div class="flex items-center gap-2 w-full @min-[420px]:w-auto">
     @if (dataSource.toolbarLeftTemplate) {
@@ -76,7 +76,7 @@
   </div>
     <div
       class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none @min-[560px]:w-auto">
-    @if (dataSource.canSearch) {
+    @if (isSearchable) {
       <!-- Enter must not submit a surrounding form: the search box belongs to the
            table's chrome, not to whatever form the table happens to sit in. -->
       <mn-lib-input-field

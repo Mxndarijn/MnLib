@@ -205,3 +205,52 @@ describe('MnList select-all label', () => {
     expect(selectAllLabel()).toBe('Alles selecteren');
   });
 });
+
+/**
+ * The toolbar search box follows the same auto-enable rule as mn-select's option
+ * search: with `canSearch` unset it appears once the list holds 8 rows and a search
+ * predicate exists. The rule itself is exercised in depth by the mn-table spec; this
+ * proves the list template reads it.
+ */
+describe('MnList search auto-enable', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let host: HostComponent;
+
+  /**
+   * Builds a data source over `count` searchable rows with `canSearch` left unset.
+   * @param count Number of rows to seed.
+   */
+  function makeDataSource(count: number): ListDataSource<Row> {
+    return {
+      dataRows: new BehaviorSubject<Row[]>(
+        Array.from({length: count}, (_, i) => ({id: String(i + 1), name: `Row ${i + 1}`})),
+      ),
+      itemTemplate: host.item,
+      getID: (row: Row) => row.id,
+      emptyMessage: '',
+      state: MnCollectionState.RETRIEVED,
+      paginationMode: 'none',
+      isInSearch: (row: Row, term: string) => row.name.toLowerCase().includes(term),
+    } as ListDataSource<Row>;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(HostComponent);
+    host = fixture.componentInstance;
+  });
+
+  it('hides the search box below 8 rows', () => {
+    host.dataSource = makeDataSource(7);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('input[type="search"]')).toBeNull();
+  });
+
+  it('shows the search box from 8 rows', () => {
+    host.dataSource = makeDataSource(8);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('input[type="search"]')).not.toBeNull();
+  });
+});

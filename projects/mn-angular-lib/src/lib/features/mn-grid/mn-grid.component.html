@@ -3,7 +3,7 @@
      and the search group at the end. Structure and classes mirror mn-table so all
      collections behave identically at every width. -->
 @if (
-  dataSource.canSearch ||
+  isSearchable ||
   dataSource.toolbarLeftTemplate ||
   dataSource.toolbarRightTemplate ||
   dataSource.toolbarTemplate
@@ -18,7 +18,7 @@
     </div>
     <div
       class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
-      @if (dataSource.canSearch) {
+      @if (isSearchable) {
         <!-- Enter must not submit a surrounding form: the search box is the
              collection's own chrome, not a field of whatever form it sits in. -->
         <mn-lib-input-field

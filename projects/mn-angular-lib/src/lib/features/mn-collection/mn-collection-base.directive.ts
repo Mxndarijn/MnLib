@@ -34,6 +34,9 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   implements OnInit, OnDestroy, DoCheck {
   @Input() dataSource!: DS;
 
+  /** Row count at which the search box auto-enables when `canSearch` is unset. */
+  private static readonly DEFAULT_SEARCH_THRESHOLD = 8;
+
   filteredItems: T[] = [];
   paginatedItems: T[] = [];
   searchValue = '';
@@ -119,6 +122,24 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
   /** Whether the component delegates search to the consumer (server-side). */
   get isServerSearched(): boolean {
     return !!this.dataSource.onServerSearch;
+  }
+
+  /**
+   * Whether the search box is shown: the explicit `canSearch` when set, otherwise
+   * auto-enabled once the row count reaches `searchThreshold` and the source can actually
+   * search (a client predicate or a server callback — a box that filters nothing is noise).
+   * A non-empty term keeps the box even when the (server-)filtered result drops below the
+   * threshold, so the user can always clear what they typed.
+   */
+  get isSearchable(): boolean {
+    if (this.dataSource.canSearch !== undefined) return this.dataSource.canSearch;
+    if (!this.dataSource.isInSearch && !this.isServerSearched) return false;
+    if (this.searchValue.length > 0) return true;
+    const threshold = this.dataSource.searchThreshold ?? MnCollectionBase.DEFAULT_SEARCH_THRESHOLD;
+    const rowCount = this.isServerPaginated && this.dataSource.totalItems != null
+      ? this.dataSource.totalItems
+      : (this.dataSource.dataRows.value ?? []).length;
+    return rowCount >= threshold;
   }
 
   get isPaginated(): boolean {
@@ -454,7 +475,7 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
 
   /** Client-side search filtering shared by list and grid. */
   protected applySearchFilter(items: T[]): T[] {
-    if (!this.isServerSearched && this.dataSource.isInSearch && this.dataSource.canSearch && this.searchValue && this.searchValue.length > 0) {
+    if (!this.isServerSearched && this.dataSource.isInSearch && this.isSearchable && this.searchValue && this.searchValue.length > 0) {
       const term = this.searchValue.toLowerCase();
       return items.filter(row => this.dataSource.isInSearch!(row, term));
     }
