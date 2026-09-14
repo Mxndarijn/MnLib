@@ -1,3 +1,4 @@
+import { anchoredPanelPlacement } from '../../shared/anchored-panel-placement';
 import {
   ChangeDetectorRef,
   Component,
@@ -60,6 +61,9 @@ export class MnMultiSelect implements OnInit {
   /** Layout classes for the anchored popover panel. The mobile sheet is rendered by
    *  mn-bottom-sheet instead, so it no longer needs a branch here. */
   readonly panelClasses = 'fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+
+  /** The panel's own height cap in pixels: the `max-h-60` above, restated for the placement maths. */
+  static readonly PANEL_MAX_HEIGHT_PX = 240;
   /** Layout classes for the invisible click shield rendered under the anchored panel.
    *  One step below the panel's z-index so the panel itself stays clickable, and above
    *  any modal/drawer chrome (which tops out well under 9998). */
@@ -141,7 +145,14 @@ export class MnMultiSelect implements OnInit {
   searchTerm = '';
 
   /** Dropdown position calculated from trigger bounding rect */
-  dropdownStyle: { top: string; left: string; width: string } = { top: '0px', left: '0px', width: '0px' };
+  /** Inline placement of the anchored panel; `maxHeight` only binds when the viewport is the tighter cap. */
+  dropdownStyle: { top: string; bottom: string; left: string; width: string; maxHeight: string | null } = {
+    top: '0px',
+    bottom: 'auto',
+    left: '0px',
+    width: '0px',
+    maxHeight: null,
+  };
 
   private onChange: (val: unknown) => void = () => {
   };
@@ -399,12 +410,15 @@ export class MnMultiSelect implements OnInit {
     this.previousBodyOverflow = null;
   }
 
-  /** Calculates the fixed position for the dropdown based on the trigger element */
+  /**
+   * Calculates the fixed position for the dropdown based on the trigger element: below it
+   * while the viewport has room, above it otherwise, never past the viewport's edge.
+   */
   private updateDropdownPosition(): void {
     if (!this.triggerRef) return;
     const rect = this.triggerRef.nativeElement.getBoundingClientRect();
     this.dropdownStyle = {
-      top: `${rect.bottom}px`,
+      ...anchoredPanelPlacement(rect, window.innerHeight, 0, MnMultiSelect.PANEL_MAX_HEIGHT_PX),
       left: `${rect.left}px`,
       width: `${rect.width}px`,
     };

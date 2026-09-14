@@ -120,7 +120,11 @@ describe('MnDropdown (anchored popover)', () => {
     // Right-aligned to the trigger: anchored at the trigger's right edge and pulled back
     // by its own width with `-translate-x-full`.
     expect(el.classList.contains('-translate-x-full')).toBeTrue();
-    expect(el.style.top).toMatch(/px$/);
+    // Anchored on whichever side of the trigger has room: `top` below it, `bottom` above it.
+    // The test viewport is short, so either can win; exactly one of them is a pixel value.
+    const anchoredBelow = /px$/.test(el.style.top);
+    const anchoredAbove = /px$/.test(el.style.bottom);
+    expect(anchoredBelow !== anchoredAbove).toBeTrue();
     expect(el.style.left).toMatch(/px$/);
   });
 

@@ -1,3 +1,4 @@
+import { anchoredPanelPlacement } from '../../shared/anchored-panel-placement';
 import {
   ChangeDetectorRef,
   Component,
@@ -160,7 +161,13 @@ export class MnDropdown implements OnInit {
   searchTerm = '';
 
   /** Popover position computed from the trigger's bounding rect. */
-  dropdownStyle: { top: string; left: string } = { top: '0px', left: '0px' };
+  /** Inline placement of the anchored panel; `maxHeight` only binds when the viewport is the tighter cap. */
+  dropdownStyle: { top: string; bottom: string; left: string; maxHeight: string | null } = {
+    top: '0px',
+    bottom: 'auto',
+    left: '0px',
+    maxHeight: null,
+  };
 
   /**
    * The popover panel, relocated to `document.body` on appearance (see mn-multi-select's
@@ -341,8 +348,10 @@ export class MnDropdown implements OnInit {
     const rect = this.triggerRef.nativeElement.getBoundingClientRect();
     // The panel is right-aligned to the trigger via a `-translate-x-full` class, so
     // `left` is anchored to the trigger's right edge.
+    // Below the trigger while the viewport has room, above it otherwise, never past the edge;
+    // the cap it competes with is the panel's own 60vh.
     this.dropdownStyle = {
-      top: `${rect.bottom + 4}px`,
+      ...anchoredPanelPlacement(rect, window.innerHeight, 4, window.innerHeight * 0.6),
       left: `${rect.right}px`,
     };
   }

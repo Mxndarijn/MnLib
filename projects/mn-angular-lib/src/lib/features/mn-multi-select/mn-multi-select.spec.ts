@@ -126,7 +126,8 @@ describe('MnMultiSelect (dropdown portal positioning)', () => {
     expect(el.classList.contains('fixed')).toBeTrue();
     // Top/left/width are derived from the trigger rect and applied as inline styles.
     expect(el.style.width).toMatch(/px$/);
-    expect(el.style.top).toMatch(/px$/);
+    // Anchored on whichever side of the trigger has room; exactly one of top/bottom is a pixel value.
+    expect(/px$/.test(el.style.top) !== /px$/.test(el.style.bottom)).toBeTrue();
     expect(el.style.left).toMatch(/px$/);
   });
 
@@ -842,7 +843,8 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
 
       expect(component.isSheet).toBeFalse();
       expect(backdrop()).toBeNull();
-      expect(anchoredPanel()!.style.top).toMatch(/px$/);
+      // Anchored on whichever side of the trigger has room; exactly one of top/bottom is a pixel value.
+      expect(/px$/.test(anchoredPanel()!.style.top) !== /px$/.test(anchoredPanel()!.style.bottom)).toBeTrue();
     });
   });
 
@@ -857,7 +859,8 @@ describe('MnMultiSelect (mobile sheet and search threshold)', () => {
       expect(component.isSheet).toBeFalse();
       expect(sheet()).toBeNull();
       expect(backdrop()).toBeNull();
-      expect(anchoredPanel()!.style.top).toMatch(/px$/);
+      // Anchored on whichever side of the trigger has room; exactly one of top/bottom is a pixel value.
+      expect(/px$/.test(anchoredPanel()!.style.top) !== /px$/.test(anchoredPanel()!.style.bottom)).toBeTrue();
     });
 
     it('leaves body scroll untouched', () => {
