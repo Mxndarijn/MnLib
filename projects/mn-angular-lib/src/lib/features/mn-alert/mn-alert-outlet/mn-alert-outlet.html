@@ -1,7 +1,9 @@
-<div class="fixed top-4 left-0 right-0 z-[9999] flex flex-col w-full px-2 sm:px-0 sm:left-auto sm:right-4 sm:max-w-sm">
+<!-- The stack is a polite live region so every toast is announced; an error toast upgrades itself to an alert. -->
+<div aria-live="polite" role="status" class="fixed top-4 left-0 right-0 z-[9999] flex flex-col w-full px-2 sm:px-0 sm:left-auto sm:right-4 sm:max-w-sm">
   @for (v of views(); track trackById($index, v)) {
     <div
       class="mn-alert-item"
+      [attr.role]="v.alert.kind === 'error' ? 'alert' : null"
       [class.dragging]="v.dragging"
       [class.leaving]="v.leaving"
       [style.touch-action]="touchAction"
