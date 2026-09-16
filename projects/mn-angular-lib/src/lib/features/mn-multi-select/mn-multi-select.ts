@@ -245,6 +245,9 @@ export class MnMultiSelect implements OnInit {
     if (this.props.placeholder) {
       this.uiConfig = { ...this.uiConfig, placeholder: this.props.placeholder };
     }
+    if (this.props.ariaLabel) {
+      this.uiConfig = { ...this.uiConfig, ariaLabel: this.props.ariaLabel };
+    }
   }
 
   // ========== ControlValueAccessor Implementation ==========

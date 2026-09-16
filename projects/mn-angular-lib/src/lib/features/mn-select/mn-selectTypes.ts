@@ -86,6 +86,9 @@ export type MnSelectProps<TValue = unknown> = {
   /** Whether to use built-in default error messages (default: true) */
   useBuiltInErrorMessages?: boolean;
 
+  /** ARIA label for screen readers (overrides uiConfig.ariaLabel when provided); use it when the select has no visible label, e.g. a table filter. */
+  ariaLabel?: string;
+
   /** Whether to display all validation errors or just the first/priority error (default: false) */
   showAllErrors?: boolean;
 }
