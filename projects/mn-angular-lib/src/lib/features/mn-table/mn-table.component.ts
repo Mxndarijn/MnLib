@@ -339,7 +339,23 @@ export class MnTable<T = object>
    * @param column - The filtered column.
    */
   filterLabel(column: ColumnDefinition<T>): string {
-    return typeof column.header === 'string' ? column.header : column.key;
+    return typeof column.header === 'string' ? this.headerText(column) : column.key;
+  }
+
+  /**
+   * A string column's header text. `headerKey` is translated here, at render time, rather than
+   * only in `resolveTranslationKeys`: that runs on init and on a locale change, so a column a
+   * consumer adds afterwards (a permission-gated actions or image column) kept an empty header,
+   * which a screen reader announces as a nameless column.
+   * @param column - The column whose header is shown.
+   * @returns The translated key when the column has one, otherwise its literal header, or an
+   *   empty string for a template header (rendered through its own outlet instead).
+   */
+  headerText(column: ColumnDefinition<T>): string {
+    if (column.headerKey) {
+      return this.lang.t(column.headerKey);
+    }
+    return typeof column.header === 'string' ? column.header : '';
   }
 
   isSortable(column: ColumnDefinition<T>): boolean {
@@ -415,6 +431,11 @@ export class MnTable<T = object>
       'mnCollection.search',
       this.dataSource.searchPlaceholder ?? 'Search...',
     );
+  }
+
+  /** Screen-reader-only header text of the selection column, so that column is never nameless. */
+  get selectionColumnLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.selectionColumn', 'Selection');
   }
 
   /** Accessible name for the scrollable table region. */

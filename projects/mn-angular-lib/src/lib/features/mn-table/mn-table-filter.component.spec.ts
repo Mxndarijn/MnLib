@@ -48,21 +48,25 @@ describe('MnTable column filters', () => {
   }
 
   /**
-   * The inline filter controls live inside `th` cells, which the browser renders
-   * bold — the controls inherit that unless the row resets it. They are form
-   * fields, not headings, so bold is wrong; this pins the reset in place.
+   * The inline filter controls are form fields, not headings: their cells are `td` at normal
+   * weight. A `th` here made every column without a filter an empty header, which assistive
+   * tech announces as a nameless column (axe `empty-table-header`).
    */
-  it('renders the inline filter controls at normal weight, not the header bold', () => {
-    fixture.componentInstance.dataSource = makeDataSource([nameColumn()]);
+  it('renders the inline filter row as normal-weight data cells, not headers', () => {
+    const plain: ColumnDefinition<Row> = {key: 'age', header: 'Age', cell: (row) => String(row.age)};
+    fixture.componentInstance.dataSource = makeDataSource([nameColumn(), plain]);
     fixture.detectChanges();
 
     const filterRow: HTMLTableRowElement =
       fixture.nativeElement.querySelector('thead tr:nth-child(2)');
     expect(filterRow).withContext('inline filter row should be rendered').toBeTruthy();
 
+    expect(filterRow.cells.length).toBe(2);
     for (const cell of Array.from(filterRow.cells)) {
+      expect(cell.tagName).toBe('TD');
       expect(cell.classList).toContain('font-normal');
     }
+    expect(filterRow.querySelectorAll('th').length).toBe(0);
 
     // The heading row itself must stay bold.
     const header: HTMLTableCellElement =

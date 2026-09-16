@@ -142,7 +142,7 @@
               @if (isTemplateRef(column.header)) {
                 <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
               } @else {
-                {{ column.header }}
+                {{ headerText(column) }}
               }
             </label>
             <ng-container
@@ -186,9 +186,12 @@
   <table [class]="tableClasses">
     <thead>
       <tr class="bg-base-100">
-        <!-- Selection checkbox column header -->
+        <!-- Selection column header. It always carries a screen-reader-only name: a single-select
+             table has nothing else in this cell, and a multi-select one only a checkbox, so
+             without it the column is announced as a nameless header (axe empty-table-header). -->
         @if (hasSelection) {
           <th class="w-10 text-center text-sm px-2 py-2">
+            <span class="sr-only">{{ selectionColumnLabel }}</span>
             @if (isMultiSelect) {
               <mn-lib-checkbox
                 (checkedChange)="toggleAll()"
@@ -223,7 +226,7 @@
               @if (isTemplateRef(column.header)) {
                 <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
               } @else {
-                <span>{{ column.header }}</span>
+                <span>{{ headerText(column) }}</span>
               }
               @if (isSortable(column)) {
                 <span class="text-[0.65rem] opacity-70 min-w-3 inline-block" aria-hidden="true">{{ getSortIcon(column) }}</span>
@@ -244,17 +247,17 @@
       </tr>
 
       <!-- Per-column filter row (wide screens only; collapses into a panel below 640px).
-           `font-normal` on the cells is load-bearing: these are `th` elements, which the
-           browser renders bold, and the filter inputs and selects inside them inherit
-           that. Filter controls are form fields, not headings, and must not look bold.
-           The stacked filter panel renders outside any `th`, so it is unaffected. -->
+           The cells are `td`, not `th`: they hold form controls, not headings, and a
+           column without a filter would otherwise be an empty header, which assistive tech
+           announces as a nameless column (axe `empty-table-header`). `font-normal` stays
+           so a consumer's thead styling cannot make the controls bold. -->
       @if (hasColumnFilters && !filtersCollapsed) {
         <tr class="bg-base-100 border-b border-base-300 font-normal">
           @if (hasSelection) {
-            <th class="px-2 py-1 font-normal"></th>
+            <td class="px-2 py-1 font-normal"></td>
           }
           @for (column of dataSource.columns; track column.key) {
-            <th
+            <td
               class="px-4 py-2 font-normal"
               [mnHiddenBelow]="column.hiddenBelow"
             >
@@ -268,7 +271,7 @@
                   [ngTemplateOutlet]="filterField"
                 ></ng-container>
               }
-            </th>
+            </td>
           }
         </tr>
       }
@@ -388,7 +391,7 @@
                         <mn-lib-dropdown [datasource]="{
                           id: actionsDropdownId(column, row),
                           actions: rowDropdownActions(column, row),
-                          menuLabel: $any(column.header),
+                          menuLabel: headerText(column),
                           size: 'sm'
                         }"></mn-lib-dropdown>
                       </span>

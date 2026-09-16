@@ -2,7 +2,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideHttpClient} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {BehaviorSubject} from 'rxjs';
-import {MnCollectionState, MnTable, TableDataSource} from 'mn-angular-lib';
+import {MnCollectionState, MnLanguageService, MnTable, TableDataSource} from 'mn-angular-lib';
 
 /** Minimal row shape used by the configuration tests. */
 type Row = {
@@ -381,4 +381,43 @@ describe('MnTable data source configuration', () => {
       expect(header.classList).not.toContain('bg-base-200');
     }
   });
+
+  /**
+   * A consumer that adds a column after the table initialised (a permission-gated actions or
+   * image column) used to keep its empty `header`: `headerKey` was only translated on init and
+   * on a locale change, so the column rendered as a nameless header (axe empty-table-header).
+   */
+  it('shows the translated header of a column added after init', () => {
+    const lang = TestBed.inject(MnLanguageService);
+    lang.registerTranslations(lang.locale, {table: {image: 'Cover image'}});
+    const ds = makeDataSource();
+    fixture.componentInstance.dataSource = ds;
+    fixture.detectChanges();
+
+    ds.columns.push({key: 'image', header: '', headerKey: 'table.image', cell: () => ''});
+    fixture.componentRef.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    const header: HTMLTableCellElement =
+      fixture.nativeElement.querySelector('thead th[data-column-key="image"]');
+    expect(header).withContext('the late column should render a header cell').toBeTruthy();
+    expect(header.textContent?.trim()).toBe('Cover image');
+  });
+
+  /**
+   * The selection column's header cell holds nothing readable of its own: a single-select table
+   * leaves it empty and a multi-select one puts only a checkbox there. Both must still name the
+   * column, or a screen reader announces a nameless header (axe empty-table-header).
+   */
+  for (const selectionMode of ['single', 'multi'] as const) {
+    it(`names the selection column header in ${selectionMode}-select mode`, () => {
+      fixture.componentInstance.dataSource = makeDataSource({selectionMode});
+      fixture.detectChanges();
+
+      const selectionHeader: HTMLTableCellElement =
+        fixture.nativeElement.querySelector('thead tr:first-child th:not([data-column-key])');
+      expect(selectionHeader).withContext('the selection column should render a header').toBeTruthy();
+      expect(selectionHeader.querySelector('.sr-only')?.textContent?.trim()).toBe('Selection');
+    });
+  }
 });
