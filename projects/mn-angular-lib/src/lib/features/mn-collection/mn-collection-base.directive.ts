@@ -112,6 +112,11 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
     return this.collectionState === MnCollectionState.LOADING;
   }
 
+  /** Accessible name for the loading placeholder, and the text the status region announces. */
+  get loadingLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.loading', 'Loading');
+  }
+
   /** Whether loading failed (the error placeholder is shown instead of rows/empty). */
   get isErrorState(): boolean {
     return this.collectionState === MnCollectionState.ERROR;

@@ -50,6 +50,11 @@
 }
 
 <!-- Body: skeleton/data swap region. Wrapper holds its height during a server reload. -->
+<!-- Announces loading. The skeletons are aria-hidden, so without this a screen reader hears
+     nothing while rows load. The region stays in the DOM and only its text changes, which is
+     what makes assistive tech read it; one inserted with its text already set is often missed. -->
+<span class="sr-only" role="status">{{ isLoadingState ? loadingLabel : '' }}</span>
+
 <div #collectionBody [style.min-height.px]="bodyMinHeight">
 <!-- Loading state -->
   @if (isLoadingState) {

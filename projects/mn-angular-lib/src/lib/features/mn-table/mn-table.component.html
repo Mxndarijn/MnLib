@@ -179,8 +179,13 @@
   </mn-bottom-sheet>
 }
 
+<!-- Announces loading. The skeletons are aria-hidden, so without this a screen reader hears
+     nothing while rows load. The region stays in the DOM and only its text changes, which is
+     what makes assistive tech read it; one inserted with its text already set is often missed. -->
+<span class="sr-only" role="status">{{ isLoadingState ? loadingLabel : '' }}</span>
+
 <!-- Table wrapper with horizontal scroll -->
-  <div #collectionBody [attr.aria-label]="tableRegionLabel" [style.min-height.px]="bodyMinHeight"
+  <div #collectionBody [attr.aria-busy]="isLoadingState || null" [attr.aria-label]="tableRegionLabel" [style.min-height.px]="bodyMinHeight"
      class="overflow-x-auto"
      role="region">
   <table [class]="tableClasses">

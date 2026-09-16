@@ -420,4 +420,22 @@ describe('MnTable data source configuration', () => {
       expect(selectionHeader.querySelector('.sr-only')?.textContent?.trim()).toBe('Selection');
     });
   }
+
+  /**
+   * Loading is announced: skeletons are aria-hidden, so the collection keeps a status region whose
+   * text switches to the loading label and back, and marks its body busy while it loads.
+   */
+  it('announces loading through a status region and marks the body busy (table)', () => {
+    fixture.componentRef.setInput('dataSource', makeDataSource({state: MnCollectionState.LOADING}));
+    fixture.detectChanges();
+    const status: HTMLElement = fixture.nativeElement.querySelector('[role="status"]');
+    const region: HTMLElement = fixture.nativeElement.querySelector('[role="region"]');
+    expect(status.textContent?.trim()).toBe('Loading');
+    expect(region.getAttribute('aria-busy')).toBe('true');
+
+    fixture.componentRef.setInput('dataSource', makeDataSource({state: MnCollectionState.RETRIEVED}));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="status"]').textContent?.trim()).toBe('');
+    expect(fixture.nativeElement.querySelector('[role="region"]').hasAttribute('aria-busy')).toBeFalse();
+  });
 });

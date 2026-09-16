@@ -314,4 +314,21 @@ describe('MnList (keyboard activation)', () => {
     expect(clicked).toEqual([]);
     expect(event.defaultPrevented).toBeFalse();
   });
+
+  /**
+   * Loading is announced: skeletons are aria-hidden, so the collection keeps a status region whose
+   * text switches to the loading label and back, and marks its body busy while it loads.
+   */
+  it('announces loading through a status region and marks the body busy (list)', () => {
+    host.dataSource = { ...host.dataSource, state: MnCollectionState.LOADING };
+    fixture.detectChanges();
+    const status: HTMLElement = fixture.nativeElement.querySelector('[role="status"]');
+    expect(status.textContent?.trim()).toBe('Loading');
+    expect(fixture.nativeElement.querySelector('[aria-busy="true"]')).not.toBeNull();
+
+    host.dataSource = { ...host.dataSource, state: MnCollectionState.RETRIEVED };
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="status"]').textContent?.trim()).toBe('');
+    expect(fixture.nativeElement.querySelector('[aria-busy="true"]')).toBeNull();
+  });
 });

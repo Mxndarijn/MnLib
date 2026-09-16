@@ -209,9 +209,4 @@ export class MnGrid<T = unknown> extends MnCollectionBase<T, GridDataSource<T>> 
   get gridRegionLabel(): string {
     return this.resolveLabel(undefined, 'mnCollection.cardGrid', 'Card grid');
   }
-
-  /** Accessible name for the loading placeholder. */
-  get loadingLabel(): string {
-    return this.resolveLabel(undefined, 'mnCollection.loading', 'Loading');
-  }
 }
