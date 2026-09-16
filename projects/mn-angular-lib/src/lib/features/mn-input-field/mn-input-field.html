@@ -19,6 +19,7 @@
     [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || null"
     [attr.aria-invalid]="showError || null"
     [attr.aria-describedby]="showError ? errorDescribedBy : null"
+    [attr.aria-activedescendant]="props.ariaActiveDescendant || null"
     [disabled]="isDisabled"
     [attr.autocomplete]="props.autocomplete || null"
     [attr.min]="minAttr"

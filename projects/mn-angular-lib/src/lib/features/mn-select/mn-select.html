@@ -13,8 +13,8 @@
     #trigger
     (blur)="handleBlur()"
     (click)="toggle()"
-    (keydown.enter)="toggle()"
-    (keydown.space)="toggle(); $event.preventDefault()"
+    (keydown)="onKeydown($event)"
+    [attr.aria-activedescendant]="activeOptionId"
     [attr.aria-controls]="isOpen ? resolvedId + '-listbox' : null"
     [attr.aria-describedby]="showError ? resolvedId + '-error' : null"
     [attr.aria-disabled]="isDisabled || null"
@@ -113,9 +113,10 @@
        is the flex scroller; anchored, the popover itself scrolls. -->
   <ng-template #panelBody>
     @if (isSearchable) {
-      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
       <div
         (click)="$event.stopPropagation()"
+        (keydown)="onKeydown($event, true)"
         [ngClass]="isSheet ? 'px-4 py-2' : 'p-2'"
         class="border-b border-base-300 shrink-0"
       >
@@ -128,6 +129,7 @@
             type: 'search',
             placeholder: searchPlaceholderLabel,
             ariaLabel: searchPlaceholderLabel,
+            ariaActiveDescendant: activeOptionId,
             fullWidth: true,
             size: 'sm',
             autoFocus: !isSheet
@@ -137,17 +139,20 @@
     }
     <div [ngClass]="isSheet ? 'flex-1 overflow-auto overscroll-contain' : ''">
       @for (opt of filteredOptions; track opt.value) {
+        <!-- Options are not Tab stops: the keyboard reaches them with the arrow keys while focus
+             stays on the trigger or the search box, and `aria-activedescendant` names the one it
+             is on. The ring marks that option, since it never receives real focus. -->
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div
           (click)="selectOption(opt); $event.stopPropagation()"
-          (keyup.enter)="selectOption(opt)"
-          (keyup.space)="selectOption(opt)"
+          [attr.aria-disabled]="opt.disabled || null"
           [attr.aria-selected]="isSelected(opt)"
           [class.opacity-50]="opt.disabled"
           [class.pointer-events-none]="opt.disabled"
-          [ngClass]="[isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm', isSelected(opt) ? 'bg-primary/10 font-medium' : '']"
+          [id]="optionId($index)"
+          [ngClass]="[isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm', isSelected(opt) ? 'bg-primary/10 font-medium' : '', $index === activeIndex ? 'ring-2 ring-inset ring-primary' : '']"
           class="flex items-center gap-x-2.5 cursor-pointer text-base-content hover:bg-base-200 transition-colors"
           role="option"
-          tabindex="0"
         >
           <span class="truncate min-w-0">{{ opt.label }}</span>
           <!-- The current choice's marker. Decorative: the state is conveyed to assistive

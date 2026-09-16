@@ -23,8 +23,8 @@
     [attr.aria-required]="isRequired() || null"
     tabindex="0"
     (click)="toggle()"
-    (keydown.enter)="toggle()"
-    (keydown.space)="toggle(); $event.preventDefault()"
+    (keydown)="onKeydown($event)"
+    [attr.aria-activedescendant]="activeOptionId"
     (blur)="handleBlur()"
   >
     <!-- `pr-6` reserves the gutter the caret is absolutely positioned in (right-2 +
@@ -132,9 +132,10 @@
        mode the list is the flex scroller; anchored, the popover itself scrolls. -->
   <ng-template #panelBody>
     @if (isSearchable) {
-      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
       <div
         (click)="$event.stopPropagation()"
+        (keydown)="onKeydown($event, true)"
         [ngClass]="isSheet ? 'px-4 py-2' : 'p-2'"
         class="border-b border-base-300 shrink-0"
       >
@@ -147,6 +148,7 @@
             type: 'search',
             placeholder: searchPlaceholderLabel,
             ariaLabel: searchPlaceholderLabel,
+            ariaActiveDescendant: activeOptionId,
             fullWidth: true,
             size: 'sm'
           }"
@@ -155,17 +157,20 @@
     }
     <div [ngClass]="isSheet ? 'flex-1 overflow-auto overscroll-contain' : ''">
       @for (opt of filteredOptions; track opt.value) {
+        <!-- Options are not Tab stops: the keyboard reaches them with the arrow keys while focus
+             stays on the trigger or the search box, and `aria-activedescendant` names the one it
+             is on. The ring marks that option, since it never receives real focus. -->
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div
           (click)="toggleOption(opt); $event.stopPropagation()"
-          (keyup.enter)="toggleOption(opt)"
-          (keyup.space)="toggleOption(opt)"
+          [attr.aria-disabled]="opt.disabled || isMaxReached(opt) || null"
           [attr.aria-selected]="isSelected(opt)"
           [class.opacity-50]="opt.disabled || isMaxReached(opt)"
           [class.pointer-events-none]="opt.disabled || isMaxReached(opt)"
-          [ngClass]="isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm'"
+          [id]="optionId($index)"
+          [ngClass]="[isSheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm', $index === activeIndex ? 'ring-2 ring-inset ring-primary' : '']"
           class="flex items-center gap-x-2 cursor-pointer text-base-content hover:bg-base-200"
           role="option"
-          tabindex="0"
         >
           <input
             [checked]="isSelected(opt)"

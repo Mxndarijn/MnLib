@@ -998,3 +998,105 @@ describe('MnMultiSelect (own labels)', () => {
     expect(component.collapseSummaryText).toBe('2 geselecteerd');
   });
 });
+
+/**
+ * Keyboard use of the multi-select, the WAI-ARIA combobox pattern: options are not Tab stops, the
+ * arrow keys move `aria-activedescendant`, and Enter or Space toggles without closing the list.
+ * Reuses the portal suite's host, which is pinned to the anchored layout.
+ */
+describe('MnMultiSelect (keyboard)', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let component: MnMultiSelect;
+
+  /** The combobox trigger. */
+  function trigger(): HTMLElement {
+    return fixture.nativeElement.querySelector('[role="combobox"]');
+  }
+
+  /** The rendered options in the portalled panel. */
+  function options(): HTMLElement[] {
+    return Array.from(document.querySelectorAll('#test-ms-listbox [role="option"]'));
+  }
+
+  /**
+   * Presses a key the way a browser delivers it and lets the view update.
+   * @param target - The focused element.
+   * @param key - The KeyboardEvent key value.
+   * @returns The event, to check whether the field claimed it.
+   */
+  function press(target: HTMLElement, key: string): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    target.dispatchEvent(event);
+    fixture.detectChanges();
+    return event;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        {provide: MnConfigService, useValue: configStub},
+        {provide: MnLanguageService, useValue: languageStub},
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
+  });
+
+  afterEach(() => {
+    document.getElementById('test-ms-listbox')?.remove();
+    document.getElementById('test-ms-shield')?.remove();
+  });
+
+  it('opens on ArrowDown with the first option active and no option in the Tab order', () => {
+    const event = press(trigger(), 'ArrowDown');
+
+    expect(event.defaultPrevented).toBeTrue();
+    expect(component.isOpen).toBeTrue();
+    expect(trigger().getAttribute('aria-activedescendant')).toBe('test-ms-option-0');
+    expect(options().every(option => option.getAttribute('tabindex') === null)).toBeTrue();
+  });
+
+  it('toggles the active option with Enter and Space and stays open', () => {
+    press(trigger(), 'ArrowDown');
+    press(trigger(), 'ArrowDown');
+
+    const enter = press(trigger(), 'Enter');
+    expect(enter.defaultPrevented).toBeTrue();
+    expect(component.selectedValues).toEqual(['b']);
+    expect(component.isOpen).toBeTrue();
+
+    press(trigger(), 'ArrowDown');
+    press(trigger(), ' ');
+    expect(component.selectedValues).toEqual(['b', 'c']);
+
+    press(trigger(), ' ');
+    expect(component.selectedValues).withContext('Space again removes it').toEqual(['b']);
+  });
+
+  it('skips options blocked by maxSelections', () => {
+    fixture.componentInstance.props = {...fixture.componentInstance.props, maxSelections: 1};
+    fixture.detectChanges();
+
+    press(trigger(), 'ArrowDown');
+    press(trigger(), 'Enter');
+    expect(component.selectedValues).toEqual(['a']);
+
+    press(trigger(), 'ArrowDown');
+    expect(component.activeIndex).withContext('Beta and Gamma are blocked at the maximum').toBe(0);
+  });
+
+  it('closes on Escape and ignores keys pressed on a chip remove button', () => {
+    press(trigger(), 'ArrowDown');
+    press(trigger(), 'Enter');
+    press(trigger(), 'Escape');
+    expect(component.isOpen).toBeFalse();
+
+    const remove = trigger().querySelector('button') as HTMLElement;
+    const event = press(remove, 'ArrowDown');
+    expect(event.defaultPrevented).toBeFalse();
+    expect(component.isOpen).toBeFalse();
+  });
+});

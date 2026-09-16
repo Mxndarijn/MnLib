@@ -1,5 +1,7 @@
 import { anchoredPanelPlacement } from '../../shared/anchored-panel-placement';
+import { scrollOptionIntoView, stepEnabledIndex } from '../../shared/listbox-navigation';
 import {
+  afterNextRender,
   ChangeDetectorRef,
   Component,
   DestroyRef,
@@ -7,6 +9,7 @@ import {
   HostListener,
   inject,
   InjectionToken,
+  Injector,
   Input,
   OnInit,
   Renderer2,
@@ -55,6 +58,8 @@ export class MnMultiSelect implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly renderer = inject(Renderer2);
   private readonly cdr = inject(ChangeDetectorRef);
+  /** Injector for the after-render scroll of the highlighted option. */
+  private readonly injector = inject(Injector);
 
   /** Reference to the trigger element for positioning the dropdown */
   @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
@@ -143,6 +148,12 @@ export class MnMultiSelect implements OnInit {
   isOpen = false;
   isDisabled = false;
   searchTerm = '';
+
+  /**
+   * Position in `filteredOptions` of the option the keyboard is on, or -1 for none. Reset when the
+   * list it indexes changes (a search) or goes away (close), so it never points at a stale row.
+   */
+  activeIndex = -1;
 
   /** Dropdown position calculated from trigger bounding rect */
   /** Inline placement of the anchored panel; `maxHeight` only binds when the viewport is the tighter cap. */
@@ -388,6 +399,7 @@ export class MnMultiSelect implements OnInit {
     if (!this.isOpen) return;
     this.isOpen = false;
     this.searchTerm = '';
+    this.activeIndex = -1;
     this.stopWatchingTrigger();
     this.unlockBodyScroll();
   }
@@ -523,8 +535,132 @@ export class MnMultiSelect implements OnInit {
     return this.selectedValues.length >= this.props.maxSelections && !this.isSelected(option);
   }
 
+  /** Filters the options; the first match is highlighted so Enter toggles it, none once the box is cleared. */
   onSearch(term: string): void {
     this.searchTerm = term;
+    this.activeIndex = this.searchTerm ? stepEnabledIndex(this.filteredOptions, -1, 1, this.isChoosable) : -1;
+  }
+
+  /**
+   * Whether the keyboard may highlight an option: not disabled, and not blocked by `maxSelections`.
+   * An arrow function so it can be handed to `stepEnabledIndex` as it is.
+   */
+  private readonly isChoosable = (option: MnMultiSelectOption): boolean =>
+    !option.disabled && !this.isMaxReached(option);
+
+  /** Id of the keyboard-highlighted option, for `aria-activedescendant`; null when none is. */
+  get activeOptionId(): string | null {
+    const inRange = this.activeIndex >= 0 && this.activeIndex < this.filteredOptions.length;
+    return this.isOpen && inRange ? this.optionId(this.activeIndex) : null;
+  }
+
+  /**
+   * The DOM id of the option rendered at a position in `filteredOptions`.
+   * @param index - The option's position.
+   * @returns The id, unique per multi-select.
+   */
+  optionId(index: number): string {
+    return `${this.resolvedId}-option-${index}`;
+  }
+
+  /**
+   * Keyboard handling for the trigger and the search box, the WAI-ARIA combobox pattern. While
+   * closed, ArrowDown, ArrowUp, Enter and Space open the list with an option highlighted. While
+   * open, the arrows move the highlight past disabled options without wrapping, Home and End jump
+   * to the ends, Enter (and Space outside the search box) toggles the highlighted option and keeps the list open for the next one, Escape closes and Tab closes and lets focus move on. Enter and Space
+   * stop here, so they can never submit a surrounding form or close a surrounding modal.
+   * @param event - The keydown.
+   * @param fromSearch - True when it came from the search box, where Space, Home and End edit text.
+   */
+  onKeydown(event: KeyboardEvent, fromSearch = false): void {
+    if (this.isDisabled) return;
+    // Keys on a chip's remove button bubble up through the trigger; they are that button's own.
+    if (!fromSearch && event.target !== event.currentTarget) return;
+
+    if (!this.isOpen) {
+      if (fromSearch || !['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) return;
+      this.claim(event);
+      this.toggle();
+      this.moveActive(-1, event.key === 'ArrowUp' ? -1 : 1);
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowUp':
+        this.claim(event);
+        this.moveActive(this.activeIndex, event.key === 'ArrowDown' ? 1 : -1);
+        return;
+      case 'Home':
+      case 'End':
+        if (fromSearch) return;
+        this.claim(event);
+        this.moveActive(-1, event.key === 'Home' ? 1 : -1);
+        return;
+      case ' ':
+        if (fromSearch) return;
+        this.toggleActive(event);
+        return;
+      case 'Enter':
+        this.toggleActive(event);
+        return;
+      case 'Escape':
+        this.claim(event);
+        this.close();
+        this.focusTrigger();
+        return;
+      case 'Tab':
+        // Focus moves on from the trigger, so the search box's Tab order position never matters.
+        this.close();
+        this.focusTrigger();
+        return;
+    }
+  }
+
+  /**
+   * Moves the highlight one enabled option from `from` and scrolls it into view.
+   * @param from - Where to step from; -1 to start at an end.
+   * @param step - 1 for down, -1 for up.
+   */
+  private moveActive(from: number, step: 1 | -1): void {
+    this.activeIndex = stepEnabledIndex(this.filteredOptions, from, step, this.isChoosable);
+    this.revealActiveOption();
+  }
+
+  /**
+   * Toggles the highlighted option. The list stays open, as it does for a click, so several options
+   * can be picked in a row.
+   * @param event - The Enter or Space keydown, claimed so a form around the field is not submitted.
+   */
+  private toggleActive(event: KeyboardEvent): void {
+    this.claim(event);
+    const option = this.filteredOptions[this.activeIndex];
+    if (option && this.isChoosable(option)) {
+      this.toggleOption(option);
+    }
+  }
+
+  /**
+   * Takes a key for the field: no default action (no scroll, no form submit) and no bubbling to a
+   * surrounding modal's own Enter or Escape handling.
+   * @param event - The keydown to claim.
+   */
+  private claim(event: KeyboardEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /** Scrolls the highlighted option into view once the render that paints its ring has run. */
+  private revealActiveOption(): void {
+    afterNextRender(() => {
+      const id = this.activeOptionId;
+      scrollOptionIntoView(id ? document.getElementById(id) : null);
+    }, {injector: this.injector});
+  }
+
+  /** Puts focus back on the trigger. */
+  private focusTrigger(): void {
+    this.triggerRef?.nativeElement.focus();
   }
 
   get filteredOptions(): MnMultiSelectOption[] {

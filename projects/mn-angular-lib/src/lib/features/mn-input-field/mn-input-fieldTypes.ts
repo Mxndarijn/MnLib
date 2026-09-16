@@ -53,6 +53,12 @@ export type MnInputBaseProps = {
    */
   ariaLabel?: string;
 
+  /**
+   * Id of the option a surrounding listbox has highlighted, set as `aria-activedescendant`. Used by
+   * the select's search box, which keeps focus while the arrow keys move through the options.
+   */
+  ariaActiveDescendant?: string | null;
+
   /** Input mask (e.g., '(000) 000-0000') */
   mask?: string;
 
