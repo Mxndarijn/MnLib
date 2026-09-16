@@ -4,6 +4,7 @@
     <input
       type="checkbox"
       [id]="resolvedId"
+    [attr.aria-required]="isRequired() || null"
       [attr.name]="resolvedName"
       [attr.aria-label]="uiConfig.ariaLabel || uiConfig.label || props.label || null"
       [attr.aria-invalid]="showError || null"
@@ -18,7 +19,7 @@
       <span class="flex flex-row items-center gap-x-0.5">
         <span>{{ uiConfig.label || props.label }}</span>
         @if (isRequired()) {
-          <span class="text-red-500">*</span>
+          <span class="text-error" aria-hidden="true">*</span>
         }
       </span>
     }

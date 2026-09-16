@@ -15,7 +15,7 @@
     <label [attr.for]="resolvedId" class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!">
       <p>{{ uiConfig.label }}</p>
       @if (isRequired()) {
-        <span class="text-red-500">*</span>
+        <span class="text-error" aria-hidden="true">*</span>
       }
     </label>
   }
@@ -30,6 +30,7 @@
     [attr.name]="resolvedName"
     [disabled]="isDisabled"
     [id]="resolvedId"
+    [attr.aria-required]="isRequired() || null"
     class="hidden"
     type="file"
   />

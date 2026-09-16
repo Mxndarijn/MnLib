@@ -3,7 +3,7 @@
     <label [attr.for]="resolvedId" class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!">
       <p>{{ uiConfig.label || props.label }}</p>
       @if (isRequired()) {
-        <span class="text-red-500">*</span>
+        <span class="text-error" aria-hidden="true">*</span>
       }
     </label>
   }
@@ -29,6 +29,7 @@
     aria-haspopup="listbox"
     class="relative"
     role="combobox"
+    [attr.aria-required]="isRequired() || null"
   >
     <!-- `pr-6` reserves the gutter the caret is absolutely positioned in (right-2 + w-4),
          so the value can never render underneath it. `min-w-0` lets the label shrink below

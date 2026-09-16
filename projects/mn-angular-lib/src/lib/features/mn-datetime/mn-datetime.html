@@ -3,7 +3,7 @@
     <label class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!" [attr.for]="resolvedId">
       <p>{{ uiConfig.label || props.label }}</p>
       @if (isRequired()) {
-        <span class="text-red-500">*</span>
+        <span class="text-error" aria-hidden="true">*</span>
       }
     </label>
   }
@@ -45,6 +45,7 @@
   <input
     #dateInput
     [id]="resolvedId"
+    [attr.aria-required]="isRequired() || null"
     [attr.name]="resolvedName"
     [type]="resolvedMode"
     [attr.placeholder]="uiConfig.placeholder || props.placeholder || null"

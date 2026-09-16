@@ -298,6 +298,16 @@ export class MnInputField implements OnInit {
    * Determines whether to show error messages.
    * Errors are shown when the control is invalid and has been touched or modified.
    */
+  /**
+   * Ids of the rendered error messages, space-separated, for `aria-describedby`. Mirrors the
+   * `{id}-error` / `{id}-{index}-error` ids `mn-error-message` renders in single and show-all mode.
+   */
+  get errorDescribedBy(): string {
+    return this.props.showAllErrors
+      ? this.errorMessages.map((_, index) => `${this.resolvedId}-${index}-error`).join(' ')
+      : `${this.resolvedId}-error`;
+  }
+
   get showError(): boolean {
     const c = this.control;
     return !!c && c.invalid && (c.touched || c.dirty);

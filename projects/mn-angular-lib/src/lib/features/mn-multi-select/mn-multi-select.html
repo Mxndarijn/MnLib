@@ -3,7 +3,7 @@
     <label class="pl-2 pb-1 flex flex-row gap-x-0.5! text-base!" [attr.for]="resolvedId">
       <p>{{ uiConfig.label || props.label }}</p>
       @if (isRequired()) {
-        <span class="text-red-500">*</span>
+        <span class="text-error" aria-hidden="true">*</span>
       }
     </label>
   }
@@ -20,6 +20,7 @@
     [attr.aria-expanded]="isOpen"
     [attr.aria-controls]="isOpen ? resolvedId + '-listbox' : null"
     role="combobox"
+    [attr.aria-required]="isRequired() || null"
     tabindex="0"
     (click)="toggle()"
     (keydown.enter)="toggle()"
