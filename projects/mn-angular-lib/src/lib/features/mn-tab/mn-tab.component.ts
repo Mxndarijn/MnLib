@@ -1,4 +1,5 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   Component,
   DoCheck,
@@ -59,7 +60,7 @@ function tabUrlKey(label: string): string {
   imports: [MnTranslatePipe, CommonModule, MnBadge, MnSkeleton],
   templateUrl: './mn-tab.component.html',
 })
-export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
+export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked, OnDestroy {
   /**
    * Router the active tab is written to. Optional: a tab bar used outside a
    * routed application still works, it just has no URL to mirror into.
@@ -216,6 +217,26 @@ export class MnTabComponent implements DoCheck, AfterViewInit, OnDestroy {
     this.updateEdgeFades();
     // Place the indicator on the default tab without a slide-in from zero.
     this.updateIndicator(false);
+  }
+
+  /** Wrapper geometry (`scrollWidth:clientWidth`) at the last fade evaluation. */
+  private lastFadeGeometry = '';
+
+  /**
+   * Re-evaluates the edge fade when the wrapper's scrollable extent changes without its box
+   * changing. {@link resizeObserver} only sees border-box changes, and the tab row is a
+   * block-level flex container that keeps its parent's width while its tabs overflow inside it,
+   * so tabs that arrive after init (permission-gated tabs, badge counts, skeleton → loaded) grow
+   * `scrollWidth` without firing it; until a resize or scroll the fade stayed off. Two property
+   * reads per pass; the repaint only runs when they moved.
+   */
+  ngAfterViewChecked(): void {
+    const el = this.scrollContainer?.nativeElement;
+    if (!el) return;
+    const geometry = `${el.scrollWidth}:${el.clientWidth}`;
+    if (geometry === this.lastFadeGeometry) return;
+    this.lastFadeGeometry = geometry;
+    this.updateEdgeFades();
   }
 
   ngOnDestroy(): void {

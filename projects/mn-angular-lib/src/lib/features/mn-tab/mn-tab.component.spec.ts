@@ -139,6 +139,31 @@ describe('MnTabComponent', () => {
     expect(onClick).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
   });
+
+  it('paints the edge fade when tabs arrive after init, without a resize or scroll event', () => {
+    component.dataSource = dataSource([]);
+    fixture.detectChanges();
+    const wrapper: HTMLElement = fixture.nativeElement.querySelector('.scrollbar-hide');
+    wrapper.style.width = '120px';
+    wrapper.style.overflowX = 'auto';
+    expect(wrapper.style.maskImage).toBe('');
+
+    component.dataSource = dataSource(['Eerste tabblad', 'Tweede tabblad', 'Derde tabblad', 'Vierde tabblad']);
+    fixture.detectChanges();
+    // Karma runs without the Tailwind stylesheet, so lay the row out inline the way the classes would.
+    const row: HTMLElement = wrapper.querySelector('[role="tablist"]')!;
+    row.style.display = 'flex';
+    row.querySelectorAll<HTMLElement>('[role="tab"]').forEach((tab) => {
+      tab.style.whiteSpace = 'nowrap';
+      tab.style.flex = '0 0 auto';
+      tab.style.padding = '0 1rem';
+    });
+    // A plain change-detection pass: the wrapper's box is unchanged, only its scrollable extent grew.
+    fixture.detectChanges();
+
+    expect(wrapper.scrollWidth).toBeGreaterThan(wrapper.clientWidth);
+    expect(wrapper.style.maskImage).toContain('linear-gradient');
+  });
 });
 
 describe('MnTabComponent URL sync', () => {
@@ -398,4 +423,5 @@ describe('MnTabComponent URL sync (routed)', () => {
     expect(tabs?.[1].getAttribute('aria-selected')).toBe('true');
     expect(tabs?.[0].getAttribute('aria-selected')).toBe('false');
   });
+
 });
