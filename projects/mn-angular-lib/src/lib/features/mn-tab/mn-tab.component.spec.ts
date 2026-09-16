@@ -140,6 +140,85 @@ describe('MnTabComponent', () => {
     expect(emit).not.toHaveBeenCalled();
   });
 
+  /** The rendered tab elements, in order. */
+  function tabElements(): HTMLElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('[role="tab"]'));
+  }
+
+  /**
+   * Presses a key on a tab the way a browser delivers it: a cancelable keydown on the tab.
+   * @param tab - The tab element that has focus.
+   * @param key - The KeyboardEvent key value.
+   * @returns The dispatched event, to check whether the tab bar claimed it.
+   */
+  function press(tab: HTMLElement, key: string): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    tab.dispatchEvent(event);
+    fixture.detectChanges();
+    return event;
+  }
+
+  it('keeps one Tab stop per bar, on the active tab', () => {
+    component.dataSource = dataSource(['One', 'Two', 'Three'], 1);
+    fixture.detectChanges();
+
+    expect(tabElements().map((tab) => tab.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
+  });
+
+  it('moves to and activates the next and previous tab with the arrow keys, wrapping at the ends', () => {
+    component.dataSource = dataSource(['One', 'Two', 'Three']);
+    fixture.detectChanges();
+
+    const right = press(tabElements()[0], 'ArrowRight');
+    expect(right.defaultPrevented).toBeTrue();
+    expect(component.currentActive?.label).toBe('Two');
+    expect(document.activeElement).toBe(tabElements()[1]);
+    expect(tabElements().map((tab) => tab.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
+
+    press(tabElements()[1], 'ArrowRight');
+    press(tabElements()[2], 'ArrowRight');
+    expect(component.currentActive?.label).toBe('One');
+    expect(document.activeElement).toBe(tabElements()[0]);
+
+    press(tabElements()[0], 'ArrowLeft');
+    expect(component.currentActive?.label).toBe('Three');
+    expect(document.activeElement).toBe(tabElements()[2]);
+  });
+
+  it('jumps to the first and last tab with Home and End', () => {
+    component.dataSource = dataSource(['One', 'Two', 'Three'], 1);
+    fixture.detectChanges();
+
+    press(tabElements()[1], 'End');
+    expect(component.currentActive?.label).toBe('Three');
+    expect(document.activeElement).toBe(tabElements()[2]);
+
+    press(tabElements()[2], 'Home');
+    expect(component.currentActive?.label).toBe('One');
+    expect(document.activeElement).toBe(tabElements()[0]);
+  });
+
+  it('activates the focused tab with Enter and Space on keydown, so Space does not scroll', () => {
+    component.dataSource = dataSource(['One', 'Two', 'Three']);
+    fixture.detectChanges();
+
+    press(tabElements()[2], 'Enter');
+    expect(component.currentActive?.label).toBe('Three');
+
+    const space = press(tabElements()[1], ' ');
+    expect(component.currentActive?.label).toBe('Two');
+    expect(space.defaultPrevented).toBeTrue();
+  });
+
+  it('leaves other keys alone, so Tab still leaves the bar', () => {
+    component.dataSource = dataSource(['One', 'Two']);
+    fixture.detectChanges();
+
+    const tab = press(tabElements()[0], 'Tab');
+    expect(tab.defaultPrevented).toBeFalse();
+    expect(component.currentActive?.label).toBe('One');
+  });
+
   it('paints the edge fade when tabs arrive after init, without a resize or scroll event', () => {
     component.dataSource = dataSource([]);
     fixture.detectChanges();

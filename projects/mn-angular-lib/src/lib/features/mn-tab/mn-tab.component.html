@@ -36,11 +36,14 @@
         }
       } @else {
         @for (item of dataSource.items; track item.label) {
+          <!-- One Tab stop per bar (the active tab); the arrow keys, Home and End move between
+               tabs and activate them, the WAI-ARIA tabs pattern. Every tab used to be its own
+               Tab stop with no arrow keys, so crossing an eight-tab bar took eight presses. -->
           <div
             (click)="setActive(item)"
-            (keyup.enter)="setActive(item)"
-            (keyup.space)="setActive(item)"
+            (keydown)="onTabKeydown($event, item)"
             [attr.aria-selected]="currentActive === item"
+            [attr.tabindex]="isTabStop(item) ? 0 : -1"
             [class.hover:after:scale-x-100]="currentActive !== item"
             [class.flex-1]="justified"
             [class.font-bold]="currentActive === item"
@@ -48,7 +51,6 @@
             [class.text-primary]="currentActive === item"
             class="tab relative px-4 py-2 border-b-2 border-transparent cursor-pointer select-none transition-colors whitespace-nowrap text-center flex items-center gap-2 after:content-[''] after:absolute after:inset-x-0 after:-bottom-[2px] after:h-[2px] after:bg-primary/60 after:origin-center after:scale-x-0 after:transition-transform after:duration-300 after:ease-out"
             role="tab"
-            tabindex="0"
           >
             {{ item.label | mnTranslate }}
             @let badge = getBadge(item);

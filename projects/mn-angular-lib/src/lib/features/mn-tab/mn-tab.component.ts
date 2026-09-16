@@ -285,6 +285,71 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
   }
 
   /**
+   * Whether a tab is the bar's single Tab stop: the active tab, or the first tab while none is
+   * active yet. Every other tab is reached with the arrow keys, so Tab leaves the bar in one press.
+   * @param item - The tab to check.
+   * @returns True for the one tab that keeps `tabindex="0"`.
+   */
+  isTabStop(item: MnTabItem): boolean {
+    return this.currentActive ? this.currentActive === item : this.dataSource?.items[0] === item;
+  }
+
+  /**
+   * Keyboard handling on a tab. Left and Right move to the previous or next tab and wrap at the
+   * ends, Home and End jump to the first and last; the tab moved to is activated at once
+   * (automatic activation) and receives focus. Enter and Space activate the focused tab, handled
+   * on keydown so Space does not scroll the page first. Other keys are left alone.
+   * @param event - The keydown on a tab.
+   * @param item - The tab the key was pressed on.
+   */
+  onTabKeydown(event: KeyboardEvent, item: MnTabItem): void {
+    const items = this.dataSource?.items ?? [];
+    const index = items.indexOf(item);
+    if (index < 0) return;
+
+    let target: number;
+    switch (event.key) {
+      case 'ArrowRight':
+        target = (index + 1) % items.length;
+        break;
+      case 'ArrowLeft':
+        target = (index - 1 + items.length) % items.length;
+        break;
+      case 'Home':
+        target = 0;
+        break;
+      case 'End':
+        target = items.length - 1;
+        break;
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        this.setActive(item);
+        return;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    this.setActive(items[target]);
+    this.focusTab(target);
+  }
+
+  /**
+   * Moves focus to the tab at `index` and scrolls it into view inside a scrollable bar. Focusing
+   * works before change detection has moved `tabindex="0"` onto it, because a script may focus an
+   * element with `tabindex="-1"`.
+   * @param index - Position of the tab in the data source's items.
+   */
+  private focusTab(index: number): void {
+    const tabs = this.tabList?.nativeElement.querySelectorAll<HTMLElement>('[role="tab"]');
+    const tab = tabs?.[index];
+    if (!tab) return;
+    tab.focus();
+    tab.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
+  }
+
+  /**
    * Moves the selection to `item` and tells the consumer about it: the
    * deactivate/activate/emit sequence a click produces, shared by the click
    * path and the URL-driven ones (deep link, back button), which owe the
