@@ -114,10 +114,12 @@ export class MnSelect implements OnInit {
 
   /** Layout classes for the anchored popover panel. The mobile sheet is rendered by
    *  mn-bottom-sheet instead, so it no longer needs a branch here. */
-  readonly panelClasses = 'fixed z-9999 bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+  readonly panelClasses = 'fixed z-9999 w-max bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
 
   /** The panel's own height cap in pixels: the `max-h-60` above, restated for the placement maths. */
   static readonly PANEL_MAX_HEIGHT_PX = 240;
+  /** Space kept between a widened panel and the viewport's right edge. */
+  static readonly PANEL_EDGE_GAP_PX = 8;
   /** Layout classes for the invisible click shield rendered under the anchored panel.
    *  One step below the panel's z-index so the panel itself stays clickable, and above
    *  any modal/drawer chrome (which tops out well under 9998). */
@@ -170,11 +172,19 @@ export class MnSelect implements OnInit {
 
   /** Dropdown position calculated from the trigger's bounding rect. */
   /** Inline placement of the anchored panel; `maxHeight` only binds when the viewport is the tighter cap. */
-  dropdownStyle: { top: string; bottom: string; left: string; width: string; maxHeight: string | null } = {
+  dropdownStyle: {
+    top: string;
+    bottom: string;
+    left: string;
+    minWidth: string;
+    maxWidth: string;
+    maxHeight: string | null;
+  } = {
     top: '0px',
     bottom: 'auto',
     left: '0px',
-    width: '0px',
+    minWidth: '0px',
+    maxWidth: 'none',
     maxHeight: null,
   };
 
@@ -675,14 +685,19 @@ export class MnSelect implements OnInit {
   /**
    * Calculates the fixed position for the dropdown based on the trigger element: below it
    * while the viewport has room, above it otherwise, never past the viewport's edge.
+   * The panel is never narrower than the trigger but grows to its widest option, so a compact
+   * trigger (the collection page-size picker) cannot squeeze the selected row's check mark
+   * over its label. It stops at the viewport's right edge, where long labels truncate.
    */
   private updateDropdownPosition(): void {
     if (!this.triggerRef) return;
     const rect = this.triggerRef.nativeElement.getBoundingClientRect();
+    const roomToRightEdge = window.innerWidth - rect.left - MnSelect.PANEL_EDGE_GAP_PX;
     this.dropdownStyle = {
       ...anchoredPanelPlacement(rect, window.innerHeight, 0, MnSelect.PANEL_MAX_HEIGHT_PX),
       left: `${rect.left}px`,
-      width: `${rect.width}px`,
+      minWidth: `${rect.width}px`,
+      maxWidth: `${Math.max(rect.width, roomToRightEdge)}px`,
     };
   }
 
