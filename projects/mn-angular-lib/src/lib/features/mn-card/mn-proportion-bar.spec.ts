@@ -70,6 +70,18 @@ describe('MnProportionBar', () => {
     expect(width(runs()[0])).toBeCloseTo(100, 5);
   });
 
+  it('draws a soft segment as a tint of its colour, next to a solid run of the same colour', () => {
+    host.segments = [
+      { value: 3, color: 'warning' },
+      { value: 1, color: 'warning', soft: true },
+    ];
+    fixture.detectChanges();
+
+    expect(runs()[0].classList).toContain('bg-warning');
+    expect(runs()[1].classList).toContain('bg-warning/30');
+    expect(runs()[1].classList).not.toContain('bg-warning');
+  });
+
   it('maps danger onto the error colour', () => {
     host.segments = [{ value: 1, color: 'danger' }];
     fixture.detectChanges();

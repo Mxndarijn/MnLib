@@ -13,6 +13,17 @@ const SEGMENT_CLASS: Record<MnProportionSegment['color'], string> = {
   gray: 'bg-base-content/25',
 };
 
+/** Tinted fill class per colour for a `soft` segment, spelled out for the same reason. */
+const SOFT_SEGMENT_CLASS: Record<MnProportionSegment['color'], string> = {
+  primary: 'bg-primary/30',
+  secondary: 'bg-secondary/30',
+  accent: 'bg-accent/30',
+  success: 'bg-success/30',
+  warning: 'bg-warning/30',
+  danger: 'bg-error/30',
+  gray: 'bg-base-content/15',
+};
+
 /** Track height per size. */
 const HEIGHT_CLASS: Record<MnProportionBarTypes['height'], string> = {
   sm: 'h-2',
@@ -88,7 +99,7 @@ export class MnProportionBar {
       .filter((segment) => segment.value > 0)
       .map((segment) => ({
         widthPct: Math.min(100, (segment.value / denominator) * 100),
-        fillClass: SEGMENT_CLASS[segment.color],
+        fillClass: (segment.soft ? SOFT_SEGMENT_CLASS : SEGMENT_CLASS)[segment.color],
       }));
   }
 }

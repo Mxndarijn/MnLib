@@ -172,6 +172,20 @@ export class MnGrid<T = unknown> extends MnCollectionBase<T, GridDataSource<T>> 
     this.itemClick.emit(item);
   }
 
+  /**
+   * Keyboard activation of a clickable item: Enter and Space open it, as they would a button.
+   * Handled on keydown so Space does not scroll the page first, and only when the item itself has
+   * focus, so a checkbox or button inside the item keeps its own keys.
+   * @param event - The keydown on the item.
+   * @param item - The item the key was pressed on.
+   */
+  onItemKeydown(event: KeyboardEvent, item: T): void {
+    if (!this.dataSource.onItemClick || event.target !== event.currentTarget) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    this.onItemClick(item);
+  }
+
   // ── Filtering ──
 
   protected applyFilter(searchForItems: boolean): void {

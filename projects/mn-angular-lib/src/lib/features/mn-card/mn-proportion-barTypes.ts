@@ -6,6 +6,12 @@ export type MnProportionSegment = {
   value: number;
   /** Colour of this run; `gray` for the part that has no answer yet. */
   color: NonNullable<MnIconChipVariants['color']>;
+  /**
+   * Draw the run as a pale tint of its colour instead of solid. For a part that is on its way but
+   * not there yet, next to a solid run of the same colour: spots asked about but not answered,
+   * payments announced but not received.
+   */
+  soft?: boolean;
 };
 
 /** Configuration of one {@link MnProportionBar}. */

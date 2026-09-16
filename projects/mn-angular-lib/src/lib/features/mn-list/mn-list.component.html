@@ -132,7 +132,7 @@
         [class.py-3]="!dataSource.appearance?.compact"
         [class.py-2]="dataSource.appearance?.compact"
         role="listitem"
-        (keyup.enter)="onItemClick(item)"
+        (keydown)="onItemKeydown($event, item)"
         (click)="onItemClick(item)"
         [attr.tabindex]="dataSource.onItemClick ? 0 : null"
       >

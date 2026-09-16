@@ -112,7 +112,7 @@
       @for (item of paginatedItems; track trackByID($index, item)) {
         <div
           (click)="onItemClick(item)"
-          (keyup.enter)="onItemClick(item)"
+          (keydown)="onItemKeydown($event, item)"
           [attr.tabindex]="dataSource.onItemClick ? 0 : null"
           [class.cursor-pointer]="!!dataSource.onItemClick"
           class="transition-colors duration-150"

@@ -10,11 +10,16 @@ import { tv, type VariantProps } from 'tailwind-variants';
 export const mnIconChipVariants = tv({
   base: 'inline-flex shrink-0 items-center justify-center',
   variants: {
-    /** `sm` for list rows, `md` for section-card headers and stat tiles, `lg` for page headers. */
+    /**
+     * `xs` for compact rows and inline labels, `sm` for list rows, `md` for section-card headers
+     * and stat tiles, `lg` for page headers, `xl` for a lone hero or empty-state icon.
+     */
     size: {
+      xs: 'h-8 w-8 rounded-lg',
       sm: 'h-9 w-9 rounded-lg',
       md: 'h-10 w-10 rounded-xl',
       lg: 'h-12 w-12 rounded-2xl',
+      xl: 'h-14 w-14 rounded-2xl',
     },
     color: {
       primary: 'bg-primary/10 text-(--color-primary-text,var(--color-primary))',

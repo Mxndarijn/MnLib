@@ -72,4 +72,19 @@ describe('MnIconChip', () => {
     expect(classes()).toContain('h-9');
     expect(classes()).toContain('rounded-lg');
   });
+
+  it('has an extra-small box for compact rows and an extra-large one for a hero icon', () => {
+    host.data = { size: 'xs' };
+    fixture.detectChanges();
+    expect(classes()).toContain('h-8');
+    expect(classes()).toContain('w-8');
+    expect(classes()).toContain('rounded-lg');
+
+    host.data = { size: 'xl' };
+    fixture.detectChanges();
+    expect(classes()).toContain('h-14');
+    expect(classes()).toContain('w-14');
+    expect(classes()).toContain('rounded-2xl');
+    expect(classes()).not.toContain('h-8');
+  });
 });

@@ -254,3 +254,64 @@ describe('MnList search auto-enable', () => {
     expect(fixture.nativeElement.querySelector('input[type="search"]')).not.toBeNull();
   });
 });
+
+/**
+ * Keyboard activation of clickable items: Enter and Space both open an item, on keydown so Space
+ * never scrolls the page, and keys pressed on a control inside the item are left to that control.
+ */
+describe('MnList (keyboard activation)', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let host: HostComponent;
+  let clicked: Row[];
+
+  /** The rendered item elements. */
+  function items(): HTMLElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('[role="listitem"]'));
+  }
+
+  /**
+   * Presses a key on an element the way a browser delivers it.
+   * @param target - The focused element.
+   * @param key - The KeyboardEvent key value.
+   * @returns The event, to check whether the item claimed it.
+   */
+  function press(target: HTMLElement, key: string): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    target.dispatchEvent(event);
+    return event;
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(HostComponent);
+    host = fixture.componentInstance;
+    clicked = [];
+    host.dataSource = {
+      dataRows: new BehaviorSubject<Row[]>([{ id: '1', name: 'Alpha' }]),
+      itemTemplate: host.item,
+      getID: (row: Row) => row.id,
+      emptyMessage: '',
+      state: MnCollectionState.RETRIEVED,
+      canSearch: false,
+      onItemClick: (row: Row) => clicked.push(row),
+    } as ListDataSource<Row>;
+    fixture.detectChanges();
+  });
+
+  it('opens an item with Enter and with Space, and stops Space from scrolling', () => {
+    press(items()[0], 'Enter');
+    const space = press(items()[0], ' ');
+
+    expect(clicked.map(row => row.name)).toEqual(['Alpha', 'Alpha']);
+    expect(space.defaultPrevented).toBeTrue();
+  });
+
+  it('leaves other keys and keys pressed inside the item alone', () => {
+    press(items()[0], 'Tab');
+    const inner = items()[0].querySelector('span') as HTMLElement;
+    const event = press(inner, ' ');
+
+    expect(clicked).toEqual([]);
+    expect(event.defaultPrevented).toBeFalse();
+  });
+});
