@@ -250,6 +250,8 @@ export type ColumnDefinition<T> = ColumnBase<T> & ColumnFilterConfig<T>;
 
 // ── Table Data Source ──
 export type TableDataSource<T> = MnSelectableCollectionDataSource<T> & {
+  /** Accessible name of the scrollable table region; without it the `mnCollection.dataTable` convention key is used. */
+  ariaLabel?: string;
   columns: ColumnDefinition<T>[];
 
   // Sorting

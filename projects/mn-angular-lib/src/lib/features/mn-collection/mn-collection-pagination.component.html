@@ -29,6 +29,7 @@
           [ngModel]="pageSize"
           [props]="{
             id: idPrefix + '-page-size',
+            ariaLabel: rowsPerPageLabel,
             options: pageSizeSelectOptions,
             size: 'sm'
           }"

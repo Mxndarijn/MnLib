@@ -216,16 +216,28 @@
             class="text-sm px-2 py-1 @min-[640px]:px-4 @min-[640px]:py-2 whitespace-nowrap"
             (click)="sort(column)"
           >
-            <span class="inline-flex items-center gap-1">
+            <!-- The header content is declared once; a sortable column wraps it in a real button so
+                 the sort is reachable by keyboard. The button's click stops there, so the th's own
+                 click (which keeps the cell padding clickable) does not sort a second time. -->
+            <ng-template #headerContent>
               @if (isTemplateRef(column.header)) {
                 <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
               } @else {
                 <span>{{ column.header }}</span>
               }
               @if (isSortable(column)) {
-                <span class="text-[0.65rem] opacity-70 min-w-3 inline-block">{{ getSortIcon(column) }}</span>
+                <span class="text-[0.65rem] opacity-70 min-w-3 inline-block" aria-hidden="true">{{ getSortIcon(column) }}</span>
               }
-            </span>
+            </ng-template>
+            @if (isSortable(column)) {
+              <button type="button" class="inline-flex items-center gap-1 cursor-pointer" (click)="$event.stopPropagation(); sort(column)">
+                <ng-container [ngTemplateOutlet]="headerContent"></ng-container>
+              </button>
+            } @else {
+              <span class="inline-flex items-center gap-1">
+                <ng-container [ngTemplateOutlet]="headerContent"></ng-container>
+              </span>
+            }
           </th>
         }
 
@@ -457,6 +469,7 @@
         [ngModel]="textFilterValue(column)"
         [props]="{
           id: 'mn-table-filter-' + idScope + '-' + column.key,
+          ariaLabel: filterLabel(column),
           options: getFilterSelectOptions(column),
           size: 'sm',
           fullWidth: true
@@ -470,6 +483,7 @@
         [ngModel]="multiFilterValue(column)"
         [props]="{
           id: 'mn-table-filter-' + idScope + '-' + column.key,
+          ariaLabel: filterLabel(column),
           options: getFilterMultiSelectOptions(column),
           placeholder: column.filterPlaceholder ?? '',
           collapsePlaceholder: filterSelectedLabel,
@@ -486,6 +500,7 @@
         [ngModel]="booleanFilterValue(column)"
         [props]="{
           id: 'mn-table-filter-' + idScope + '-' + column.key,
+          ariaLabel: filterLabel(column),
           options: getBooleanFilterOptions(column),
           size: 'sm',
           fullWidth: true

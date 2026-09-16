@@ -333,6 +333,15 @@ export class MnTable<T = object>
     return this.currentSort.direction === 'asc' ? '▲' : '▼';
   }
 
+  /**
+   * Accessible name for a column's inline filter control: the header text, or the column key when
+   * the header is a template.
+   * @param column - The filtered column.
+   */
+  filterLabel(column: ColumnDefinition<T>): string {
+    return typeof column.header === 'string' ? column.header : column.key;
+  }
+
   isSortable(column: ColumnDefinition<T>): boolean {
     return !!column.sortType && column.sortType !== ColumnSortType.NONE;
   }
@@ -410,7 +419,7 @@ export class MnTable<T = object>
 
   /** Accessible name for the scrollable table region. */
   get tableRegionLabel(): string {
-    return this.resolveLabel(undefined, 'mnCollection.dataTable', 'Data table');
+    return this.resolveLabel(this.dataSource.ariaLabel, 'mnCollection.dataTable', 'Data table');
   }
 
   /**
