@@ -1,0 +1,17 @@
+<!-- The accent bar sits on the card's top edge, clipped by the host's overflow-hidden
+     into the corner radius. Decorative: the colour's meaning is in the content. -->
+@if (data.accent) {
+  <span [class]="styles.accent()" aria-hidden="true"></span>
+}
+<!-- The section header: chip, title, then whatever the consumer marks cardHeaderEnd.
+     Wraps on narrow screens so a full-width button drops under the title. -->
+@if (heading; as text) {
+  <div [class]="styles.header()">
+    <mn-icon-chip [data]="{ color: data.color }">
+      <ng-content select="[cardIcon]"></ng-content>
+    </mn-icon-chip>
+    <h2 [class]="styles.title()">{{ text | mnTranslate }}</h2>
+    <ng-content select="[cardHeaderEnd]"></ng-content>
+  </div>
+}
+<ng-content></ng-content>

@@ -1,0 +1,115 @@
+<app-demo-page
+  title="Card"
+  tag="mn-card"
+  lead="One card shell for every surface, plus the family that lives on it: the icon chip, the stat tile and the proportion bar. Sizing is ordinary CSS on the element; colour is the shared MnColor palette, so a badge's colour feeds the chip or bar beside it unchanged."
+>
+  <app-demo-example
+    title="Section card"
+    hint="heading renders the header row: the projected cardIcon in a chip, the h2, then everything inside cardHeaderEnd. padding 'md' brings its own gap."
+  >
+    <mn-card [data]="{ padding: 'md' }" heading="Agenda">
+      <svg cardIcon lucideListOrdered [size]="20"></svg>
+      <ng-container cardHeaderEnd>
+        <span mnBadge [data]="{ size: 'sm', color: 'warning' }">Hidden from members</span>
+        <button mnButton class="w-full sm:ml-auto sm:w-auto" [data]="{ variant: 'fill', color: 'primary', size: 'md', borderRadius: 'lg' }">
+          Edit agenda
+        </button>
+      </ng-container>
+      <ol class="flex flex-col gap-2 text-sm">
+        <li>1. Opening</li>
+        <li>2. Annual accounts</li>
+        <li>3. Any other business</li>
+      </ol>
+    </mn-card>
+  </app-demo-example>
+
+  <app-demo-example
+    title="Fact cards"
+    hint="layout 'row' puts the children on one line. Two cards share a row through min-w-0 flex-1 on the element itself."
+  >
+    <div class="flex flex-col gap-4 sm:flex-row">
+      <mn-card class="min-w-0 flex-1" [data]="{ layout: 'row' }">
+        <mn-icon-chip><svg lucideCalendarClock [size]="20"></svg></mn-icon-chip>
+        <div class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-xs font-semibold uppercase tracking-wider opacity-70">When</span>
+          <span class="font-medium">Thursday 24 September 2026</span>
+          <span class="text-sm opacity-70">19:00 - 20:30</span>
+        </div>
+      </mn-card>
+      <mn-card class="min-w-0 flex-1" [data]="{ layout: 'row' }">
+        <mn-icon-chip><svg lucideMapPin [size]="20"></svg></mn-icon-chip>
+        <div class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-xs font-semibold uppercase tracking-wider opacity-70">Where</span>
+          <span class="font-medium">Clubhouse, board room</span>
+        </div>
+      </mn-card>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example
+    title="Stat tiles"
+    hint="mn-stat-tile: a chip, a label and a large tabular number on the card shell. Each tile is flex-1, so a row of them shares the width and wraps."
+  >
+    <div class="flex flex-wrap gap-4">
+      <mn-stat-tile label="Attending" [value]="4" [data]="{ color: 'success' }">
+        <svg lucideCheck [size]="20"></svg>
+      </mn-stat-tile>
+      <mn-stat-tile label="Invited" [value]="8">
+        <svg lucideUsersRound [size]="20"></svg>
+      </mn-stat-tile>
+      <mn-stat-tile label="Collected" value="€ 3.250" [data]="{ color: 'accent' }">
+        <svg lucideWallet [size]="20"></svg>
+        <span trailing mnBadge [data]="{ size: 'sm', color: 'success' }">+12%</span>
+      </mn-stat-tile>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example
+    title="Proportion bar"
+    hint="Segments in draw order; total defaults to their sum. Zero segments are skipped. Announced as one image with the ariaLabel."
+  >
+    <mn-card [data]="{ padding: 'md' }" heading="Responses">
+      <svg cardIcon lucideUsersRound [size]="20"></svg>
+      <div class="flex flex-col gap-2">
+        <mn-proportion-bar [segments]="turnout" ariaLabel="4 yes, 1 maybe, 1 no, 2 no answer"></mn-proportion-bar>
+        <p class="text-sm opacity-70">4 yes · 1 maybe · 1 no · 2 no answer</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <mn-proportion-bar [segments]="budget" [total]="5000" [data]="{ height: 'sm' }" ariaLabel="3250 of 5000 spent"></mn-proportion-bar>
+        <p class="text-sm opacity-70">€ 3.250 of € 5.000 spent</p>
+      </div>
+    </mn-card>
+  </app-demo-example>
+
+  <app-demo-example
+    title="Accent, link and entrance"
+    hint="accent draws a bar in the card colour along the top edge. As an attribute on an anchor the card is a link; hover 'lift' says so. enterDelayMs staggers the rise-in when the theme defines --animate-rise."
+  >
+    <div class="flex flex-col gap-4 sm:flex-row">
+      <a mnCard href="#" class="min-w-0 flex-1" [data]="{ accent: true, color: 'secondary', hover: 'lift' }">
+        <span class="font-semibold">Weapon reservation</span>
+        <span class="text-sm opacity-70">Saturday 10:00, lane 3</span>
+      </a>
+      <a mnCard href="#" class="min-w-0 flex-1" [data]="{ accent: true, color: 'warning', hover: 'lift' }" [enterDelayMs]="80">
+        <span class="font-semibold">Pending payment</span>
+        <span class="text-sm opacity-70">Contribution 2026</span>
+      </a>
+      <mn-card class="min-w-0 flex-1" [data]="{ accent: true, color: 'danger', hover: 'none', borderRadius: 'lg' }" [enterDelayMs]="160">
+        <span class="font-semibold">Cancelled match</span>
+        <span class="text-sm opacity-70">Square-ish corners, no hover.</span>
+      </mn-card>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example title="Icon chip" hint="Three sizes, one 10% wash, every MnColor.">
+    <div class="flex flex-wrap items-center gap-3">
+      <mn-icon-chip [data]="{ size: 'sm' }"><svg lucideCheck [size]="18"></svg></mn-icon-chip>
+      <mn-icon-chip [data]="{ color: 'secondary' }"><svg lucideCheck [size]="20"></svg></mn-icon-chip>
+      <mn-icon-chip [data]="{ color: 'accent' }"><svg lucideCheck [size]="20"></svg></mn-icon-chip>
+      <mn-icon-chip [data]="{ color: 'success' }"><svg lucideCheck [size]="20"></svg></mn-icon-chip>
+      <mn-icon-chip [data]="{ color: 'warning' }"><svg lucideCheck [size]="20"></svg></mn-icon-chip>
+      <mn-icon-chip [data]="{ color: 'danger' }"><svg lucideCheck [size]="20"></svg></mn-icon-chip>
+      <mn-icon-chip [data]="{ color: 'gray', size: 'lg' }"><svg lucideCheck [size]="24"></svg></mn-icon-chip>
+    </div>
+  </app-demo-example>
+</app-demo-page>

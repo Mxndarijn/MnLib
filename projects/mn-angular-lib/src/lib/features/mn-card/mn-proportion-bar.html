@@ -1,0 +1,10 @@
+<!-- One labelled image: the runs are decoration, the numbers live in the caller's text. -->
+<div role="img" [attr.aria-label]="label" [class]="trackClass">
+  @for (segment of rendered; track $index) {
+    <span
+      class="h-full transition-[width] duration-300 ease-out motion-reduce:transition-none"
+      [class]="segment.fillClass"
+      [style.width.%]="segment.widthPct"
+    ></span>
+  }
+</div>

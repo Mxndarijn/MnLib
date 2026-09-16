@@ -26,10 +26,10 @@ module.exports = defineConfig([
     },
   },
   {
-    // mn-badge and mn-button are components that target native HTML elements using
-    // attribute selectors (span[mnBadge], button[mnButton]). The element-only selector
-    // rule doesn't apply to this pattern.
-    files: ["**/mn-badge/mn-badge.ts", "**/mn-button/mn-button.ts"],
+    // mn-badge, mn-button and mn-card are components that target native HTML elements using
+    // attribute selectors (span[mnBadge], button[mnButton], a[mnCard]). The element-only
+    // selector rule doesn't apply to this pattern.
+    files: ["**/mn-badge/mn-badge.ts", "**/mn-button/mn-button.ts", "**/mn-card/mn-card.ts"],
     rules: {
       "@angular-eslint/component-selector": "off",
     },

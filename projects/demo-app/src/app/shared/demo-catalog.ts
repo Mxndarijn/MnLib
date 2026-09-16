@@ -135,6 +135,14 @@ export const DEMOS: DemoEntry[] = [
 
   // Data
   {
+    title: 'Card',
+    path: '/demos/card-demo',
+    category: 'Data',
+    color: '#0ea5e9',
+    abbr: 'CD',
+    description: 'One card shell with header, stat tile, icon chip and proportion bar.',
+  },
+  {
     title: 'Table',
     path: '/demos/table-demo',
     category: 'Data',

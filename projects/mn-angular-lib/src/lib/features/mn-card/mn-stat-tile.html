@@ -1,0 +1,14 @@
+<!-- The card is a row: chip, then label over number. The muted label reads the
+     consumer's muted-text token when it has one and plain base text otherwise. -->
+<div mnCard class="w-full" [data]="{ layout: 'row' }">
+  <mn-icon-chip [data]="{ color: data.color }">
+    <ng-content></ng-content>
+  </mn-icon-chip>
+  <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+    <span class="text-sm text-(--color-base-content-muted,var(--color-base-content))">{{ label | mnTranslate }}</span>
+    <div class="flex flex-wrap items-baseline gap-2">
+      <span class="text-2xl font-bold leading-none tabular-nums text-base-content">{{ value }}</span>
+      <ng-content select="[trailing]"></ng-content>
+    </div>
+  </div>
+</div>
