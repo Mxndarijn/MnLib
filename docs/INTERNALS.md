@@ -15,7 +15,7 @@ This document explains the internal architecture and logic of MnLib.
 
 ### 1. Loading Phase (`load()`)
 -   The service uses `HttpClient` to fetch a file (usually `.json5`).
--   It uses the `json5` library to parse the content. JSON5 was chosen because it supports:
+-   It tries `JSON.parse` first and only falls back to the `json5` library, loaded with a dynamic `import()` as its own chunk, when the file needs JSON5 syntax. A static import put the CommonJS `json5` package into every consumer's startup bundle. JSON5 was chosen because it supports:
     -   Comments (useful for documenting config settings).
     -   Trailing commas.
     -   Unquoted keys.

@@ -4,10 +4,10 @@ MnLib is a lightweight Angular library providing powerful configuration manageme
 
 ## Installation
 
-Ensure you have `@angular/common` and `@angular/core` installed. MnLib also uses `json5` for configuration parsing.
+Ensure you have `@angular/common` and `@angular/core` installed. MnLib also uses `json5` for configuration parsing (loaded only when a config file needs JSON5 syntax), and `lucide` plus `@lucide/angular` for its icons.
 
 ```bash
-npm install mn-angular-lib json5
+npm install mn-angular-lib json5 lucide @lucide/angular
 ```
 
 ## Getting Started

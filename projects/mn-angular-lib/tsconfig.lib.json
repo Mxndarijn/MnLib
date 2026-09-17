@@ -7,10 +7,15 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": []
+    "types": [],
+    // ng-packagr maps `mn-angular-lib/<entry>` to each entry point it has already built; the
+    // workspace mapping to sources (tsconfig.json) would compile an entry into its dependants.
+    "paths": {}
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "*/public-api.ts",
+    "*/src/**/*.ts"
   ],
   "exclude": [
     "**/*.spec.ts"

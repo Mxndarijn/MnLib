@@ -6,7 +6,7 @@
     "mn-angular-lib": {
       "projectType": "library",
       "root": "projects/mn-angular-lib",
-      "sourceRoot": "projects/mn-angular-lib/src",
+      "sourceRoot": "projects/mn-angular-lib",
       "prefix": "lib",
       "architect": {
         "build": {

@@ -1,0 +1,576 @@
+<!-- Everything that reflows lives inside a @container, so the breakpoints below
+     measure the table's own width rather than the window's. A table in a modal,
+     a sidebar or a narrow grid cell is far narrower than the viewport, and
+     viewport breakpoints would hand it a desktop layout it has no room for. -->
+<div class="@container">
+  <!-- Selection summary: the whole selection, never paged, filtered or sorted. The
+       table below answers "what could I pick?", which is why it is searched and paged;
+       this answers "what did I pick?", which a paginated list cannot without hiding
+       most of the answer on some other page. -->
+  @if (showSelectionSummary) {
+    <div class="flex flex-col gap-2 rounded-md border border-base-300 bg-base-200/50 p-3 mb-3">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-sm font-medium text-base-content">{{ selectionSummaryTitle }}</span>
+        <button
+          (click)="clearSelection()"
+          [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
+          class="gap-1 shrink-0"
+          mnButton
+          type="button"
+        >
+          <svg [size]="14" [lucideIcon]="icons.X"></svg>
+          <span>{{ selectionClearAllLabel }}</span>
+        </button>
+      </div>
+      <!-- Only the first few tags render; the rest collapse behind a "+N more" control.
+           The heading's count always states the true total, so this hides tags, never
+           information. Expanded, the list is height-capped and scrolls, so even a
+           selection of hundreds cannot push the table off screen. -->
+      <ul
+        [class.max-h-28]="selectionSummaryExpanded"
+        [class.overflow-y-auto]="selectionSummaryExpanded"
+        class="flex flex-wrap gap-1.5 list-none m-0 p-0"
+      >
+        @for (row of visibleSelectionRows; track dataSource.getID(row)) {
+          <li
+            class="inline-flex items-center gap-1 rounded-full bg-base-100 border border-base-300 pl-2.5 pr-1 py-0.5 text-xs text-base-content max-w-full">
+            <span [attr.title]="selectionLabelFor(row)" class="truncate">{{ selectionLabelFor(row) }}</span>
+            <button
+              (click)="removeSelection(row)"
+              [attr.aria-label]="selectionRemoveLabel(row)"
+              class="shrink-0 rounded-full p-0.5 hover:bg-base-300 transition-colors cursor-pointer"
+              type="button"
+            >
+              <svg [size]="12" [lucideIcon]="icons.X"></svg>
+            </button>
+          </li>
+        }
+        @if (hiddenSelectionCount > 0 || selectionSummaryExpanded) {
+          <li>
+            <button
+              (click)="toggleSelectionSummary()"
+              [attr.aria-expanded]="selectionSummaryExpanded"
+              [data]="{ variant: 'text', color: 'primary', size: 'sm', borderRadius: 'md', hover: true }"
+              class="text-xs"
+              mnButton
+              type="button"
+            >
+              {{ selectionSummaryToggleLabel }}
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
+       so an unsearchable table without toolbar templates emits no empty spacer. -->
+@if (isSearchable || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
+  <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
+    <div class="flex items-center gap-2 w-full @min-[420px]:w-auto">
+    @if (dataSource.toolbarLeftTemplate) {
+      <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
+        <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
+      </div>
+    }
+  </div>
+    <div
+      class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none @min-[560px]:w-auto">
+    @if (isSearchable) {
+      <!-- Enter must not submit a surrounding form: the search box belongs to the
+           table's chrome, not to whatever form the table happens to sit in. -->
+      <mn-lib-input-field
+        (keydown.enter)="$event.preventDefault()"
+        class="w-full @min-[420px]:flex-1 @min-[560px]:max-w-64"
+        [props]="{
+            id: 'mn-table-search',
+            type: 'search',
+            label: '',
+            ariaLabel: searchPlaceholderLabel,
+            placeholder: searchPlaceholderLabel,
+            size: 'sm',
+            borderRadius: 'md',
+            fullWidth: true
+          }"
+        [ngModel]="searchValue"
+        (ngModelChange)="onSearch($event)"
+      ></mn-lib-input-field>
+    }
+    @if (dataSource.toolbarRightTemplate) {
+      <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
+        <ng-container [ngTemplateOutlet]="dataSource.toolbarRightTemplate"></ng-container>
+      </div>
+    }
+    <!-- Small-screen filter toggle: replaces the inline per-column filter row below 640px -->
+    @if (hasColumnFilters && filtersCollapsed) {
+      <button
+        type="button"
+        mnButton
+        [data]="{ variant: 'outline', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
+        class="w-full @min-[420px]:w-auto gap-1.5"
+        [attr.aria-expanded]="filtersPanelOpen"
+        aria-controls="mn-table-filters-panel"
+        (click)="openFiltersPanel()"
+      >
+        <svg [lucideIcon]="icons.Funnel" [size]="15"></svg>
+        <span>{{ filtersButtonLabel }}</span>
+      </button>
+    }
+  </div>
+</div>
+}
+
+<!-- Small-screen filters: full-width fields decoupled from column widths, presented
+     as a bottom sheet so they overlay rather than push the table down. -->
+@if (hasColumnFilters && filtersCollapsed && filtersPanelOpen) {
+  <mn-bottom-sheet
+    #filtersSheet
+    (dismiss)="filtersPanelOpen = false"
+    [ariaLabel]="filtersButtonLabel"
+    [growWithKeyboard]="true"
+    [maxHeightVh]="80"
+  >
+    <div id="mn-table-filters-panel" class="flex flex-col gap-3 px-4 pb-4">
+      <span class="text-base font-semibold text-base-content">{{ filtersButtonLabel }}</span>
+      @for (column of dataSource.columns; track column.key) {
+        @if (column.filterable) {
+          <div class="flex flex-col gap-1">
+            <label
+              class="text-xs font-medium text-base-content/70"
+              [attr.for]="'mn-table-filter-panel-' + column.key"
+            >
+              @if (isTemplateRef(column.header)) {
+                <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
+              } @else {
+                {{ headerText(column) }}
+              }
+            </label>
+            <ng-container
+              [ngTemplateOutletContext]="{ $implicit: column, idScope: 'panel' }"
+              [ngTemplateOutlet]="filterField"
+            ></ng-container>
+          </div>
+        }
+      }
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          mnButton
+          [data]="{ variant: 'text', color: 'gray', size: 'sm', borderRadius: 'md', hover: true }"
+          class="self-start gap-1"
+          (click)="clearAllFilters()"
+        >
+          <svg [lucideIcon]="icons.X" [size]="14"></svg>
+          <span>{{ clearFiltersButtonLabel }}</span>
+        </button>
+      }
+      <div class="mt-1 flex min-[400px]:justify-end">
+        <button
+          type="button"
+          mnButton
+          [data]="{ variant: 'fill', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
+          class="w-full min-[400px]:w-auto"
+          (click)="closeFiltersPanel()"
+        >
+          <span>{{ filtersCloseLabel }}</span>
+        </button>
+      </div>
+    </div>
+  </mn-bottom-sheet>
+}
+
+<!-- Announces loading. The skeletons are aria-hidden, so without this a screen reader hears
+     nothing while rows load. The region stays in the DOM and only its text changes, which is
+     what makes assistive tech read it; one inserted with its text already set is often missed. -->
+<span class="sr-only" role="status">{{ isLoadingState ? loadingLabel : '' }}</span>
+
+<!-- Table wrapper with horizontal scroll -->
+  <div #collectionBody [attr.aria-busy]="isLoadingState || null" [attr.aria-label]="tableRegionLabel" [style.min-height.px]="bodyMinHeight"
+     class="overflow-x-auto"
+     role="region">
+  <table [class]="tableClasses">
+    <thead>
+      <tr class="bg-base-100">
+        <!-- Selection column header. It always carries a screen-reader-only name: a single-select
+             table has nothing else in this cell, and a multi-select one only a checkbox, so
+             without it the column is announced as a nameless header (axe empty-table-header). -->
+        @if (hasSelection) {
+          <th class="w-10 text-center text-sm px-2 py-2">
+            <span class="sr-only">{{ selectionColumnLabel }}</span>
+            @if (isMultiSelect) {
+              <mn-lib-checkbox
+                (checkedChange)="toggleAll()"
+                [checked]="allSelected"
+                [props]="{ id: 'mn-table-select-all', size: 'sm' }"
+              ></mn-lib-checkbox>
+            }
+          </th>
+        }
+
+        <!-- Data columns -->
+        @for (column of dataSource.columns; track column.key) {
+          <th
+            [attr.data-column-key]="column.key"
+            [class.truncate]="widthsArePinned"
+            [class.cursor-pointer]="isSortable(column)"
+            [class.select-none]="isSortable(column)"
+            [class.hover:bg-base-200]="isSortable(column)"
+            [class.text-left]="(column.align ?? 'left') === 'left'"
+            [class.text-center]="column.align === 'center'"
+            [class.text-right]="column.align === 'right'"
+            [mnHiddenBelow]="column.hiddenBelow"
+            [style.width]="columnWidth(column)"
+            [attr.aria-sort]="currentSort?.columnKey === column.key ? (currentSort!.direction === 'asc' ? 'ascending' : 'descending') : null"
+            class="text-sm px-2 py-1 @min-[640px]:px-4 @min-[640px]:py-2 whitespace-nowrap"
+            (click)="sort(column)"
+          >
+            <!-- The header content is declared once; a sortable column wraps it in a real button so
+                 the sort is reachable by keyboard. The button's click stops there, so the th's own
+                 click (which keeps the cell padding clickable) does not sort a second time. -->
+            <ng-template #headerContent>
+              @if (isTemplateRef(column.header)) {
+                <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
+              } @else {
+                <span>{{ headerText(column) }}</span>
+              }
+              @if (isSortable(column)) {
+                <span class="text-[0.65rem] opacity-70 min-w-3 inline-block" aria-hidden="true">{{ getSortIcon(column) }}</span>
+              }
+            </ng-template>
+            @if (isSortable(column)) {
+              <button type="button" class="inline-flex items-center gap-1 cursor-pointer" (click)="$event.stopPropagation(); sort(column)">
+                <ng-container [ngTemplateOutlet]="headerContent"></ng-container>
+              </button>
+            } @else {
+              <span class="inline-flex items-center gap-1">
+                <ng-container [ngTemplateOutlet]="headerContent"></ng-container>
+              </span>
+            }
+          </th>
+        }
+
+      </tr>
+
+      <!-- Per-column filter row (wide screens only; collapses into a panel below 640px).
+           The cells are `td`, not `th`: they hold form controls, not headings, and a
+           column without a filter would otherwise be an empty header, which assistive tech
+           announces as a nameless column (axe `empty-table-header`). `font-normal` stays
+           so a consumer's thead styling cannot make the controls bold. -->
+      @if (hasColumnFilters && !filtersCollapsed) {
+        <tr class="bg-base-100 border-b border-base-300 font-normal">
+          @if (hasSelection) {
+            <td class="px-2 py-1 font-normal"></td>
+          }
+          @for (column of dataSource.columns; track column.key) {
+            <td
+              class="px-4 py-2 font-normal"
+              [mnHiddenBelow]="column.hiddenBelow"
+            >
+              @if (column.filterable) {
+                <!-- Every filter renders as an ordinary control right under its
+                     header. The rich types used to hide behind a button that opened
+                     a floating panel, which cost a click to discover, a click to
+                     apply, and hid whether a column was even filterable. -->
+                <ng-container
+                  [ngTemplateOutletContext]="{ $implicit: column, idScope: 'inline' }"
+                  [ngTemplateOutlet]="filterField"
+                ></ng-container>
+              }
+            </td>
+          }
+        </tr>
+      }
+    </thead>
+
+    <tbody>
+      <!-- Loading state -->
+        @if (isLoadingState) {
+        @for (_ of skeletonRows; track $index) {
+          <tr>
+            @if (hasSelection) {
+              <td class="px-2 py-3">
+                <mn-skeleton [data]="{ shape: 'rectangle', width: '1rem', height: '1rem' }"></mn-skeleton>
+              </td>
+            }
+            @for (column of dataSource.columns; track column.key) {
+              <td class="px-4 py-3"
+                [mnHiddenBelow]="column.hiddenBelow"
+                  [style.width]="columnWidth(column)"
+              >
+                @if (isTemplateRef(column.skeleton)) {
+                  <ng-container [ngTemplateOutlet]="$any(column.skeleton)"></ng-container>
+                } @else {
+                  <mn-skeleton [data]="getColumnSkeletonData(column)"></mn-skeleton>
+                }
+              </td>
+            }
+          </tr>
+        }
+        } @else if (isErrorState) {
+          <!-- Error state -->
+          <tr class="bg-base-100">
+            <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
+              @if (dataSource.errorTemplate) {
+                <ng-container [ngTemplateOutlet]="dataSource.errorTemplate"></ng-container>
+              } @else {
+                <div class="flex flex-col items-center gap-2 text-error">
+                  <p class="text-sm">{{ dataSource.errorMessage }}</p>
+                </div>
+              }
+            </td>
+          </tr>
+      } @else {
+        <!-- Empty state -->
+        @if (filteredItems.length === 0) {
+          <tr class="bg-base-100">
+            <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
+              @if (dataSource.emptyTemplate) {
+                <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
+              } @else {
+                <div class="flex flex-col items-center gap-2 text-base-content/50">
+                  @if (dataSource.emptyIcon !== null) {
+                    <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="32" [strokeWidth]="1.5"></svg>
+                  }
+                  <p class="text-sm">{{ dataSource.emptyMessage }}</p>
+                </div>
+              }
+            </td>
+          </tr>
+        }
+
+        <!-- Data rows -->
+        @for (row of paginatedItems; track trackByID($index, row); let odd = $odd; let last = $last) {
+          <tr
+            class="bg-base-100 transition-colors duration-150 hover:cursor-pointer"
+            [ngClass]="{'bg-primary/10': isSelected(row)}"
+            [class.bg-base-200]="!isSelected(row) && odd && dataSource.appearance?.striped"
+            [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
+            [class.cursor-pointer]="!!dataSource.onRowClick"
+            [class.border-b]="!last"
+            [class.border-base-300]="!last"
+            [class.border-b-1]="last"
+            [class.border-black]="last"
+            [class.shadow-3xl]="last"
+            (click)="onRowClick(row)"
+          >
+            <!-- Selection checkbox -->
+            @if (hasSelection) {
+              <td (click)="$event.stopPropagation()" class="w-10 text-center px-2 py-2">
+                <mn-lib-checkbox
+                  (checkedChange)="toggle(row)"
+                  [checked]="isSelected(row)"
+                  [props]="{ id: 'mn-table-row-' + $index, size: 'sm' }"
+                ></mn-lib-checkbox>
+              </td>
+            }
+
+            <!-- Data cells -->
+            @for (column of dataSource.columns; track column.key) {
+              <td
+                [attr.title]="cellTitle(column, row)"
+                [class.text-left]="(column.align ?? 'left') === 'left'"
+                [class.text-center]="column.align === 'center'"
+                [class.text-right]="column.align === 'right'"
+                [class.truncate]="widthsArePinned"
+                [mnHiddenBelow]="column.hiddenBelow"
+                [style.width]="columnWidth(column)"
+                class="text-xs px-2 py-1 @min-[640px]:px-4 @min-[640px]:py-2"
+              >
+                @if (column.actions) {
+                  <!-- Actions column: inline command buttons that collapse into a ⋯ menu
+                       once the table is narrower than 450px (container query), for every
+                       row with actions. A row with no visible actions renders nothing.
+                       A row with a single icon-only action never collapses: one icon button
+                       is narrower than the ⋯ trigger it would hide behind, so folding it
+                       only costs a tap. -->
+                  @if (hasRowActions(column, row)) {
+                  <div class="inline-flex items-center gap-1"
+                       [class.justify-end]="(column.align ?? 'left') === 'right'">
+                    @if (collapsesRowActions(column, row)) {
+                      <span class="hidden items-center gap-1 @min-[450px]:inline-flex">
+                        <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
+                                      [ngTemplateOutlet]="actionButtons"></ng-container>
+                      </span>
+                      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+                      <span class="@min-[450px]:hidden" (click)="$event.stopPropagation()">
+                        <mn-lib-dropdown [datasource]="{
+                          id: actionsDropdownId(column, row),
+                          actions: rowDropdownActions(column, row),
+                          menuLabel: headerText(column),
+                          size: 'sm'
+                        }"></mn-lib-dropdown>
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1">
+                        <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
+                                      [ngTemplateOutlet]="actionButtons"></ng-container>
+                      </span>
+                    }
+                  </div>
+                  }
+                } @else if (column.cellSm) {
+                  <!-- Default cell: hidden below the cellSm breakpoint -->
+                  <span [mnShowAbove]="column.cellSm.below">
+                    @if (isTemplateRef(column.cell)) {
+                      <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }"
+                                    [ngTemplateOutlet]="$any(column.cell)"></ng-container>
+                    } @else {
+                      {{ getCellValue(column, row) }}
+                    }
+                  </span>
+                  <!-- Small cell: shown only below the cellSm breakpoint -->
+                  <span [mnShowBelow]="column.cellSm.below">
+                    @if (isTemplateRef(column.cellSm.cell)) {
+                      <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }"
+                                    [ngTemplateOutlet]="$any(column.cellSm.cell)"></ng-container>
+                    } @else {
+                      {{ getCellSmValue(column, row) }}
+                    }
+                  </span>
+                } @else {
+                  @if (isTemplateRef(column.cell)) {
+                    <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }"
+                                  [ngTemplateOutlet]="$any(column.cell)"></ng-container>
+                  } @else {
+                    {{ getCellValue(column, row) }}
+                  }
+                }
+              </td>
+            }
+
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Load more + pagination -->
+<mn-collection-pagination
+  (loadMore)="loadMoreRows()"
+  (pageChange)="goToPage($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+  [currentPage]="currentPage"
+  [isPaginated]="isPaginated"
+  [isServerPaginated]="isServerPaginated"
+  [labels]="dataSource.labels"
+  [loadingMoreRows]="loadingMoreRows"
+  [pageSizeSelectOptions]="pageSizeSelectOptions"
+  [pageSize]="pageSize"
+  [showLoadMore]="showLoadMore"
+  [totalItemCount]="totalItemCount"
+  [totalPages]="totalPages"
+  [visiblePages]="visiblePages"
+  idPrefix="mn-table"
+></mn-collection-pagination>
+</div>
+
+<!-- Single source of truth for every filter control, reused by the inline header
+     row and the small-screen panel. `idScope` keeps element ids unique across
+     both placements. -->
+<ng-template #filterField let-column let-idScope="idScope">
+  @switch (filterTypeOf(column)) {
+    @case ('select') {
+      <mn-lib-select
+        (ngModelChange)="onColumnFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="textFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          ariaLabel: filterLabel(column),
+          options: getFilterSelectOptions(column),
+          size: 'sm',
+          fullWidth: true
+        }"
+      ></mn-lib-select>
+    }
+    @case ('multi-select') {
+      <mn-lib-multi-select
+        (ngModelChange)="onColumnFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="multiFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          ariaLabel: filterLabel(column),
+          options: getFilterMultiSelectOptions(column),
+          placeholder: column.filterPlaceholder ?? '',
+          collapsePlaceholder: filterSelectedLabel,
+          collapseThreshold: 1,
+          size: 'sm',
+          fullWidth: true
+        }"
+      ></mn-lib-multi-select>
+    }
+    @case ('boolean') {
+      <mn-lib-select
+        (ngModelChange)="onBooleanFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="booleanFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          ariaLabel: filterLabel(column),
+          options: getBooleanFilterOptions(column),
+          size: 'sm',
+          fullWidth: true
+        }"
+      ></mn-lib-select>
+    }
+    @default {
+      <mn-lib-input-field
+        (keydown.enter)="$event.preventDefault()"
+        (ngModelChange)="onColumnFilter(column, $event)"
+        [disabled]="column.filterDisabled ?? false"
+        [ngModel]="textFilterValue(column)"
+        [props]="{
+          id: 'mn-table-filter-' + idScope + '-' + column.key,
+          type: 'text',
+          label: '',
+          placeholder: column.filterPlaceholder ?? '',
+          ariaLabel: column.filterPlaceholder ?? '',
+          autocomplete: column.filterAutocomplete ?? undefined,
+          size: 'sm',
+          borderRadius: 'md',
+          fullWidth: true,
+          hover: true
+        }"
+      ></mn-lib-input-field>
+    }
+  }
+</ng-template>
+
+<!-- Inline action buttons for an actions column, shared by the wide-table layout and
+     (implicitly) mirrored by the ⋯ menu below 450px. -->
+<ng-template #actionButtons let-column="column" let-row="row">
+  @for (action of visibleRowActions(column, row); track $index) {
+    <button
+      mnButton
+      type="button"
+      [data]="{
+        size: 'sm',
+        variant: 'text',
+        color: rowActionColor(action, row),
+        disabled: isRowActionDisabled(action, row)
+      }"
+      class="cursor-pointer"
+      (click)="$event.stopPropagation(); runRowAction(action, row)"
+      [attr.aria-label]="rowActionLabel(action, row)"
+      [attr.title]="showActionLabel(column, action, row) ? null : rowActionLabel(action, row)"
+    >
+      @if (showActionIcon(column, action, row)) {
+        <span class="inline-flex items-center shrink-0">
+          @let icon = rowActionIcon(action, row);
+          @if (isTemplateRef(icon)) {
+            <ng-container [ngTemplateOutlet]="icon"></ng-container>
+          } @else {
+            <!-- Data icon: sized here to match the sm button's text, so a caller can
+                 declare the action in TypeScript without owning a template. -->
+            <svg [lucideIcon]="$any(icon)" [size]="17"></svg>
+          }
+        </span>
+      }
+      @if (showActionLabel(column, action, row)) {
+        <span>{{ rowActionLabel(action, row) }}</span>
+      }
+    </button>
+  }
+</ng-template>

@@ -8,12 +8,12 @@ const path = require('path');
 
 const mapFilePath = path.resolve(
   __dirname,
-  '../projects/mn-angular-lib/src/lib/features/mn-icon/mn-icon-map.ts'
+  '../projects/mn-angular-lib/display/src/mn-icon/mn-icon-map.ts'
 );
 
 const directiveFilePath = path.resolve(
   __dirname,
-  '../projects/mn-angular-lib/src/lib/features/mn-icon/mn-icon-attributes.directive.ts'
+  '../projects/mn-angular-lib/display/src/mn-icon/mn-icon-attributes.directive.ts'
 );
 
 // Read the icon map file and extract keys from the MN_ICON_MAP object

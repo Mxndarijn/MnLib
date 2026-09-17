@@ -1,7 +1,7 @@
 /* Aggregate CSS entry for consumers. This file is included in the package assets. */
 @import './styles.css';
 /* Feature styles */
-@import '../features/mn-alert/mn-alert-outlet/mn-alert-outlet.css';
-@import '../features/mn-rich-text-editor/mn-rich-text-editor.component.css';
+@import '../../../alert/src/mn-alert/mn-alert-outlet/mn-alert-outlet.css';
+@import '../../../rich-text-editor/src/mn-rich-text-editor/mn-rich-text-editor.component.css';
 @import "tailwindcss";
 

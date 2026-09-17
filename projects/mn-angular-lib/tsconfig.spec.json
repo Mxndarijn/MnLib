@@ -9,6 +9,8 @@
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "*/public-api.ts",
+    "*/src/**/*.ts"
   ]
 }

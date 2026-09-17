@@ -11,6 +11,10 @@
       "mn-angular-lib": [
         "./projects/mn-angular-lib/src/public-api.ts",
         "./dist/mn-angular-lib"
+      ],
+      "mn-angular-lib/*": [
+        "./projects/mn-angular-lib/*/public-api.ts",
+        "./dist/mn-angular-lib/*"
       ]
     },
     "moduleResolution": "bundler",

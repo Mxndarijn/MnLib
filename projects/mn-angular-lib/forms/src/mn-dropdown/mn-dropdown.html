@@ -1,0 +1,172 @@
+<div class="relative inline-flex">
+  <!-- Trigger -->
+  <button
+    #trigger
+    mnButton
+    type="button"
+    [id]="resolvedId"
+    [data]="triggerData"
+    [ngClass]="triggerClasses"
+    [attr.aria-label]="triggerLabelText ? null : triggerAriaLabel"
+    [attr.aria-haspopup]="'menu'"
+    [attr.aria-expanded]="isOpen"
+    [attr.aria-controls]="isOpen ? resolvedId + '-menu' : null"
+    (click)="toggle()"
+  >
+    @if (triggerLabelText) {
+      <span class="truncate">{{ triggerLabelText }}</span>
+    }
+    <!-- One glyph, rendered like a menu item's icon: a caller's template, else lucide data
+         (a preset resolves to its own data). No per-preset switch. -->
+    @if (triggerIconTemplate; as tpl) {
+      <span class="shrink-0 inline-flex items-center">
+        <ng-container [ngTemplateOutlet]="tpl"></ng-container>
+      </span>
+    } @else if (triggerIconData; as glyph) {
+      <span class="shrink-0 inline-flex items-center">
+        <svg [lucideIcon]="glyph.data" [size]="glyph.size" [class.opacity-70]="glyph.dim"></svg>
+      </span>
+    }
+  </button>
+
+  <!-- Menu -->
+  @if (isOpen) {
+    @if (isSheet) {
+      <!-- On mobile the menu is presented as the shared bottom sheet: chrome (backdrop,
+           grabber, swipe-to-dismiss, slide animation) lives in mn-bottom-sheet; this
+           component only projects the item list into it. The host is portalled to
+           document.body (see the `sheet` ViewChild). -->
+      <mn-bottom-sheet
+        #sheet
+        (dismiss)="close()"
+        [ariaLabel]="menuLabel || triggerAriaLabel"
+        [maxHeightVh]="80"
+        [minHeightPx]="sheetFloorPx"
+      >
+        <div [id]="resolvedId + '-menu'" role="menu" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <!-- The sheet covers its own trigger, so it carries a header to name itself; the
+               way out is the grabber (swipe-to-dismiss) and a backdrop tap. -->
+          <div class="px-4 pt-1 pb-2 shrink-0">
+            <p class="text-base font-bold text-base-content truncate">{{ menuLabel || triggerAriaLabel }}</p>
+          </div>
+          <ng-container [ngTemplateOutlet]="searchBox" [ngTemplateOutletContext]="{ sheet: true }"></ng-container>
+          <div class="flex-1 flex flex-col overflow-auto overscroll-contain">
+            <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: true }"></ng-container>
+          </div>
+        </div>
+      </mn-bottom-sheet>
+    } @else {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <div
+        #dropdown
+        (click)="$event.stopPropagation()"
+        [id]="resolvedId + '-menu'"
+        [ngClass]="panelClasses"
+        [style.left]="dropdownStyle.left"
+        [style.top]="dropdownStyle.top"
+        [style.bottom]="dropdownStyle.bottom"
+        [style.max-height]="dropdownStyle.maxHeight"
+        [style.height.px]="panelFloorPx"
+        [style.width.px]="panelWidthPx"
+        role="menu"
+      >
+        @if (menuLabel) {
+          <p class="px-3 pt-1 pb-1.5 text-xs font-medium text-base-content/50 truncate shrink-0">{{ menuLabel }}</p>
+        }
+        <ng-container [ngTemplateOutlet]="searchBox" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+        @if (isSearchable) {
+          <!-- Its own scroll region so the pinned search box above stays fixed and the
+               locked panel height (panelFloorPx) doesn't change as the list filters. The
+               flex column lets the empty state fill and centre in the reserved space. -->
+          <div class="flex-1 min-h-0 flex flex-col overflow-auto">
+            <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+          </div>
+        } @else {
+          <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ sheet: false }"></ng-container>
+        }
+      </div>
+    }
+  }
+
+  <!-- The item list, shared verbatim by the sheet and the anchored popover. `sheet`
+       only tunes the spacing so touch targets are roomier on mobile. -->
+  <ng-template #items let-sheet="sheet">
+    @for (item of filteredActions; track $index) {
+      @if (asAction(item); as action) {
+        <button
+          type="button"
+          role="menuitem"
+          [disabled]="action.disabled"
+          [attr.aria-current]="action.active ? 'true' : null"
+          [class.opacity-50]="action.disabled"
+          [class.pointer-events-none]="action.disabled"
+          [ngClass]="[actionColorClass(action), sheet ? 'px-4 py-3 text-base' : 'px-3 py-2 text-sm', action.active ? 'bg-primary/10 font-medium' : '']"
+          class="flex w-full shrink-0 items-center gap-x-2.5 text-left cursor-pointer hover:bg-base-200 focus-visible:bg-base-200 focus:outline-none transition-colors"
+          (click)="select(action)"
+        >
+          @if (action.icon) {
+            <span class="shrink-0 inline-flex items-center">
+              @if (isTemplateRef(action.icon)) {
+                <ng-container [ngTemplateOutlet]="action.icon"></ng-container>
+              } @else {
+                <!-- Data icon: rendered here so the item sizes it to match its own text
+                     (larger in the sheet, where the rows are touch-sized). -->
+                <svg [lucideIcon]="$any(action.icon)" [size]="sheet ? 18 : 16"></svg>
+              }
+            </span>
+          }
+          <span class="truncate min-w-0">{{ actionLabel(action) }}</span>
+          <!-- The current choice's marker (e.g. the active language). Decorative: the
+               state is conveyed to assistive tech by `aria-current` on the row. -->
+          @if (action.active) {
+            <svg
+              [lucideIcon]="checkIcon"
+              [size]="sheet ? 18 : 16"
+              class="ml-auto shrink-0 text-primary"
+              aria-hidden="true"
+            ></svg>
+          }
+        </button>
+      } @else {
+        <hr role="separator" [ngClass]="sheet ? 'mx-4 my-1.5' : 'mx-2 my-1'" class="shrink-0 border-t border-base-300" />
+      }
+    }
+    @if (isSearchable && filteredActions.length === 0) {
+      <div class="flex-1 flex flex-col items-center justify-center gap-2 px-4 py-6 text-center text-base-content/50">
+        <svg [lucideIcon]="icons.SearchX" [size]="sheet ? 28 : 24" class="opacity-60"></svg>
+        <span [ngClass]="sheet ? 'text-base' : 'text-sm'">{{ searchEmptyLabel }}</span>
+      </div>
+    }
+  </ng-template>
+
+  <!-- The filter input, shared by the sheet and the anchored popover. Autofocused on
+       desktop (`!sheet`) so typing starts immediately; deliberately not on mobile, where
+       it would pop the soft keyboard and fight the viewport-anchored sheet. Enter runs
+       the first visible action via the wrapper's bubbled keydown. -->
+  <ng-template #searchBox let-sheet="sheet">
+    @if (isSearchable) {
+      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+      <div
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="selectFirstVisible()"
+        [ngClass]="sheet ? 'px-4 py-2' : 'p-2'"
+        class="border-b border-base-300 shrink-0"
+      >
+        <mn-lib-input-field
+          (ngModelChange)="onSearch($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [ngModel]="searchTerm"
+          [props]="{
+            id: resolvedId + '-search',
+            type: 'search',
+            placeholder: searchPlaceholder,
+            ariaLabel: searchPlaceholder,
+            fullWidth: true,
+            size: 'sm',
+            autoFocus: !sheet
+          }"
+        ></mn-lib-input-field>
+      </div>
+    }
+  </ng-template>
+</div>
