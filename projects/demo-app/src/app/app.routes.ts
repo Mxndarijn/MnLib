@@ -3,8 +3,6 @@ import {DemoListComponent} from './demo-list/demo-list.component';
 import {ButtonDemo} from './button-demo/button-demo';
 import {AlertsDemoComponent} from './demos/alerts-demo.component';
 import {ConfigDemoComponent} from './demos/config-demo.component';
-import {DualHorizontalImageDemo} from './dual-horizontal-image-demo/dual-horizontal-image-demo';
-import {InformationCardDemo} from './information-card-demo/information-card-demo';
 import {InputFieldDemo} from './input-field-demo/input-field-demo';
 import {TextareaDemo} from './textarea-demo/textarea-demo';
 import {ModalDemo} from './modal-demo/modal-demo';
@@ -37,16 +35,6 @@ export const routes: Routes = [
   { path: 'demos/alerts', component: AlertsDemoComponent, title: 'Alerts Demo' },
   { path: 'demos/button-demo', component: ButtonDemo, title: 'Button Demo' },
   { path: 'demos/config', component: ConfigDemoComponent, title: 'Config Demo' },
-  {
-    path: 'demos/dual-horizontal-image-demo',
-    component: DualHorizontalImageDemo,
-    title: 'DualImageHorizontal Demo',
-  },
-  {
-    path: 'demos/information-card-demo',
-    component: InformationCardDemo,
-    title: 'Information card Demo',
-  },
   {path: 'demos/input-field-demo', component: InputFieldDemo, title: 'Input Field Demo'},
   {path: 'demos/textarea-demo', component: TextareaDemo, title: 'Textarea Demo'},
   {path: 'demos/modal-demo', component: ModalDemo, title: 'Modal Demo'},

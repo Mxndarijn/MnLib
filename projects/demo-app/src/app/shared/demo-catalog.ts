@@ -166,22 +166,6 @@ export const DEMOS: DemoEntry[] = [
     abbr: 'GR',
     description: 'Responsive card grid with skeletons, preview cap, and search.',
   },
-  {
-    title: 'Information Card',
-    path: '/demos/information-card-demo',
-    category: 'Data',
-    color: '#0ea5e9',
-    abbr: 'IC',
-    description: 'Card with title, description, and optional images.',
-  },
-  {
-    title: 'Dual Horizontal Image',
-    path: '/demos/dual-horizontal-image-demo',
-    category: 'Data',
-    color: '#8b5cf6',
-    abbr: 'DI',
-    description: 'Two images shown side by side.',
-  },
 
   // Navigation
   {
