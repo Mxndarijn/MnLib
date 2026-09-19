@@ -22,4 +22,12 @@
   <app-demo-example title="Small size" hint="The same trail at size: 'sm'.">
     <mn-breadcrumbs [data]="{ items: trail.items, size: 'sm' }" (crumbClick)="onCrumb($event)"></mn-breadcrumbs>
   </app-demo-example>
+
+  <app-demo-example title="Collapses to the parent" hint="Narrow the window below 640px: the trail gives way to its parent crumb as a back control.">
+    <mn-breadcrumbs [data]="deepTrail" (crumbClick)="onCrumb($event)"></mn-breadcrumbs>
+  </app-demo-example>
+
+  <app-demo-example title="Never collapses" hint="collapse: 'never' keeps every crumb, however narrow the window gets.">
+    <mn-breadcrumbs [data]="deepTrailWhole" (crumbClick)="onCrumb($event)"></mn-breadcrumbs>
+  </app-demo-example>
 </app-demo-page>

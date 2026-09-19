@@ -18,6 +18,24 @@
         </li>
       }
     </ol>
+    <!--
+      Below `sm` the trail above is hidden and this takes its place: the parent
+      crumb as a back control. Both sit in the DOM and CSS decides which one is
+      there for the reader, so nothing has to measure a width.
+    -->
+    @if (parentCrumb; as parent) {
+      @if (parent.href) {
+        <a [attr.href]="parent.href" [class]="styles.collapsed()" (click)="onCrumb(parent)">
+          <svg [size]="16" [lucideIcon]="icons.ChevronLeft"></svg>
+          {{ parent.label | mnTranslate }}
+        </a>
+      } @else {
+        <button type="button" [class]="styles.collapsed()" (click)="onCrumb(parent)">
+          <svg [size]="16" [lucideIcon]="icons.ChevronLeft"></svg>
+          {{ parent.label | mnTranslate }}
+        </button>
+      }
+    }
   } @else if (data.backHref) {
     <a [attr.href]="data.backHref" [class]="styles.back()" (click)="onBack()">
       <svg [size]="16" [lucideIcon]="icons.ChevronLeft"></svg>

@@ -32,4 +32,13 @@ export type MnBreadcrumbsData = {
   backLabel?: string;
   /** Visual scale. Defaults to `'md'`. */
   size?: 'sm' | 'md';
+  /**
+   * What the trail does on a narrow screen (below `sm`). Defaults to `'parent'`:
+   * the crumbs give way to the parent crumb alone, drawn as a back control,
+   * because a hierarchy read on a phone is a way up rather than a map, and an
+   * uncollapsed trail wraps over three lines above the title it belongs to.
+   * `'never'` keeps every crumb at every width, for a page where the trail
+   * itself is the content.
+   */
+  collapse?: 'parent' | 'never';
 };

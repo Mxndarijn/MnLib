@@ -14,9 +14,14 @@ const ICONS = lucideIcons({ ChevronLeft: lucide.ChevronLeft, ChevronRight: lucid
  *
  * Given crumbs it renders a linkable trail (`root › … › current`) where the last
  * crumb is the current page and is never a link. Given no crumbs it degrades to
- * a single "Back" control — the two are mutually exclusive. "Flexible" here is
- * input-driven, not viewport-driven: there is deliberately no responsive
- * collapse, no scroll machinery — it is a list of links plus a fallback.
+ * a single "Back" control — the two are mutually exclusive.
+ *
+ * The one thing a width decides is how much of the trail shows: below `sm` the
+ * crumbs give way to the parent crumb alone, drawn as a back control, unless
+ * `data.collapse` is `'never'`. That measures nothing — both renderings sit in
+ * the DOM and a Tailwind breakpoint hides one — and there is deliberately no
+ * scroll machinery: on a phone a hierarchy is a way up rather than a map, and a
+ * trail that scrolls sideways buries the one link anybody reaches for.
  *
  * Navigation stays router- and history-agnostic where possible: a crumb (or the
  * Back control) with an `href` renders a plain `<a>` and navigates natively;
@@ -51,7 +56,24 @@ export class MnBreadcrumbs {
 
   /** Resolved tailwind-variants slot functions for the current size. */
   get styles() {
-    return mnBreadcrumbsVariants({ size: this.data.size });
+    return mnBreadcrumbsVariants({ size: this.data.size, collapsible: this.collapsesToParent });
+  }
+
+  /** Whether the parent crumb replaces the trail below `sm`. */
+  get collapsesToParent(): boolean {
+    return this.data.collapse !== 'never' && (this.data.items?.length ?? 0) > 1;
+  }
+
+  /**
+   * The crumb one level above the current page, or `null` when the trail stays
+   * whole: a single crumb has nowhere to go up to, and `'never'` asks for every
+   * crumb at every width.
+   */
+  get parentCrumb(): MnBreadcrumbItem | null {
+    if (!this.collapsesToParent) {
+      return null;
+    }
+    return this.data.items[this.data.items.length - 2];
   }
 
   /**

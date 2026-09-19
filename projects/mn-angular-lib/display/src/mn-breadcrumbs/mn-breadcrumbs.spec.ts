@@ -38,6 +38,12 @@ describe('MnBreadcrumbs', () => {
     Array.from(fixture.nativeElement.querySelectorAll('ol > li[aria-hidden]'));
   const backControl = (): HTMLElement | null =>
     fixture.nativeElement.querySelector('nav > a, nav > button');
+  /**
+   * The narrow-screen stand-in for the trail: the parent crumb, which renders
+   * beside the `ol` rather than instead of it, so CSS alone decides which shows.
+   */
+  const collapsed = (): HTMLElement | null =>
+    fixture.nativeElement.querySelector('nav > a[class*="sm:hidden"], nav > button[class*="sm:hidden"]');
 
   /**
    * Clicks an element while cancelling the browser's default action, so an
@@ -99,6 +105,46 @@ describe('MnBreadcrumbs', () => {
     crumbs()[0].querySelector('button')!.click();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(host.clicked).toBe(host.data.items[0]);
+  });
+
+  it('offers the parent crumb as a collapsed control, hidden from sm up', () => {
+    host.data = {items: [{label: 'Home', href: '/'}, {label: 'Library', href: '/lib'}, {label: 'Current'}]};
+    fixture.detectChanges();
+
+    // The trail itself only exists from `sm`; below it the parent takes over.
+    expect(fixture.nativeElement.querySelector('ol')!.className).toContain('hidden');
+    expect(fixture.nativeElement.querySelector('ol')!.className).toContain('sm:flex');
+    expect(collapsed()!.textContent!.trim()).toBe('Library');
+    expect(collapsed()!.getAttribute('href')).toBe('/lib');
+  });
+
+  it('emits crumbClick for the parent when the collapsed control is used', () => {
+    const spy = jasmine.createSpy('onClick');
+    host.data = {items: [{label: 'Home'}, {label: 'Library', onClick: spy}, {label: 'Current'}]};
+    fixture.detectChanges();
+
+    collapsed()!.click();
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(host.clicked).toBe(host.data.items[1]);
+  });
+
+  it('keeps every crumb at every width when collapse is never', () => {
+    host.data = {
+      items: [{label: 'Home', href: '/'}, {label: 'Library', href: '/lib'}, {label: 'Current'}],
+      collapse: 'never',
+    };
+    fixture.detectChanges();
+
+    expect(collapsed()).toBeNull();
+    expect(fixture.nativeElement.querySelector('ol')!.className).not.toContain('hidden');
+  });
+
+  it('leaves a single-crumb trail whole: there is nowhere to go up to', () => {
+    host.data = {items: [{label: 'Current'}]};
+    fixture.detectChanges();
+
+    expect(collapsed()).toBeNull();
+    expect(crumbs().length).toBe(1);
   });
 
   it('degrades to a Back control when no crumbs are given', () => {
