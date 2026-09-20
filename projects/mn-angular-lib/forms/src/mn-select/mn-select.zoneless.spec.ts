@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, provideZonelessChangeDetection } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 
 import { MnSelect } from './mn-select';
@@ -21,7 +21,7 @@ let locale$: BehaviorSubject<string>;
   template: `<mn-lib-select [props]="props" [formControl]="control"></mn-lib-select>`,
 })
 class HostComponent {
-  readonly control = new FormControl<string | null>(null);
+  readonly control = new FormControl<string | null>(null, Validators.required);
   props: MnSelectProps = {
     id: 'zoneless-select',
     options: [
@@ -103,6 +103,20 @@ describe('MnSelect (zoneless change detection)', () => {
     expect(trigger().getAttribute('aria-disabled')).toBe('true');
     expect(trigger().getAttribute('tabindex')).toBe('-1');
     expect(trigger().classList).toContain('opacity-60');
+  });
+
+  it('reveals the error state when the form marks the control touched', async () => {
+    await render();
+    // `showError` drives aria-describedby; the control is required and still empty, so the
+    // only thing missing is `touched`.
+    const trigger = (): HTMLElement => fixture.nativeElement.querySelector('#zoneless-select');
+    expect(trigger().getAttribute('aria-describedby')).toBeNull();
+
+    // What a form does when the user tries to submit an incomplete page.
+    fixture.componentInstance.control.markAsTouched();
+    await fixture.whenStable();
+
+    expect(trigger().getAttribute('aria-describedby')).toBe('zoneless-select-error');
   });
 
   it('re-renders its label when the locale changes', async () => {

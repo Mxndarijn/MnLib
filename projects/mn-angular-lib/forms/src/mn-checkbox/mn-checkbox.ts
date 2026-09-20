@@ -69,6 +69,16 @@ export class MnCheckbox implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    // `showError` reads the control's touched/dirty/invalid state straight off the form.
+    // Those move from the forms API — `markAllAsTouched()` when the user tries to submit, a
+    // programmatic `setErrors` — never through an event on this component, so under OnPush
+    // the message would never appear. `events` covers value, status, touched and pristine.
+    const formControl = this.ngControl?.control;
+    if (formControl) {
+      const stateSub = formControl.events.subscribe(() => this.cdr.markForCheck());
+      this.destroyRef.onDestroy(() => stateSub.unsubscribe());
+    }
+
     this.resolveConfig();
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
