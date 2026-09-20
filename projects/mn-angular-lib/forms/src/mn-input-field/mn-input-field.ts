@@ -1,16 +1,33 @@
-import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
-import {CommonModule, NgClass} from '@angular/common';
-import {MnErrorMessageData, MnInputFieldUIConfig, MnInputProps} from './mn-input-fieldTypes';
-import {AbstractControl, FormsModule, NgControl, ValidationErrors, Validators} from '@angular/forms';
-import {pickAdapter} from './mn-input-field-adapters';
-import {mnInputFieldVariants} from './mn-input-fieldVariants';
-import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnConfigService} from "mn-angular-lib/core";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "mn-angular-lib/core";
-import {MnLanguageService} from "mn-angular-lib/core";
-import {skip} from "rxjs";
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  InjectionToken,
+  Input,
+  OnInit,
+} from '@angular/core';
+import { CommonModule, NgClass } from '@angular/common';
+import { MnErrorMessageData, MnInputFieldUIConfig, MnInputProps } from './mn-input-fieldTypes';
+import {
+  AbstractControl,
+  FormsModule,
+  NgControl,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
+import { pickAdapter } from './mn-input-field-adapters';
+import { mnInputFieldVariants } from './mn-input-fieldVariants';
+import { MnErrorMessage } from '../mn-error-message/mn-error-message';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { skip } from 'rxjs';
 
-export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('MN_INPUT_FIELD_CONFIG');
+export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>(
+  'MN_INPUT_FIELD_CONFIG',
+);
 
 /**
  * MnInputField Component
@@ -51,9 +68,13 @@ export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('M
   // The native `type="search"` clear affordance (the ✕) is a shadow pseudo-element, so it
   // can't take a Tailwind class — give it a pointer cursor here. Only search inputs render
   // this pseudo, so it needs no type qualifier.
-  styles: [`
-    input::-webkit-search-cancel-button { cursor: pointer; }
-  `],
+  styles: [
+    `
+      input::-webkit-search-cancel-button {
+        cursor: pointer;
+      }
+    `,
+  ],
   host: {
     // Native inputs (notably `type="date"`) have a platform-specific intrinsic width.
     // Without an explicit host width the inline host collapses to that intrinsic size,
@@ -66,7 +87,7 @@ export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>('M
   },
 })
 export class MnInputField implements OnInit {
-  ngControl = inject(NgControl, {optional: true, self: true});
+  ngControl = inject(NgControl, { optional: true, self: true });
 
   /** Resolved UI configuration for the input field */
   protected uiConfig: MnInputFieldUIConfig = {};
@@ -79,6 +100,8 @@ export class MnInputField implements OnInit {
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
+  /** Marks the view when a locale change re-resolves the config (OnPush). */
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -89,8 +112,7 @@ export class MnInputField implements OnInit {
   isDisabled = false;
 
   /** Callback function to notify Angular forms of value changes */
-  private onChange: (val: unknown) => void = () => {
-  };
+  private onChange: (val: unknown) => void = () => {};
 
   /** Callback function to notify Angular forms when input is touched/blurred */
   private onTouched: () => void = () => {};
@@ -123,6 +145,9 @@ export class MnInputField implements OnInit {
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // `resolveConfig` rewrites plain fields the template reads; under OnPush nothing else
+      // marks this view for the locale change.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
 
@@ -146,15 +171,15 @@ export class MnInputField implements OnInit {
     this.uiConfig = this.configService.resolve<MnInputFieldUIConfig>(
       'mn-input-field',
       this.sectionPath,
-      instanceId
+      instanceId,
     );
 
     // Allow props to override uiConfig for label and placeholder
     if (this.props) {
-    this.uiConfig = { ...this.uiConfig, label: this.props.label };
+      this.uiConfig = { ...this.uiConfig, label: this.props.label };
       this.uiConfig = { ...this.uiConfig, placeholder: this.props.placeholder };
       if (this.props.ariaLabel) {
-        this.uiConfig = {...this.uiConfig, ariaLabel: this.props.ariaLabel};
+        this.uiConfig = { ...this.uiConfig, ariaLabel: this.props.ariaLabel };
       }
     }
   }
@@ -177,6 +202,9 @@ export class MnInputField implements OnInit {
    */
   writeValue(val: unknown): void {
     this.value = this.adapter.format(val);
+    // The forms API writes in from outside (setValue, reset, patch); nothing marks
+    // this view for it.
+    this.cdr.markForCheck();
   }
 
   /**
@@ -204,6 +232,9 @@ export class MnInputField implements OnInit {
    */
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // `control.disable()` / `.enable()` reaches us the same way `writeValue` does —
+    // from the forms API, with no event behind it.
+    this.cdr.markForCheck();
   }
 
   // ========== Event Handlers ==========
@@ -365,7 +396,7 @@ export class MnInputField implements OnInit {
     // Interpolate {{placeholder}} tokens with error arguments (e.g. {{requiredLength}})
     if (errorArgs && typeof errorArgs === 'object') {
       return msgDef.replace(/\{\{(\w+)}}/g, (_: string, key: string) =>
-        errorArgs[key] !== undefined ? String(errorArgs[key]) : `{{${key}}}`
+        errorArgs[key] !== undefined ? String(errorArgs[key]) : `{{${key}}}`,
       );
     }
     return msgDef;
@@ -382,7 +413,7 @@ export class MnInputField implements OnInit {
     if (!errors) return [];
 
     const errorKeys = Object.keys(errors);
-    return errorKeys.map(key => this.resolveErrorMessageForKey(key, errors));
+    return errorKeys.map((key) => this.resolveErrorMessageForKey(key, errors));
   }
 
   /**

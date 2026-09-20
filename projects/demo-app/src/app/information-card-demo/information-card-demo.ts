@@ -1,7 +1,7 @@
-import {Component} from '@angular/core';
-import {MnImageType, MnInformationCard, MnInformationCardData} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component } from '@angular/core';
+import { MnImageType, MnInformationCard, MnInformationCardData } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 type OneImageExtra = { kind: 'one-image'; image: MnImageType };
 type TwoImagesExtra = { kind: 'two-images'; images: [MnImageType, MnImageType] };
@@ -50,8 +50,8 @@ export class InformationCardDemo {
           id: 1,
           url: 'https://logo-icons.com/cdn/shop/files/2081-logo-1713630973.369.svg?v=1713641356',
           alt: 'test-image',
-        }
-      ]
-    }
+        },
+      ],
+    },
   ];
 }

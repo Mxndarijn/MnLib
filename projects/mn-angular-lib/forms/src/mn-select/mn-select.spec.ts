@@ -1,12 +1,12 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {Subject} from 'rxjs';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { Subject } from 'rxjs';
 
-import {MnSelect} from './mn-select';
-import {MnSelectProps} from './mn-selectTypes';
-import {MnConfigService} from 'mn-angular-lib/core';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { MnSelect } from './mn-select';
+import { MnSelectProps } from './mn-selectTypes';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /**
  * Label resolution for the strings mn-select renders on its own behalf.
@@ -24,15 +24,15 @@ import {MnLanguageService} from 'mn-angular-lib/core';
 @Component({
   standalone: true,
   imports: [MnSelect],
-  template: `
-    <mn-lib-select [props]="props"></mn-lib-select>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: ` <mn-lib-select [props]="props"></mn-lib-select>`,
 })
 class HostComponent {
   props: MnSelectProps = {
     id: 'test-select',
     options: [
-      {label: 'Alpha', value: 'a'},
-      {label: 'Beta', value: 'b'},
+      { label: 'Alpha', value: 'a' },
+      { label: 'Beta', value: 'b' },
     ],
     searchable: true,
     mobileSheet: false,
@@ -58,7 +58,7 @@ describe('MnSelect (own labels)', () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
-        {provide: MnConfigService, useValue: {resolve: () => config as never}},
+        { provide: MnConfigService, useValue: { resolve: () => config as never } },
         {
           provide: MnLanguageService,
           useValue: {
@@ -73,7 +73,7 @@ describe('MnSelect (own labels)', () => {
 
     fixture = TestBed.createComponent(HostComponent);
     if (props) {
-      fixture.componentInstance.props = {...fixture.componentInstance.props, ...props};
+      fixture.componentInstance.props = { ...fixture.componentInstance.props, ...props };
     }
     fixture.detectChanges();
     component = fixture.debugElement.query(By.directive(MnSelect)).componentInstance;
@@ -111,23 +111,23 @@ describe('MnSelect (own labels)', () => {
   });
 
   it('prefers resolved config over the conventional key', async () => {
-    bundle = {'mnSelect.search': 'from key'};
-    config = {searchPlaceholder: 'from config'};
+    bundle = { 'mnSelect.search': 'from key' };
+    config = { searchPlaceholder: 'from config' };
     await build();
 
     expect(component.searchPlaceholderLabel).toBe('from config');
   });
 
   it('prefers an explicit prop over both config and the key', async () => {
-    bundle = {'mnSelect.search': 'from key'};
-    config = {searchPlaceholder: 'from config'};
-    await build({searchPlaceholder: 'from props'});
+    bundle = { 'mnSelect.search': 'from key' };
+    config = { searchPlaceholder: 'from config' };
+    await build({ searchPlaceholder: 'from props' });
 
     expect(component.searchPlaceholderLabel).toBe('from props');
   });
 
   it('shows the resolved placeholder in the trigger until an option is selected', async () => {
-    bundle = {'mnSelect.placeholder': 'Selecteer...'};
+    bundle = { 'mnSelect.placeholder': 'Selecteer...' };
     await build();
 
     expect(component.displayText).toBe('Selecteer...');

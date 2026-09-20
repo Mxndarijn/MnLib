@@ -11,10 +11,10 @@ import {
   OnDestroy,
   OnInit,
   signal,
-  viewChild
+  viewChild,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MnModalRef} from 'mn-angular-lib/modal-core';
+import { CommonModule } from '@angular/common';
+import { MnModalRef } from 'mn-angular-lib/modal-core';
 import {
   ActionStyle,
   BackdropMode,
@@ -30,16 +30,16 @@ import {
   ModalSize,
   WizardModalConfig,
 } from 'mn-angular-lib/modal-core';
-import {MnWizardBodyComponent} from '../mn-wizard-body/mn-wizard-body.component';
-import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
-import {MnConfirmationBodyComponent} from '../mn-confirmation-body/mn-confirmation-body.component';
-import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
-import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.component';
-import {MnButton} from 'mn-angular-lib/button';
-import {MnBottomSheet} from 'mn-angular-lib/bottom-sheet';
+import { MnWizardBodyComponent } from '../mn-wizard-body/mn-wizard-body.component';
+import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
+import { MnConfirmationBodyComponent } from '../mn-confirmation-body/mn-confirmation-body.component';
+import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
+import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
+import { MnButton } from 'mn-angular-lib/button';
+import { MnBottomSheet } from 'mn-angular-lib/bottom-sheet';
 import { LucideDynamicIcon } from '@lucide/angular';
-import {MN_HAPTICS} from 'mn-angular-lib/modal-core';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { MN_HAPTICS } from 'mn-angular-lib/modal-core';
+import { MnLanguageService } from 'mn-angular-lib/core';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
 
@@ -118,7 +118,7 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   /** The bottom sheet presenting this modal on mobile, absent on the desktop dialog path. */
   private readonly bottomSheet = viewChild(MnBottomSheet);
   /** Optional native haptic engine. Absent on the web — every call is null-guarded. */
-  private haptics = inject(MN_HAPTICS, {optional: true});
+  private haptics = inject(MN_HAPTICS, { optional: true });
   private sheetMedia: MediaQueryList | null = null;
   private sheetMediaListener: ((event: MediaQueryListEvent) => void) | null = null;
 
@@ -140,9 +140,10 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     // application. Deriving it here as well flips the host class string after the
     // view has been checked (NG0100). Angular's class binding only manages the tokens
     // it emits, so it leaves the imperatively added `.closing` untouched.
-    const animType = typeof this.config.animation === 'string'
-      ? this.config.animation
-      : this.config.animation?.type || 'slide';
+    const animType =
+      typeof this.config.animation === 'string'
+        ? this.config.animation
+        : this.config.animation?.type || 'slide';
     const animation = ` anim-${animType}`;
     const stacked = this.isStacked() ? ' is-stacked' : '';
     const mobileSheet = this.showMobileSheet ? ' mobile-sheet' : '';
@@ -153,7 +154,7 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     this.focusTrapListener = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
       const focusable = this.el.nativeElement.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
       );
       if (focusable.length === 0) return;
       const first = focusable[0];
@@ -211,7 +212,10 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     this.stopPolling();
     this.stopWatchingViewport();
     // Restore focus to previously focused element
-    if (this.previouslyFocusedElement && typeof this.previouslyFocusedElement.focus === 'function') {
+    if (
+      this.previouslyFocusedElement &&
+      typeof this.previouslyFocusedElement.focus === 'function'
+    ) {
       this.previouslyFocusedElement.focus();
     }
   }
@@ -226,7 +230,7 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
    * fires, and we short-circuit under reduced motion (the CSS collapses to instant).
    */
   startClosing(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(async () => {
         this.isClosing = true;
         // @HostBinding('class') updates are flushed when the host view is checked
@@ -250,7 +254,9 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
         }
 
         // Desktop: wait for the centered dialog container's own close animation.
-        const container = this.el.nativeElement.querySelector('.modal-container') as HTMLElement | null;
+        const container = this.el.nativeElement.querySelector(
+          '.modal-container',
+        ) as HTMLElement | null;
         if (!container) {
           resolve();
           return;
@@ -276,9 +282,11 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   }
 
   private prefersReducedMotion(): boolean {
-    return typeof window !== 'undefined'
-      && typeof window.matchMedia === 'function'
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
   }
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -292,8 +300,9 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   }
 
   onBackdropClick(): void {
-    const shouldClose = this.config.backdrop === BackdropMode.CLOSABLE
-      || (this.isMobileSheet && this.config.backdrop !== BackdropMode.STATIC);
+    const shouldClose =
+      this.config.backdrop === BackdropMode.CLOSABLE ||
+      (this.isMobileSheet && this.config.backdrop !== BackdropMode.STATIC);
     if (shouldClose) {
       this.handleClose(ModalCloseReason.BACKDROP);
     }
@@ -380,12 +389,18 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
 
   get containerSizeClass(): string {
     switch (this.config.sizeWidth || ModalSize.MD) {
-      case ModalSize.SM: return 'w-96';
-      case ModalSize.MD: return 'w-[32rem]';
-      case ModalSize.LG: return 'w-[48rem]';
-      case ModalSize.XL: return 'w-[64rem]';
-      case ModalSize.FULL: return 'w-[95vw]';
-      default: return 'w-[32rem]';
+      case ModalSize.SM:
+        return 'w-96';
+      case ModalSize.MD:
+        return 'w-[32rem]';
+      case ModalSize.LG:
+        return 'w-[48rem]';
+      case ModalSize.XL:
+        return 'w-[64rem]';
+      case ModalSize.FULL:
+        return 'w-[95vw]';
+      default:
+        return 'w-[32rem]';
     }
   }
 
@@ -395,12 +410,18 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     }
     if (!this.config.sizeHeight) return null;
     switch (this.config.sizeHeight) {
-      case ModalSize.SM: return '30vh';
-      case ModalSize.MD: return '50vh';
-      case ModalSize.LG: return '70vh';
-      case ModalSize.XL: return '85vh';
-      case ModalSize.FULL: return '95vh';
-      default: return null;
+      case ModalSize.SM:
+        return '30vh';
+      case ModalSize.MD:
+        return '50vh';
+      case ModalSize.LG:
+        return '70vh';
+      case ModalSize.XL:
+        return '85vh';
+      case ModalSize.FULL:
+        return '95vh';
+      default:
+        return null;
     }
   }
 
@@ -417,11 +438,11 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
   }
 
   get leftFooterActions(): ModalFooterAction<TResult>[] {
-    return (this.config.footerActions || []).filter(a => a.position === 'left');
+    return (this.config.footerActions || []).filter((a) => a.position === 'left');
   }
 
   get rightFooterActions(): ModalFooterAction<TResult>[] {
-    return (this.config.footerActions || []).filter(a => a.position !== 'left');
+    return (this.config.footerActions || []).filter((a) => a.position !== 'left');
   }
 
   async onFooterAction(action: ModalFooterAction<TResult>): Promise<void> {
@@ -438,21 +459,30 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     }
   }
 
-  getActionButtonColor(style?: ActionStyle): 'primary' | 'secondary' | 'danger' | 'warning' | 'success' {
+  getActionButtonColor(
+    style?: ActionStyle,
+  ): 'primary' | 'secondary' | 'danger' | 'warning' | 'success' {
     switch (style) {
-      case ActionStyle.PRIMARY: return 'primary';
-      case ActionStyle.DANGER: return 'danger';
-      case ActionStyle.GHOST: return 'secondary';
-      default: return 'secondary';
+      case ActionStyle.PRIMARY:
+        return 'primary';
+      case ActionStyle.DANGER:
+        return 'danger';
+      case ActionStyle.GHOST:
+        return 'secondary';
+      default:
+        return 'secondary';
     }
   }
 
   getActionButtonVariant(style?: ActionStyle): 'fill' | 'outline' | 'text' {
     switch (style) {
       case ActionStyle.PRIMARY:
-      case ActionStyle.DANGER: return 'fill';
-      case ActionStyle.GHOST: return 'text';
-      default: return 'outline';
+      case ActionStyle.DANGER:
+        return 'fill';
+      case ActionStyle.GHOST:
+        return 'text';
+      default:
+        return 'outline';
     }
   }
 

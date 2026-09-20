@@ -1,6 +1,6 @@
-import {Component, HostBinding, Input} from '@angular/core';
-import {MnSkeletonProps} from './mn-skeletonTypes';
-import {mnSkeletonVariants} from './mn-skeletonVariants';
+import { Component, HostBinding, Input } from '@angular/core';
+import { MnSkeletonProps } from './mn-skeletonTypes';
+import { mnSkeletonVariants } from './mn-skeletonVariants';
 
 @Component({
   selector: 'mn-skeleton',
@@ -17,7 +17,7 @@ export class MnSkeleton {
 
   @HostBinding('class')
   get hostClasses(): string {
-    return mnSkeletonVariants({shape: this.data.shape});
+    return mnSkeletonVariants({ shape: this.data.shape });
   }
 
   @HostBinding('style.width')

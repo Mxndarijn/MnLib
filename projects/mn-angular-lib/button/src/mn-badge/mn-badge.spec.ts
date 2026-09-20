@@ -1,13 +1,14 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {MnBadge} from './mn-badge';
-import {MnBadgeTypes} from './mn-badgeTypes';
+import { MnBadge } from './mn-badge';
+import { MnBadgeTypes } from './mn-badgeTypes';
 
 /** Minimal host that renders an `mnBadge` so the attribute-selector component can be tested. */
 @Component({
   standalone: true,
   imports: [MnBadge],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<span mnBadge [data]="data">Label</span>`,
 })
 class HostComponent {
@@ -43,7 +44,7 @@ describe('MnBadge', () => {
   });
 
   it('tints a semantic colour at 10% and reads its text from the consumer text token with a fallback', () => {
-    host.data = {color: 'warning'};
+    host.data = { color: 'warning' };
     fixture.detectChanges();
 
     expect(classes()).toContain('bg-warning/10');
@@ -53,7 +54,7 @@ describe('MnBadge', () => {
   });
 
   it('maps danger onto the error colour', () => {
-    host.data = {color: 'danger'};
+    host.data = { color: 'danger' };
     fixture.detectChanges();
 
     expect(classes()).toContain('bg-error/10');
@@ -61,7 +62,7 @@ describe('MnBadge', () => {
   });
 
   it('keeps the solid fill variant on the base colour with its content colour', () => {
-    host.data = {color: 'success', variant: 'fill'};
+    host.data = { color: 'success', variant: 'fill' };
     fixture.detectChanges();
 
     expect(classes()).toContain('bg-success');
@@ -70,7 +71,7 @@ describe('MnBadge', () => {
   });
 
   it('leaves the neutral lightgray badge on the base-content tint', () => {
-    host.data = {color: 'lightgray'};
+    host.data = { color: 'lightgray' };
     fixture.detectChanges();
 
     expect(classes()).toContain('bg-base-content/10');
@@ -78,7 +79,7 @@ describe('MnBadge', () => {
   });
 
   it('applies size and wrap options', () => {
-    host.data = {size: 'lg', wrap: true};
+    host.data = { size: 'lg', wrap: true };
     fixture.detectChanges();
 
     expect(classes()).toContain('text-base');

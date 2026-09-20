@@ -7,29 +7,29 @@
   OnDestroy,
   OnInit,
   Output,
-  Type
+  Type,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Observable, Subject, takeUntil} from 'rxjs';
-import {CalendarEvent} from 'mn-angular-lib/calendar-core';
-import {CalendarEventData} from 'mn-angular-lib/calendar-core';
+import { CommonModule } from '@angular/common';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { CalendarEvent } from 'mn-angular-lib/calendar-core';
+import { CalendarEventData } from 'mn-angular-lib/calendar-core';
 import {
   CalendarConfig,
   DEFAULT_CALENDAR_CONFIG,
   HourRow,
-  resolveCalendarConfig
+  resolveCalendarConfig,
 } from 'mn-angular-lib/calendar-core';
-import {CalendarDateFormatter} from 'mn-angular-lib/calendar-core';
-import {DefaultCalendarDateFormatter} from 'mn-angular-lib/calendar-core';
-import {CalendarEventLayoutService} from 'mn-angular-lib/calendar-core';
-import {CalendarUtility} from 'mn-angular-lib/calendar-core';
-import {CalendarEventComponent} from '../calendar-event/calendar-event.component';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { CalendarDateFormatter } from 'mn-angular-lib/calendar-core';
+import { DefaultCalendarDateFormatter } from 'mn-angular-lib/calendar-core';
+import { CalendarEventLayoutService } from 'mn-angular-lib/calendar-core';
+import { CalendarUtility } from 'mn-angular-lib/calendar-core';
+import { CalendarEventComponent } from '../calendar-event/calendar-event.component';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /** Extended hour row with a pre-resolved display label. */
 type DisplayHourRow = {
   hourLabel: string;
-} & HourRow
+} & HourRow;
 
 /**
  * Day grid view showing a single day with half-hour time slots.
@@ -93,13 +93,15 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.resolvedConfig = this.config ? resolveCalendarConfig(this.config) : { ...DEFAULT_CALENDAR_CONFIG };
+    this.resolvedConfig = this.config
+      ? resolveCalendarConfig(this.config)
+      : { ...DEFAULT_CALENDAR_CONFIG };
     this.updateDayInfo();
     this.updateCurrentTime();
     this.currentTimeInterval = setInterval(() => this.updateCurrentTime(), 60000);
 
     if (this.eventsChanged) {
-      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
+      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe((events) => {
         this.events = events;
         this.refreshEvents();
         this.cdr.markForCheck();
@@ -107,7 +109,7 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
     }
 
     if (this.focusDayChanged) {
-      this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe(date => {
+      this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe((date) => {
         this.focusDay = date;
         this.updateDayInfo();
         this.refreshEvents();
@@ -129,10 +131,14 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
   /** Returns the CSS `grid-row` value for an event. */
   getEventRow(event: CalendarEvent): string {
     const startRow = CalendarUtility.getCorrectRow(
-      event.startTime.getHours(), event.startTime.getMinutes(), this.resolvedConfig.startHour
+      event.startTime.getHours(),
+      event.startTime.getMinutes(),
+      this.resolvedConfig.startHour,
     );
     const endRow = CalendarUtility.getCorrectRow(
-      event.endTime.getHours(), event.endTime.getMinutes(), this.resolvedConfig.startHour
+      event.endTime.getHours(),
+      event.endTime.getMinutes(),
+      this.resolvedConfig.startHour,
     );
     return `${startRow} / ${Math.max(endRow, startRow + 1)}`;
   }
@@ -171,7 +177,7 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
         hour,
         topRow: i * 2 + 1,
         bottomRow: i * 2 + 3,
-        hourLabel: label
+        hourLabel: label,
       });
     }
     this.hourRows = rows;
@@ -197,28 +203,39 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
     const rangeEnd = new Date(this.focusDay);
     rangeEnd.setHours(23, 59, 59, 999);
 
-    const filtered = this.events.filter(e =>
-      this.layoutService.eventsOverlap(e.startTime, e.endTime, rangeStart, rangeEnd)
+    const filtered = this.events.filter((e) =>
+      this.layoutService.eventsOverlap(e.startTime, e.endTime, rangeStart, rangeEnd),
     );
 
     this.displayEvents = this.layoutService.calculateMultiDayEvents(
-      filtered, this.resolvedConfig.startHour, this.resolvedConfig.endHour, rangeStart, rangeEnd
+      filtered,
+      this.resolvedConfig.startHour,
+      this.resolvedConfig.endHour,
+      rangeStart,
+      rangeEnd,
     );
 
     this.layoutService.assignColumnsToEvents(this.displayEvents);
     this.layoutService.assignWidthsToEvents(this.displayEvents, rangeStart, rangeEnd);
 
-    this.totalColumns = this.displayEvents.reduce((max, e) => Math.max(max, (e.column ?? 0) + (e.width ?? 1)), 1);
+    this.totalColumns = this.displayEvents.reduce(
+      (max, e) => Math.max(max, (e.column ?? 0) + (e.width ?? 1)),
+      1,
+    );
   }
 
   /** Updates the current-time red line position. */
   private updateCurrentTime() {
     const now = new Date();
     if (this.focusDay && this.formatter.isSameDay(this.focusDay, now)) {
-      this.currentTimeRow = CalendarUtility.getCorrectRow(now.getHours(), now.getMinutes(), this.resolvedConfig.startHour);
+      this.currentTimeRow = CalendarUtility.getCorrectRow(
+        now.getHours(),
+        now.getMinutes(),
+        this.resolvedConfig.startHour,
+      );
       this.isToday = true;
       // formatTime is async; refresh the label and re-render when it resolves.
-      this.formatter.formatTime(now).then(label => {
+      this.formatter.formatTime(now).then((label) => {
         this.currentTimeLabel = label;
         this.cdr.markForCheck();
       });
@@ -227,5 +244,9 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
       this.isToday = false;
       this.currentTimeLabel = '';
     }
+    // The minute tick is a bare setInterval, so neither branch is reached through anything
+    // Angular wraps. Only the `then` above marked anything, which left a view opened on a
+    // day that stops being today painting its "now" line forever.
+    this.cdr.markForCheck();
   }
 }

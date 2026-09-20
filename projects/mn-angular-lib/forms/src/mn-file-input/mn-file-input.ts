@@ -1,20 +1,31 @@
-import {Component, computed, DestroyRef, EventEmitter, inject, Input, OnInit, Output, signal,} from '@angular/core';
-import {CommonModule, NgClass} from '@angular/common';
-import {NgControl, ValidationErrors, Validators} from '@angular/forms';
-import {skip} from 'rxjs';
+import {
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
+import { CommonModule, NgClass } from '@angular/common';
+import { NgControl, ValidationErrors, Validators } from '@angular/forms';
+import { skip } from 'rxjs';
 import {
   MnFileInputDisplayMode,
   MnFileInputErrorMessageData,
   MnFileInputProps,
   MnFileInputUIConfig,
 } from './mn-file-inputTypes';
-import {mnFileInputVariants} from './mn-file-inputVariants';
-import {MnErrorMessage} from '../mn-error-message/mn-error-message';
+import { mnFileInputVariants } from './mn-file-inputVariants';
+import { MnErrorMessage } from '../mn-error-message/mn-error-message';
 import { LucideDynamicIcon } from '@lucide/angular';
-import {MnConfigService} from 'mn-angular-lib/core';
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from 'mn-angular-lib/core';
-import {MnLanguageService} from 'mn-angular-lib/core';
-import {MnValidationErrorArgs} from 'mn-angular-lib/core';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { MnValidationErrorArgs } from 'mn-angular-lib/core';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
 
@@ -78,9 +89,9 @@ export class MnFileInput implements OnInit {
   /** Lucide icons the template renders. */
   protected readonly icons = ICONS;
 
-  ngControl = inject(NgControl, {optional: true, self: true});
+  ngControl = inject(NgControl, { optional: true, self: true });
   /** Configuration properties for the file input. */
-  @Input({required: true}) props!: MnFileInputProps;
+  @Input({ required: true }) props!: MnFileInputProps;
   /** Emits whenever the selected file(s) change (in addition to the form control). */
   @Output() filesChange = new EventEmitter<File | File[] | null>();
   /** Emits when the user removes an already-saved image (`currentUrl(s)`). */
@@ -94,8 +105,10 @@ export class MnFileInput implements OnInit {
   /** Transient message for a rejected selection (accept/maxSize/maxFiles). */
   protected readonly internalError = signal<string | null>(null);
   private readonly configService = inject(MnConfigService);
-  private readonly sectionPath = inject(MN_SECTION_PATH, {optional: true}) ?? [];
-  private readonly explicitInstanceId = inject(MN_INSTANCE_ID, {optional: true});
+  private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
+  private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
+  /** Marks the view when a locale change re-resolves the config (OnPush). */
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
   /** Object-URL previews aligned to {@link files}; null for non-image entries. */
@@ -196,7 +209,7 @@ export class MnFileInput implements OnInit {
       size: this.props.size,
       borderRadius: this.props.borderRadius,
       shadow: this.props.shadow,
-      fullWidth: this.props.fullWidth ?? (this.displayMode !== 'compact'),
+      fullWidth: this.props.fullWidth ?? this.displayMode !== 'compact',
       dropzone: this.displayMode === 'dropzone',
       dragging: this.isDragging(),
       disabled: this.isDisabled,
@@ -233,7 +246,11 @@ export class MnFileInput implements OnInit {
   ngOnInit(): void {
     this.resolveConfig();
 
-    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => this.resolveConfig());
+    const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
+      this.resolveConfig();
+      // See mn-input-field: OnPush needs the locale change announced.
+      this.cdr.markForCheck();
+    });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
     this.destroyRef.onDestroy(() => this.revokeAll());
   }
@@ -243,10 +260,15 @@ export class MnFileInput implements OnInit {
    * @param val A `File`, an array of `File`, or null/undefined.
    */
   writeValue(val: unknown): void {
-    const next = Array.isArray(val) ? val.filter((f): f is File => f instanceof File)
-      : val instanceof File ? [val]
+    const next = Array.isArray(val)
+      ? val.filter((f): f is File => f instanceof File)
+      : val instanceof File
+        ? [val]
         : [];
     this.setFiles(next);
+    // The forms API writes in from outside (setValue, reset, patch); nothing marks
+    // this view for it.
+    this.cdr.markForCheck();
   }
 
   /**
@@ -273,6 +295,9 @@ export class MnFileInput implements OnInit {
    */
   setDisabledState(isDisabled: boolean): void {
     this.formDisabled = isDisabled;
+    // `control.disable()` / `.enable()` reaches us the same way `writeValue` does —
+    // from the forms API, with no event behind it.
+    this.cdr.markForCheck();
   }
 
   /**
@@ -379,14 +404,12 @@ export class MnFileInput implements OnInit {
   }
 
   /** Callback to notify Angular forms of value changes. */
-  private onChange: (val: unknown) => void = () => {
-  };
+  private onChange: (val: unknown) => void = () => {};
 
   // ========== Error handling (control validators) ==========
 
   /** Callback to notify Angular forms when the control is touched. */
-  private onTouched: () => void = () => {
-  };
+  private onTouched: () => void = () => {};
 
   /** Resolves UI strings from config, layering built-in defaults and prop overrides. */
   private resolveConfig(): void {
@@ -404,12 +427,16 @@ export class MnFileInput implements OnInit {
       removeLabel: 'Remove',
     };
 
-    this.uiConfig = {...builtIn, ...resolved};
-    if (this.props.label) this.uiConfig = {...this.uiConfig, label: this.props.label};
-    if (this.props.dropzoneHint) this.uiConfig = {...this.uiConfig, dropzoneHint: this.props.dropzoneHint};
-    if (this.props.dropActiveHint) this.uiConfig = {...this.uiConfig, dropActiveHint: this.props.dropActiveHint};
-    if (this.props.replaceLabel) this.uiConfig = {...this.uiConfig, replaceLabel: this.props.replaceLabel};
-    if (this.props.removeLabel) this.uiConfig = {...this.uiConfig, removeLabel: this.props.removeLabel};
+    this.uiConfig = { ...builtIn, ...resolved };
+    if (this.props.label) this.uiConfig = { ...this.uiConfig, label: this.props.label };
+    if (this.props.dropzoneHint)
+      this.uiConfig = { ...this.uiConfig, dropzoneHint: this.props.dropzoneHint };
+    if (this.props.dropActiveHint)
+      this.uiConfig = { ...this.uiConfig, dropActiveHint: this.props.dropActiveHint };
+    if (this.props.replaceLabel)
+      this.uiConfig = { ...this.uiConfig, replaceLabel: this.props.replaceLabel };
+    if (this.props.removeLabel)
+      this.uiConfig = { ...this.uiConfig, removeLabel: this.props.removeLabel };
   }
 
   /**
@@ -429,7 +456,7 @@ export class MnFileInput implements OnInit {
       const withinSize = accepted.filter((f) => f.size <= max);
       if (withinSize.length < accepted.length) {
         errorKey = 'maxSize';
-        errorArgs = {max: this.humanFileSize(max)};
+        errorArgs = { max: this.humanFileSize(max) };
       }
       accepted = withinSize;
     }
@@ -439,7 +466,7 @@ export class MnFileInput implements OnInit {
     if (this.props.multiple && this.props.maxFiles != null && next.length > this.props.maxFiles) {
       next = next.slice(0, this.props.maxFiles);
       errorKey = 'maxFiles';
-      errorArgs = {max: this.props.maxFiles};
+      errorArgs = { max: this.props.maxFiles };
     }
 
     if (errorKey) this.internalError.set(this.resolveMessage(errorKey, errorArgs));
@@ -546,7 +573,10 @@ export class MnFileInput implements OnInit {
   private matchesAccept(file: File): boolean {
     const accept = this.props.accept;
     if (!accept) return true;
-    const tokens = accept.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
+    const tokens = accept
+      .split(',')
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
     if (tokens.length === 0) return true;
     const name = file.name.toLowerCase();
     const type = (file.type ?? '').toLowerCase();

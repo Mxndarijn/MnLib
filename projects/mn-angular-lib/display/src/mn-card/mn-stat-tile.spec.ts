@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { MnStatTile } from './mn-stat-tile';
@@ -9,6 +9,7 @@ import { MnStatTile } from './mn-stat-tile';
 @Component({
   standalone: true,
   imports: [MnStatTile],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mn-stat-tile [label]="label" [value]="value" [data]="{ color: 'success' }">
       <i id="icon"></i>
@@ -31,7 +32,7 @@ describe('MnStatTile', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);

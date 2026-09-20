@@ -1,14 +1,12 @@
-import {Component, Input} from '@angular/core';
-import {MnInformationCardData} from './mn-information-cardTypes';
-import {mnInformationCardVariants} from './mn-information-cardVariants';
-import {NgClass} from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { MnInformationCardData } from './mn-information-cardTypes';
+import { mnInformationCardVariants } from './mn-information-cardVariants';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'mn-lib-information-card',
   standalone: true,
-  imports: [
-    NgClass
-  ],
+  imports: [NgClass],
   templateUrl: './mn-information-card.html',
 })
 export class MnInformationCard<TExtra = unknown> {
@@ -19,8 +17,7 @@ export class MnInformationCard<TExtra = unknown> {
       bottomBorder: this.data.bottomBorder,
       shadow: this.data.shadow,
       textPosition: this.data.textPosition,
-      borderRadius: this.data.borderRadius
+      borderRadius: this.data.borderRadius,
     });
   }
 }
-

@@ -358,7 +358,12 @@ export abstract class MnCollectionBase<T, DS extends MnCollectionDataSource<T>>
 
     promise
       .then(rows => this.processLoadedRows(rows))
-      .catch(() => this.loadingMoreRows = false);
+      .catch(() => {
+        // The resolved path is repainted by the `dataRows` subscription; a rejection reaches
+        // nothing, which would leave the load-more button spinning with no way to retry.
+        this.loadingMoreRows = false;
+        this.cdr.markForCheck();
+      });
   }
 
   isTemplateRef(value: unknown): value is TemplateRef<unknown> {

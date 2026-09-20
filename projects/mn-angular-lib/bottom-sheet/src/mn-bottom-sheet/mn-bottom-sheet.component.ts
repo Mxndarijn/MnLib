@@ -11,7 +11,7 @@ import {
   Output,
   viewChild,
 } from '@angular/core';
-import {NgClass} from '@angular/common';
+import { NgClass } from '@angular/common';
 
 /**
  * A viewport-anchored bottom sheet — the mobile presentation shared by the modal
@@ -157,16 +157,16 @@ export class MnBottomSheet implements OnInit, OnDestroy {
       if (event.cancelable) event.preventDefault();
     };
     // Capture phase, so the gesture is cancelled before any scroller sees it.
-    document.addEventListener('wheel', guard, {capture: true, passive: false});
-    document.addEventListener('touchmove', guard, {capture: true, passive: false});
+    document.addEventListener('wheel', guard, { capture: true, passive: false });
+    document.addEventListener('touchmove', guard, { capture: true, passive: false });
     this.scrollGuard = guard;
   }
 
   /** Releases the scroll guard. Idempotent. */
   private unlockScroll(): void {
     if (!this.scrollGuard) return;
-    document.removeEventListener('wheel', this.scrollGuard, {capture: true});
-    document.removeEventListener('touchmove', this.scrollGuard, {capture: true});
+    document.removeEventListener('wheel', this.scrollGuard, { capture: true });
+    document.removeEventListener('touchmove', this.scrollGuard, { capture: true });
     this.scrollGuard = null;
   }
 
@@ -184,8 +184,10 @@ export class MnBottomSheet implements OnInit, OnDestroy {
   }
 
   @HostBinding('class') get hostClasses(): string {
-    return `mn-bottom-sheet${this.isDismissing ? ' is-dismissing' : ''}`
-      + `${this.growWithKeyboard ? ' grow-with-keyboard' : ''}`;
+    return (
+      `mn-bottom-sheet${this.isDismissing ? ' is-dismissing' : ''}` +
+      `${this.growWithKeyboard ? ' grow-with-keyboard' : ''}`
+    );
   }
 
   /** Whether the viewport is currently narrow enough for the sheet to accept a swipe. */
@@ -200,7 +202,7 @@ export class MnBottomSheet implements OnInit, OnDestroy {
     this.isDraggingSheet = true;
     this.dragStartY = event.clientY;
     // Seed the velocity window so a fast flick that releases on the first move still measures.
-    this.lastSample = {y: event.clientY, t: event.timeStamp};
+    this.lastSample = { y: event.clientY, t: event.timeStamp };
     this.prevSample = this.lastSample;
     (event.target as HTMLElement).setPointerCapture(event.pointerId);
   }
@@ -210,7 +212,7 @@ export class MnBottomSheet implements OnInit, OnDestroy {
     // Only track downward movement.
     this.sheetDragY = Math.max(0, event.clientY - this.dragStartY);
     this.prevSample = this.lastSample;
-    this.lastSample = {y: event.clientY, t: event.timeStamp};
+    this.lastSample = { y: event.clientY, t: event.timeStamp };
   }
 
   onSheetPointerUp(): void {
@@ -264,8 +266,10 @@ export class MnBottomSheet implements OnInit, OnDestroy {
     if (this.sheetDragY > MnBottomSheet.SWIPE_DISMISS_THRESHOLD) {
       return true;
     }
-    return this.releaseVelocity() > MnBottomSheet.FLICK_VELOCITY
-      && this.sheetDragY > MnBottomSheet.FLICK_MIN_DISTANCE;
+    return (
+      this.releaseVelocity() > MnBottomSheet.FLICK_VELOCITY &&
+      this.sheetDragY > MnBottomSheet.FLICK_MIN_DISTANCE
+    );
   }
 
   /** Downward release speed (px/ms) from the last two pointer samples; 0 when unusable. */
@@ -304,13 +308,14 @@ export class MnBottomSheet implements OnInit, OnDestroy {
   /** Waits for the container's exit transition to end, with a reduced-motion short-circuit
    *  and a fallback timeout so it always resolves. */
   private awaitExit(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.prefersReducedMotion()) {
         resolve();
         return;
       }
-      const container = this.containerRef()?.nativeElement
-        ?? this.el.nativeElement.querySelector<HTMLElement>('.mn-sheet-container');
+      const container =
+        this.containerRef()?.nativeElement ??
+        this.el.nativeElement.querySelector<HTMLElement>('.mn-sheet-container');
       if (!container) {
         resolve();
         return;
@@ -331,8 +336,10 @@ export class MnBottomSheet implements OnInit, OnDestroy {
   }
 
   private prefersReducedMotion(): boolean {
-    return typeof window !== 'undefined'
-      && typeof window.matchMedia === 'function'
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
   }
 }

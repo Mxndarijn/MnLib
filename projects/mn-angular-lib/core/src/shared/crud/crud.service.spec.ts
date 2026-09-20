@@ -1,14 +1,20 @@
-import {TestBed} from '@angular/core/testing';
-import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
-import {CrudService} from './crud.service';
-import {API_BASE_URL} from './crud.tokens';
-import {HttpErrorResponse, HttpParams, HttpStatusCode, provideHttpClient} from '@angular/common/http';
-import {ApiError, QueryParams} from './crud.model';
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { CrudService } from './crud.service';
+import { API_BASE_URL } from './crud.tokens';
+import {
+  HttpErrorResponse,
+  HttpParams,
+  HttpStatusCode,
+  provideHttpClient,
+  withXhr,
+} from '@angular/common/http';
+import { ApiError, QueryParams } from './crud.model';
 
 type TestEntity = {
   id: number;
   name: string;
-}
+};
 
 class TestCrudService extends CrudService<TestEntity> {
   constructor() {
@@ -24,11 +30,11 @@ describe('CrudService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         TestCrudService,
-        { provide: API_BASE_URL, useValue: baseUrl }
-      ]
+        { provide: API_BASE_URL, useValue: baseUrl },
+      ],
     });
 
     service = TestBed.inject(TestCrudService);
@@ -51,7 +57,7 @@ describe('CrudService', () => {
     it('should return a list of entities on success', () => {
       const mockData: TestEntity[] = [{ id: 1, name: 'Test' }];
 
-      service.getAll().subscribe(result => {
+      service.getAll().subscribe((result) => {
         expect(result.ok).toBeTrue();
         if (result.ok) {
           expect(result.data).toEqual(mockData);
@@ -66,19 +72,20 @@ describe('CrudService', () => {
     it('should handle query parameters', () => {
       service.getAll({ search: 'term', active: true, tags: ['a', 'b'] }).subscribe();
 
-      const req = httpMock.expectOne(request =>
-        request.url === `${baseUrl}/test` &&
-        request.params.get('search') === 'term' &&
-        request.params.get('active') === 'true' &&
-        (request.params.getAll('tags')?.includes('a') ?? false) &&
-        (request.params.getAll('tags')?.includes('b') ?? false)
+      const req = httpMock.expectOne(
+        (request) =>
+          request.url === `${baseUrl}/test` &&
+          request.params.get('search') === 'term' &&
+          request.params.get('active') === 'true' &&
+          (request.params.getAll('tags')?.includes('a') ?? false) &&
+          (request.params.getAll('tags')?.includes('b') ?? false),
       );
       expect(req.request.method).toBe('GET');
       req.flush([]);
     });
 
     it('should return a failure result on error', () => {
-      service.getAll().subscribe(result => {
+      service.getAll().subscribe((result) => {
         expect(result.ok).toBeFalse();
         if (!result.ok) {
           expect(result.error.status).toBe(HttpStatusCode.InternalServerError);
@@ -94,7 +101,7 @@ describe('CrudService', () => {
     it('should return a single entity', () => {
       const mockData: TestEntity = { id: 1, name: 'Test' };
 
-      service.getById(1).subscribe(result => {
+      service.getById(1).subscribe((result) => {
         expect(result.ok).toBeTrue();
         if (result.ok) {
           expect(result.data).toEqual(mockData);
@@ -112,7 +119,7 @@ describe('CrudService', () => {
       const payload: Partial<TestEntity> = { name: 'New' };
       const mockResponse: TestEntity = { id: 1, name: 'New' };
 
-      service.create(payload).subscribe(result => {
+      service.create(payload).subscribe((result) => {
         expect(result.ok).toBeTrue();
         if (result.ok) {
           expect(result.data).toEqual(mockResponse);
@@ -166,10 +173,12 @@ describe('CrudService', () => {
       const errorResponse = new HttpErrorResponse({
         error: errorBody,
         status: 400,
-        statusText: 'Bad Request'
+        statusText: 'Bad Request',
       });
 
-      const mapped = (service as unknown as { mapHttpError: (e: unknown) => ApiError }).mapHttpError(errorResponse);
+      const mapped = (
+        service as unknown as { mapHttpError: (e: unknown) => ApiError }
+      ).mapHttpError(errorResponse);
       expect(mapped.backendMessage).toBe('Backend Error Message');
     });
 
@@ -177,16 +186,18 @@ describe('CrudService', () => {
       const errorBody = {
         errors: {
           email: ['Invalid format', 'Too short'],
-          password: ['Required']
-        }
+          password: ['Required'],
+        },
       };
       const errorResponse = new HttpErrorResponse({
         error: errorBody,
         status: 422,
-        statusText: 'Unprocessable Entity'
+        statusText: 'Unprocessable Entity',
       });
 
-      const mapped = (service as unknown as { mapHttpError: (e: unknown) => ApiError }).mapHttpError(errorResponse);
+      const mapped = (
+        service as unknown as { mapHttpError: (e: unknown) => ApiError }
+      ).mapHttpError(errorResponse);
       expect(mapped.validationErrors).toEqual(errorBody.errors);
     });
 
@@ -197,11 +208,11 @@ describe('CrudService', () => {
         HttpStatusCode.InternalServerError,
         HttpStatusCode.BadGateway,
         HttpStatusCode.ServiceUnavailable,
-        HttpStatusCode.GatewayTimeout
+        HttpStatusCode.GatewayTimeout,
       ];
 
       const svcWithMapHttpError = service as unknown as { mapHttpError: (e: unknown) => ApiError };
-      retryableStatuses.forEach(status => {
+      retryableStatuses.forEach((status) => {
         const errorResponse = new HttpErrorResponse({ status });
         const mapped = svcWithMapHttpError.mapHttpError(errorResponse);
         expect(mapped.retryable).toBeTrue();
@@ -219,12 +230,14 @@ describe('CrudService', () => {
         filter: 'test',
         tags: ['a', 'b'],
         empty: null,
-        missing: undefined
+        missing: undefined,
       };
 
-      const params = (service as unknown as {
-        toHttpParams: (q?: QueryParams) => HttpParams | undefined
-      }).toHttpParams(query);
+      const params = (
+        service as unknown as {
+          toHttpParams: (q?: QueryParams) => HttpParams | undefined;
+        }
+      ).toHttpParams(query);
       expect(params!.get('page')).toBe('1');
       expect(params!.get('filter')).toBe('test');
       expect(params!.getAll('tags')).toEqual(['a', 'b']);

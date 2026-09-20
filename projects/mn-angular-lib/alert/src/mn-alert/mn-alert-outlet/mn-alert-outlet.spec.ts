@@ -1,12 +1,13 @@
-import {Component, TemplateRef, ViewChild} from '@angular/core';
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {MnAlertOutletComponent} from './mn-alert-outlet';
-import {MnAlertStore} from '../mn-alert.store';
+import { Component, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { MnAlertOutletComponent } from './mn-alert-outlet';
+import { MnAlertStore } from '../mn-alert.store';
 
 @Component({
   standalone: true,
   imports: [MnAlertOutletComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <ng-template #tpl let-alert let-dismiss="dismiss">
       <div class="alert-item">
@@ -16,7 +17,7 @@ import {MnAlertStore} from '../mn-alert.store';
     </ng-template>
 
     <mn-alert-outlet [template]="tpl"></mn-alert-outlet>
-  `
+  `,
 })
 class HostComponent {
   @ViewChild('tpl', { static: true }) tpl!: TemplateRef<unknown>;
@@ -25,11 +26,10 @@ class HostComponent {
 @Component({
   standalone: true,
   imports: [MnAlertOutletComponent],
-  template: `
-    <mn-alert-outlet></mn-alert-outlet>`
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: ` <mn-alert-outlet></mn-alert-outlet>`,
 })
-class DefaultCardHostComponent {
-}
+class DefaultCardHostComponent {}
 
 describe('MnAlertOutletComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
@@ -39,7 +39,7 @@ describe('MnAlertOutletComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [MnAlertStore]
+      providers: [MnAlertStore],
     }).compileComponents();
 
     store = TestBed.inject(MnAlertStore);
@@ -52,19 +52,19 @@ describe('MnAlertOutletComponent', () => {
   }
 
   it('renders alerts from the store using the provided template context', () => {
-    store.show({ title: 'A', kind: 'info'});
+    store.show({ title: 'A', kind: 'info' });
     store.show({ title: 'B', kind: 'success' });
 
     fixture.detectChanges();
 
     const items = queryAllAlerts();
     expect(items.length).toBe(2);
-    const titles = items.map(el => el.nativeElement.querySelector('.title')!.textContent.trim());
+    const titles = items.map((el) => el.nativeElement.querySelector('.title')!.textContent.trim());
     expect(titles).toEqual(['A', 'B']);
   });
 
   it('dismiss in context removes the alert once its leave animation finishes', fakeAsync(() => {
-    const _id1 = store.show({title: 'A', kind: 'info'});
+    const _id1 = store.show({ title: 'A', kind: 'info' });
     store.show({ title: 'B', kind: 'success' });
 
     fixture.detectChanges();
@@ -80,7 +80,7 @@ describe('MnAlertOutletComponent', () => {
     fixture.detectChanges();
 
     const items = queryAllAlerts();
-    const titles = items.map(el => el.nativeElement.querySelector('.title')!.textContent.trim());
+    const titles = items.map((el) => el.nativeElement.querySelector('.title')!.textContent.trim());
     expect(titles).toEqual(['B']);
   }));
 });
@@ -92,7 +92,7 @@ describe('MnAlertOutletComponent countdown bar', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DefaultCardHostComponent],
-      providers: [MnAlertStore]
+      providers: [MnAlertStore],
     }).compileComponents();
 
     store = TestBed.inject(MnAlertStore);
@@ -102,11 +102,11 @@ describe('MnAlertOutletComponent countdown bar', () => {
   function progressBars(): HTMLElement[] {
     return fixture.debugElement
       .queryAll(By.css('.mn-alert-progress-bar'))
-      .map(el => el.nativeElement as HTMLElement);
+      .map((el) => el.nativeElement as HTMLElement);
   }
 
   it('runs the bar over the alert lifetime', () => {
-    store.show({title: 'Timed', kind: 'info', duration: 5000});
+    store.show({ title: 'Timed', kind: 'info', duration: 5000 });
     fixture.detectChanges();
 
     const bars = progressBars();
@@ -115,7 +115,7 @@ describe('MnAlertOutletComponent countdown bar', () => {
   });
 
   it('omits the bar for an alert that never auto-dismisses', () => {
-    store.show({title: 'Sticky', kind: 'info', duration: 0});
+    store.show({ title: 'Sticky', kind: 'info', duration: 0 });
     fixture.detectChanges();
 
     expect(progressBars().length).toBe(0);

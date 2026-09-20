@@ -1,4 +1,9 @@
-﻿import {ChangeDetectorRef, Component, OnInit, inject} from '@angular/core';
+﻿import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarEventData } from 'mn-angular-lib/calendar-core';
 import { CalendarEvent } from 'mn-angular-lib/calendar-core';
@@ -27,7 +32,9 @@ export class CalendarEventDefaultComponent implements CalendarEventData, OnInit 
   private formatter: CalendarDateFormatter;
 
   constructor() {
-    const formatter = inject<CalendarDateFormatter | null>(CALENDAR_DATE_FORMATTER, {optional: true});
+    const formatter = inject<CalendarDateFormatter | null>(CALENDAR_DATE_FORMATTER, {
+      optional: true,
+    });
 
     this.formatter = formatter ?? new DefaultCalendarDateFormatter();
   }

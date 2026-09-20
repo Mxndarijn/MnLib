@@ -14,10 +14,10 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule} from '@angular/forms';
-import {Subscription} from 'rxjs';
-import {MnModalRef} from 'mn-angular-lib/modal-core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { MnModalRef } from 'mn-angular-lib/modal-core';
 import {
   ActionStyle,
   CustomModalConfig,
@@ -34,18 +34,26 @@ import {
   WizardResult,
   WizardStepConfig,
 } from 'mn-angular-lib/modal-core';
-import {MnButton, MnButtonTypes} from 'mn-angular-lib/button';
-import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
-import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
-import {MnFooterActionsComponent} from '../mn-footer-actions/mn-footer-actions.component';
-import {MnLanguageService} from 'mn-angular-lib/core';
-import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
-import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from 'mn-angular-lib/modal-core';
+import { MnButton, MnButtonTypes } from 'mn-angular-lib/button';
+import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
+import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
+import { MnFooterActionsComponent } from '../mn-footer-actions/mn-footer-actions.component';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { LucideDynamicIcon, LucideIconData } from '@lucide/angular';
+import { MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE } from 'mn-angular-lib/modal-core';
 
 @Component({
   selector: 'mn-wizard-body',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, MnFooterActionsComponent, LucideDynamicIcon],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MnButton,
+    MnFormBodyComponent,
+    MnCustomBodyHostComponent,
+    MnFooterActionsComponent,
+    LucideDynamicIcon,
+  ],
   templateUrl: './mn-wizard-body.component.html',
   styleUrls: ['./mn-wizard-body.component.css'],
 })
@@ -133,7 +141,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
         // Merge top-level initialValue with step-level initialValue
         const mergedInitialValue = {
           ...(this.config.initialValue || {}),
-          ...(step.initialValue || {})
+          ...(step.initialValue || {}),
         };
 
         this.stepFormConfigs[step.id] = {
@@ -145,7 +153,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
           groupValidators: step.groupValidators,
           initialValue: mergedInitialValue,
           readOnly: this.config.readOnly,
-          disabled: this.config.disabled
+          disabled: this.config.disabled,
         } as FormModalConfig<unknown, unknown>;
       } else {
         // A component/template body (not a plain string) renders through the
@@ -199,7 +207,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   private buildStepBodyConfig(step: WizardStepConfig): CustomModalConfig | undefined {
     const body = step.body;
     if (!body || typeof body === 'string') return undefined;
-    const config: CustomModalConfig = {kind: ModalKind.CUSTOM, inputs: step.bodyInputs};
+    const config: CustomModalConfig = { kind: ModalKind.CUSTOM, inputs: step.bodyInputs };
     if (body instanceof TemplateRef) {
       config.template = body;
     } else {
@@ -243,12 +251,12 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private measureTallestStep(): void {
     if (this.config.sizeHeight || this.config.sizeWidth === ModalSize.FULL) return;
-    const wrappers = this.stepWrappers?.toArray().map(ref => ref.nativeElement) ?? [];
+    const wrappers = this.stepWrappers?.toArray().map((ref) => ref.nativeElement) ?? [];
     if (wrappers.length === 0) return;
 
     // Synchronous pre-paint pass: show one step at a time, read its height,
     // then restore the original display values (so there is no visible flicker).
-    const originalDisplay = wrappers.map(el => el.style.display);
+    const originalDisplay = wrappers.map((el) => el.style.display);
     let tallest = 0;
     for (let i = 0; i < wrappers.length; i++) {
       for (let j = 0; j < wrappers.length; j++) {
@@ -266,7 +274,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Get visible steps (filtered by visibility condition) */
   get visibleSteps(): WizardStepConfig[] {
-    return this.config.steps.filter(s => this.isStepVisible(s));
+    return this.config.steps.filter((s) => this.isStepVisible(s));
   }
 
   isStepVisible(step: WizardStepConfig): boolean {
@@ -275,15 +283,15 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get currentStep() {
-    return this.config.steps.find(s => s.id === this.currentStepId);
+    return this.config.steps.find((s) => s.id === this.currentStepId);
   }
 
   get currentVisibleIndex(): number {
-    return this.visibleSteps.findIndex(s => s.id === this.currentStepId);
+    return this.visibleSteps.findIndex((s) => s.id === this.currentStepId);
   }
 
   get currentStepIndex(): number {
-    return this.config.steps.findIndex(s => s.id === this.currentStepId);
+    return this.config.steps.findIndex((s) => s.id === this.currentStepId);
   }
 
   get canGoBack(): boolean {
@@ -390,8 +398,8 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     // formBodies only contains entries for steps that have stepFormConfigs
     // We need to find which form body index corresponds to the current step
     const formStepIds = this.config.steps
-      .filter(s => this.stepFormConfigs[s.id])
-      .map(s => s.id);
+      .filter((s) => this.stepFormConfigs[s.id])
+      .map((s) => s.id);
     const formIndex = formStepIds.indexOf(this.currentStepId);
     if (formIndex === -1) return undefined;
     return this.formBodies.toArray()[formIndex];
@@ -429,7 +437,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     const previousStepId = this.currentStepId;
 
     // Remove current step from visited so the circle resets
-    this.visitedStepIds = this.visitedStepIds.filter(id => id !== this.currentStepId);
+    this.visitedStepIds = this.visitedStepIds.filter((id) => id !== this.currentStepId);
 
     this.setCurrentStep(prevStep.id);
 
@@ -444,7 +452,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private setCurrentStep(stepId: ModalStepId): void {
     this.currentStepId = stepId;
-    this.currentStepTitle.set(this.config.steps.find(s => s.id === stepId)?.title);
+    this.currentStepTitle.set(this.config.steps.find((s) => s.id === stepId)?.title);
     // A new step always starts at its top — the shared scroller would otherwise
     // keep the previous step's offset. Instant, not smooth: a scroll animation
     // during a step swap reads as a glitch. Absent before the view is created.
@@ -518,8 +526,8 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.formBodies) return aggregated;
 
     const formStepIds = this.config.steps
-      .filter(s => this.stepFormConfigs[s.id])
-      .map(s => s.id);
+      .filter((s) => this.stepFormConfigs[s.id])
+      .map((s) => s.id);
 
     this.formBodies.toArray().forEach((fb, index) => {
       if (fb.form && formStepIds[index]) {
@@ -543,7 +551,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       case ActionStyle.SECONDARY:
         return { variant: 'outline', color: 'secondary' };
       case ActionStyle.GHOST:
-        return {variant: 'text', color: 'gray'};
+        return { variant: 'text', color: 'gray' };
       default:
         return { variant: 'outline', color: 'secondary' };
     }
@@ -558,11 +566,16 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       await action.handler(this.modalRef as unknown as ModalRef<unknown>);
     }
     if (action.closesModal) {
-      this.modalRef.close((action.closeReason || ModalCloseReason.PROGRAMMATIC) as unknown as WizardResult);
+      this.modalRef.close(
+        (action.closeReason || ModalCloseReason.PROGRAMMATIC) as unknown as WizardResult,
+      );
     }
   }
 
-  private async notifyStepChange(previousStepId: ModalStepId, direction: NavigationDirection): Promise<void> {
+  private async notifyStepChange(
+    previousStepId: ModalStepId,
+    direction: NavigationDirection,
+  ): Promise<void> {
     if (this.config.onStepChange) {
       await this.config.onStepChange.handle({
         previousStepId,

@@ -1,4 +1,11 @@
-import { Component, EventEmitter, inject, Input, Output, TemplateRef } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  TemplateRef,
+} from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { MnLanguageService, MnTranslatePipe } from 'mn-angular-lib/core';

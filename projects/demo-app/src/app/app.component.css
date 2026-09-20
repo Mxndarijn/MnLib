@@ -204,6 +204,10 @@
 
 .backdrop {
   display: none;
+  /* A <button> so closing the drawer is reachable from the keyboard; strip the chrome. */
+  padding: 0;
+  border: 0;
+  cursor: pointer;
 }
 
 .menu-btn {

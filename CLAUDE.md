@@ -65,6 +65,32 @@ Rules:
 
 **i18n** — all user-facing strings in templates must use the translation pipe or interpolation, never hardcoded English. Run `npm run lint:i18n` to verify.
 
+**Change detection — every component is OnPush.** Angular 22 made `OnPush` the default and renamed
+the old default to `ChangeDetectionStrategy.Eager`; the whole library runs on the new default, so a
+component simply omits the property (a handful still spell `OnPush` out, which is the same thing).
+Never write `Eager` in library code —
+`@angular-eslint/prefer-on-push-component-change-detection` fails the build on it. The consuming
+apps are zoneless, where an unmarked view is not checked at all, so **state that changes outside a
+listener Angular wraps has to mark itself** with `inject(ChangeDetectorRef)` + `markForCheck()`:
+a subscription, a value written after an `await`, a timer or observer callback, a
+ControlValueAccessor's `writeValue` (the forms API writes in from outside), and any public method a
+consumer can call without an event behind it (`toggle()`, `close()`, …). A template or `@HostListener`
+event, a signal write and an input binding all mark the view by themselves and need nothing. Writing
+straight to the DOM (`el.style…`) needs nothing either.
+
+The Karma suite runs **with** zone.js, so it cannot prove any of this on its own; the regression
+coverage lives in `*.zoneless.spec.ts` files that add `provideZonelessChangeDetection()`, use
+`fixture.autoDetectChanges()` and deliberately never call `detectChanges()` after the act. Drive the
+component through a host with a signal-backed binding, the way an app does, and always confirm a new
+spec fails with the fix reverted.
+
+**Spec host components are the exception**: a `@Component` inside a `describe()` keeps
+`ChangeDetectionStrategy.Eager`, because an OnPush host that nothing marks dirty makes
+`fixture.detectChanges()` skip the component under test. The lint rule stands down for `*.spec.ts`.
+
+**Node** — `engines` in the root `package.json` states the floor Angular 22 requires
+(`^22.22.3 || ^24.15.0 || >=26.0.0`); an older Node fails the CLI outright.
+
 **Config system** — `MnConfigService.resolve()` merges `defaults` → section `overrides` → instance `#id` overrides. Components inject `MN_SECTION_PATH` and `MN_INSTANCE_ID` tokens to scope config resolution.
 
 ## CI/CD pipeline (`.github/workflows/main.yml`)

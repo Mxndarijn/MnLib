@@ -1,4 +1,12 @@
-import { Component, HostBinding, Input, OnChanges, OnInit, inject, ElementRef } from '@angular/core';
+import {
+  Component,
+  HostBinding,
+  Input,
+  OnChanges,
+  OnInit,
+  inject,
+  ElementRef,
+} from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MnIconTypes } from './mn-iconTypes';
 import { mnIconVariants } from './mn-iconVariants';

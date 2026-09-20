@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { MnCard } from './mn-card';
@@ -10,6 +10,7 @@ import { MnCardTypes } from './mn-cardTypes';
 @Component({
   standalone: true,
   imports: [MnCard],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mn-card class="min-w-0 flex-1" [data]="data" [heading]="heading" [enterDelayMs]="delay">
       <i cardIcon id="icon"></i>
@@ -46,7 +47,7 @@ describe('MnCard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);
@@ -65,7 +66,7 @@ describe('MnCard', () => {
     expect(card().querySelector('#body')).not.toBeNull();
   });
 
-  it('keeps the consumer\'s own classes beside its own', () => {
+  it("keeps the consumer's own classes beside its own", () => {
     expect(classes()).toContain('min-w-0');
     expect(classes()).toContain('flex-1');
   });

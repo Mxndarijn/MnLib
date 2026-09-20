@@ -7,7 +7,15 @@ import {
   LucideUsersRound,
   LucideWallet,
 } from '@lucide/angular';
-import { MnBadge, MnButton, MnCard, MnIconChip, MnProportionBar, MnProportionSegment, MnStatTile } from 'mn-angular-lib';
+import {
+  MnBadge,
+  MnButton,
+  MnCard,
+  MnIconChip,
+  MnProportionBar,
+  MnProportionSegment,
+  MnStatTile,
+} from 'mn-angular-lib';
 import { DemoPageComponent } from '../shared/demo-page.component';
 import { DemoExampleComponent } from '../shared/demo-example.component';
 

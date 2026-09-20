@@ -8,14 +8,18 @@
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges
+  SimpleChanges,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Observable, Subject, takeUntil} from 'rxjs';
-import {CalendarEvent} from 'mn-angular-lib/calendar-core';
-import {CalendarConfig, DEFAULT_CALENDAR_CONFIG, resolveCalendarConfig} from 'mn-angular-lib/calendar-core';
-import {UpcomingEventRowComponent} from '../upcoming-event-row/upcoming-event-row.component';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { CommonModule } from '@angular/common';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { CalendarEvent } from 'mn-angular-lib/calendar-core';
+import {
+  CalendarConfig,
+  DEFAULT_CALENDAR_CONFIG,
+  resolveCalendarConfig,
+} from 'mn-angular-lib/calendar-core';
+import { UpcomingEventRowComponent } from '../upcoming-event-row/upcoming-event-row.component';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /**
  * Sidebar component that lists the next 10 upcoming events
@@ -68,7 +72,9 @@ export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-    const resolved = this.config ? resolveCalendarConfig(this.config) : { ...DEFAULT_CALENDAR_CONFIG };
+    const resolved = this.config
+      ? resolveCalendarConfig(this.config)
+      : { ...DEFAULT_CALENDAR_CONFIG };
     this.title = resolved.upcomingEventsTitle;
     this.noEventsMessage = resolved.noUpcomingEvents;
 
@@ -76,10 +82,10 @@ export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {
     // itself a reason for Angular to re-render, so the sidebar would keep showing the events it
     // was first given.
     if (this.eventsChanged) {
-      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
+      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe((events) => {
         const now = new Date();
         this.upcomingEvents = events
-          .filter(e => e.endTime > now)
+          .filter((e) => e.endTime > now)
           .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
           .slice(0, 10);
         this.cdr.markForCheck();

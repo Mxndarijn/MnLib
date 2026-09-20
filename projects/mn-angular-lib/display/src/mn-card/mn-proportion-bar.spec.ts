@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { MnProportionBar } from './mn-proportion-bar';
@@ -10,7 +10,12 @@ import { MnProportionSegment } from './mn-proportion-barTypes';
 @Component({
   standalone: true,
   imports: [MnProportionBar],
-  template: `<mn-proportion-bar [segments]="segments" [total]="total" ariaLabel="Turnout"></mn-proportion-bar>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `<mn-proportion-bar
+    [segments]="segments"
+    [total]="total"
+    ariaLabel="Turnout"
+  ></mn-proportion-bar>`,
 })
 class HostComponent {
   segments: MnProportionSegment[] = [
@@ -34,7 +39,7 @@ describe('MnProportionBar', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);

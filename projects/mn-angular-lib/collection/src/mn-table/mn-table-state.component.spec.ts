@@ -1,14 +1,14 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {BehaviorSubject} from 'rxjs';
-import {MnCollectionState, MnTable, TableDataSource} from 'mn-angular-lib';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { MnCollectionState, MnTable, TableDataSource } from 'mn-angular-lib';
 
 /** Minimal row shape used by the state-rendering tests. */
 type Row = {
   id: string;
   name: string;
-}
+};
 
 /**
  * Verifies that {@link MnTable} renders the correct chrome for each
@@ -29,7 +29,7 @@ describe('MnTable data lifecycle state', () => {
     return {
       dataRows: rows,
       getID: (row) => row.id,
-      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
       emptyMessage: 'No items',
       errorMessage: 'Could not load',
       state,
@@ -41,7 +41,7 @@ describe('MnTable data lifecycle state', () => {
     rows = new BehaviorSubject<Row[]>([]);
     await TestBed.configureTestingModule({
       imports: [MnTable],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
     fixture = TestBed.createComponent(MnTable<Row>);
   });

@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 /**
  * One example: a small label + optional hint, then the live component in open

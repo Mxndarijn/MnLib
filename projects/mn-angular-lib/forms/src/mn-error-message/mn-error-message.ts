@@ -1,4 +1,4 @@
-﻿import {Component, Input} from '@angular/core';
+﻿import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'mn-error-message',
@@ -6,6 +6,6 @@
   templateUrl: './mn-error-message.html',
 })
 export class MnErrorMessage {
-  @Input({ required: true }) errorMessage! :string;
+  @Input({ required: true }) errorMessage!: string;
   @Input({ required: true }) id!: string;
 }

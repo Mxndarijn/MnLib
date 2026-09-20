@@ -30,6 +30,16 @@ module.exports = defineConfig([
     },
   },
   {
+    // A spec's host component is scaffolding, not shipped UI. Angular 22 makes an omitted
+    // strategy OnPush, and an OnPush host that nothing marks dirty is skipped by
+    // `fixture.detectChanges()` — the component under test then never re-renders. Those hosts
+    // keep `ChangeDetectionStrategy.Eager`, so this rule has to stand down for them.
+    files: ["**/*.spec.ts"],
+    rules: {
+      "@angular-eslint/prefer-on-push-component-change-detection": "off",
+    },
+  },
+  {
     files: ["**/*.html"],
     extends: [
       angular.configs.templateRecommended,

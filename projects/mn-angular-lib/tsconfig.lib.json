@@ -12,12 +12,6 @@
     // workspace mapping to sources (tsconfig.json) would compile an entry into its dependants.
     "paths": {}
   },
-  "include": [
-    "src/**/*.ts",
-    "*/public-api.ts",
-    "*/src/**/*.ts"
-  ],
-  "exclude": [
-    "**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts", "*/public-api.ts", "*/src/**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
 }

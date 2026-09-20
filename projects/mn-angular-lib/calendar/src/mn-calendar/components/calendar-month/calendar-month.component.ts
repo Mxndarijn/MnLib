@@ -1,16 +1,25 @@
-﻿import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Observable, Subject, takeUntil} from 'rxjs';
-import {CalendarEvent} from 'mn-angular-lib/calendar-core';
+﻿import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { CalendarEvent } from 'mn-angular-lib/calendar-core';
 import {
   CalendarConfig,
   DEFAULT_CALENDAR_CONFIG,
   MonthItem,
-  resolveCalendarConfig
+  resolveCalendarConfig,
 } from 'mn-angular-lib/calendar-core';
-import {CalendarDateFormatter} from 'mn-angular-lib/calendar-core';
-import {DefaultCalendarDateFormatter} from 'mn-angular-lib/calendar-core';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { CalendarDateFormatter } from 'mn-angular-lib/calendar-core';
+import { DefaultCalendarDateFormatter } from 'mn-angular-lib/calendar-core';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /**
  * Month grid view showing a 7Ã—6 grid of day cells.
@@ -64,7 +73,9 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const resolved = this.config ? resolveCalendarConfig(this.config) : { ...DEFAULT_CALENDAR_CONFIG };
+    const resolved = this.config
+      ? resolveCalendarConfig(this.config)
+      : { ...DEFAULT_CALENDAR_CONFIG };
     this.weekdayLabels = resolved.shortDayNames;
     this.moreEventsLabel = resolved.moreEventsLabel;
     this.buildMonth();
@@ -74,7 +85,7 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
     // whose events arrive from a stream — a fetch, a parent seeding its list — stays blank until
     // some unrelated interaction happens to trigger change detection.
     if (this.eventsChanged) {
-      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
+      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe((events) => {
         this.events = events;
         this.buildMonth();
         this.cdr.markForCheck();
@@ -82,7 +93,7 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
     }
 
     if (this.focusDayChanged) {
-      this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe(date => {
+      this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe((date) => {
         this.focusDay = date;
         this.buildMonth();
         this.cdr.markForCheck();
@@ -149,10 +160,11 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
 
   private createMonthItem(date: Date, isCurrentMonth: boolean, today: Date): MonthItem {
     const isToday = this.formatter.isSameDay(date, today);
-    const dayEvents = this.events.filter(e =>
-      this.formatter.isSameDay(e.startTime, date) ||
-      this.formatter.isSameDay(e.endTime, date) ||
-      (e.startTime < date && e.endTime > date)
+    const dayEvents = this.events.filter(
+      (e) =>
+        this.formatter.isSameDay(e.startTime, date) ||
+        this.formatter.isSameDay(e.endTime, date) ||
+        (e.startTime < date && e.endTime > date),
     );
 
     return {
@@ -160,7 +172,7 @@ export class CalendarMonthComponent implements OnInit, OnDestroy {
       dayNumber: date.getDate(),
       isCurrentMonth,
       isToday,
-      events: dayEvents
+      events: dayEvents,
     };
   }
 }
