@@ -1,6 +1,6 @@
 {
   "name": "mn-angular-lib",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "peerDependencies": {
     "@angular/common": "^22.1.7",
     "@angular/core": "^22.1.7",
