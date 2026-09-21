@@ -665,6 +665,9 @@ export class MnTable<T = object>
     if (!this.widthsPinned) return;
     this.pinnedWidths = new Map();
     this.widthsPinned = false;
+    // The window:resize listener marks the view for us; a container-only resize arrives
+    // through the ResizeObserver, which does not.
+    this.cdr.markForCheck();
     // Row heights are about to change back; the floor measured for the pinned
     // layout does not describe the automatic one.
     this.invalidatePageHeight();

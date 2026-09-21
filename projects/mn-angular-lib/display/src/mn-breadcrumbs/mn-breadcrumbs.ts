@@ -1,8 +1,14 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+} from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
-import {MnLanguageService, MnTranslatePipe} from 'mn-angular-lib/core';
-import {MnBreadcrumbItem, MnBreadcrumbsData} from './mn-breadcrumbsTypes';
-import {mnBreadcrumbsVariants} from './mn-breadcrumbsVariants';
+import { MnLanguageService, MnTranslatePipe } from 'mn-angular-lib/core';
+import { MnBreadcrumbItem, MnBreadcrumbsData } from './mn-breadcrumbsTypes';
+import { mnBreadcrumbsVariants } from './mn-breadcrumbsVariants';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
 

@@ -1,7 +1,13 @@
-import {Component, EventEmitter, HostBinding, Input, Output} from '@angular/core';
-import {NgTemplateOutlet} from '@angular/common';
-import {MnBottomSheet} from 'mn-angular-lib/bottom-sheet';
-import {MnKeyboardLabels, MnKeyboardLayout, MnKeyboardPresentation} from './mn-keyboard.types';
+import {
+  Component,
+  EventEmitter,
+  HostBinding,
+  Input,
+  Output,
+} from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { MnBottomSheet } from 'mn-angular-lib/bottom-sheet';
+import { MnKeyboardLabels, MnKeyboardLayout, MnKeyboardPresentation } from './mn-keyboard.types';
 
 /** QWERTY letter rows, lower-case. Rendered upper-case when {@link MnKeyboard.uppercase} is set. */
 const ALPHA_ROWS: readonly string[][] = [

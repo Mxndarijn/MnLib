@@ -1,20 +1,25 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import {MnLanguageService} from 'mn-angular-lib/core';
-import {MnBreadcrumbs} from './mn-breadcrumbs';
-import {MnBreadcrumbItem, MnBreadcrumbsData} from './mn-breadcrumbsTypes';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { MnBreadcrumbs } from './mn-breadcrumbs';
+import { MnBreadcrumbItem, MnBreadcrumbsData } from './mn-breadcrumbsTypes';
 
 /** Minimal host so the element-selector component can be driven and observed. */
 @Component({
   standalone: true,
   imports: [MnBreadcrumbs],
-  template: `<mn-breadcrumbs [data]="data" (crumbClick)="onCrumb($event)" (back)="onBack()"></mn-breadcrumbs>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `<mn-breadcrumbs
+    [data]="data"
+    (crumbClick)="onCrumb($event)"
+    (back)="onBack()"
+  ></mn-breadcrumbs>`,
 })
 class HostComponent {
-  data: MnBreadcrumbsData = {items: []};
+  data: MnBreadcrumbsData = { items: [] };
   clicked?: MnBreadcrumbItem;
   backCount = 0;
 
@@ -43,7 +48,9 @@ describe('MnBreadcrumbs', () => {
    * beside the `ol` rather than instead of it, so CSS alone decides which shows.
    */
   const collapsed = (): HTMLElement | null =>
-    fixture.nativeElement.querySelector('nav > a[class*="sm:hidden"], nav > button[class*="sm:hidden"]');
+    fixture.nativeElement.querySelector(
+      'nav > a[class*="sm:hidden"], nav > button[class*="sm:hidden"]',
+    );
 
   /**
    * Clicks an element while cancelling the browser's default action, so an
@@ -51,14 +58,14 @@ describe('MnBreadcrumbs', () => {
    * page (a real navigation reloads the runner and disconnects the browser).
    */
   const clickNoNav = (el: HTMLElement): void => {
-    el.addEventListener('click', (e) => e.preventDefault(), {once: true});
+    el.addEventListener('click', (e) => e.preventDefault(), { once: true });
     el.click();
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);
@@ -71,7 +78,13 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('renders one crumb per item with separators between them', () => {
-    host.data = {items: [{label: 'Home', href: '/'}, {label: 'Library', href: '/lib'}, {label: 'Current'}]};
+    host.data = {
+      items: [
+        { label: 'Home', href: '/' },
+        { label: 'Library', href: '/lib' },
+        { label: 'Current' },
+      ],
+    };
     fixture.detectChanges();
 
     expect(crumbs().length).toBe(3);
@@ -80,7 +93,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('marks the last crumb as the current page and never a link', () => {
-    host.data = {items: [{label: 'Home', href: '/'}, {label: 'Current'}]};
+    host.data = { items: [{ label: 'Home', href: '/' }, { label: 'Current' }] };
     fixture.detectChanges();
 
     const last = crumbs()[1].querySelector('span[aria-current="page"]');
@@ -89,7 +102,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('renders a linked crumb as an anchor carrying its href', () => {
-    host.data = {items: [{label: 'Home', href: '/home'}, {label: 'Current'}]};
+    host.data = { items: [{ label: 'Home', href: '/home' }, { label: 'Current' }] };
     fixture.detectChanges();
 
     const anchor = crumbs()[0].querySelector('a');
@@ -99,7 +112,7 @@ describe('MnBreadcrumbs', () => {
 
   it('emits crumbClick and runs the crumb callback on click', () => {
     const spy = jasmine.createSpy('onClick');
-    host.data = {items: [{label: 'Home', onClick: spy}, {label: 'Current'}]};
+    host.data = { items: [{ label: 'Home', onClick: spy }, { label: 'Current' }] };
     fixture.detectChanges();
 
     crumbs()[0].querySelector('button')!.click();
@@ -108,7 +121,13 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('offers the parent crumb as a collapsed control, hidden from sm up', () => {
-    host.data = {items: [{label: 'Home', href: '/'}, {label: 'Library', href: '/lib'}, {label: 'Current'}]};
+    host.data = {
+      items: [
+        { label: 'Home', href: '/' },
+        { label: 'Library', href: '/lib' },
+        { label: 'Current' },
+      ],
+    };
     fixture.detectChanges();
 
     // The trail itself only exists from `sm`; below it the parent takes over.
@@ -120,7 +139,9 @@ describe('MnBreadcrumbs', () => {
 
   it('emits crumbClick for the parent when the collapsed control is used', () => {
     const spy = jasmine.createSpy('onClick');
-    host.data = {items: [{label: 'Home'}, {label: 'Library', onClick: spy}, {label: 'Current'}]};
+    host.data = {
+      items: [{ label: 'Home' }, { label: 'Library', onClick: spy }, { label: 'Current' }],
+    };
     fixture.detectChanges();
 
     collapsed()!.click();
@@ -130,7 +151,11 @@ describe('MnBreadcrumbs', () => {
 
   it('keeps every crumb at every width when collapse is never', () => {
     host.data = {
-      items: [{label: 'Home', href: '/'}, {label: 'Library', href: '/lib'}, {label: 'Current'}],
+      items: [
+        { label: 'Home', href: '/' },
+        { label: 'Library', href: '/lib' },
+        { label: 'Current' },
+      ],
       collapse: 'never',
     };
     fixture.detectChanges();
@@ -140,7 +165,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('leaves a single-crumb trail whole: there is nowhere to go up to', () => {
-    host.data = {items: [{label: 'Current'}]};
+    host.data = { items: [{ label: 'Current' }] };
     fixture.detectChanges();
 
     expect(collapsed()).toBeNull();
@@ -148,7 +173,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('degrades to a Back control when no crumbs are given', () => {
-    host.data = {items: []};
+    host.data = { items: [] };
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('ol')).toBeNull();
@@ -156,7 +181,7 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('renders the Back control as an anchor when a backHref is set', () => {
-    host.data = {items: [], backHref: '/parent'};
+    host.data = { items: [], backHref: '/parent' };
     fixture.detectChanges();
 
     const control = backControl();
@@ -166,7 +191,7 @@ describe('MnBreadcrumbs', () => {
 
   it('emits back without touching history when a backHref is set', () => {
     const backSpy = spyOn(window.history, 'back');
-    host.data = {items: [], backHref: '/parent'};
+    host.data = { items: [], backHref: '/parent' };
     fixture.detectChanges();
 
     clickNoNav(backControl()!);
@@ -176,7 +201,7 @@ describe('MnBreadcrumbs', () => {
 
   it('emits back and steps through history when no backHref is set', () => {
     const backSpy = spyOn(window.history, 'back');
-    host.data = {items: []};
+    host.data = { items: [] };
     fixture.detectChanges();
 
     backControl()!.click();
@@ -189,7 +214,7 @@ describe('MnBreadcrumbs', () => {
   // and the Back control defaulted to the bare key `back`, which the translate pipe
   // echoed verbatim as lowercase "back" in any app that had not defined it.
   it('labels the Back control in English when no key is defined', () => {
-    host.data = {items: []};
+    host.data = { items: [] };
     fixture.detectChanges();
 
     expect(backControl()!.textContent!.trim()).toBe('Back');
@@ -200,7 +225,7 @@ describe('MnBreadcrumbs', () => {
       'mnBreadcrumbs.label': 'Kruimelpad',
       'mnBreadcrumbs.back': 'Terug',
     });
-    host.data = {items: []};
+    host.data = { items: [] };
     fixture.detectChanges();
 
     expect(root().getAttribute('aria-label')).toBe('Kruimelpad');
@@ -208,13 +233,13 @@ describe('MnBreadcrumbs', () => {
   });
 
   it('translates a caller-supplied backLabel key, and passes a literal through', () => {
-    TestBed.inject(MnLanguageService).registerTranslations('en', {'nav.parent': 'Naar boven'});
+    TestBed.inject(MnLanguageService).registerTranslations('en', { 'nav.parent': 'Naar boven' });
 
-    host.data = {items: [], backLabel: 'nav.parent'};
+    host.data = { items: [], backLabel: 'nav.parent' };
     fixture.detectChanges();
     expect(backControl()!.textContent!.trim()).toBe('Naar boven');
 
-    host.data = {items: [], backLabel: 'Overzicht'};
+    host.data = { items: [], backLabel: 'Overzicht' };
     fixture.detectChanges();
     expect(backControl()!.textContent!.trim()).toBe('Overzicht');
   });

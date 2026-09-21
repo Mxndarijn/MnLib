@@ -3,13 +3,7 @@
 @Component({
   selector: 'mn-lib',
   imports: [],
-  template: `
-    <p>
-      mn-angular-lib works!
-    </p>
-  `,
+  template: ` <p>mn-angular-lib works!</p> `,
   styles: ``,
 })
-export class MnAngularLib {
-
-}
+export class MnAngularLib {}

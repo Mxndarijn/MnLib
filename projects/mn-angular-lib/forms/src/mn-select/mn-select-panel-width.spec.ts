@@ -1,12 +1,12 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
-import {Subject} from 'rxjs';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
 
-import {MnSelect} from './mn-select';
-import {MnSelectProps} from './mn-selectTypes';
-import {MnConfigService} from 'mn-angular-lib/core';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { MnSelect } from './mn-select';
+import { MnSelectProps } from './mn-selectTypes';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /**
  * Width of the anchored panel. It used to be pinned to the trigger's width, so a compact trigger
@@ -19,15 +19,15 @@ import {MnLanguageService} from 'mn-angular-lib/core';
 @Component({
   standalone: true,
   imports: [MnSelect, FormsModule],
-  template: `
-    <div style="width: 56px">
-      <mn-lib-select [props]="props" [(ngModel)]="value"></mn-lib-select>
-    </div>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: ` <div style="width: 56px">
+    <mn-lib-select [props]="props" [(ngModel)]="value"></mn-lib-select>
+  </div>`,
 })
 class HostComponent {
   props: MnSelectProps = {
     id: 'width-select',
-    options: [5, 10, 25, 50].map(size => ({label: String(size), value: size})),
+    options: [5, 10, 25, 50].map((size) => ({ label: String(size), value: size })),
     searchable: false,
     mobileSheet: false,
     fullWidth: true,
@@ -43,7 +43,7 @@ describe('MnSelect (panel width)', () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
-        {provide: MnConfigService, useValue: {resolve: () => ({}) as never}},
+        { provide: MnConfigService, useValue: { resolve: () => ({}) as never } },
         {
           provide: MnLanguageService,
           useValue: {

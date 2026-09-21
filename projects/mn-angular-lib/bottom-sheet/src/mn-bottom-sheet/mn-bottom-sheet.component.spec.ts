@@ -1,6 +1,6 @@
-import {Component, ViewChild} from '@angular/core';
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {MnBottomSheet} from './mn-bottom-sheet.component';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { MnBottomSheet } from './mn-bottom-sheet.component';
 
 /**
  * Host that projects a marker body into the sheet, so the tests can exercise the
@@ -9,6 +9,7 @@ import {MnBottomSheet} from './mn-bottom-sheet.component';
 @Component({
   standalone: true,
   imports: [MnBottomSheet],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mn-bottom-sheet
       [showBackdrop]="showBackdrop"
@@ -40,7 +41,7 @@ function ptr(clientY: number, timeStamp: number): PointerEvent {
     clientY,
     timeStamp,
     pointerId: 1,
-    target: {closest: () => null, setPointerCapture: () => undefined},
+    target: { closest: () => null, setPointerCapture: () => undefined },
   } as unknown as PointerEvent;
 }
 
@@ -72,19 +73,19 @@ describe('MnBottomSheet', () => {
 
   /** Forces the viewport to the narrow width the swipe gesture requires to arm. */
   function forceNarrow(): void {
-    Object.defineProperty(window, 'innerWidth', {value: 375, configurable: true});
+    Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true });
   }
 
   beforeEach(async () => {
     originalWidth = window.innerWidth;
-    await TestBed.configureTestingModule({imports: [HostComponent]}).compileComponents();
+    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
     host = fixture.componentInstance;
     fixture.detectChanges();
   });
 
   afterEach(() => {
-    Object.defineProperty(window, 'innerWidth', {value: originalWidth, configurable: true});
+    Object.defineProperty(window, 'innerWidth', { value: originalWidth, configurable: true });
   });
 
   it('renders the container, backdrop, grabber and projected body by default', () => {
@@ -213,7 +214,7 @@ describe('MnBottomSheet', () => {
   describe('scroll lock', () => {
     /** Dispatches a cancellable wheel from a node and reports whether it was blocked. */
     function wheelFrom(node: EventTarget): boolean {
-      const event = new WheelEvent('wheel', {bubbles: true, cancelable: true});
+      const event = new WheelEvent('wheel', { bubbles: true, cancelable: true });
       node.dispatchEvent(event);
       return event.defaultPrevented;
     }

@@ -13,19 +13,24 @@ import {
   Input,
   OnInit,
   Renderer2,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
-import {NgClass, NgTemplateOutlet} from '@angular/common';
-import {MnSelectErrorMessageData, MnSelectOption, MnSelectProps, MnSelectUIConfig} from './mn-selectTypes';
-import {FormsModule, NgControl, ValidationErrors, Validators} from '@angular/forms';
-import {mnSelectVariants} from './mn-selectVariants';
-import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnInputField} from '../mn-input-field';
-import {MnBottomSheet} from 'mn-angular-lib/bottom-sheet';
-import {MnConfigService} from "mn-angular-lib/core";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "mn-angular-lib/core";
-import {MnLanguageService} from "mn-angular-lib/core";
-import {skip} from "rxjs";
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import {
+  MnSelectErrorMessageData,
+  MnSelectOption,
+  MnSelectProps,
+  MnSelectUIConfig,
+} from './mn-selectTypes';
+import { FormsModule, NgControl, ValidationErrors, Validators } from '@angular/forms';
+import { mnSelectVariants } from './mn-selectVariants';
+import { MnErrorMessage } from '../mn-error-message/mn-error-message';
+import { MnInputField } from '../mn-input-field';
+import { MnBottomSheet } from 'mn-angular-lib/bottom-sheet';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { skip } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
@@ -72,7 +77,15 @@ function claim(event: KeyboardEvent): void {
 @Component({
   selector: 'mn-lib-select',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, FormsModule, MnErrorMessage, MnInputField, MnBottomSheet, LucideDynamicIcon],
+  imports: [
+    NgClass,
+    NgTemplateOutlet,
+    FormsModule,
+    MnErrorMessage,
+    MnInputField,
+    MnBottomSheet,
+    LucideDynamicIcon,
+  ],
   templateUrl: './mn-select.html',
   host: {
     // Without an explicit host width the inline host collapses to its content size, so
@@ -86,9 +99,9 @@ export class MnSelect implements OnInit {
   /** Lucide icons the template renders. */
   protected readonly icons = ICONS;
 
-  ngControl = inject(NgControl, {optional: true, self: true});
+  ngControl = inject(NgControl, { optional: true, self: true });
 
-  @Input({required: true}) props!: MnSelectProps;
+  @Input({ required: true }) props!: MnSelectProps;
 
   /** Currently selected value */
   selectedValue: unknown = null;
@@ -105,8 +118,8 @@ export class MnSelect implements OnInit {
   protected uiConfig: MnSelectUIConfig = {};
 
   private readonly configService = inject(MnConfigService);
-  private readonly sectionPath = inject(MN_SECTION_PATH, {optional: true}) ?? [];
-  private readonly explicitInstanceId = inject(MN_INSTANCE_ID, {optional: true});
+  private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
+  private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
   private readonly elRef = inject(ElementRef);
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
@@ -118,11 +131,12 @@ export class MnSelect implements OnInit {
   protected readonly checkIcon = ICONS.Check;
 
   /** Reference to the trigger element for positioning the dropdown. */
-  @ViewChild('trigger', {static: false}) triggerRef!: ElementRef<HTMLElement>;
+  @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
 
   /** Layout classes for the anchored popover panel. The mobile sheet is rendered by
    *  mn-bottom-sheet instead, so it no longer needs a branch here. */
-  readonly panelClasses = 'fixed z-9999 w-max bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+  readonly panelClasses =
+    'fixed z-9999 w-max bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
 
   /** The panel's own height cap in pixels: the `max-h-60` above, restated for the placement maths. */
   static readonly PANEL_MAX_HEIGHT_PX = 240;
@@ -196,10 +210,8 @@ export class MnSelect implements OnInit {
     maxHeight: null,
   };
 
-  private onChange: (val: unknown) => void = () => {
-  };
-  private onTouched: () => void = () => {
-  };
+  private onChange: (val: unknown) => void = () => {};
+  private onTouched: () => void = () => {};
 
   private readonly builtInErrorMessages: Record<string, MnSelectErrorMessageData> = {
     required: 'Please select an option',
@@ -216,7 +228,7 @@ export class MnSelect implements OnInit {
    * become the containing block and push the panel to the middle of the screen — also broken
    * on iOS). Cleanup is handled when the query clears on close/destroy.
    */
-  @ViewChild('dropdown', {static: false})
+  @ViewChild('dropdown', { static: false })
   set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
     this.movedPanel = this.portal(ref?.nativeElement ?? null, this.movedPanel);
   }
@@ -225,7 +237,7 @@ export class MnSelect implements OnInit {
    * The click shield sitting under the anchored panel, portalled alongside it for the same
    * reason: `position: fixed` must resolve against the viewport, not a transformed ancestor.
    */
-  @ViewChild('shield', {static: false})
+  @ViewChild('shield', { static: false })
   set shieldRef(ref: ElementRef<HTMLElement> | undefined) {
     this.movedShield = this.portal(ref?.nativeElement ?? null, this.movedShield);
   }
@@ -235,7 +247,7 @@ export class MnSelect implements OnInit {
    * itself to `document.body`, so nothing is moved here. On open its container height is
    * captured as the sheet's `min-height` floor.
    */
-  @ViewChild('sheet', {static: false, read: ElementRef})
+  @ViewChild('sheet', { static: false, read: ElementRef })
   set sheetRef(ref: ElementRef<HTMLElement> | undefined) {
     const el = ref?.nativeElement ?? null;
     this.sheetHost = el;
@@ -251,7 +263,7 @@ export class MnSelect implements OnInit {
   }
 
   get selectedOption(): MnSelectOption | undefined {
-    return this.props.options.find(o => o.value === this.selectedValue);
+    return this.props.options.find((o) => o.value === this.selectedValue);
   }
 
   /** The label shown in the trigger: the selected option, else the placeholder. */
@@ -323,7 +335,7 @@ export class MnSelect implements OnInit {
   get errorMessages(): string[] {
     const errors = this.control?.errors;
     if (!errors) return [];
-    return Object.keys(errors).map(key => this.resolveErrorMessageForKey(key, errors));
+    return Object.keys(errors).map((key) => this.resolveErrorMessageForKey(key, errors));
   }
 
   get errorMessage(): string | null {
@@ -368,17 +380,30 @@ export class MnSelect implements OnInit {
   get filteredOptions(): MnSelectOption[] {
     if (!this.searchTerm) return this.props.options;
     const lower = this.searchTerm.toLowerCase();
-    return this.props.options.filter(o => o.label.toLowerCase().includes(lower));
+    return this.props.options.filter((o) => o.label.toLowerCase().includes(lower));
   }
 
   // ========== Lifecycle ==========
 
   ngOnInit() {
+    // `showError` reads the control's touched/dirty/invalid state straight off the form.
+    // Those move from the forms API — `markAllAsTouched()` when the user tries to submit, a
+    // programmatic `setErrors` — never through an event on this component, so under OnPush
+    // the message would never appear. `events` covers value, status, touched and pristine.
+    const formControl = this.ngControl?.control;
+    if (formControl) {
+      const stateSub = formControl.events.subscribe(() => this.cdr.markForCheck());
+      this.destroyRef.onDestroy(() => stateSub.unsubscribe());
+    }
+
     this.resolveConfig();
     this.startWatchingViewport();
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // `resolveConfig` rewrites plain fields the template reads; under OnPush nothing else
+      // marks this view for the locale change.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => {
       sub.unsubscribe();
@@ -396,7 +421,10 @@ export class MnSelect implements OnInit {
 
   writeValue(val: unknown): void {
     // Treat empty string as null so the placeholder is shown and the control stays properly invalid.
-    this.selectedValue = (val === '' || val == null) ? null : val;
+    this.selectedValue = val === '' || val == null ? null : val;
+    // The forms API writes in from outside (setValue, reset, patch); nothing marks
+    // this view for it.
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: (val: unknown) => void): void {
@@ -409,6 +437,9 @@ export class MnSelect implements OnInit {
 
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // `control.disable()` / `.enable()` reaches us the same way `writeValue` does —
+    // from the forms API, with no event behind it.
+    this.cdr.markForCheck();
   }
 
   // ========== Dropdown Logic ==========
@@ -419,7 +450,10 @@ export class MnSelect implements OnInit {
       this.close();
       return;
     }
+    // `toggle()` and `close()` are public API: a consumer holding a @ViewChild can
+    // open the panel without an event, and under OnPush nothing else marks this view.
     this.isOpen = true;
+    this.cdr.markForCheck();
     if (this.isSheet) {
       // A sheet is anchored to the viewport, so it needs no trigger tracking — only a
       // scroll lock so the page behind it stays put while the list is scrolled.
@@ -445,7 +479,9 @@ export class MnSelect implements OnInit {
   /** Filters the options; the first match is highlighted so Enter picks it, none once the box is cleared. */
   onSearch(term: string | null): void {
     this.searchTerm = term ?? '';
-    this.activeIndex = this.searchTerm ? stepEnabledIndex(this.filteredOptions, -1, 1, isChoosable) : -1;
+    this.activeIndex = this.searchTerm
+      ? stepEnabledIndex(this.filteredOptions, -1, 1, isChoosable)
+      : -1;
   }
 
   /** Id of the keyboard-highlighted option, for `aria-activedescendant`; null when none is. */
@@ -481,10 +517,16 @@ export class MnSelect implements OnInit {
       if (fromSearch || !OPEN_KEYS.includes(event.key)) return;
       claim(event);
       this.toggle();
-      const selected = this.filteredOptions.findIndex(o => this.isSelected(o) && isChoosable(o));
-      this.activeIndex = selected >= 0
-        ? selected
-        : stepEnabledIndex(this.filteredOptions, -1, event.key === 'ArrowUp' ? -1 : 1, isChoosable);
+      const selected = this.filteredOptions.findIndex((o) => this.isSelected(o) && isChoosable(o));
+      this.activeIndex =
+        selected >= 0
+          ? selected
+          : stepEnabledIndex(
+              this.filteredOptions,
+              -1,
+              event.key === 'ArrowUp' ? -1 : 1,
+              isChoosable,
+            );
       this.revealActiveOption();
       return;
     }
@@ -549,10 +591,13 @@ export class MnSelect implements OnInit {
 
   /** Scrolls the highlighted option into view once the render that paints its ring has run. */
   private revealActiveOption(): void {
-    afterNextRender(() => {
-      const id = this.activeOptionId;
-      scrollOptionIntoView(id ? document.getElementById(id) : null);
-    }, {injector: this.injector});
+    afterNextRender(
+      () => {
+        const id = this.activeOptionId;
+        scrollOptionIntoView(id ? document.getElementById(id) : null);
+      },
+      { injector: this.injector },
+    );
   }
 
   /** Puts focus back on the trigger. */
@@ -568,6 +613,7 @@ export class MnSelect implements OnInit {
   close(): void {
     if (!this.isOpen) return;
     this.isOpen = false;
+    this.cdr.markForCheck();
     this.searchTerm = '';
     this.activeIndex = -1;
     this.stopWatchingTrigger();
@@ -720,8 +766,8 @@ export class MnSelect implements OnInit {
 
     const trigger = this.triggerRef?.nativeElement;
     if (trigger && typeof IntersectionObserver !== 'undefined') {
-      this.visibilityObserver = new IntersectionObserver(entries => {
-        if (!entries.some(entry => !entry.isIntersecting)) return;
+      this.visibilityObserver = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => !entry.isIntersecting)) return;
         this.close();
         // The observer fires outside Angular, so a zoneless app needs an explicit nudge.
         this.cdr.markForCheck();
@@ -731,7 +777,11 @@ export class MnSelect implements OnInit {
 
     this.scrollCapture = (event: Event) => {
       const target = event.target as Node | null;
-      if (target && this.movedPanel && (this.movedPanel === target || this.movedPanel.contains(target))) {
+      if (
+        target &&
+        this.movedPanel &&
+        (this.movedPanel === target || this.movedPanel.contains(target))
+      ) {
         return;
       }
       this.close();
@@ -813,17 +863,17 @@ export class MnSelect implements OnInit {
     this.uiConfig = this.configService.resolve<MnSelectUIConfig>(
       'mn-select',
       this.sectionPath,
-      instanceId
+      instanceId,
     );
 
     if (this.props.label) {
-      this.uiConfig = {...this.uiConfig, label: this.props.label};
+      this.uiConfig = { ...this.uiConfig, label: this.props.label };
     }
     if (this.props.placeholder) {
-      this.uiConfig = {...this.uiConfig, placeholder: this.props.placeholder};
+      this.uiConfig = { ...this.uiConfig, placeholder: this.props.placeholder };
     }
     if (this.props.ariaLabel) {
-      this.uiConfig = {...this.uiConfig, ariaLabel: this.props.ariaLabel};
+      this.uiConfig = { ...this.uiConfig, ariaLabel: this.props.ariaLabel };
     }
   }
 

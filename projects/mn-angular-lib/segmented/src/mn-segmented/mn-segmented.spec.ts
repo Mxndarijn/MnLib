@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LucideCalendarDays, LucideList } from '@lucide/angular';
 
@@ -11,6 +11,7 @@ import { MnSegmentedDataSource } from './mn-segmentedTypes';
 @Component({
   standalone: true,
   imports: [MnSegmented],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<mn-segmented
     [dataSource]="dataSource"
     [justified]="justified"
@@ -48,7 +49,7 @@ describe('MnSegmented', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);
@@ -161,7 +162,7 @@ describe('MnSegmented', () => {
     expect(group().className).toContain('rounded-lg');
     expect(segments()[0].className).toContain('rounded-md');
 
-    host.dataSource = {...host.dataSource, borderRadius: 'full'};
+    host.dataSource = { ...host.dataSource, borderRadius: 'full' };
     fixture.detectChanges();
 
     // A pill shares its rounding with its segments — there is no tighter step.

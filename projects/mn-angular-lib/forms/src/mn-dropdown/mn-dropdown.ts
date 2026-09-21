@@ -23,7 +23,14 @@ import { MnInputField } from '../mn-input-field';
 import { MnConfigService } from 'mn-angular-lib/core';
 import { MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
 import { MnLanguageService } from 'mn-angular-lib/core';
-import { MnDropdownAction, MnDropdownActionColor, MnDropdownItem, MnDropdownProps, MnDropdownSeparator, MnDropdownUIConfig } from './mn-dropdownTypes';
+import {
+  MnDropdownAction,
+  MnDropdownActionColor,
+  MnDropdownItem,
+  MnDropdownProps,
+  MnDropdownSeparator,
+  MnDropdownUIConfig,
+} from './mn-dropdownTypes';
 import { mnDropdownTriggerVariants } from './mn-dropdownVariants';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
@@ -66,7 +73,15 @@ const ACTION_COLOR_CLASS: Record<MnDropdownActionColor, string> = {
 @Component({
   selector: 'mn-lib-dropdown',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, FormsModule, MnButton, MnBottomSheet, MnInputField, LucideDynamicIcon],
+  imports: [
+    NgClass,
+    NgTemplateOutlet,
+    FormsModule,
+    MnButton,
+    MnBottomSheet,
+    MnInputField,
+    LucideDynamicIcon,
+  ],
   templateUrl: './mn-dropdown.html',
   styleUrl: './mn-dropdown.css',
 })
@@ -267,7 +282,10 @@ export class MnDropdown implements OnInit {
       return;
     }
     if (this.datasource.actions.length === 0) return;
+    // `toggle()` and `close()` are public API: a consumer holding a @ViewChild can
+    // open the panel without an event, and under OnPush nothing else marks this view.
     this.isOpen = true;
+    this.cdr.markForCheck();
     if (this.isSheet) {
       // A sheet is anchored to the viewport, so it needs no trigger tracking — only a
       // scroll lock so the page behind it stays put.
@@ -282,6 +300,7 @@ export class MnDropdown implements OnInit {
   close(): void {
     if (!this.isOpen) return;
     this.isOpen = false;
+    this.cdr.markForCheck();
     this.searchTerm = '';
     this.panelFloorPx = null;
     this.panelWidthPx = null;
@@ -317,6 +336,9 @@ export class MnDropdown implements OnInit {
    */
   onSearch(term: string | null): void {
     this.searchTerm = term ?? '';
+    // Public, like toggle()/close(): a caller that is not an event handler still has to
+    // see the list narrow.
+    this.cdr.markForCheck();
   }
 
   /**
@@ -329,7 +351,7 @@ export class MnDropdown implements OnInit {
     if (!this.isSearchable || !term) return this.datasource.actions;
     // While filtering, separators are dropped — a divider stranded between or after hidden
     // results is meaningless — so match only real actions.
-    return this.datasource.actions.filter(item => {
+    return this.datasource.actions.filter((item) => {
       if (this.isSeparator(item)) return false;
       const haystack = `${this.actionLabel(item)} ${item.keywords ?? ''}`.toLowerCase();
       return haystack.includes(term);
@@ -367,8 +389,8 @@ export class MnDropdown implements OnInit {
 
     const trigger = this.triggerRef?.nativeElement;
     if (trigger && typeof IntersectionObserver !== 'undefined') {
-      this.visibilityObserver = new IntersectionObserver(entries => {
-        if (!entries.some(entry => !entry.isIntersecting)) return;
+      this.visibilityObserver = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => !entry.isIntersecting)) return;
         this.close();
         this.cdr.markForCheck();
       });
@@ -377,7 +399,11 @@ export class MnDropdown implements OnInit {
 
     this.scrollCapture = (event: Event) => {
       const target = event.target as Node | null;
-      if (target && this.movedPanel && (this.movedPanel === target || this.movedPanel.contains(target))) {
+      if (
+        target &&
+        this.movedPanel &&
+        (this.movedPanel === target || this.movedPanel.contains(target))
+      ) {
         return;
       }
       this.close();
@@ -554,13 +580,17 @@ export class MnDropdown implements OnInit {
 
   /** Accessible name for the ⋯ trigger button. */
   get triggerAriaLabel(): string {
-    const translated = this.datasource.ariaLabelKey ? this.lang.translateIfPresent(this.datasource.ariaLabelKey) : undefined;
+    const translated = this.datasource.ariaLabelKey
+      ? this.lang.translateIfPresent(this.datasource.ariaLabelKey)
+      : undefined;
     return translated ?? this.datasource.ariaLabel ?? this.uiConfig.ariaLabel ?? 'Actions';
   }
 
   /** The visible text on the trigger, or null for an icon-only ⋯ trigger. */
   get triggerLabelText(): string | null {
-    const translated = this.datasource.triggerLabelKey ? this.lang.translateIfPresent(this.datasource.triggerLabelKey) : undefined;
+    const translated = this.datasource.triggerLabelKey
+      ? this.lang.translateIfPresent(this.datasource.triggerLabelKey)
+      : undefined;
     return translated ?? this.datasource.triggerLabel ?? null;
   }
 
@@ -580,7 +610,8 @@ export class MnDropdown implements OnInit {
     if (icon === 'none') return null;
     if (icon instanceof TemplateRef) return { template: icon };
     if (icon != null && typeof icon !== 'string') return { data: icon, size: 18, dim: false };
-    const preset = typeof icon === 'string' ? icon : this.triggerLabelText ? 'chevron' : 'dots-vertical';
+    const preset =
+      typeof icon === 'string' ? icon : this.triggerLabelText ? 'chevron' : 'dots-vertical';
     // The chevron is a touch smaller and dimmed, matching a select's trailing affordance.
     return preset === 'chevron'
       ? { data: ICONS.ChevronDown, size: 16, dim: true }
@@ -603,20 +634,36 @@ export class MnDropdown implements OnInit {
 
   /** Heading shown above the menu/sheet, or null when none is configured. */
   get menuLabel(): string | null {
-    const translated = this.datasource.menuLabelKey ? this.lang.translateIfPresent(this.datasource.menuLabelKey) : undefined;
+    const translated = this.datasource.menuLabelKey
+      ? this.lang.translateIfPresent(this.datasource.menuLabelKey)
+      : undefined;
     return translated ?? this.datasource.menuLabel ?? this.uiConfig.menuLabel ?? null;
   }
 
   /** Placeholder shown in the search input, preferring a resolved translation key. */
   get searchPlaceholder(): string {
-    const translated = this.datasource.searchPlaceholderKey ? this.lang.translateIfPresent(this.datasource.searchPlaceholderKey) : undefined;
-    return translated ?? this.datasource.searchPlaceholder ?? this.uiConfig.searchPlaceholder ?? 'Search...';
+    const translated = this.datasource.searchPlaceholderKey
+      ? this.lang.translateIfPresent(this.datasource.searchPlaceholderKey)
+      : undefined;
+    return (
+      translated ??
+      this.datasource.searchPlaceholder ??
+      this.uiConfig.searchPlaceholder ??
+      'Search...'
+    );
   }
 
   /** Text shown in place of the list when the filter matches no actions. */
   get searchEmptyLabel(): string {
-    const translated = this.datasource.searchEmptyLabelKey ? this.lang.translateIfPresent(this.datasource.searchEmptyLabelKey) : undefined;
-    return translated ?? this.datasource.searchEmptyLabel ?? this.uiConfig.searchEmptyLabel ?? 'No results';
+    const translated = this.datasource.searchEmptyLabelKey
+      ? this.lang.translateIfPresent(this.datasource.searchEmptyLabelKey)
+      : undefined;
+    return (
+      translated ??
+      this.datasource.searchEmptyLabel ??
+      this.uiConfig.searchEmptyLabel ??
+      'No results'
+    );
   }
 
   /** The ghost look the trigger has always used; a bare or partial `triggerButton` merges

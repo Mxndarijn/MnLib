@@ -1,21 +1,21 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideHttpClient} from '@angular/common/http';
-import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {BehaviorSubject} from 'rxjs';
-import {MnCollectionState, MnTable, TableDataSource} from 'mn-angular-lib';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { MnCollectionState, MnTable, TableDataSource } from 'mn-angular-lib';
 
 /** Minimal row shape used by the search auto-enable tests. */
 type Row = {
   id: string;
   name: string;
-}
+};
 
 /**
  * Builds `count` rows named `Row 1` … `Row n`.
  * @param count Number of rows to build.
  */
 function makeRows(count: number): Row[] {
-  return Array.from({length: count}, (_, i) => ({id: String(i + 1), name: `Row ${i + 1}`}));
+  return Array.from({ length: count }, (_, i) => ({ id: String(i + 1), name: `Row ${i + 1}` }));
 }
 
 /**
@@ -32,11 +32,14 @@ describe('MnTable search auto-enable', () => {
    * @param rowCount Number of rows to seed.
    * @param extra Fields merged over the defaults (e.g. `canSearch`, `searchThreshold`).
    */
-  function makeDataSource(rowCount: number, extra: Partial<TableDataSource<Row>> = {}): TableDataSource<Row> {
+  function makeDataSource(
+    rowCount: number,
+    extra: Partial<TableDataSource<Row>> = {},
+  ): TableDataSource<Row> {
     return {
       dataRows: new BehaviorSubject<Row[]>(makeRows(rowCount)),
       getID: (row) => row.id,
-      columns: [{key: 'name', header: 'Name', cell: (row) => row.name}],
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
       emptyMessage: 'No items',
       state: MnCollectionState.RETRIEVED,
       paginationMode: 'none',
@@ -53,7 +56,7 @@ describe('MnTable search auto-enable', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MnTable],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
     fixture = TestBed.createComponent(MnTable<Row>);
   });
@@ -73,42 +76,49 @@ describe('MnTable search auto-enable', () => {
   });
 
   it('honours a custom searchThreshold', () => {
-    fixture.componentInstance.dataSource = makeDataSource(3, {searchThreshold: 3});
+    fixture.componentInstance.dataSource = makeDataSource(3, { searchThreshold: 3 });
     fixture.detectChanges();
 
     expect(searchInput()).not.toBeNull();
   });
 
   it('never auto-enables when the source has no way to search', () => {
-    fixture.componentInstance.dataSource = makeDataSource(20, {isInSearch: undefined});
+    fixture.componentInstance.dataSource = makeDataSource(20, { isInSearch: undefined });
     fixture.detectChanges();
 
     expect(searchInput()).toBeNull();
   });
 
   it('auto-enables for a server-searched source without a client predicate', () => {
-    fixture.componentInstance.dataSource = makeDataSource(8, {isInSearch: undefined, onServerSearch: () => undefined});
+    fixture.componentInstance.dataSource = makeDataSource(8, {
+      isInSearch: undefined,
+      onServerSearch: () => undefined,
+    });
     fixture.detectChanges();
 
     expect(searchInput()).not.toBeNull();
   });
 
   it('counts totalItems, not the current page, for a server-paginated source', () => {
-    fixture.componentInstance.dataSource = makeDataSource(5, {paginationMode: 'paginated', totalItems: 40, onPageChange: () => undefined});
+    fixture.componentInstance.dataSource = makeDataSource(5, {
+      paginationMode: 'paginated',
+      totalItems: 40,
+      onPageChange: () => undefined,
+    });
     fixture.detectChanges();
 
     expect(searchInput()).not.toBeNull();
   });
 
   it('lets an explicit canSearch: false suppress the box on a long list', () => {
-    fixture.componentInstance.dataSource = makeDataSource(20, {canSearch: false});
+    fixture.componentInstance.dataSource = makeDataSource(20, { canSearch: false });
     fixture.detectChanges();
 
     expect(searchInput()).toBeNull();
   });
 
   it('lets an explicit canSearch: true force the box on a short list', () => {
-    fixture.componentInstance.dataSource = makeDataSource(2, {canSearch: true});
+    fixture.componentInstance.dataSource = makeDataSource(2, { canSearch: true });
     fixture.detectChanges();
 
     expect(searchInput()).not.toBeNull();
@@ -132,8 +142,10 @@ describe('MnTable search auto-enable', () => {
     fixture.detectChanges();
 
     fixture.componentInstance.searchValue = 'row 10';
-    (fixture.componentInstance as unknown as {applyFilter(searchForItems: boolean): void}).applyFilter(false);
+    (
+      fixture.componentInstance as unknown as { applyFilter(searchForItems: boolean): void }
+    ).applyFilter(false);
 
-    expect(fixture.componentInstance.filteredItems.map(r => r.id)).toEqual(['10']);
+    expect(fixture.componentInstance.filteredItems.map((r) => r.id)).toEqual(['10']);
   });
 });

@@ -1,18 +1,25 @@
-import {Component} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MnButton, MnMultiSelect, MnMultiSelectProps, MnSectionDirective} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MnButton, MnMultiSelect, MnMultiSelectProps, MnSectionDirective } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 @Component({
   selector: 'app-multi-select-demo',
   standalone: true,
-  imports: [MnMultiSelect, ReactiveFormsModule, MnSectionDirective, MnButton, DemoPageComponent, DemoExampleComponent],
+  imports: [
+    MnMultiSelect,
+    ReactiveFormsModule,
+    MnSectionDirective,
+    MnButton,
+    DemoPageComponent,
+    DemoExampleComponent,
+  ],
   templateUrl: './multi-select-demo.html',
 })
 export class MultiSelectDemo {
   form = new FormGroup({
-    fruits: new FormControl<string[]>([], {validators: [Validators.required]}),
+    fruits: new FormControl<string[]>([], { validators: [Validators.required] }),
     colors: new FormControl<string[]>([]),
     languages: new FormControl<string[]>([]),
   });
@@ -23,11 +30,11 @@ export class MultiSelectDemo {
     label: 'Favourite Fruits',
     placeholder: 'Select fruits...',
     options: [
-      {label: 'Apple', value: 'apple'},
-      {label: 'Banana', value: 'banana'},
-      {label: 'Cherry', value: 'cherry'},
-      {label: 'Mango', value: 'mango'},
-      {label: 'Strawberry', value: 'strawberry'},
+      { label: 'Apple', value: 'apple' },
+      { label: 'Banana', value: 'banana' },
+      { label: 'Cherry', value: 'cherry' },
+      { label: 'Mango', value: 'mango' },
+      { label: 'Strawberry', value: 'strawberry' },
     ],
     fullWidth: true,
   };
@@ -41,14 +48,14 @@ export class MultiSelectDemo {
     searchPlaceholder: 'Type to filter...',
     maxSelections: 3,
     options: [
-      {label: 'Red', value: 'red'},
-      {label: 'Blue', value: 'blue'},
-      {label: 'Green', value: 'green'},
-      {label: 'Yellow', value: 'yellow'},
-      {label: 'Purple', value: 'purple'},
-      {label: 'Orange', value: 'orange'},
-      {label: 'Pink', value: 'pink'},
-      {label: 'Teal', value: 'teal'},
+      { label: 'Red', value: 'red' },
+      { label: 'Blue', value: 'blue' },
+      { label: 'Green', value: 'green' },
+      { label: 'Yellow', value: 'yellow' },
+      { label: 'Purple', value: 'purple' },
+      { label: 'Orange', value: 'orange' },
+      { label: 'Pink', value: 'pink' },
+      { label: 'Teal', value: 'teal' },
     ],
     fullWidth: true,
   };
@@ -59,12 +66,12 @@ export class MultiSelectDemo {
     label: 'Programming Languages',
     placeholder: 'Choose languages...',
     options: [
-      {label: 'TypeScript', value: 'ts'},
-      {label: 'JavaScript', value: 'js'},
-      {label: 'Python', value: 'py'},
-      {label: 'Rust', value: 'rust'},
-      {label: 'Go', value: 'go'},
-      {label: 'COBOL (deprecated)', value: 'cobol', disabled: true},
+      { label: 'TypeScript', value: 'ts' },
+      { label: 'JavaScript', value: 'js' },
+      { label: 'Python', value: 'py' },
+      { label: 'Rust', value: 'rust' },
+      { label: 'Go', value: 'go' },
+      { label: 'COBOL (deprecated)', value: 'cobol', disabled: true },
     ],
     fullWidth: true,
     errorMessages: {

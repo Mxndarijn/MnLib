@@ -1,6 +1,6 @@
-import {Component, Input, inject} from '@angular/core';
-import {Router} from '@angular/router';
-import {DEMOS} from './demo-catalog';
+import { Component, Input, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { DEMOS } from './demo-catalog';
 
 /**
  * Consistent chrome for a component demo page: a header with a category eyebrow

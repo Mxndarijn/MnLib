@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MnIconChip } from './mn-icon-chip';
@@ -8,6 +8,7 @@ import { MnIconChipTypes } from './mn-icon-chipTypes';
 @Component({
   standalone: true,
   imports: [MnIconChip],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<mn-icon-chip [data]="data"><i id="icon"></i></mn-icon-chip>`,
 })
 class HostComponent {

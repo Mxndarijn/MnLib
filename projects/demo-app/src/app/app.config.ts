@@ -21,5 +21,5 @@ export const appConfig: ApplicationConfig = {
     // Set a base theme for the demo (can be overridden at runtime in components)
 
     provideRouter(routes),
-  ]
+  ],
 };

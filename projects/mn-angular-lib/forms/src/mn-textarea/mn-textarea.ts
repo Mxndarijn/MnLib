@@ -1,13 +1,26 @@
-import {Component, DestroyRef, ElementRef, inject, InjectionToken, Input, OnInit} from '@angular/core';
-import {NgClass} from '@angular/common';
-import {MnTextareaErrorMessageData, MnTextareaProps, MnTextareaUIConfig} from './mn-textareaTypes';
-import {NgControl, ValidationErrors, Validators} from '@angular/forms';
-import {mnTextareaVariants} from './mn-textareaVariants';
-import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnConfigService} from "mn-angular-lib/core";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "mn-angular-lib/core";
-import {MnLanguageService} from "mn-angular-lib/core";
-import {skip} from "rxjs";
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  InjectionToken,
+  Input,
+  OnInit,
+} from '@angular/core';
+import { NgClass } from '@angular/common';
+import {
+  MnTextareaErrorMessageData,
+  MnTextareaProps,
+  MnTextareaUIConfig,
+} from './mn-textareaTypes';
+import { NgControl, ValidationErrors, Validators } from '@angular/forms';
+import { mnTextareaVariants } from './mn-textareaVariants';
+import { MnErrorMessage } from '../mn-error-message/mn-error-message';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { skip } from 'rxjs';
 
 export const MN_TEXTAREA_CONFIG = new InjectionToken<MnTextareaUIConfig>('MN_TEXTAREA_CONFIG');
 
@@ -49,7 +62,7 @@ export const MN_TEXTAREA_CONFIG = new InjectionToken<MnTextareaUIConfig>('MN_TEX
   templateUrl: './mn-textarea.html',
 })
 export class MnTextarea implements OnInit {
-  ngControl = inject(NgControl, {optional: true, self: true});
+  ngControl = inject(NgControl, { optional: true, self: true });
 
   /** Resolved UI configuration for the textarea */
   protected uiConfig: MnTextareaUIConfig = {};
@@ -62,6 +75,8 @@ export class MnTextarea implements OnInit {
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
+  /** Marks the view when a locale change re-resolves the config (OnPush). */
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -72,8 +87,7 @@ export class MnTextarea implements OnInit {
   isDisabled = false;
 
   /** Callback function to notify Angular forms of value changes */
-  private onChange: (val: unknown) => void = () => {
-  };
+  private onChange: (val: unknown) => void = () => {};
 
   /** Callback function to notify Angular forms when textarea is touched/blurred */
   private onTouched: () => void = () => {};
@@ -99,10 +113,23 @@ export class MnTextarea implements OnInit {
   }
 
   ngOnInit() {
+    // `showError` reads the control's touched/dirty/invalid state straight off the form.
+    // Those move from the forms API — `markAllAsTouched()` when the user tries to submit, a
+    // programmatic `setErrors` — never through an event on this component, so under OnPush
+    // the message would never appear. `events` covers value, status, touched and pristine.
+    const formControl = this.ngControl?.control;
+    if (formControl) {
+      const stateSub = formControl.events.subscribe(() => this.cdr.markForCheck());
+      this.destroyRef.onDestroy(() => stateSub.unsubscribe());
+    }
+
     this.resolveConfig();
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // `resolveConfig` rewrites plain fields the template reads; under OnPush nothing else
+      // marks this view for the locale change.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
 
@@ -124,7 +151,7 @@ export class MnTextarea implements OnInit {
     this.uiConfig = this.configService.resolve<MnTextareaUIConfig>(
       'mn-textarea',
       this.sectionPath,
-      instanceId
+      instanceId,
     );
 
     // Allow props to override uiConfig for label and placeholder
@@ -145,6 +172,9 @@ export class MnTextarea implements OnInit {
    */
   writeValue(val: unknown): void {
     this.value = val != null ? String(val) : null;
+    // The forms API writes in from outside (setValue, reset, patch); nothing marks
+    // this view for it.
+    this.cdr.markForCheck();
   }
 
   /**
@@ -172,6 +202,9 @@ export class MnTextarea implements OnInit {
    */
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // `control.disable()` / `.enable()` reaches us the same way `writeValue` does —
+    // from the forms API, with no event behind it.
+    this.cdr.markForCheck();
   }
 
   // ========== Event Handlers ==========
@@ -285,7 +318,7 @@ export class MnTextarea implements OnInit {
     if (!errors) return [];
 
     const errorKeys = Object.keys(errors);
-    return errorKeys.map(key => this.resolveErrorMessageForKey(key, errors));
+    return errorKeys.map((key) => this.resolveErrorMessageForKey(key, errors));
   }
 
   /**

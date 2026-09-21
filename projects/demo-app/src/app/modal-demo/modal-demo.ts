@@ -1,6 +1,6 @@
-import {Component, inject, TemplateRef, ViewChild} from '@angular/core';
-import {NgClass} from '@angular/common';
-import {Validators} from '@angular/forms';
+import { Component, inject, TemplateRef, ViewChild, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Validators } from '@angular/forms';
 import {
   ActionStyle,
   CloseMode,
@@ -20,9 +20,9 @@ import {
   WizardFlowMode,
   WizardResult,
 } from 'mn-angular-lib';
-import {BehaviorSubject} from 'rxjs';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { BehaviorSubject } from 'rxjs';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 type UserFormModel = {
   firstName: string;
@@ -52,7 +52,9 @@ type UserFormModel = {
 export class ModalDemo {
   @ViewChild('customTemplate') customTemplate!: TemplateRef<unknown>;
 
-  lastResult = '';
+  /** Outcome of the last modal, written from close handlers and awaited submit callbacks.
+   *  A signal, because every one of those writes lands outside an Angular event. */
+  readonly lastResult = signal('');
 
   sampleUsers = [
     { name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
@@ -85,9 +87,9 @@ export class ModalDemo {
 
     modalRef.afterClosed$.subscribe((event) => {
       if (event.reason === ModalCloseReason.COMPLETED) {
-        this.lastResult = `Confirmation Modal: Confirmed`;
+        this.lastResult.set(`Confirmation Modal: Confirmed`);
       } else {
-        this.lastResult = `Confirmation Modal: Cancelled (${event.reason})`;
+        this.lastResult.set(`Confirmation Modal: Cancelled (${event.reason})`);
       }
     });
   }
@@ -114,7 +116,7 @@ export class ModalDemo {
     const modalRef = this.modalService.open(config);
 
     modalRef.afterClosed$.subscribe((event) => {
-      this.lastResult = `Danger Confirmation: ${event.reason}`;
+      this.lastResult.set(`Danger Confirmation: ${event.reason}`);
     });
   }
 
@@ -221,19 +223,19 @@ export class ModalDemo {
             await new Promise((r) => setTimeout(r, 500));
             const cities: Record<string, { label: string; value: string }[]> = {
               nl: [
-                {label: 'Amsterdam', value: 'ams'},
-                {label: 'Rotterdam', value: 'rtd'},
-                {label: 'Utrecht', value: 'utr'},
+                { label: 'Amsterdam', value: 'ams' },
+                { label: 'Rotterdam', value: 'rtd' },
+                { label: 'Utrecht', value: 'utr' },
               ],
               de: [
-                {label: 'Berlin', value: 'ber'},
-                {label: 'Munich', value: 'muc'},
-                {label: 'Hamburg', value: 'ham'},
+                { label: 'Berlin', value: 'ber' },
+                { label: 'Munich', value: 'muc' },
+                { label: 'Hamburg', value: 'ham' },
               ],
               be: [
-                {label: 'Brussels', value: 'bru'},
-                {label: 'Antwerp', value: 'ant'},
-                {label: 'Ghent', value: 'gnt'},
+                { label: 'Brussels', value: 'bru' },
+                { label: 'Antwerp', value: 'ant' },
+                { label: 'Ghent', value: 'gnt' },
               ],
             };
             return cities[formValue.country as string] || [];
@@ -266,7 +268,7 @@ export class ModalDemo {
       .onComplete({
         handle: async (result) => {
           console.log('Form submitted:', result);
-          this.lastResult = `Form Submitted: ${JSON.stringify(result)}`;
+          this.lastResult.set(`Form Submitted: ${JSON.stringify(result)}`);
         },
       })
       .build();
@@ -337,7 +339,7 @@ export class ModalDemo {
               validate: async () => {
                 console.log('Simulating Async Verification...');
                 await new Promise((resolve) => setTimeout(resolve, 1000));
-                return {status: ValidationStatus.VALID};
+                return { status: ValidationStatus.VALID };
               },
             },
           ]);
@@ -359,7 +361,7 @@ export class ModalDemo {
       .onComplete({
         handle: async (result) => {
           console.log('Wizard completed:', result);
-          this.lastResult = `Wizard Completed: visited ${result.visitedStepIds.join(', ')}`;
+          this.lastResult.set(`Wizard Completed: visited ${result.visitedStepIds.join(', ')}`);
         },
       })
       .build();
@@ -395,14 +397,14 @@ export class ModalDemo {
             key: 'tags',
             label: 'Tags',
             options: [
-              {label: 'Accessibility', value: 'a11y'},
-              {label: 'Backend', value: 'backend'},
-              {label: 'Design', value: 'design'},
-              {label: 'Documentation', value: 'docs'},
-              {label: 'Frontend', value: 'frontend'},
-              {label: 'Performance', value: 'perf'},
-              {label: 'Security', value: 'security'},
-              {label: 'Tooling', value: 'tooling'},
+              { label: 'Accessibility', value: 'a11y' },
+              { label: 'Backend', value: 'backend' },
+              { label: 'Design', value: 'design' },
+              { label: 'Documentation', value: 'docs' },
+              { label: 'Frontend', value: 'frontend' },
+              { label: 'Performance', value: 'perf' },
+              { label: 'Security', value: 'security' },
+              { label: 'Tooling', value: 'tooling' },
             ],
             searchable: true,
           })
@@ -425,7 +427,7 @@ export class ModalDemo {
       )
       .onComplete({
         handle: async (result) => {
-          this.lastResult = `Multi-select wizard completed: visited ${result.visitedStepIds.join(', ')}`;
+          this.lastResult.set(`Multi-select wizard completed: visited ${result.visitedStepIds.join(', ')}`);
         },
       })
       .build();
@@ -445,7 +447,7 @@ export class ModalDemo {
     const modalRef = this.modalService.open(config);
 
     modalRef.afterClosed$.subscribe((event) => {
-      this.lastResult = `Custom Modal: ${event.reason}`;
+      this.lastResult.set(`Custom Modal: ${event.reason}`);
     });
   }
 
@@ -485,7 +487,7 @@ export class ModalDemo {
           style: ActionStyle.PRIMARY,
           position: 'right',
           handler: async (ref: ModalRef<unknown>) => {
-            this.lastResult = 'Multi-Action: Edit clicked';
+            this.lastResult.set('Multi-Action: Edit clicked');
             ref.dismiss(ModalCloseReason.DISMISSED);
           },
         },
@@ -494,7 +496,7 @@ export class ModalDemo {
           style: ActionStyle.DANGER,
           position: 'right',
           handler: async (ref: ModalRef<unknown>) => {
-            this.lastResult = 'Multi-Action: Delete Single clicked';
+            this.lastResult.set('Multi-Action: Delete Single clicked');
             ref.dismiss(ModalCloseReason.DISMISSED);
           },
         },
@@ -503,7 +505,7 @@ export class ModalDemo {
           style: ActionStyle.DANGER,
           position: 'right',
           handler: async (ref: ModalRef<unknown>) => {
-            this.lastResult = 'Multi-Action: Delete Series clicked';
+            this.lastResult.set('Multi-Action: Delete Series clicked');
             ref.dismiss(ModalCloseReason.DISMISSED);
           },
         },
@@ -530,7 +532,7 @@ export class ModalDemo {
           console.log(`Poll attempt ${pollCount}`);
           // Simulate: verified after 3 polls
           if (pollCount >= 3) {
-            this.lastResult = `Polling: Verified after ${pollCount} attempts`;
+            this.lastResult.set(`Polling: Verified after ${pollCount} attempts`);
             ref.close(true);
             return true; // stop polling
           }
@@ -719,7 +721,7 @@ export class ModalDemo {
       .onComplete({
         handle: async (result) => {
           console.log('Team assigned:', result);
-          this.lastResult = `Team "${result.teamName}" assigned with ${result.members.length} members: ${result.members.join(', ')}`;
+          this.lastResult.set(`Team "${result.teamName}" assigned with ${result.members.length} members: ${result.members.join(', ')}`);
         },
       })
       .build();
@@ -741,7 +743,7 @@ export class ModalDemo {
     const DEPARTMENTS = ['Engineering', 'Design', 'Quality', 'Operations'];
     // Deliberately mixes very short and very long values so column widths would
     // otherwise change from page to page.
-    const ALL: Employee[] = Array.from({length: 43}, (_, i) => ({
+    const ALL: Employee[] = Array.from({ length: 43 }, (_, i) => ({
       id: String(i + 1),
       name: i % 4 === 0 ? `Al ${i + 1}` : `Alexandra Bartholomew-Fitzgerald ${i + 1}`,
       email:
@@ -790,7 +792,7 @@ export class ModalDemo {
       initialSelectedRows: ALL.slice(0, 14),
       // No `layout` set: exercises the default `stable` mode. `hover` alone, with no
       // striping, matches how the library is actually consumed in product.
-      appearance: {hover: true},
+      appearance: { hover: true },
       paginationMode: 'paginated',
       pageSize: 5,
       pageSizeOptions: [5, 10, 25],
@@ -823,7 +825,7 @@ export class ModalDemo {
           filterable: true,
           filterPlaceholder: 'Filter name…',
         },
-        {key: 'email', header: 'Email', cell: (r) => r.email, hiddenBelow: 'sm'},
+        { key: 'email', header: 'Email', cell: (r) => r.email, hiddenBelow: 'sm' },
         {
           key: 'role',
           header: 'Role',
@@ -832,7 +834,7 @@ export class ModalDemo {
           filterable: true,
           filterType: 'select',
           filterPlaceholder: 'All roles',
-          filterOptions: ROLES.map((r) => ({label: r, value: r})),
+          filterOptions: ROLES.map((r) => ({ label: r, value: r })),
         },
         {
           key: 'department',
@@ -843,7 +845,7 @@ export class ModalDemo {
           filterable: true,
           filterType: 'multi-select',
           filterPlaceholder: 'Departments',
-          filterOptions: DEPARTMENTS.map((d) => ({label: d, value: d})),
+          filterOptions: DEPARTMENTS.map((d) => ({ label: d, value: d })),
         },
       ],
     };
@@ -865,7 +867,7 @@ export class ModalDemo {
       })
       .onComplete({
         handle: async (result) => {
-          this.lastResult = `Assigned ${result.employees.length} employees`;
+          this.lastResult.set(`Assigned ${result.employees.length} employees`);
         },
       })
       .build();
@@ -890,9 +892,9 @@ export class ModalDemo {
     this.modalService.open(config);
   }
 
-  @ViewChild('customHeader', {static: true}) customHeader!: TemplateRef<unknown>;
-  @ViewChild('confirmationDetail', {static: true}) confirmationDetail!: TemplateRef<unknown>;
-  @ViewChild('wizardHeader', {static: true}) wizardHeader!: TemplateRef<unknown>;
+  @ViewChild('customHeader', { static: true }) customHeader!: TemplateRef<unknown>;
+  @ViewChild('confirmationDetail', { static: true }) confirmationDetail!: TemplateRef<unknown>;
+  @ViewChild('wizardHeader', { static: true }) wizardHeader!: TemplateRef<unknown>;
 
   openHybridModal() {
     type HybridModel = {
@@ -911,7 +913,7 @@ export class ModalDemo {
       })
       .onComplete({
         handle: async (result) => {
-          this.lastResult = `Hybrid Form Result: ${JSON.stringify(result)}`;
+          this.lastResult.set(`Hybrid Form Result: ${JSON.stringify(result)}`);
         },
       })
       .build();
@@ -941,9 +943,9 @@ export class ModalDemo {
               key: 'priority',
               label: 'Priority',
               options: [
-                {label: 'Low', value: 'low'},
-                {label: 'Medium', value: 'medium'},
-                {label: 'High', value: 'high'},
+                { label: 'Low', value: 'low' },
+                { label: 'Medium', value: 'medium' },
+                { label: 'High', value: 'high' },
               ],
               validators: [Validators.required],
             });
@@ -975,12 +977,12 @@ export class ModalDemo {
       .template(this.wizardHeader)
       .addStep<WizardHeaderModel>('Step 1', (s) => {
         s.body('This wizard has a custom header visualization across all steps.')
-          .field({kind: FieldKind.TEXT, key: 'data1', label: 'Field 1'})
+          .field({ kind: FieldKind.TEXT, key: 'data1', label: 'Field 1' })
           .nextLabel('Go to Step 2');
       })
       .addStep<WizardHeaderModel>('Step 2', (s) => {
         s.body('Still here!')
-          .field({kind: FieldKind.TEXT, key: 'data2', label: 'Field 2'})
+          .field({ kind: FieldKind.TEXT, key: 'data2', label: 'Field 2' })
           .backLabel('Go back to 1')
           .nextLabel('Finish');
       })
@@ -1034,7 +1036,7 @@ export class ModalDemo {
       })
       .onComplete({
         handle: async (result) => {
-          this.lastResult = `Advanced Form Result: ${JSON.stringify(result)}`;
+          this.lastResult.set(`Advanced Form Result: ${JSON.stringify(result)}`);
         },
       })
       .build();
@@ -1150,9 +1152,9 @@ export class ModalDemo {
             key: 'role',
             label: 'Role',
             options: [
-              {label: 'User', value: 'user'},
-              {label: 'Editor', value: 'editor'},
-              {label: 'Admin', value: 'admin'},
+              { label: 'User', value: 'user' },
+              { label: 'Editor', value: 'editor' },
+              { label: 'Admin', value: 'admin' },
             ],
             validators: [Validators.required],
           }).field({
@@ -1176,7 +1178,7 @@ export class ModalDemo {
           style: ActionStyle.SECONDARY,
           position: 'left',
           handler: async (_ref: ModalRef<WizardResult>) => {
-            this.lastResult = 'Wizard: Draft saved';
+            this.lastResult.set('Wizard: Draft saved');
             console.log('Draft saved');
           },
         },
@@ -1185,7 +1187,7 @@ export class ModalDemo {
           style: ActionStyle.DANGER,
           position: 'right',
           handler: async (_ref: ModalRef<WizardResult>) => {
-            this.lastResult = 'Wizard: Form reset';
+            this.lastResult.set('Wizard: Form reset');
             console.log('Form reset');
           },
         },
@@ -1193,7 +1195,7 @@ export class ModalDemo {
       .onComplete({
         handle: async (result) => {
           console.log('Wizard completed:', result);
-          this.lastResult = `Wizard with Buttons Completed: visited ${result.visitedStepIds.join(', ')}`;
+          this.lastResult.set(`Wizard with Buttons Completed: visited ${result.visitedStepIds.join(', ')}`);
         },
       })
       .build();
@@ -1221,7 +1223,7 @@ export class ModalDemo {
       })
       .onComplete({
         handle: async (result) => {
-          this.lastResult = `Fixed Height Form: ${JSON.stringify(result)}`;
+          this.lastResult.set(`Fixed Height Form: ${JSON.stringify(result)}`);
         },
       })
       .build();
@@ -1260,7 +1262,7 @@ export class ModalDemo {
       )
       .onComplete({
         handle: async (result) => {
-          this.lastResult = `Fixed Height Wizard completed: visited ${result.visitedStepIds.join(', ')}`;
+          this.lastResult.set(`Fixed Height Wizard completed: visited ${result.visitedStepIds.join(', ')}`);
         },
       })
       .build();

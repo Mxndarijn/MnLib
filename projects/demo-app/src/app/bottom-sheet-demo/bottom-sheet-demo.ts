@@ -1,7 +1,7 @@
-import {Component, signal, viewChild} from '@angular/core';
-import {MnBottomSheet, MnButton, MnCheckbox, MnCheckboxProps} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { Component, signal, viewChild } from '@angular/core';
+import { MnBottomSheet, MnButton, MnCheckbox, MnCheckboxProps } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 /**
  * Showcases the shared {@link MnBottomSheet} chrome: a viewport-anchored, swipe/flick

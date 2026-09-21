@@ -1,7 +1,7 @@
-import {Component, computed, signal} from '@angular/core';
-import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
-import {ThemeToggleComponent} from './shared/theme-toggle.component';
-import {DEMOS, groupDemos} from './shared/demo-catalog';
+import { Component, computed, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ThemeToggleComponent } from './shared/theme-toggle.component';
+import { DEMOS, groupDemos } from './shared/demo-catalog';
 
 @Component({
   selector: 'app-root',
@@ -24,8 +24,8 @@ export class AppComponent {
     const q = this.query().toLowerCase().trim();
     const matches = q
       ? DEMOS.filter(
-        (d) => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q),
-      )
+          (d) => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q),
+        )
       : DEMOS;
     return groupDemos(matches);
   });

@@ -1,13 +1,13 @@
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {FormsModule} from '@angular/forms';
-import {Subject} from 'rxjs';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
 
-import {MnSelect} from './mn-select';
-import {MnSelectProps} from './mn-selectTypes';
-import {MnConfigService} from 'mn-angular-lib/core';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { MnSelect } from './mn-select';
+import { MnSelectProps } from './mn-selectTypes';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /**
  * Keyboard use of mn-select, the WAI-ARIA combobox pattern. Options used to be Tab stops reached
@@ -20,19 +20,19 @@ import {MnLanguageService} from 'mn-angular-lib/core';
 @Component({
   standalone: true,
   imports: [MnSelect, FormsModule],
-  template: `
-    <form (submit)="submitted = true; $event.preventDefault()">
-      <mn-lib-select [props]="props" [(ngModel)]="value" name="choice"></mn-lib-select>
-    </form>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: ` <form (submit)="submitted = true; $event.preventDefault()">
+    <mn-lib-select [props]="props" [(ngModel)]="value" name="choice"></mn-lib-select>
+  </form>`,
 })
 class HostComponent {
   props: MnSelectProps = {
     id: 'kb-select',
     options: [
-      {label: 'Alpha', value: 'a'},
-      {label: 'Beta', value: 'b', disabled: true},
-      {label: 'Gamma', value: 'c'},
-      {label: 'Delta', value: 'd'},
+      { label: 'Alpha', value: 'a' },
+      { label: 'Beta', value: 'b', disabled: true },
+      { label: 'Gamma', value: 'c' },
+      { label: 'Delta', value: 'd' },
     ],
     searchable: false,
     mobileSheet: false,
@@ -62,7 +62,7 @@ describe('MnSelect (keyboard)', () => {
    * @returns The event, to check whether the select claimed it.
    */
   async function press(target: HTMLElement, key: string): Promise<KeyboardEvent> {
-    const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
     target.dispatchEvent(event);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -77,7 +77,7 @@ describe('MnSelect (keyboard)', () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
-        {provide: MnConfigService, useValue: {resolve: () => ({}) as never}},
+        { provide: MnConfigService, useValue: { resolve: () => ({}) as never } },
         {
           provide: MnLanguageService,
           useValue: {
@@ -90,7 +90,7 @@ describe('MnSelect (keyboard)', () => {
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
-    if (props) fixture.componentInstance.props = {...fixture.componentInstance.props, ...props};
+    if (props) fixture.componentInstance.props = { ...fixture.componentInstance.props, ...props };
     fixture.detectChanges();
     await fixture.whenStable();
     component = fixture.debugElement.query(By.directive(MnSelect)).componentInstance;
@@ -106,7 +106,7 @@ describe('MnSelect (keyboard)', () => {
     await press(trigger(), 'ArrowDown');
 
     expect(options().length).toBe(4);
-    expect(options().every(option => option.getAttribute('tabindex') === null)).toBeTrue();
+    expect(options().every((option) => option.getAttribute('tabindex') === null)).toBeTrue();
   });
 
   it('opens on ArrowDown with the first option active, named by aria-activedescendant', async () => {
@@ -198,7 +198,7 @@ describe('MnSelect (keyboard)', () => {
     }
 
     it('moves through the options from the search box and chooses with Enter', async () => {
-      await build({searchable: true});
+      await build({ searchable: true });
       await press(trigger(), 'ArrowDown');
 
       await press(search(), 'ArrowDown');
@@ -210,12 +210,12 @@ describe('MnSelect (keyboard)', () => {
     });
 
     it('highlights the first match while typing and leaves Space, Home and End to the text', async () => {
-      await build({searchable: true});
+      await build({ searchable: true });
       await press(trigger(), 'ArrowDown');
 
       component.onSearch('ta');
       fixture.detectChanges();
-      expect(component.filteredOptions.map(option => option.label)).toEqual(['Beta', 'Delta']);
+      expect(component.filteredOptions.map((option) => option.label)).toEqual(['Beta', 'Delta']);
       expect(component.activeIndex).withContext('Beta is disabled, so Delta').toBe(1);
 
       for (const key of [' ', 'Home', 'End']) {

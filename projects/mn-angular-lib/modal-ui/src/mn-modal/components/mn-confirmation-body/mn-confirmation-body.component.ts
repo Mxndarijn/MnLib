@@ -1,14 +1,26 @@
-import {ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule} from '@angular/forms';
-import {MnModalRef} from 'mn-angular-lib/modal-core';
-import {ActionStyle, ConfirmationModalConfig, ConfirmationTone, ModalCloseReason,} from 'mn-angular-lib/modal-core';
-import {MnButton} from 'mn-angular-lib/button';
-import {MnFormBodyComponent} from '../mn-form-body/mn-form-body.component';
-import {MnCustomBodyHostComponent} from '../mn-custom-body-host/mn-custom-body-host.component';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MnModalRef } from 'mn-angular-lib/modal-core';
+import {
+  ActionStyle,
+  ConfirmationModalConfig,
+  ConfirmationTone,
+  ModalCloseReason,
+} from 'mn-angular-lib/modal-core';
+import { MnButton } from 'mn-angular-lib/button';
+import { MnFormBodyComponent } from '../mn-form-body/mn-form-body.component';
+import { MnCustomBodyHostComponent } from '../mn-custom-body-host/mn-custom-body-host.component';
+import { MnLanguageService } from 'mn-angular-lib/core';
 import { LucideDynamicIcon, LucideIconData } from '@lucide/angular';
-import {MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE} from 'mn-angular-lib/modal-core';
+import { MN_MODAL_ACTION_ICONS, MODAL_ACTION_ICON_SIZE } from 'mn-angular-lib/modal-core';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
 
@@ -18,7 +30,14 @@ const ICONS = lucideIcons({ CircleAlert: lucide.CircleAlert, TriangleAlert: luci
 @Component({
   selector: 'mn-confirmation-body',
   standalone: true,
-  imports: [CommonModule, MnButton, MnFormBodyComponent, MnCustomBodyHostComponent, ReactiveFormsModule, LucideDynamicIcon],
+  imports: [
+    CommonModule,
+    MnButton,
+    MnFormBodyComponent,
+    MnCustomBodyHostComponent,
+    ReactiveFormsModule,
+    LucideDynamicIcon,
+  ],
   templateUrl: './mn-confirmation-body.component.html',
   styleUrls: ['./mn-confirmation-body.component.css'],
 })

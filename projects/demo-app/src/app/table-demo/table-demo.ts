@@ -1,6 +1,13 @@
-import {Component, OnInit, TemplateRef, viewChild} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {ColumnSortType, MnButton, MnCollectionState, MnTable, SortState, TableDataSource,} from 'mn-angular-lib';
+import { Component, OnInit, TemplateRef, viewChild } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import {
+  ColumnSortType,
+  MnButton,
+  MnCollectionState,
+  MnTable,
+  SortState,
+  TableDataSource,
+} from 'mn-angular-lib';
 import {
   LucideCopy,
   LucidePencil,
@@ -9,8 +16,8 @@ import {
   LucideShieldOff,
   LucideTrash2,
 } from '@lucide/angular';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
 
 type User = {
   id: string;
@@ -236,11 +243,11 @@ export class TableDemo implements OnInit {
     skeletonRowCount: 4,
     canSearch: false,
     paginationMode: 'none',
-    appearance: {hover: true, striped: true},
+    appearance: { hover: true, striped: true },
     columns: [
-      {key: 'name', header: 'Name', cell: (row) => row.name},
-      {key: 'email', header: 'Email', cell: (row) => row.email, hiddenBelow: 'sm'},
-      {key: 'role', header: 'Role', cell: (row) => row.role, width: '120px'},
+      { key: 'name', header: 'Name', cell: (row) => row.name },
+      { key: 'email', header: 'Email', cell: (row) => row.email, hiddenBelow: 'sm' },
+      { key: 'role', header: 'Role', cell: (row) => row.role, width: '120px' },
     ],
   };
 
@@ -261,7 +268,7 @@ export class TableDemo implements OnInit {
     state: MnCollectionState.RETRIEVED,
     canSearch: false,
     paginationMode: 'none',
-    appearance: {hover: true, striped: true},
+    appearance: { hover: true, striped: true },
     columns: [
       {
         key: 'name',
@@ -276,7 +283,7 @@ export class TableDemo implements OnInit {
         sortType: ColumnSortType.ALPHABETICAL,
         hiddenBelow: 'sm',
       },
-      {key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center'},
+      { key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center' },
       {
         key: 'age',
         header: 'Age',
@@ -293,7 +300,7 @@ export class TableDemo implements OnInit {
         hiddenBelow: 'md',
       },
     ],
-    defaultSort: {columnKey: 'name', direction: 'asc'},
+    defaultSort: { columnKey: 'name', direction: 'asc' },
   };
   // ── Loading skeleton: custom user-profile skeletons (built in ngOnInit for the cell templates) ──
   profileSkeletonDataSource!: TableDataSource<User>;
@@ -306,11 +313,11 @@ export class TableDemo implements OnInit {
     canSearch: true,
     searchPlaceholder: 'Search client-side...',
     isInSearch: (row, term) =>
-        row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
+      row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
     paginationMode: 'client-side-pagination',
     pageSize: 5,
     pageSizeOptions: [5, 10, 15],
-    appearance: {hover: true, striped: true},
+    appearance: { hover: true, striped: true },
     columns: [
       {
         key: 'name',
@@ -318,8 +325,8 @@ export class TableDemo implements OnInit {
         cell: (row) => row.name,
         sortType: ColumnSortType.ALPHABETICAL,
       },
-      {key: 'email', header: 'Email', cell: (row) => row.email},
-      {key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center'},
+      { key: 'email', header: 'Email', cell: (row) => row.email },
+      { key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center' },
       {
         key: 'age',
         header: 'Age',
@@ -340,11 +347,11 @@ export class TableDemo implements OnInit {
     paginationMode: 'none',
     selectionMode: 'multi',
     selectedRows: new BehaviorSubject<User[]>([]),
-    appearance: {hover: true},
+    appearance: { hover: true },
     columns: [
-      {key: 'name', header: 'Name', cell: (row) => row.name},
-      {key: 'email', header: 'Email', cell: (row) => row.email},
-      {key: 'role', header: 'Role', cell: (row) => row.role},
+      { key: 'name', header: 'Name', cell: (row) => row.name },
+      { key: 'email', header: 'Email', cell: (row) => row.email },
+      { key: 'role', header: 'Role', cell: (row) => row.role },
     ],
   };
 
@@ -378,7 +385,7 @@ export class TableDemo implements OnInit {
       this.paginatedPage = 1;
       this.fetchPaginatedPage();
     },
-    appearance: {hover: true, striped: true},
+    appearance: { hover: true, striped: true },
     columns: [
       {
         key: 'name',
@@ -393,7 +400,7 @@ export class TableDemo implements OnInit {
         sortType: ColumnSortType.ALPHABETICAL,
         hiddenBelow: 'sm',
       },
-      {key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center'},
+      { key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center' },
       {
         key: 'age',
         header: 'Age',
@@ -410,7 +417,7 @@ export class TableDemo implements OnInit {
         hiddenBelow: 'md',
       },
     ],
-    defaultSort: {columnKey: 'name', direction: 'asc'},
+    defaultSort: { columnKey: 'name', direction: 'asc' },
   };
   // ── Column filters table ──
   filterDataSource: TableDataSource<User> = {
@@ -420,7 +427,7 @@ export class TableDemo implements OnInit {
     state: MnCollectionState.RETRIEVED,
     canSearch: false,
     paginationMode: 'none',
-    appearance: {hover: true, striped: true},
+    appearance: { hover: true, striped: true },
     columns: [
       {
         key: 'name',
@@ -445,9 +452,9 @@ export class TableDemo implements OnInit {
         filterType: 'select',
         filterPlaceholder: 'All roles',
         filterOptions: [
-          {label: 'Admin', value: 'Admin'},
-          {label: 'Editor', value: 'Editor'},
-          {label: 'Viewer', value: 'Viewer'},
+          { label: 'Admin', value: 'Admin' },
+          { label: 'Editor', value: 'Editor' },
+          { label: 'Viewer', value: 'Viewer' },
         ],
       },
       {
@@ -481,8 +488,8 @@ export class TableDemo implements OnInit {
     canSearch: false,
     paginationMode: 'none',
     columns: [
-      {key: 'name', header: 'Name', cell: (row) => row.name},
-      {key: 'email', header: 'Email', cell: (row) => row.email},
+      { key: 'name', header: 'Name', cell: (row) => row.name },
+      { key: 'email', header: 'Email', cell: (row) => row.email },
     ],
   };
   // ── Searchable + load more table (server-side) ──
@@ -501,7 +508,7 @@ export class TableDemo implements OnInit {
       this.loadMoreLoaded = 5;
       this.fetchLoadMoreBatch(true);
     },
-    appearance: {hover: true, compact: true},
+    appearance: { hover: true, compact: true },
     columns: [
       {
         key: 'name',
@@ -509,8 +516,8 @@ export class TableDemo implements OnInit {
         cell: (row) => row.name,
         sortType: ColumnSortType.ALPHABETICAL,
       },
-      {key: 'email', header: 'Email', cell: (row) => row.email},
-      {key: 'role', header: 'Role', cell: (row) => row.role},
+      { key: 'email', header: 'Email', cell: (row) => row.email },
+      { key: 'role', header: 'Role', cell: (row) => row.role },
       {
         key: 'age',
         header: 'Age',
@@ -538,11 +545,11 @@ export class TableDemo implements OnInit {
   /** Uppercase initials for the avatar placeholder. */
   initials(user: User): string {
     return user.name
-        .split(' ')
-        .map((part) => part.charAt(0))
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
+      .split(' ')
+      .map((part) => part.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
   }
   // ── Server-side pagination state ──
   private paginatedPage = 1;
@@ -559,9 +566,9 @@ export class TableDemo implements OnInit {
       searchPlaceholder: 'Search users...',
       paginationMode: 'none',
       toolbarRightTemplate: this.toolbarRightTpl(),
-      appearance: {hover: true, striped: true},
+      appearance: { hover: true, striped: true },
       isInSearch: (row, term) =>
-          row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
+        row.name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term),
       columns: [
         {
           key: 'name',
@@ -569,8 +576,8 @@ export class TableDemo implements OnInit {
           cell: (row) => row.name,
           sortType: ColumnSortType.ALPHABETICAL,
         },
-        {key: 'email', header: 'Email', cell: (row) => row.email},
-        {key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center'},
+        { key: 'email', header: 'Email', cell: (row) => row.email },
+        { key: 'role', header: 'Role', cell: (row) => row.role, width: '100px', align: 'center' },
       ],
     };
     this.actionsDataSource = {
@@ -580,10 +587,10 @@ export class TableDemo implements OnInit {
       state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true, bordered: true},
+      appearance: { hover: true, bordered: true },
       columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name},
-        {key: 'role', header: 'Role', cell: (row) => row.role},
+        { key: 'name', header: 'Name', cell: (row) => row.name },
+        { key: 'role', header: 'Role', cell: (row) => row.role },
         {
           key: 'actions',
           header: 'Actions',
@@ -631,16 +638,18 @@ export class TableDemo implements OnInit {
       state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true},
+      appearance: { hover: true },
       columns: [
-        {key: 'name', header: 'Name', cell: (row) => row.name},
-        {key: 'role', header: 'Role', cell: (row) => row.role},
+        { key: 'name', header: 'Name', cell: (row) => row.name },
+        { key: 'role', header: 'Role', cell: (row) => row.role },
         {
           key: 'actions',
           header: 'Actions',
           align: 'right',
           sortType: ColumnSortType.NONE,
-          actions: [{label: 'Edit', icon: LucidePencil.icon, run: (row) => this.onAction('Edit', row)}],
+          actions: [
+            { label: 'Edit', icon: LucidePencil.icon, run: (row) => this.onAction('Edit', row) },
+          ],
         },
       ],
     };
@@ -652,7 +661,7 @@ export class TableDemo implements OnInit {
       state: MnCollectionState.RETRIEVED,
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true},
+      appearance: { hover: true },
       columns: [
         {
           key: 'name',
@@ -660,7 +669,7 @@ export class TableDemo implements OnInit {
           cell: (row) => row.name,
           sortType: ColumnSortType.ALPHABETICAL,
         },
-        {key: 'role', header: 'Role', cell: (row) => row.role},
+        { key: 'role', header: 'Role', cell: (row) => row.role },
         {
           key: 'actions',
           header: 'Actions',
@@ -676,7 +685,7 @@ export class TableDemo implements OnInit {
               run: (row) => this.toggleRole(row),
             },
             // Data icons: no <ng-template> stub and no viewChild backing these.
-            {label: 'Edit', icon: LucidePencil.icon, run: (row) => this.onAction('Edit', row)},
+            { label: 'Edit', icon: LucidePencil.icon, run: (row) => this.onAction('Edit', row) },
             {
               label: 'Delete',
               icon: LucideTrash2.icon,
@@ -696,7 +705,7 @@ export class TableDemo implements OnInit {
       skeletonRowCount: 4,
       canSearch: false,
       paginationMode: 'none',
-      appearance: {hover: true},
+      appearance: { hover: true },
       columns: [
         // Profile picture → circular skeleton.
         {
@@ -704,17 +713,17 @@ export class TableDemo implements OnInit {
           header: '',
           cell: this.avatarTpl(),
           width: '64px',
-          skeleton: {shape: 'circle', width: '40px', height: '40px'},
+          skeleton: { shape: 'circle', width: '40px', height: '40px' },
         },
         // Name → wider text bar.
-        {key: 'name', header: 'Name', cell: (row) => row.name, skeleton: {width: '70%'}},
+        { key: 'name', header: 'Name', cell: (row) => row.name, skeleton: { width: '70%' } },
         // Email → near-full-width text bar.
         {
           key: 'email',
           header: 'Email',
           cell: (row) => row.email,
           hiddenBelow: 'sm',
-          skeleton: {width: '90%'},
+          skeleton: { width: '90%' },
         },
         // Role badge → small rounded rectangle matching the badge footprint.
         {
@@ -722,7 +731,7 @@ export class TableDemo implements OnInit {
           header: 'Role',
           cell: this.roleBadgeTpl(),
           width: '120px',
-          skeleton: {shape: 'rectangle', width: '64px', height: '22px'},
+          skeleton: { shape: 'rectangle', width: '64px', height: '22px' },
         },
       ],
     };
@@ -776,7 +785,7 @@ export class TableDemo implements OnInit {
   private toggleRole(user: User): void {
     this.roleRows.next(
       this.roleRows.value.map((row) =>
-          row.id === user.id ? {...row, role: row.role === 'Admin' ? 'Editor' : 'Admin'} : row,
+        row.id === user.id ? { ...row, role: row.role === 'Admin' ? 'Editor' : 'Admin' } : row,
       ),
     );
   }
@@ -799,7 +808,7 @@ export class TableDemo implements OnInit {
     if (!search) return ALL_USERS;
     const term = search.toLowerCase();
     return ALL_USERS.filter(
-        (u) => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term),
+      (u) => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term),
     );
   }
 

@@ -57,9 +57,7 @@
             "outputPath": "dist/demo-app",
             "index": "projects/demo-app/src/index.html",
             "browser": "projects/demo-app/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "tsConfig": "projects/demo-app/tsconfig.app.json",
             "assets": [
               "projects/demo-app/src/favicon.ico",

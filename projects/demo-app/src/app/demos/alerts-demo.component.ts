@@ -1,9 +1,15 @@
-import {Component, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {DemoPageComponent} from '../shared/demo-page.component';
-import {DemoExampleComponent} from '../shared/demo-example.component';
-import {MnAlertKind, MnAlertOutletComponent, MnAlertService, MnButton, provideMnAlerts,} from 'mn-angular-lib';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DemoPageComponent } from '../shared/demo-page.component';
+import { DemoExampleComponent } from '../shared/demo-example.component';
+import {
+  MnAlertKind,
+  MnAlertOutletComponent,
+  MnAlertService,
+  MnButton,
+  provideMnAlerts,
+} from 'mn-angular-lib';
 
 @Component({
   selector: 'app-alerts-demo',
@@ -18,7 +24,7 @@ import {MnAlertKind, MnAlertOutletComponent, MnAlertService, MnButton, provideMn
   ],
   providers: [
     provideMnAlerts({
-      durations: {success: 2500, info: 3500, warning: 6000, error: 8000, default: 4000},
+      durations: { success: 2500, info: 3500, warning: 6000, error: 8000, default: 4000 },
     }),
   ],
   templateUrl: './alerts-demo.component.html',

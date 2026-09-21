@@ -1,6 +1,7 @@
 import {
   AfterViewChecked,
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   DoCheck,
   ElementRef,
@@ -10,16 +11,16 @@ import {
   isSignal,
   OnDestroy,
   Output,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Subscription} from 'rxjs';
-import {MnTranslatePipe} from 'mn-angular-lib/core';
-import {MnCollectionState} from 'mn-angular-lib/collection';
-import {MnTabDataSource, MnTabItem} from './mn-tab.types';
-import {CommonModule} from '@angular/common';
-import {MnBadge} from 'mn-angular-lib/button';
-import {MnSkeleton} from 'mn-angular-lib/button';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { MnTranslatePipe } from 'mn-angular-lib/core';
+import { MnCollectionState } from 'mn-angular-lib/collection';
+import { MnTabDataSource, MnTabItem } from './mn-tab.types';
+import { CommonModule } from '@angular/common';
+import { MnBadge } from 'mn-angular-lib/button';
+import { MnSkeleton } from 'mn-angular-lib/button';
 
 /** Fallback number of skeleton tabs when no items are known and no count is given. */
 const DEFAULT_SKELETON_TAB_COUNT = 3;
@@ -65,10 +66,18 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
    * Router the active tab is written to. Optional: a tab bar used outside a
    * routed application still works, it just has no URL to mirror into.
    */
-  private readonly router = inject(Router, {optional: true});
+  private readonly router = inject(Router, { optional: true });
 
   /** Route the tab value is read back from; absent for the same reason as {@link router}. */
-  private readonly route = inject(ActivatedRoute, {optional: true});
+  private readonly route = inject(ActivatedRoute, { optional: true });
+
+  /**
+   * Marks the view whenever {@link currentActive} moves. The selection changes from three
+   * places Angular does not notice under OnPush: the query-parameter subscription, the
+   * {@link ngDoCheck} re-resolve, and a stale item being dropped — only a click arrives
+   * through a listener that dirties the view by itself.
+   */
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /** Watches the URL so a deep link, a back button or an in-app link moves the tab bar. */
   private readonly queryParamsSub?: Subscription;
@@ -167,9 +176,8 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
    */
   get skeletonTabs(): number[] {
     const count =
-      this.dataSource.skeletonCount ??
-      (this.dataSource.items.length || DEFAULT_SKELETON_TAB_COUNT);
-    return Array.from({length: count}, (_, index) => index);
+      this.dataSource.skeletonCount ?? (this.dataSource.items.length || DEFAULT_SKELETON_TAB_COUNT);
+    return Array.from({ length: count }, (_, index) => index);
   }
 
   constructor() {
@@ -346,7 +354,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
     const tab = tabs?.[index];
     if (!tab) return;
     tab.focus();
-    tab.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
+    tab.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
   }
 
   /**
@@ -445,6 +453,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
       if (this.currentActive !== undefined) {
         this.currentActive = undefined;
         this.currentKey = undefined;
+        this.cdr.markForCheck();
         this.scheduleIndicator(false);
       }
       return;
@@ -453,8 +462,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
       return;
     }
     const defaultIndex = this.dataSource.defaultActive;
-    const index =
-      defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0;
+    const index = defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0;
     const fallback = items[index];
     const restored = this.itemFromUrl(items);
     const previousKey = this.currentKey;
@@ -481,6 +489,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
     const items = this.dataSource.items;
     this.currentActive = item;
     this.currentKey = this.urlKeys(items)[items.indexOf(item)];
+    this.cdr.markForCheck();
   }
 
   /**
@@ -549,7 +558,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
     // no route of its own to be relative to.
     void this.router
       .navigate([], {
-        queryParams: {[param]: key},
+        queryParams: { [param]: key },
         queryParamsHandling: 'merge',
         replaceUrl: true,
       })
@@ -575,7 +584,7 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
       used.set(base, taken + 1);
       return taken === 0 ? base : `${base}-${taken + 1}`;
     });
-    this.urlKeyCache = {items, keys};
+    this.urlKeyCache = { items, keys };
     return keys;
   }
 }

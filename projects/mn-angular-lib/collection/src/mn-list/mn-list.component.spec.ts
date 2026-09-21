@@ -1,11 +1,11 @@
-import {Component, TemplateRef, ViewChild} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {BehaviorSubject} from 'rxjs';
+import { Component, TemplateRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BehaviorSubject } from 'rxjs';
 
-import {MnList} from './mn-list.component';
-import {ListDataSource} from './mn-list.types';
-import {MnCollectionState} from '../mn-collection';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { MnList } from './mn-list.component';
+import { ListDataSource } from './mn-list.types';
+import { MnCollectionState } from '../mn-collection';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /** One row of test data. */
 type Row = { id: string; name: string };
@@ -17,6 +17,7 @@ type Row = { id: string; name: string };
 @Component({
   standalone: true,
   imports: [MnList],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <ng-template #item let-row>
       <span class="item">{{ row.name }}</span>
@@ -104,7 +105,9 @@ describe('MnList toolbar slots', () => {
     const legacy = el.querySelector('.legacy-slot');
     const search = el.querySelector('input');
     expect(legacy).not.toBeNull();
-    expect(search!.compareDocumentPosition(legacy!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      search!.compareDocumentPosition(legacy!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it('prefers toolbarRightTemplate over the deprecated toolbarTemplate', () => {
@@ -149,7 +152,7 @@ describe('MnList select-all label', () => {
     const el: HTMLElement | null = fixture.nativeElement.querySelector(
       'label[for="mn-list-select-all"], #mn-list-select-all',
     );
-    return el ? (el.closest('label')?.textContent ?? el.textContent)?.trim() ?? null : null;
+    return el ? ((el.closest('label')?.textContent ?? el.textContent)?.trim() ?? null) : null;
   };
 
   beforeEach(async () => {
@@ -180,7 +183,7 @@ describe('MnList select-all label', () => {
    */
   function multiSelectSource(): ListDataSource<Row> {
     return {
-      dataRows: new BehaviorSubject<Row[]>([{id: '1', name: 'Alpha'}]),
+      dataRows: new BehaviorSubject<Row[]>([{ id: '1', name: 'Alpha' }]),
       itemTemplate: host.item,
       getID: (row: Row) => row.id,
       emptyMessage: '',
@@ -198,7 +201,7 @@ describe('MnList select-all label', () => {
   });
 
   it('uses mnCollection.selectAll once the app defines it', () => {
-    bundle = {'mnCollection.selectAll': 'Alles selecteren'};
+    bundle = { 'mnCollection.selectAll': 'Alles selecteren' };
     host.dataSource = multiSelectSource();
     fixture.detectChanges();
 
@@ -223,7 +226,7 @@ describe('MnList search auto-enable', () => {
   function makeDataSource(count: number): ListDataSource<Row> {
     return {
       dataRows: new BehaviorSubject<Row[]>(
-        Array.from({length: count}, (_, i) => ({id: String(i + 1), name: `Row ${i + 1}`})),
+        Array.from({ length: count }, (_, i) => ({ id: String(i + 1), name: `Row ${i + 1}` })),
       ),
       itemTemplate: host.item,
       getID: (row: Row) => row.id,
@@ -276,7 +279,7 @@ describe('MnList (keyboard activation)', () => {
    * @returns The event, to check whether the item claimed it.
    */
   function press(target: HTMLElement, key: string): KeyboardEvent {
-    const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
     target.dispatchEvent(event);
     return event;
   }
@@ -302,7 +305,7 @@ describe('MnList (keyboard activation)', () => {
     press(items()[0], 'Enter');
     const space = press(items()[0], ' ');
 
-    expect(clicked.map(row => row.name)).toEqual(['Alpha', 'Alpha']);
+    expect(clicked.map((row) => row.name)).toEqual(['Alpha', 'Alpha']);
     expect(space.defaultPrevented).toBeTrue();
   });
 

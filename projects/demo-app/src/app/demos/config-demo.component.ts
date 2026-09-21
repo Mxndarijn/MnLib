@@ -1,6 +1,6 @@
-import {Component} from '@angular/core';
-import {MnSectionDirective} from 'mn-angular-lib';
-import {DemoPageComponent} from '../shared/demo-page.component';
+import { Component } from '@angular/core';
+import { MnSectionDirective } from 'mn-angular-lib';
+import { DemoPageComponent } from '../shared/demo-page.component';
 
 @Component({
   selector: 'app-config-demo',
@@ -14,8 +14,12 @@ import {DemoPageComponent} from '../shared/demo-page.component';
       lead="This page demonstrates defaults, section overrides, and instance overrides."
     ></app-demo-page>
   `,
-  styles: [`
-    h1 { margin: 0 0 8px; }
-  `]
+  styles: [
+    `
+      h1 {
+        margin: 0 0 8px;
+      }
+    `,
+  ],
 })
 export class ConfigDemoComponent {}

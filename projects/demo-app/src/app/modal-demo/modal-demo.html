@@ -234,10 +234,10 @@
     </div>
   </app-demo-example>
 
-  @if (lastResult) {
+  @if (lastResult()) {
     <app-demo-example title="Last Modal Result" hint="The most recent modal's close result.">
       <div class="p-4 bg-base-200 rounded-lg border border-base-300 font-mono text-sm text-base-content/70">
-        {{ lastResult }}
+        {{ lastResult() }}
       </div>
     </app-demo-example>
   }

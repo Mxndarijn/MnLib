@@ -7,30 +7,30 @@
   OnDestroy,
   OnInit,
   Output,
-  Type
+  Type,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Observable, Subject, takeUntil} from 'rxjs';
-import {CalendarEvent} from 'mn-angular-lib/calendar-core';
-import {CalendarEventData} from 'mn-angular-lib/calendar-core';
+import { CommonModule } from '@angular/common';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { CalendarEvent } from 'mn-angular-lib/calendar-core';
+import { CalendarEventData } from 'mn-angular-lib/calendar-core';
 import {
   CalendarConfig,
   ColumnDay,
   DEFAULT_CALENDAR_CONFIG,
   HourRow,
-  resolveCalendarConfig
+  resolveCalendarConfig,
 } from 'mn-angular-lib/calendar-core';
-import {CalendarDateFormatter} from 'mn-angular-lib/calendar-core';
-import {DefaultCalendarDateFormatter} from 'mn-angular-lib/calendar-core';
-import {CalendarEventLayoutService} from 'mn-angular-lib/calendar-core';
-import {CalendarUtility} from 'mn-angular-lib/calendar-core';
-import {CalendarEventComponent} from '../calendar-event/calendar-event.component';
-import {MnLanguageService} from 'mn-angular-lib/core';
+import { CalendarDateFormatter } from 'mn-angular-lib/calendar-core';
+import { DefaultCalendarDateFormatter } from 'mn-angular-lib/calendar-core';
+import { CalendarEventLayoutService } from 'mn-angular-lib/calendar-core';
+import { CalendarUtility } from 'mn-angular-lib/calendar-core';
+import { CalendarEventComponent } from '../calendar-event/calendar-event.component';
+import { MnLanguageService } from 'mn-angular-lib/core';
 
 /** Extended hour row with a pre-resolved display label. */
 type DisplayHourRow = {
   hourLabel: string;
-} & HourRow
+} & HourRow;
 
 /**
  * Week grid view showing 7 day columns with half-hour time slots.
@@ -95,13 +95,15 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.resolvedConfig = this.config ? resolveCalendarConfig(this.config) : { ...DEFAULT_CALENDAR_CONFIG };
+    this.resolvedConfig = this.config
+      ? resolveCalendarConfig(this.config)
+      : { ...DEFAULT_CALENDAR_CONFIG };
     this.buildColumns();
     this.updateCurrentTime();
     this.currentTimeInterval = setInterval(() => this.updateCurrentTime(), 60000);
 
     if (this.eventsChanged) {
-      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe(events => {
+      this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe((events) => {
         this.events = events;
         this.refreshEvents();
         this.cdr.markForCheck();
@@ -109,7 +111,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
     }
 
     if (this.focusDayChanged) {
-      this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe(date => {
+      this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe((date) => {
         this.focusDay = date;
         this.buildColumns();
         this.refreshEvents();
@@ -131,10 +133,14 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
   /** Returns the CSS `grid-row` value for an event based on its start/end times. */
   getEventRow(event: CalendarEvent): string {
     const startRow = CalendarUtility.getCorrectRow(
-      event.startTime.getHours(), event.startTime.getMinutes(), this.resolvedConfig.startHour
+      event.startTime.getHours(),
+      event.startTime.getMinutes(),
+      this.resolvedConfig.startHour,
     );
     const endRow = CalendarUtility.getCorrectRow(
-      event.endTime.getHours(), event.endTime.getMinutes(), this.resolvedConfig.startHour
+      event.endTime.getHours(),
+      event.endTime.getMinutes(),
+      this.resolvedConfig.startHour,
     );
     return `${startRow} / ${Math.max(endRow, startRow + 1)}`;
   }
@@ -148,7 +154,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
 
   /** Returns the CSS `grid-column` value for an event within its day's sub-columns. */
   getEventColumn(event: CalendarEvent): string {
-    const dayIdx = this.columns.findIndex(c => this.formatter.isSameDay(c.date, event.startTime));
+    const dayIdx = this.columns.findIndex((c) => this.formatter.isSameDay(c.date, event.startTime));
     if (dayIdx < 0) return '1 / span 1';
     const dayInfo = this.dayColumnMap[dayIdx];
     const subCol = (event.column ?? 0) + dayInfo.startCol;
@@ -188,7 +194,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
         hour,
         topRow: i * 2 + 1,
         bottomRow: i * 2 + 3,
-        hourLabel: label
+        hourLabel: label,
       });
     }
     this.hourRows = rows;
@@ -214,7 +220,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
         date,
         dayName: shortNames[i],
         dayNumber: date.getDate(),
-        isToday: this.formatter.isSameDay(date, today)
+        isToday: this.formatter.isSameDay(date, today),
       });
     }
   }
@@ -227,12 +233,16 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
     const rangeEnd = new Date(this.columns[6].date);
     rangeEnd.setHours(23, 59, 59, 999);
 
-    const filtered = this.events.filter(e =>
-      this.layoutService.eventsOverlap(e.startTime, e.endTime, rangeStart, rangeEnd)
+    const filtered = this.events.filter((e) =>
+      this.layoutService.eventsOverlap(e.startTime, e.endTime, rangeStart, rangeEnd),
     );
 
     this.displayEvents = this.layoutService.calculateMultiDayEvents(
-      filtered, this.resolvedConfig.startHour, this.resolvedConfig.endHour, rangeStart, rangeEnd
+      filtered,
+      this.resolvedConfig.startHour,
+      this.resolvedConfig.endHour,
+      rangeStart,
+      rangeEnd,
     );
 
     // Assign columns per day so overlapping events within a day get sub-columns
@@ -242,8 +252,8 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
       const dayEnd = new Date(this.columns[i].date);
       dayEnd.setHours(23, 59, 59, 999);
 
-      const dayEvents = this.displayEvents.filter(e =>
-        this.formatter.isSameDay(e.startTime, this.columns[i].date)
+      const dayEvents = this.displayEvents.filter((e) =>
+        this.formatter.isSameDay(e.startTime, this.columns[i].date),
       );
 
       this.layoutService.assignColumnsToEvents(dayEvents);
@@ -260,8 +270,8 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
     let currentCol = 1;
 
     for (let i = 0; i < 7; i++) {
-      const dayEvents = this.displayEvents.filter(e =>
-        this.formatter.isSameDay(e.startTime, this.columns[i].date)
+      const dayEvents = this.displayEvents.filter((e) =>
+        this.formatter.isSameDay(e.startTime, this.columns[i].date),
       );
 
       let maxSubCols = 1;
@@ -285,13 +295,17 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
   /** Updates the current-time red line position. */
   private updateCurrentTime() {
     const now = new Date();
-    const dayIdx = this.columns.findIndex(c => this.formatter.isSameDay(c.date, now));
+    const dayIdx = this.columns.findIndex((c) => this.formatter.isSameDay(c.date, now));
     if (dayIdx >= 0 && this.dayColumnMap.length > 0) {
       const dayInfo = this.dayColumnMap[dayIdx];
       this.currentTimeCol = `${dayInfo.startCol} / span ${dayInfo.subColumns}`;
-      this.currentTimeRow = CalendarUtility.getCorrectRow(now.getHours(), now.getMinutes(), this.resolvedConfig.startHour);
+      this.currentTimeRow = CalendarUtility.getCorrectRow(
+        now.getHours(),
+        now.getMinutes(),
+        this.resolvedConfig.startHour,
+      );
       // formatTime is async; refresh the label and re-render when it resolves.
-      this.formatter.formatTime(now).then(label => {
+      this.formatter.formatTime(now).then((label) => {
         this.currentTimeLabel = label;
         this.cdr.markForCheck();
       });
@@ -300,5 +314,7 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
       this.currentTimeRow = 0;
       this.currentTimeLabel = '';
     }
+    // See calendar-day: the setInterval tick marks nothing by itself.
+    this.cdr.markForCheck();
   }
 }

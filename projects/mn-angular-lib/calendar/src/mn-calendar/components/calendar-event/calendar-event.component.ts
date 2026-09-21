@@ -1,6 +1,14 @@
 ﻿import {
-  Component, Input, Output, EventEmitter, ViewChild, ViewContainerRef,
-  AfterViewInit, Type, OnChanges, SimpleChanges
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ViewChild,
+  ViewContainerRef,
+  AfterViewInit,
+  Type,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarEvent } from 'mn-angular-lib/calendar-core';
@@ -30,7 +38,8 @@ export class CalendarEventComponent implements AfterViewInit, OnChanges {
   /** Emits when the rendered event is clicked. */
   @Output() eventClicked = new EventEmitter<CalendarEvent>();
 
-  @ViewChild('eventContainer', { read: ViewContainerRef, static: true }) eventContainer!: ViewContainerRef;
+  @ViewChild('eventContainer', { read: ViewContainerRef, static: true })
+  eventContainer!: ViewContainerRef;
 
   private rendered = false;
 
@@ -53,7 +62,8 @@ export class CalendarEventComponent implements AfterViewInit, OnChanges {
   private renderComponent() {
     if (!this.eventContainer) return;
     this.eventContainer.clear();
-    const component = this.customComponent ?? this.event?.component ?? CalendarEventDefaultComponent;
+    const component =
+      this.customComponent ?? this.event?.component ?? CalendarEventDefaultComponent;
     const ref = this.eventContainer.createComponent(component);
     (ref.instance as CalendarEventData).event = this.event;
     ref.changeDetectorRef.detectChanges();

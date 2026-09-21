@@ -1,6 +1,6 @@
-import {Component, HostBinding, Input} from '@angular/core';
-import {MnButtonTypes} from './mn-buttonTypes';
-import {mnButtonVariants} from './mn-buttonVariants';
+import { Component, HostBinding, Input } from '@angular/core';
+import { MnButtonTypes } from './mn-buttonTypes';
+import { mnButtonVariants } from './mn-buttonVariants';
 
 @Component({
   selector: 'button[mnButton], a[mnButton]',
@@ -54,5 +54,4 @@ export class MnButton {
   private get isBlocked(): boolean {
     return !!(this.data.disabled || this.data.loading);
   }
-
 }

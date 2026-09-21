@@ -9,14 +9,14 @@
   OnDestroy,
   OnInit,
   Output,
-  Type
+  Type,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideDynamicIcon } from '@lucide/angular';
-import {BehaviorSubject, skip, Subject, takeUntil} from 'rxjs';
-import {CalendarButton, CalendarEvent} from 'mn-angular-lib/calendar-core';
-import {CalendarEventData} from 'mn-angular-lib/calendar-core';
+import { BehaviorSubject, skip, Subject, takeUntil } from 'rxjs';
+import { CalendarButton, CalendarEvent } from 'mn-angular-lib/calendar-core';
+import { CalendarEventData } from 'mn-angular-lib/calendar-core';
 import {
   CALENDAR_CONFIG,
   CalendarConfig,
@@ -24,15 +24,15 @@ import {
   DEFAULT_CALENDAR_CONFIG,
   MN_CALENDAR_CONFIG,
   provideMnCalendarConfig,
-  resolveCalendarConfig
+  resolveCalendarConfig,
 } from 'mn-angular-lib/calendar-core';
-import {MnLanguageService} from 'mn-angular-lib/core';
-import {CalendarMonthComponent} from '../calendar-month/calendar-month.component';
-import {CalendarWeekComponent} from '../calendar-week/calendar-week.component';
-import {CalendarDayComponent} from '../calendar-day/calendar-day.component';
-import {UpcomingEventsComponent} from '../upcoming-events/upcoming-events.component';
-import {MnButton} from 'mn-angular-lib/button';
-import {MnDatetime} from 'mn-angular-lib/forms';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { CalendarMonthComponent } from '../calendar-month/calendar-month.component';
+import { CalendarWeekComponent } from '../calendar-week/calendar-week.component';
+import { CalendarDayComponent } from '../calendar-day/calendar-day.component';
+import { UpcomingEventsComponent } from '../upcoming-events/upcoming-events.component';
+import { MnButton } from 'mn-angular-lib/button';
+import { MnDatetime } from 'mn-angular-lib/forms';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
 
@@ -81,10 +81,17 @@ let instanceCounter = 0;
     LucideDynamicIcon,
   ],
   templateUrl: './calendar-view.component.html',
-  providers: [
-    provideMnCalendarConfig(DEFAULT_CALENDAR_CONFIG),
+  providers: [provideMnCalendarConfig(DEFAULT_CALENDAR_CONFIG)],
+  styles: [
+    `
+      :host {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+      }
+    `,
   ],
-  styles: [`:host { display: flex; flex-direction: column; width: 100%; height: 100%; }`]
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
   /** Lucide icons the template renders. */
@@ -139,8 +146,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    const mnConfig = inject<CalendarConfig | null>(MN_CALENDAR_CONFIG, {optional: true});
-    const legacyConfig = inject<CalendarConfig | null>(CALENDAR_CONFIG, {optional: true});
+    const mnConfig = inject<CalendarConfig | null>(MN_CALENDAR_CONFIG, { optional: true });
+    const legacyConfig = inject<CalendarConfig | null>(CALENDAR_CONFIG, { optional: true });
 
     // Keep a reference to the injected config so we can re-read it after locale changes.
     this.mnConfigRef = mnConfig;
@@ -170,7 +177,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     this.RequestNewCalendarItemsEvent.emit(this.focusDay);
 
     if (this.NewCalendarItemsEvent) {
-      this.NewCalendarItemsEvent.pipe(takeUntil(this.destroy$)).subscribe(events => {
+      this.NewCalendarItemsEvent.pipe(takeUntil(this.destroy$)).subscribe((events) => {
         this.internalEventsChanged.next(events);
       });
     }
@@ -199,7 +206,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     const locale = this.config.locale;
 
     if (this.currentView === CalendarView.MONTH) {
-      return this.focusDay.toLocaleDateString(locale, {month: 'long', year: 'numeric'});
+      return this.focusDay.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
     }
 
     if (this.currentView === CalendarView.DAY) {
@@ -208,7 +215,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       return this.focusDay.toLocaleDateString(locale, {
         day: 'numeric',
         month: 'long',
-        ...(this.focusDay.getFullYear() !== new Date().getFullYear() ? {year: 'numeric'} : {}),
+        ...(this.focusDay.getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}),
       });
     }
 
@@ -216,13 +223,14 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
     // Only repeat what actually changes across the week's two ends.
-    const from = start.getFullYear() !== end.getFullYear()
-      ? start.toLocaleDateString(locale, {day: 'numeric', month: 'short', year: 'numeric'})
-      : start.toLocaleDateString(locale, {
-        day: 'numeric',
-        ...(start.getMonth() !== end.getMonth() ? {month: 'short'} : {}),
-      });
-    const to = end.toLocaleDateString(locale, {day: 'numeric', month: 'short', year: 'numeric'});
+    const from =
+      start.getFullYear() !== end.getFullYear()
+        ? start.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+        : start.toLocaleDateString(locale, {
+            day: 'numeric',
+            ...(start.getMonth() !== end.getMonth() ? { month: 'short' } : {}),
+          });
+    const to = end.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
     return `${from} – ${to}`;
   }
 
@@ -297,7 +305,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     this.viewOptions = [
       { value: CalendarView.MONTH, label: this.config.viewLabels['MONTH'] ?? 'Month' },
       { value: CalendarView.WEEK, label: this.config.viewLabels['WEEK'] ?? 'Week' },
-      { value: CalendarView.DAY, label: this.config.viewLabels['DAY'] ?? 'Day' }
+      { value: CalendarView.DAY, label: this.config.viewLabels['DAY'] ?? 'Day' },
     ];
   }
 

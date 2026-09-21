@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   EventEmitter,
@@ -7,17 +8,21 @@ import {
   Input,
   OnChanges,
   OnInit,
-  Output
+  Output,
 } from '@angular/core';
-import {NgClass} from '@angular/common';
-import {MnCheckboxErrorMessageData, MnCheckboxProps, MnCheckboxUIConfig} from './mn-checkboxTypes';
-import {NgControl, ValidationErrors, Validators} from '@angular/forms';
-import {mnCheckboxVariants, mnCheckboxWrapperVariants} from './mn-checkboxVariants';
-import {MnErrorMessage} from '../mn-error-message/mn-error-message';
-import {MnConfigService} from "mn-angular-lib/core";
-import {MN_INSTANCE_ID, MN_SECTION_PATH} from "mn-angular-lib/core";
-import {MnLanguageService} from "mn-angular-lib/core";
-import {skip} from "rxjs";
+import { NgClass } from '@angular/common';
+import {
+  MnCheckboxErrorMessageData,
+  MnCheckboxProps,
+  MnCheckboxUIConfig,
+} from './mn-checkboxTypes';
+import { NgControl, ValidationErrors, Validators } from '@angular/forms';
+import { mnCheckboxVariants, mnCheckboxWrapperVariants } from './mn-checkboxVariants';
+import { MnErrorMessage } from '../mn-error-message/mn-error-message';
+import { MnConfigService } from 'mn-angular-lib/core';
+import { MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
+import { MnLanguageService } from 'mn-angular-lib/core';
+import { skip } from 'rxjs';
 
 export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHECKBOX_CONFIG');
 
@@ -29,7 +34,7 @@ export const MN_CHECKBOX_CONFIG = new InjectionToken<MnCheckboxUIConfig>('MN_CHE
   styleUrl: './mn-checkbox.css',
 })
 export class MnCheckbox implements OnInit, OnChanges {
-  ngControl = inject(NgControl, {optional: true, self: true});
+  ngControl = inject(NgControl, { optional: true, self: true });
 
   protected uiConfig: MnCheckboxUIConfig = {};
 
@@ -44,14 +49,15 @@ export class MnCheckbox implements OnInit, OnChanges {
   private readonly configService = inject(MnConfigService);
   private readonly sectionPath = inject(MN_SECTION_PATH, { optional: true }) ?? [];
   private readonly explicitInstanceId = inject(MN_INSTANCE_ID, { optional: true });
+  /** Marks the view when a locale change re-resolves the config (OnPush). */
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly lang = inject(MnLanguageService);
   private readonly destroyRef = inject(DestroyRef);
 
   value = false;
   isDisabled = false;
 
-  private onChange: (val: unknown) => void = () => {
-  };
+  private onChange: (val: unknown) => void = () => {};
   private onTouched: () => void = () => {};
 
   private readonly builtInErrorMessages: Record<string, MnCheckboxErrorMessageData> = {
@@ -63,10 +69,23 @@ export class MnCheckbox implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    // `showError` reads the control's touched/dirty/invalid state straight off the form.
+    // Those move from the forms API — `markAllAsTouched()` when the user tries to submit, a
+    // programmatic `setErrors` — never through an event on this component, so under OnPush
+    // the message would never appear. `events` covers value, status, touched and pristine.
+    const formControl = this.ngControl?.control;
+    if (formControl) {
+      const stateSub = formControl.events.subscribe(() => this.cdr.markForCheck());
+      this.destroyRef.onDestroy(() => stateSub.unsubscribe());
+    }
+
     this.resolveConfig();
 
     const sub = this.lang.locale$.pipe(skip(1)).subscribe(() => {
       this.resolveConfig();
+      // `resolveConfig` rewrites plain fields the template reads; under OnPush nothing else
+      // marks this view for the locale change.
+      this.cdr.markForCheck();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
@@ -76,7 +95,7 @@ export class MnCheckbox implements OnInit, OnChanges {
     this.uiConfig = this.configService.resolve<MnCheckboxUIConfig>(
       'mn-checkbox',
       this.sectionPath,
-      instanceId
+      instanceId,
     );
 
     if (this.props.label) {
@@ -88,6 +107,9 @@ export class MnCheckbox implements OnInit, OnChanges {
 
   writeValue(val: unknown): void {
     this.value = !!val;
+    // The forms API writes in from outside (setValue, reset, patch); nothing marks
+    // this view for it.
+    this.cdr.markForCheck();
   }
 
   /** Sync value from checked input when not using forms */
@@ -107,6 +129,9 @@ export class MnCheckbox implements OnInit, OnChanges {
 
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    // `control.disable()` / `.enable()` reaches us the same way `writeValue` does —
+    // from the forms API, with no event behind it.
+    this.cdr.markForCheck();
   }
 
   // ========== Event Handlers ==========
@@ -166,7 +191,7 @@ export class MnCheckbox implements OnInit, OnChanges {
   get errorMessages(): string[] {
     const errors = this.control?.errors;
     if (!errors) return [];
-    return Object.keys(errors).map(key => this.resolveErrorMessageForKey(key, errors));
+    return Object.keys(errors).map((key) => this.resolveErrorMessageForKey(key, errors));
   }
 
   get errorMessage(): string | null {

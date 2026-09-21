@@ -1,9 +1,9 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {LucideDynamicIcon, LucideIconData} from '@lucide/angular';
-import {MnButton, MnButtonTypes} from 'mn-angular-lib/button';
-import {ActionStyle, ModalFooterAction} from 'mn-angular-lib/modal-core';
-import {defaultIconForStyle, MODAL_ACTION_ICON_SIZE} from 'mn-angular-lib/modal-core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LucideDynamicIcon, LucideIconData } from '@lucide/angular';
+import { MnButton, MnButtonTypes } from 'mn-angular-lib/button';
+import { ActionStyle, ModalFooterAction } from 'mn-angular-lib/modal-core';
+import { defaultIconForStyle, MODAL_ACTION_ICON_SIZE } from 'mn-angular-lib/modal-core';
 
 @Component({
   selector: 'mn-footer-actions',
@@ -62,11 +62,11 @@ export class MnFooterActionsComponent<TResult = unknown> {
   }
 
   get leftActions(): ModalFooterAction<TResult>[] {
-    return this.actions.filter(a => a.position === 'left');
+    return this.actions.filter((a) => a.position === 'left');
   }
 
   get rightActions(): ModalFooterAction<TResult>[] {
-    return this.actions.filter(a => a.position !== 'left');
+    return this.actions.filter((a) => a.position !== 'left');
   }
 
   getButtonData(action: ModalFooterAction<TResult>): Partial<MnButtonTypes> {
@@ -76,7 +76,7 @@ export class MnFooterActionsComponent<TResult = unknown> {
       case ActionStyle.DANGER:
         return { variant: 'fill', color: 'danger', disabled: action.disabled };
       case ActionStyle.GHOST:
-        return {variant: 'text', color: 'gray', disabled: action.disabled};
+        return { variant: 'text', color: 'gray', disabled: action.disabled };
       case ActionStyle.SECONDARY:
       default:
         return { variant: 'outline', color: 'secondary', disabled: action.disabled };

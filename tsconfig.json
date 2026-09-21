@@ -6,7 +6,7 @@
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "baseUrl": ".",
+    // TypeScript 6 deprecates `baseUrl`; the mappings below are relative to this file instead.
     "paths": {
       "mn-angular-lib": [
         "./projects/mn-angular-lib/src/public-api.ts",
