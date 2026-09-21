@@ -11,16 +11,25 @@ import {
   isSignal,
   OnDestroy,
   Output,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { MnTranslatePipe } from 'mn-angular-lib/core';
+import { LucideDynamicIcon } from '@lucide/angular';
+import * as lucide from 'lucide';
+import { lucideIcons, MnTranslatePipe } from 'mn-angular-lib/core';
 import { MnCollectionState } from 'mn-angular-lib/collection';
 import { MnTabDataSource, MnTabItem } from './mn-tab.types';
 import { CommonModule } from '@angular/common';
 import { MnBadge } from 'mn-angular-lib/button';
 import { MnSkeleton } from 'mn-angular-lib/button';
+
+/** Lucide icons this file renders. */
+const ICONS = lucideIcons({ ChevronLeft: lucide.ChevronLeft, ChevronRight: lucide.ChevronRight });
+
+/** Share of the visible width one chevron press scrolls, so the last tab in view stays as an anchor. */
+const CHEVRON_SCROLL_RATIO = 0.75;
 
 /** Fallback number of skeleton tabs when no items are known and no count is given. */
 const DEFAULT_SKELETON_TAB_COUNT = 3;
@@ -58,7 +67,7 @@ function tabUrlKey(label: string): string {
 @Component({
   selector: 'mn-tab',
   standalone: true,
-  imports: [MnTranslatePipe, CommonModule, MnBadge, MnSkeleton],
+  imports: [MnTranslatePipe, CommonModule, MnBadge, MnSkeleton, LucideDynamicIcon],
   templateUrl: './mn-tab.component.html',
 })
 export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked, OnDestroy {
@@ -152,6 +161,18 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
    * Defaults to false, so tabs only take as much space as their content.
    */
   @Input() justified = false;
+
+  /** Icons rendered by the template. */
+  protected readonly icons = ICONS;
+
+  /**
+   * Whether tabs are scrolled out of view past the start edge, which shows the start chevron.
+   * A signal, so a write from the scroll handler or the resize observer marks the view by itself.
+   */
+  readonly canScrollStart = signal(false);
+
+  /** Whether tabs are hidden past the end edge, which shows the end chevron. */
+  readonly canScrollEnd = signal(false);
 
   /** Emits the newly activated tab item whenever the active tab changes. */
   @Output() activeChange = new EventEmitter<MnTabItem>();
@@ -260,12 +281,20 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
    * dissolve that reads as "more this way", the affordance a hidden scrollbar
    * otherwise costs us. Uses a mask (content → transparent) rather than a
    * background-coloured overlay, so it needs no knowledge of the theme.
+   *
+   * The fade alone only reads as "more" when it dissolves a tab cut off
+   * mid-label. When a tab boundary lands exactly on the edge it merely softens
+   * a complete label and the hidden tabs go unnoticed, so the same overflow
+   * also shows a chevron in the faded strip ({@link canScrollStart},
+   * {@link canScrollEnd}).
    */
   updateEdgeFades(): void {
     const el = this.scrollContainer?.nativeElement;
     if (!el) return;
     const fadeStart = el.scrollLeft > 1;
     const fadeEnd = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+    this.canScrollStart.set(this.scrollable && fadeStart);
+    this.canScrollEnd.set(this.scrollable && fadeEnd);
     const f = MnTabComponent.FADE;
     let mask = '';
     if (this.scrollable && fadeStart && fadeEnd) {
@@ -277,6 +306,22 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
     }
     el.style.maskImage = mask;
     el.style.setProperty('-webkit-mask-image', mask);
+  }
+
+  /**
+   * Scrolls the bar by most of its visible width towards one edge, from a chevron press. The
+   * scroll event that follows moves the fade and hides the chevron whose edge has been reached.
+   * Jumps instead of gliding for a user who asked for reduced motion.
+   * @param direction - -1 towards the start, 1 towards the end.
+   */
+  scrollTabs(direction: -1 | 1): void {
+    const el = this.scrollContainer?.nativeElement;
+    if (!el) return;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    el.scrollBy({
+      left: direction * el.clientWidth * CHEVRON_SCROLL_RATIO,
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    });
   }
 
   /**

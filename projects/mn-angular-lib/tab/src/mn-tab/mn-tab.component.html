@@ -1,4 +1,37 @@
-<div class="mb-10">
+<div class="relative mb-10">
+  <!--
+    Scroll chevrons, one per edge that hides tabs. They sit in the 2rem strip the edge fade
+    dissolves, so they cover nothing still legible. aria-hidden and out of the Tab order: the
+    arrow keys already move between tabs (and scroll them into view), and a screen reader reads
+    every tab whether scrolled into view or not. mousedown is cancelled so a press does not
+    take focus away from the active tab.
+  -->
+  @if (canScrollStart()) {
+    <button
+      (click)="scrollTabs(-1)"
+      (mousedown)="$event.preventDefault()"
+      aria-hidden="true"
+      class="absolute inset-y-0 left-0 z-10 flex w-8 cursor-pointer items-center justify-start text-base-content hover:text-primary"
+      data-mn-tab-scroll="start"
+      tabindex="-1"
+      type="button"
+    >
+      <svg [size]="18" [lucideIcon]="icons.ChevronLeft"></svg>
+    </button>
+  }
+  @if (canScrollEnd()) {
+    <button
+      (click)="scrollTabs(1)"
+      (mousedown)="$event.preventDefault()"
+      aria-hidden="true"
+      class="absolute inset-y-0 right-0 z-10 flex w-8 cursor-pointer items-center justify-end text-base-content hover:text-primary"
+      data-mn-tab-scroll="end"
+      tabindex="-1"
+      type="button"
+    >
+      <svg [size]="18" [lucideIcon]="icons.ChevronRight"></svg>
+    </button>
+  }
   <div
     #scrollContainer
     (scroll)="updateEdgeFades()"

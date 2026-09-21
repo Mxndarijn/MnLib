@@ -254,6 +254,94 @@ describe('MnTabComponent', () => {
     expect(wrapper.scrollWidth).toBeGreaterThan(wrapper.clientWidth);
     expect(wrapper.style.maskImage).toContain('linear-gradient');
   });
+
+  describe('scroll chevrons', () => {
+    /**
+     * Renders the given tabs in a wrapper of `width` pixels, laid out inline the way the Tailwind
+     * classes would (Karma has no stylesheet), and returns the scroll wrapper.
+     * @param labels - Tab labels to render.
+     * @param width - Wrapper width in pixels.
+     */
+    function renderBar(labels: string[], width: number): HTMLElement {
+      component.dataSource = dataSource(labels);
+      fixture.detectChanges();
+      const wrapper: HTMLElement = fixture.nativeElement.querySelector('.scrollbar-hide');
+      wrapper.style.width = `${width}px`;
+      wrapper.style.overflowX = component.scrollable ? 'auto' : 'hidden';
+      const row: HTMLElement = wrapper.querySelector('[role="tablist"]')!;
+      row.style.display = 'flex';
+      row.querySelectorAll<HTMLElement>('[role="tab"]').forEach((tab) => {
+        tab.style.whiteSpace = 'nowrap';
+        tab.style.flex = '0 0 auto';
+        tab.style.padding = '0 1rem';
+      });
+      fixture.detectChanges();
+      return wrapper;
+    }
+
+    /**
+     * The chevron for one edge, or null when it is not rendered.
+     * @param edge - Which edge's chevron to look up.
+     */
+    function chevron(edge: 'start' | 'end'): HTMLButtonElement | null {
+      return fixture.nativeElement.querySelector(`[data-mn-tab-scroll="${edge}"]`);
+    }
+
+    const LONG_LABELS = ['Eerste tabblad', 'Tweede tabblad', 'Derde tabblad', 'Vierde tabblad'];
+
+    it('renders no chevron when every tab fits', () => {
+      renderBar(['One', 'Two'], 800);
+
+      expect(chevron('start')).toBeNull();
+      expect(chevron('end')).toBeNull();
+    });
+
+    it('shows only the end chevron while the bar sits at its start', () => {
+      renderBar(LONG_LABELS, 120);
+
+      expect(chevron('start')).toBeNull();
+      expect(chevron('end')).not.toBeNull();
+    });
+
+    it('swaps to the start chevron once the bar is scrolled to its end', () => {
+      const wrapper = renderBar(LONG_LABELS, 120);
+
+      wrapper.scrollLeft = wrapper.scrollWidth;
+      wrapper.dispatchEvent(new Event('scroll'));
+      fixture.detectChanges();
+
+      expect(chevron('start')).not.toBeNull();
+      expect(chevron('end')).toBeNull();
+    });
+
+    it('scrolls most of a visible width towards the pressed edge', () => {
+      const wrapper = renderBar(LONG_LABELS, 120);
+      // scrollBy is overloaded; pin the options-object form the component calls.
+      const scrollBy = spyOn(wrapper, 'scrollBy') as jasmine.Spy<(options: ScrollToOptions) => void>;
+
+      chevron('end')!.click();
+      expect(scrollBy).toHaveBeenCalledWith(jasmine.objectContaining({ left: 90 }));
+
+      component.scrollTabs(-1);
+      expect(scrollBy).toHaveBeenCalledWith(jasmine.objectContaining({ left: -90 }));
+    });
+
+    it('keeps the chevrons out of the Tab order and the accessibility tree', () => {
+      renderBar(LONG_LABELS, 120);
+      const end = chevron('end')!;
+
+      expect(end.getAttribute('tabindex')).toBe('-1');
+      expect(end.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('renders no chevron on a bar that is not scrollable', () => {
+      component.scrollable = false;
+      renderBar(LONG_LABELS, 120);
+
+      expect(chevron('start')).toBeNull();
+      expect(chevron('end')).toBeNull();
+    });
+  });
 });
 
 describe('MnTabComponent URL sync', () => {
