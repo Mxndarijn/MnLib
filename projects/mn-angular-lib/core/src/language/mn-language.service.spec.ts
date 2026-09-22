@@ -1,4 +1,5 @@
 import {HttpClient} from '@angular/common/http';
+import {computed} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {MnLanguageService} from './mn-language.service';
 
@@ -105,6 +106,22 @@ describe('MnLanguageService', () => {
 
     it('still selects the singular wording when the key is present', () => {
       expect(lang.translateIfPresent('shift.asked', { count: 1 })).toBe('1 member is notified');
+    });
+  });
+
+  describe('locale switch', () => {
+    it('recomputes a computed built on translate', async () => {
+      // The locale is a signal, so anything reactive that translated something (a computed, or
+      // an OnPush template through the pipe) is told the language changed. Before, a computed
+      // kept the old language, and an unmarked OnPush view was never re-rendered.
+      const asked = TestBed.runInInjectionContext(() =>
+        computed(() => lang.translate('shift.asked', { count: 3 })),
+      );
+      expect(asked()).toBe('3 members are notified');
+
+      await lang.setLocale('nl');
+
+      expect(asked()).toBe('3 leden krijgen bericht');
     });
   });
 });

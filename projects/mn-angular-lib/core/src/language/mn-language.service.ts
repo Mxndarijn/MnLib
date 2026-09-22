@@ -1,4 +1,4 @@
-import {ApplicationRef, inject, Injectable} from '@angular/core';
+import {ApplicationRef, inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import {MnTranslationMap, MnTranslations} from './mn-language.types';
@@ -25,6 +25,17 @@ export class MnLanguageService {
 
   private _translations: MnTranslations = {};
   private _locale$ = new BehaviorSubject<string>('en');
+
+  /**
+   * The active locale as a signal, read by {@link locale} and so by every lookup.
+   *
+   * Components are OnPush, and `setLocale` only ran one `appRef.tick()`, which skips every view
+   * nobody marked: a tab bar, a card heading or a bar label kept the old language until the page
+   * was reloaded. A signal read while a template renders (through the `mnTranslate` pipe, or a
+   * getter calling `translate`) is tracked by that view, so switching the locale marks exactly
+   * the views that translated something, and a `computed` built on `translate` recomputes.
+   */
+  private readonly _locale = signal('en');
   private _urlPattern: string | null = null;
   private _debug = false;
 
@@ -39,7 +50,7 @@ export class MnLanguageService {
 
   /** Current active locale. */
   get locale(): string {
-    return this._locale$.value;
+    return this._locale();
   }
 
   /**
@@ -102,6 +113,7 @@ export class MnLanguageService {
       console.log(`[MnLanguage] Setting locale to "${locale}"`);
     }
     await this.loadLocale(locale);
+    this._locale.set(locale);
     this._locale$.next(locale);
     this.appRef.tick();
   }

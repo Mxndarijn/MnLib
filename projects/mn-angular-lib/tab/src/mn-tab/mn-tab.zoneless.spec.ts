@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, convertToParamMap, ParamMap, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { MnLanguageService } from 'mn-angular-lib/core';
 import { MnTabComponent } from './mn-tab.component';
 import { MnTabDataSource } from './mn-tab.types';
 
@@ -118,5 +119,28 @@ describe('MnTabComponent (zoneless change detection)', () => {
     await fixture.whenStable();
 
     expect(selectedLabel(fixture)).toBe('Archive');
+  });
+
+  it('re-translates its labels when the language switches', async () => {
+    const fixture = await render();
+    const lang = TestBed.inject(MnLanguageService);
+    lang.registerTranslations('en', { tabs: { members: 'Members', invites: 'Invites' } });
+    lang.registerTranslations('nl', { tabs: { members: 'Leden', invites: 'Uitnodigingen' } });
+    fixture.componentInstance.tabs.set({
+      items: [
+        { id: 'members', label: 'tabs.members' },
+        { id: 'invites', label: 'tabs.invites' },
+      ],
+      defaultActive: 0,
+    });
+    await fixture.whenStable();
+    expect(selectedLabel(fixture)).toBe('Members');
+
+    // Nothing about the tabs changes, only the locale: the bar has to notice it on its own,
+    // or it keeps the old language until the page is reloaded.
+    await lang.setLocale('nl');
+    await fixture.whenStable();
+
+    expect(selectedLabel(fixture)).toBe('Leden');
   });
 });
