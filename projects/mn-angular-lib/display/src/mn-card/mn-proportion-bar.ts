@@ -51,6 +51,13 @@ export type MnRenderedProportionSegment = {
  *   [total]="invited"
  *   ariaLabel="meetings.responses.title">
  * </mn-proportion-bar>
+ *
+ * <mn-proportion-bar
+ *   [segments]="[{ value: filled, color: 'primary' }]"
+ *   [total]="capacity"
+ *   ariaLabel="volunteers.filledOf"
+ *   [ariaLabelParams]="{ filled, total: capacity }">
+ * </mn-proportion-bar>
  * ```
  */
 @Component({
@@ -68,6 +75,14 @@ export class MnProportionBar {
   /** Accessible name for the bar as a whole, as a translation key or a literal. */
   @Input({ required: true }) ariaLabel!: string;
 
+  /**
+   * `{{name}}` interpolation values for {@link ariaLabel}, so a name that quotes the figures
+   * ("3 of 8 places filled") can still be passed as a key and translated here, in the active
+   * locale, rather than as a sentence the caller translated up front. A `count` selects the
+   * plural wording like any other `translate` call.
+   */
+  @Input() ariaLabelParams?: Record<string, string | number>;
+
   /** Track thickness; see {@link MnProportionBarTypes}. */
   @Input() data: Partial<MnProportionBarTypes> = {};
 
@@ -76,7 +91,7 @@ export class MnProportionBar {
 
   /** The translated accessible name. */
   get label(): string {
-    return this.lang.translate(this.ariaLabel);
+    return this.lang.translate(this.ariaLabel, this.ariaLabelParams);
   }
 
   /** Every class on the track element. */

@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
+import { MnLanguageService } from 'mn-angular-lib/core';
 import { MnProportionBar } from './mn-proportion-bar';
 import { MnProportionSegment } from './mn-proportion-barTypes';
 
@@ -105,5 +106,66 @@ describe('MnProportionBar', () => {
     const track: HTMLElement = fixture.nativeElement.querySelector('[role="img"]');
     expect(track.getAttribute('aria-label')).toBe('Turnout');
     expect(track.classList).toContain('h-2.5');
+  });
+});
+
+/** Host naming the bar with a key whose sentence quotes the figures. */
+@Component({
+  standalone: true,
+  imports: [MnProportionBar],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `<mn-proportion-bar
+    [segments]="[{ value: filled, color: 'primary' }]"
+    [total]="capacity"
+    ariaLabel="volunteers.filledOf"
+    [ariaLabelParams]="{ filled: filled, total: capacity }"
+  ></mn-proportion-bar>`,
+})
+class ParamsHostComponent {
+  filled = 3;
+  capacity = 8;
+}
+
+describe('MnProportionBar ariaLabelParams', () => {
+  let fixture: ComponentFixture<ParamsHostComponent>;
+  let lang: MnLanguageService;
+
+  /** The accessible name the bar currently carries. */
+  const label = (): string | null =>
+    fixture.nativeElement.querySelector('[role="img"]').getAttribute('aria-label');
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ParamsHostComponent],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
+    }).compileComponents();
+
+    lang = TestBed.inject(MnLanguageService);
+    lang.registerTranslations('en', {
+      volunteers: { filledOf: '{{filled}} of {{total}} places filled' },
+    });
+    lang.registerTranslations('nl', {
+      volunteers: { filledOf: '{{filled}} van {{total}} plekken bezet' },
+    });
+    fixture = TestBed.createComponent(ParamsHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('translates the key with the figures filled in, without a missing-translation warning', () => {
+    lang.setDebug(true);
+    const warn = spyOn(console, 'warn');
+    fixture.componentInstance.filled = 5;
+    fixture.detectChanges();
+
+    expect(label()).toBe('5 of 8 places filled');
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('follows a locale switch, which a sentence translated by the caller never did', async () => {
+    await lang.setLocale('nl');
+    fixture.componentInstance.filled = 4;
+    fixture.detectChanges();
+
+    expect(label()).toBe('4 van 8 plekken bezet');
   });
 });
