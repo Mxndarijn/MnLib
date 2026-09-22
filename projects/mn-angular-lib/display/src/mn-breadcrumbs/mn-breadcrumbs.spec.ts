@@ -243,49 +243,4 @@ describe('MnBreadcrumbs', () => {
     fixture.detectChanges();
     expect(backControl()!.textContent!.trim()).toBe('Overzicht');
   });
-
-  describe('text crumbs', () => {
-    /**
-     * A record's own name (a meeting's title) has no translation key. Passed as a `label` it
-     * was looked up as one and logged a missing translation on every render; `text` is shown
-     * as is and never looked up.
-     */
-    it('renders a text crumb as is, without a missing-translation warning', () => {
-      const lang = TestBed.inject(MnLanguageService);
-      lang.registerTranslations('en', { meetings: { title: 'Meetings' } });
-      lang.setDebug(true);
-      const warn = spyOn(console, 'warn');
-
-      host.data = {
-        items: [
-          { label: 'meetings.title', href: '/meetings' },
-          { text: 'Bestuursvergadering deze maand' },
-        ],
-      };
-      fixture.detectChanges();
-
-      expect(crumbs().map((crumb) => crumb.textContent!.trim())).toEqual([
-        'Meetings',
-        'Bestuursvergadering deze maand',
-      ]);
-      expect(warn).not.toHaveBeenCalled();
-    });
-
-    it('does not translate a text crumb, even when it matches a key', () => {
-      TestBed.inject(MnLanguageService).registerTranslations('en', { Agenda: 'Vertaald' });
-      host.data = { items: [{ label: 'Home', href: '/' }, { text: 'Agenda' }] };
-      fixture.detectChanges();
-
-      expect(crumbs()[1].textContent!.trim()).toBe('Agenda');
-    });
-
-    it('uses a text parent as the narrow-screen back control', () => {
-      host.data = {
-        items: [{ text: 'Landelijke Open Dag', href: '/matches/1' }, { label: 'Current' }],
-      };
-      fixture.detectChanges();
-
-      expect(collapsed()!.textContent!.trim()).toBe('Landelijke Open Dag');
-    });
-  });
 });

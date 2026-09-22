@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
-import { MnLanguageService } from 'mn-angular-lib/core';
+import { MnLanguageService, MnTranslatePipe } from 'mn-angular-lib/core';
 import { MnBreadcrumbItem, MnBreadcrumbsData } from './mn-breadcrumbsTypes';
 import { mnBreadcrumbsVariants } from './mn-breadcrumbsVariants';
 import * as lucide from 'lucide';
@@ -37,7 +37,7 @@ const ICONS = lucideIcons({ ChevronLeft: lucide.ChevronLeft, ChevronRight: lucid
 @Component({
   selector: 'mn-breadcrumbs',
   standalone: true,
-  imports: [LucideDynamicIcon],
+  imports: [MnTranslatePipe, LucideDynamicIcon],
   templateUrl: './mn-breadcrumbs.html',
 })
 export class MnBreadcrumbs {
@@ -112,15 +112,6 @@ export class MnBreadcrumbs {
       return this.lang.translate(this.data.backLabel);
     }
     return this.lang.translateIfPresent(MnBreadcrumbs.BACK_LABEL_KEY) ?? 'Back';
-  }
-
-  /**
-   * A crumb's caption: its `text` as is, or its `label` key translated.
-   * @param item The crumb to caption.
-   * @returns The text to render.
-   */
-  crumbLabel(item: MnBreadcrumbItem): string {
-    return item.text ?? this.lang.translate(item.label);
   }
 
   /** The last crumb is the current page and is rendered as plain text. */
