@@ -158,14 +158,15 @@ export class MnCollectionPagination {
    * width — the same strip is wide on a page and cramped in a modal.
    *
    * The first/last anchors and their gaps drop below 640px, where « and » already
-   * jump to either end. Below 380px every number except the current one drops too:
+   * jump to either end. Below 380px every number drops, the current one included:
    * the strip would otherwise wrap onto a second line and push the footer over the
    * table, and the "Page 3 of 9" readout beside it already says where the user is.
+   * A lone current number would read as a page count ("1" beside "Page 1 of 2").
    * The arrows survive both steps, so navigation never depends on a number.
    */
   slotVisibility(slot: MnPageSlot): string {
     if (slot.anchor) return 'hidden @min-[640px]:inline-flex';
-    return slot.page === this.currentPage ? 'inline-flex' : 'hidden @min-[380px]:inline-flex';
+    return 'hidden @min-[380px]:inline-flex';
   }
 
   /**

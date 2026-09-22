@@ -93,6 +93,26 @@ describe('MnCollectionPagination', () => {
     });
   });
 
+  describe('slotVisibility', () => {
+    it('hides the current page below 380px too, so a lone number never reads as the page count', () => {
+      at(1, 2);
+      const current = component.pageSlots.find(s => s.page === 1)!;
+      expect(component.slotVisibility(current)).toBe('hidden @min-[380px]:inline-flex');
+    });
+
+    it('gives every window number the same visibility, current or not', () => {
+      const classes = at(5, 20).pageSlots
+        .filter(s => !s.anchor)
+        .map(s => component.slotVisibility(s));
+      expect(new Set(classes).size).toBe(1);
+    });
+
+    it('keeps anchors and gaps hidden until 640px', () => {
+      const anchor = at(5, 50).pageSlots.find(s => s.anchor)!;
+      expect(component.slotVisibility(anchor)).toBe('hidden @min-[640px]:inline-flex');
+    });
+  });
+
   describe('pageIndicatorLabel', () => {
     it('states the position and the total page count', () => {
       expect(at(5, 20).pageIndicatorLabel).toBe('Page 5 of 20');
