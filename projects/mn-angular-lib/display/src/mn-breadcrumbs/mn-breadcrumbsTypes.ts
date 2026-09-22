@@ -6,9 +6,26 @@
  * {@link onClick}. The library stays router-agnostic — an app wires SPA
  * navigation through `onClick`/`crumbClick`, or lets the `href` anchor navigate.
  */
-export type MnBreadcrumbItem = {
-  /** Translation key or literal label for the crumb. */
-  label: string;
+export type MnBreadcrumbItem = MnBreadcrumbItemBase &
+  (
+    | {
+        /** Translation key for the crumb, translated in the active locale. */
+        label: string;
+        text?: never;
+      }
+    | {
+        /**
+         * Text shown as is, never looked up: a record's own name (a meeting's title, a
+         * match's name) that has no translation key. Passed as a `label`, it was looked
+         * up as a key and logged a missing translation on every render.
+         */
+        text: string;
+        label?: never;
+      }
+  );
+
+/** What every crumb carries, whichever way its caption is given. */
+export type MnBreadcrumbItemBase = {
   /** Optional link target; when set the crumb renders as an `<a href>`. */
   href?: string;
   /** Optional callback invoked on click (fires alongside `crumbClick`). */

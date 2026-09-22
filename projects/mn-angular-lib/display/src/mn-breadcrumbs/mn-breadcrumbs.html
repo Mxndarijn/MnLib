@@ -9,11 +9,11 @@
         }
         <li class="inline-flex items-center">
           @if (isCurrent($index)) {
-            <span aria-current="page" [class]="styles.current()">{{ item.label | mnTranslate }}</span>
+            <span aria-current="page" [class]="styles.current()">{{ crumbLabel(item) }}</span>
           } @else if (item.href) {
-            <a [attr.href]="item.href" [class]="styles.link()" (click)="onCrumb(item)">{{ item.label | mnTranslate }}</a>
+            <a [attr.href]="item.href" [class]="styles.link()" (click)="onCrumb(item)">{{ crumbLabel(item) }}</a>
           } @else {
-            <button type="button" [class]="styles.link()" (click)="onCrumb(item)">{{ item.label | mnTranslate }}</button>
+            <button type="button" [class]="styles.link()" (click)="onCrumb(item)">{{ crumbLabel(item) }}</button>
           }
         </li>
       }
@@ -27,12 +27,12 @@
       @if (parent.href) {
         <a [attr.href]="parent.href" [class]="styles.collapsed()" (click)="onCrumb(parent)">
           <svg [size]="16" [lucideIcon]="icons.ChevronLeft"></svg>
-          {{ parent.label | mnTranslate }}
+          {{ crumbLabel(parent) }}
         </a>
       } @else {
         <button type="button" [class]="styles.collapsed()" (click)="onCrumb(parent)">
           <svg [size]="16" [lucideIcon]="icons.ChevronLeft"></svg>
-          {{ parent.label | mnTranslate }}
+          {{ crumbLabel(parent) }}
         </button>
       }
     }
