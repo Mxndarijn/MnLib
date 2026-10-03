@@ -289,14 +289,32 @@ export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterVi
     );
   }
 
+  /**
+   * Closes the modal on Escape, through the same close guard as every other way out, so a
+   * modal that may not close (`CloseMode.DISABLED`) stays open and a guarded one asks first.
+   * @param event The keydown.
+   */
   @HostListener('document:keydown.escape', ['$event'])
   onEscapeKey(event: Event): void {
-    if (this.config.keyboard === KeyboardMode.ENABLED) {
-      this.handleClose(ModalCloseReason.ESCAPE);
-      if (event && event.preventDefault) {
-        event.preventDefault();
-      }
-    }
+    if (!this.closesOnEscape(event)) return;
+    this.handleClose(ModalCloseReason.ESCAPE);
+    event?.preventDefault?.();
+  }
+
+  /**
+   * Whether this Escape is this modal's to act on. On unless the modal opted out with
+   * `KeyboardMode.DISABLED`; it used to be off unless every builder opted in, which no app did,
+   * so no modal anywhere closed on Escape. Every open shell hears the same document keydown, so
+   * only the top one acts (one press closes one modal), and an Escape something inside the modal
+   * already took, or an open dropdown in it is about to take, is left to that.
+   * @param event The keydown.
+   * @returns True when the modal should close.
+   */
+  private closesOnEscape(event: Event): boolean {
+    if (this.config.keyboard === KeyboardMode.DISABLED) return false;
+    if (this.isStacked()) return false;
+    if (event?.defaultPrevented) return false;
+    return !this.el.nativeElement.querySelector('[aria-expanded="true"]');
   }
 
   onBackdropClick(): void {

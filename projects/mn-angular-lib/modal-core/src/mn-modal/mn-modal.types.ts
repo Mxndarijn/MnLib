@@ -832,6 +832,10 @@ export type BaseModalConfig<TResult = unknown> = {
   closeMode?: CloseMode;
   closeGuard?: () => Promise<boolean> | boolean;
   backdrop?: BackdropMode;
+  /**
+   * Whether Escape closes the modal. Closes by default (unset or `ENABLED`); `DISABLED` opts out.
+   * Only the top modal of a stack reacts, and the close goes through `closeMode`/`closeGuard`.
+   */
   keyboard?: KeyboardMode;
   intent?: ModalIntent;
   resultType?: TResult;
