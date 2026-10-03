@@ -260,4 +260,45 @@ describe('MnTable column filters', () => {
         .toBeTrue();
     }
   });
+
+  /** An age column filtered with a single-value select. */
+  function ageSelectColumn(filterPlaceholder?: string): ColumnDefinition<Row> {
+    return {
+      key: 'age',
+      header: 'Age',
+      cell: (row) => String(row.age),
+      filterable: true,
+      filterType: 'select',
+      filterPlaceholder,
+      filterOptions: [{ label: '36', value: '36' }],
+    };
+  }
+
+  /** The text the select filter's trigger shows. */
+  function selectFilterText(): string {
+    const trigger: HTMLElement = fixture.nativeElement.querySelector(
+      'thead tr:nth-child(2) [role="combobox"]',
+    );
+    return trigger?.textContent?.trim() ?? '';
+  }
+
+  /**
+   * An unfiltered select column reads "All" like the multi-select beside it. mn-select shows its
+   * placeholder for an empty value, so without being handed the column's "All" it read the
+   * generic "Select...", as if the filter still wanted a choice.
+   */
+  it('shows the column\'s own "All" label on an unfiltered select filter', () => {
+    fixture.componentInstance.dataSource = makeDataSource([ageSelectColumn('Alle')]);
+    fixture.detectChanges();
+
+    expect(selectFilterText()).toContain('Alle');
+  });
+
+  it('falls back to "All", never "Select...", when the column sets no placeholder', () => {
+    fixture.componentInstance.dataSource = makeDataSource([ageSelectColumn()]);
+    fixture.detectChanges();
+
+    expect(selectFilterText()).toContain('All');
+    expect(selectFilterText()).not.toContain('Select');
+  });
 });

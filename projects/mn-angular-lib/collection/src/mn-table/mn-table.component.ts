@@ -942,11 +942,22 @@ export class MnTable<T = object>
     });
   }
 
+  /**
+   * What an unfiltered select column reads: the column's own placeholder, else "All". It is both
+   * the first option and the select's placeholder, because mn-select shows its placeholder for an
+   * empty value (right for a form field, which must stay invalid until chosen), so without it an
+   * unfiltered column read the select's generic "Select..." instead of "All".
+   * @param column The filtered column.
+   * @returns The label.
+   */
+  filterAllLabel(column: ColumnDefinition<T>): string {
+    return column.filterPlaceholder ?? this.resolveLabel(undefined, 'mnCollection.filterAll', 'All');
+  }
+
   /** Filter options formatted for mn-select for a given column. */
   getFilterSelectOptions(column: ColumnDefinition<T>): MnSelectOption<string>[] {
-    const placeholder = column.filterPlaceholder ?? this.resolveLabel(undefined, 'mnCollection.filterAll', 'All');
     return [
-      {label: placeholder, value: ''},
+      {label: this.filterAllLabel(column), value: ''},
       ...(column.filterOptions ?? []).map(opt => ({label: opt.label, value: String(opt.value)})),
     ];
   }
