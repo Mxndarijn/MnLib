@@ -349,6 +349,8 @@ export type NumberFieldConfig<TModel = unknown> = {
   min?: number;
   max?: number;
   step?: number;
+  /** Fixed decimals shown, such as 2 for an amount ("90,50", not "90,5"). The value stays a number. */
+  decimals?: number;
   readOnly?: boolean;
   disabled?: boolean;
   visible?: FieldVisibilityCondition<TModel>;

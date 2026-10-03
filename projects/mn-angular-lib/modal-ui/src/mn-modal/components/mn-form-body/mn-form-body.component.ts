@@ -87,6 +87,8 @@ type FormFieldView<TModel> = FormFieldConfig<TModel> & {
   min?: number | string;
   max?: number | string;
   step?: number;
+  /** A number field's fixed decimals (NumberFieldConfig.decimals). */
+  decimals?: number;
   rows?: number;
   searchable?: boolean;
   searchPlaceholder?: string;

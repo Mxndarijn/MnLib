@@ -67,21 +67,23 @@
        so an unsearchable table without toolbar templates emits no empty spacer. -->
 @if (isSearchable || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
   <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
-    <div class="flex items-center gap-2 w-full @min-[420px]:w-auto">
+    <!-- The left slot only when it has content: an empty one still took a flex gap, which
+         pushed the search 8px in from the page edge. ml-auto keeps the search on the right. -->
     @if (dataSource.toolbarLeftTemplate) {
+    <div class="flex items-center gap-2 w-full @min-[420px]:w-auto">
       <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
         <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
       </div>
+    </div>
     }
-  </div>
     <div
-      class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none @min-[560px]:w-auto">
+      class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[420px]:ml-auto @min-[560px]:flex-none @min-[560px]:w-auto">
     @if (isSearchable) {
       <!-- Enter must not submit a surrounding form: the search box belongs to the
            table's chrome, not to whatever form the table happens to sit in. -->
       <mn-lib-input-field
         (keydown.enter)="$event.preventDefault()"
-        class="w-full @min-[420px]:flex-1 @min-[560px]:max-w-64"
+        class="w-full @min-[420px]:flex-1 @min-[560px]:flex-none @min-[560px]:min-w-64"
         [props]="{
             id: 'mn-table-search',
             type: 'search',
@@ -341,16 +343,11 @@
         <!-- Data rows -->
         @for (row of paginatedItems; track trackByID($index, row); let odd = $odd; let last = $last) {
           <tr
-            class="bg-base-100 transition-colors duration-150 hover:cursor-pointer"
+            class="bg-base-100 transition-colors duration-150 hover:cursor-pointer border-b border-base-300"
             [ngClass]="{'bg-primary/10': isSelected(row)}"
             [class.bg-base-200]="!isSelected(row) && odd && dataSource.appearance?.striped"
             [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
             [class.cursor-pointer]="!!dataSource.onRowClick"
-            [class.border-b]="!last"
-            [class.border-base-300]="!last"
-            [class.border-b-1]="last"
-            [class.border-black]="last"
-            [class.shadow-3xl]="last"
             (click)="onRowClick(row)"
           >
             <!-- Selection checkbox -->

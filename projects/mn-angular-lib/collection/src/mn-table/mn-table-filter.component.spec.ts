@@ -261,6 +261,22 @@ describe('MnTable column filters', () => {
     }
   });
 
+  /**
+   * Every row, the last one included, ends in the same light divider. The last row used to get
+   * a black border, a line no other row has.
+   */
+  it('gives the last row the same light divider as the others, not a black line', () => {
+    fixture.componentInstance.dataSource = makeDataSource([nameColumn()]);
+    fixture.detectChanges();
+
+    const rows: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('tbody tr'));
+    expect(rows.length).toBe(ROWS.length);
+    for (const row of rows) {
+      expect(row.classList).toContain('border-base-300');
+      expect(row.classList).not.toContain('border-black');
+    }
+  });
+
   /** An age column filtered with a single-value select. */
   function ageSelectColumn(filterPlaceholder?: string): ColumnDefinition<Row> {
     return {

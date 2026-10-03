@@ -283,10 +283,13 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
       currentCol += maxSubCols;
     }
 
+    // Each overlap column gets at least 0.8 of a day: a day with two overlapping events grows
+    // to 1.6 days instead of splitting one day in two, which left ~40px blocks reading "V…".
     const parts: string[] = [];
     for (const day of this.dayColumnMap) {
+      const share = Math.max(1 / day.subColumns, 0.8);
       for (let j = 0; j < day.subColumns; j++) {
-        parts.push(`${1 / day.subColumns}fr`);
+        parts.push(`${share}fr`);
       }
     }
     this.gridTemplateColumns = parts.join(' ');

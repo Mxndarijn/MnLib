@@ -9,15 +9,17 @@
   dataSource.toolbarTemplate
 ) {
   <div class="flex flex-col min-[375px]:flex-row min-[375px]:items-center justify-between gap-2 mb-3">
-    <div class="flex items-center gap-2 w-full min-[375px]:w-auto">
-      @if (dataSource.toolbarLeftTemplate) {
+    <!-- The left slot only when it has content: an empty one still took a flex gap, which
+         pushed the search 8px in from the page edge. ml-auto keeps the search on the right. -->
+    @if (dataSource.toolbarLeftTemplate) {
+      <div class="flex items-center gap-2 w-full min-[375px]:w-auto">
         <div class="flex flex-col w-full min-[375px]:w-auto min-[375px]:flex-row">
           <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
         </div>
-      }
-    </div>
+      </div>
+    }
     <div
-      class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:w-auto">
+      class="flex flex-col min-[375px]:flex-row min-[375px]:items-center gap-2 w-full min-[375px]:flex-1 min-[375px]:ml-auto min-[480px]:flex-none min-[480px]:w-auto">
       @if (isSearchable) {
         <!-- Enter must not submit a surrounding form: the search box is the
              collection's own chrome, not a field of whatever form it sits in. -->
@@ -35,7 +37,7 @@
             borderRadius: 'md',
             fullWidth: true
           }"
-          class="w-full min-[375px]:flex-1 min-[480px]:max-w-64"
+          class="w-full min-[375px]:flex-1 min-[480px]:flex-none min-[480px]:min-w-64"
         ></mn-lib-input-field>
       }
       <!-- `toolbarTemplate` is the deprecated name for this slot; honouring it here

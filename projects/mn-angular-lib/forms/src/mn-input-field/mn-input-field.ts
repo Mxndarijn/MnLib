@@ -211,7 +211,7 @@ export class MnInputField implements OnInit {
    * @param val - The value to write (type depends on input type)
    */
   writeValue(val: unknown): void {
-    this.value = this.adapter.format(val);
+    this.value = this.withDecimals(this.adapter.format(val));
     // The forms API writes in from outside (setValue, reset, patch); nothing marks
     // this view for it.
     this.cdr.markForCheck();
@@ -279,7 +279,27 @@ export class MnInputField implements OnInit {
    * Notifies Angular Forms that the input has been touched.
    */
   handleBlur(): void {
+    const formatted = this.withDecimals(this.value);
+    if (formatted !== this.value) {
+      // Only the shown text changes: "90.5" and "90.50" are the same number for the control.
+      this.value = formatted;
+      this.cdr.markForCheck();
+    }
     this.onTouched();
+  }
+
+  /**
+   * Pads a number input's text to its fixed decimals (see the decimals prop). Anything that is
+   * not a finite number, an empty field included, is left as it is.
+   * @param text - The text the input shows.
+   * @returns The text with the fixed decimals, or unchanged.
+   */
+  private withDecimals(text: unknown): string {
+    const decimals = (this.props as { decimals?: number }).decimals;
+    const shown = text == null ? '' : String(text);
+    if (this.props.type !== 'number' || decimals == null || shown.trim() === '') return shown;
+    const n = Number(shown);
+    return Number.isFinite(n) ? n.toFixed(decimals) : shown;
   }
 
   // ========== Validator Implementation ==========

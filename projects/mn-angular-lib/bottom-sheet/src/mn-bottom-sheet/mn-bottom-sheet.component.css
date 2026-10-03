@@ -8,10 +8,11 @@
 }
 
 .mn-sheet-container {
-  /* Keep the last content clear of the iOS home indicator. The sheet background extends
-     into the inset so it still reads as one continuous surface. env() is 0 on the web,
-     so this is a no-op outside the native shell. */
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Keep the last content clear of the screen edge and of the iOS home indicator. The sheet
+     background extends into the inset so it still reads as one continuous surface. env() is 0
+     on the web, which used to leave a sheet's last row ("Uitloggen") on the very edge, so a
+     small base always applies on top of it. */
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
 
   /* Scrolling the sheet's own content to either end must not hand the remaining delta
      to whatever is behind it. The component's guard blocks gestures that start outside

@@ -52,7 +52,7 @@
               type="button"
               class="text-base-content/50 cursor-pointer shrink-0"
               (click)="removeOption(opt, $event)"
-              [attr.aria-label]="'Remove ' + opt.label"
+              [attr.aria-label]="removeOptionLabel(opt)"
             ><svg [lucideIcon]="icons.X" [size]="18"></svg></button>
           </span>
         }

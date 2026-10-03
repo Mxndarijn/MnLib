@@ -1107,3 +1107,35 @@ describe('MnMultiSelect (keyboard)', () => {
     expect(component.isOpen).toBeFalse();
   });
 });
+
+/**
+ * The chip ✕ is named for a screen reader. It went through no translation at all, so a Dutch
+ * page read "Remove Bardienst"; it now resolves mnMultiSelect.removeOption like every other label.
+ */
+describe('MnMultiSelect remove label', () => {
+  let component: MnMultiSelect;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    component = fixture.debugElement.query(By.directive(MnMultiSelect)).componentInstance;
+  });
+
+  it('falls back to English when the app defines no key', () => {
+    expect(component.removeOptionLabel({ label: 'Alpha', value: 'a' })).toBe('Remove Alpha');
+  });
+
+  it('uses the translated template with the option filled in', () => {
+    spyOn(languageStub as MnLanguageService, 'translateIfPresent').and.callFake((key: string) =>
+      key === 'mnMultiSelect.removeOption' ? '{label} verwijderen' : undefined,
+    );
+    expect(component.removeOptionLabel({ label: 'Alpha', value: 'a' })).toBe('Alpha verwijderen');
+  });
+});

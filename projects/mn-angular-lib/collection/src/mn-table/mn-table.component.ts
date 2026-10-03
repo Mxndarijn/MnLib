@@ -642,7 +642,9 @@ export class MnTable<T = object>
     const pinned = new Map<string, string>();
     for (const {key, width} of measured) {
       if (key === widest.key) continue;
-      pinned.set(key, `${Math.round(width)}px`);
+      // Up, plus a pixel: rounding 87.4 down to 87 left the content 0.4px too wide for its
+      // own column, so a header that fitted grew a stray "…" and a badge was clipped.
+      pinned.set(key, `${Math.ceil(width) + 1}px`);
     }
 
     this.pinnedWidths = pinned;

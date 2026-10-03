@@ -62,6 +62,13 @@ export type MnInputBaseProps = {
   /** Input mask (e.g., '(000) 000-0000') */
   mask?: string;
 
+  /**
+   * For a number input: the fixed number of decimals it shows, such as 2 for an amount, so
+   * 90.5 reads "90,50" like every other amount instead of "90,5". Applied when a value is
+   * written in and when the field loses focus; the control keeps the plain number.
+   */
+  decimals?: number;
+
   /** Autocomplete attribute */
   autocomplete?: string;
 

@@ -461,6 +461,29 @@ export class MnTabComponent implements DoCheck, AfterViewInit, AfterViewChecked,
       void bar.offsetWidth;
       bar.style.transition = '';
     }
+    this.revealActiveTab(active);
+  }
+
+  /**
+   * Scrolls the strip so the active tab is fully in view, clear of the 2rem edge the fade and
+   * the scroll chevron cover. Only keyboard focus used to scroll, so a deep link to a tab past
+   * the fold ("?tab=results" on a phone) opened with the strip at its start and the selected
+   * tab out of sight. Sets scrollLeft on the strip itself rather than calling scrollIntoView,
+   * which would scroll the page too.
+   * @param active - The selected tab element.
+   */
+  private revealActiveTab(active: HTMLElement): void {
+    const box = this.scrollContainer?.nativeElement;
+    if (!this.scrollable || !box || box.scrollWidth <= box.clientWidth) return;
+    const edge = 32;
+    const boxRect = box.getBoundingClientRect();
+    const tabRect = active.getBoundingClientRect();
+    if (tabRect.left < boxRect.left + edge) {
+      box.scrollLeft -= boxRect.left + edge - tabRect.left;
+    } else if (tabRect.right > boxRect.right - edge) {
+      box.scrollLeft += tabRect.right - (boxRect.right - edge);
+    }
+    this.updateEdgeFades();
   }
 
   /**

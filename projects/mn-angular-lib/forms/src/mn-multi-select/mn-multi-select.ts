@@ -815,6 +815,20 @@ export class MnMultiSelect implements OnInit {
     );
   }
 
+  /**
+   * Accessible name of a chip's remove button, such as "Remove Bardienst". Through
+   * {@link resolveLabel} like every other label here; it used to be an English literal, so a
+   * screen reader read "Remove" on an otherwise Dutch page.
+   * @param opt The selected option the button removes.
+   * @returns The label.
+   */
+  removeOptionLabel(opt: MnMultiSelectOption): string {
+    return this.resolveLabel(undefined, 'mnMultiSelect.removeOption', 'Remove {label}').replace(
+      /\{label}/g,
+      opt.label,
+    );
+  }
+
   /** Empty text shown when the search filters every option away. */
   get noOptionsLabel(): string {
     return this.resolveLabel(
