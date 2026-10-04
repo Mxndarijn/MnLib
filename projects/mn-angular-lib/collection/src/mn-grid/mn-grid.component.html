@@ -99,12 +99,13 @@
     @if (dataSource.emptyTemplate) {
       <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
     } @else {
+      <!-- Borderless, as the table's and list's: a dashed box read as a drop zone. -->
       <div
-        class="flex flex-col items-center justify-center gap-2 min-h-[6rem] py-8 rounded-xl border border-dashed border-base-content/15 bg-base-100 text-base-content/40">
+        class="flex flex-col items-center justify-center gap-3 py-16 text-center text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
         @if (dataSource.emptyIcon !== null) {
-          <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="32" [strokeWidth]="1.5"></svg>
+          <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="26" class="opacity-30"></svg>
         }
-        <p class="text-sm">{{ dataSource.emptyMessage }}</p>
+        <p class="text-base font-medium">{{ dataSource.emptyMessage }}</p>
       </div>
     }
   } @else {

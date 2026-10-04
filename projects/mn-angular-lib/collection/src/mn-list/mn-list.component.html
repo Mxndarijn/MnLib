@@ -102,11 +102,12 @@
         @if (dataSource.emptyTemplate) {
           <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
         } @else {
-          <div class="flex flex-col items-center gap-2 text-base-content/50">
+          <!-- The same look as the table's empty state and a section's own. -->
+          <div class="flex flex-col items-center gap-3 py-16 text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
             @if (dataSource.emptyIcon !== null) {
-              <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="32" [strokeWidth]="1.5"></svg>
+              <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="26" class="opacity-30"></svg>
             }
-            <p class="text-sm">{{ dataSource.emptyMessage }}</p>
+            <p class="text-base font-medium">{{ dataSource.emptyMessage }}</p>
           </div>
         }
       </div>
