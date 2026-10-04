@@ -117,7 +117,7 @@
 
   <!-- Custom Footer Actions (not for wizard modals, they render their own) -->
   @if (hasCustomFooterActions && config.kind !== ModalKind.WIZARD) {
-    <div class="flex gap-3 p-6 border-t border-base-300">
+    <div class="flex gap-3 px-6 pt-4 pb-6 border-t border-base-300">
       <mn-footer-actions
         [actions]="config.footerActions || []"
         [showIcons]="config.showActionIcons !== false"

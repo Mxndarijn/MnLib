@@ -431,7 +431,9 @@
   }
 
   @if (!hideFooter) {
-    <div class="flex gap-3 pt-4 pb-6 border-t border-base-300 mt-auto sticky bottom-0 bg-base-100 z-10">
+    <!-- -mx-6 bleeds the footer to the modal edges over the body's px-6, so its line runs the full
+         width like a custom or wizard modal's footer instead of stopping at the padding. -->
+    <div class="flex gap-3 -mx-6 px-6 pt-4 pb-6 border-t border-base-300 mt-auto sticky bottom-0 bg-base-100 z-10">
       <button
         mnButton
         type="button"

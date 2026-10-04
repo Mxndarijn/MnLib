@@ -764,6 +764,11 @@ export type ModalFooterAction<TResult = unknown> = {
    * omitted. Only rendered when the modal's `showActionIcons` is not explicitly `false`.
    */
   icon?: LucideIconData;
+  /**
+   * Where the icon sits: before the label (default) or after it. `'end'` is for a step forward
+   * ("Volgende" with `MN_MODAL_ACTION_ICONS.next`), drawn the way a wizard's own next button is.
+   */
+  iconPosition?: 'start' | 'end';
 }
 
 // =========================

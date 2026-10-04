@@ -18,10 +18,17 @@ import { defaultIconForStyle, MODAL_ACTION_ICON_SIZE } from 'mn-angular-lib/moda
         [disabled]="action.disabled || false"
         (click)="actionClick.emit(action)"
       >
-        @if (iconFor(action); as icon) {
-          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        @if (action.iconPosition !== 'end') {
+          @if (iconFor(action); as icon) {
+            <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+          }
         }
         {{ action.label }}
+        @if (action.iconPosition === 'end') {
+          @if (iconFor(action); as icon) {
+            <svg [lucideIcon]="icon" [size]="actionIconSize" class="ml-2"></svg>
+          }
+        }
       </button>
     }
 
@@ -34,10 +41,17 @@ import { defaultIconForStyle, MODAL_ACTION_ICON_SIZE } from 'mn-angular-lib/moda
         [disabled]="action.disabled || false"
         (click)="actionClick.emit(action)"
       >
-        @if (iconFor(action); as icon) {
-          <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+        @if (action.iconPosition !== 'end') {
+          @if (iconFor(action); as icon) {
+            <svg [lucideIcon]="icon" [size]="actionIconSize" class="mr-2"></svg>
+          }
         }
         {{ action.label }}
+        @if (action.iconPosition === 'end') {
+          @if (iconFor(action); as icon) {
+            <svg [lucideIcon]="icon" [size]="actionIconSize" class="ml-2"></svg>
+          }
+        }
       </button>
     }
   `,
