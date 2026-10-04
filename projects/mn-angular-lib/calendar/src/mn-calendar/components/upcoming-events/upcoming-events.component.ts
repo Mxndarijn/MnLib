@@ -20,6 +20,7 @@ import {
 } from 'mn-angular-lib/calendar-core';
 import { UpcomingEventRowComponent } from '../upcoming-event-row/upcoming-event-row.component';
 import { MnLanguageService } from 'mn-angular-lib/core';
+import { MnBadge } from 'mn-angular-lib/button';
 
 /**
  * Sidebar component that lists the next 10 upcoming events
@@ -28,7 +29,7 @@ import { MnLanguageService } from 'mn-angular-lib/core';
 @Component({
   selector: 'mn-upcoming-events',
   standalone: true,
-  imports: [CommonModule, UpcomingEventRowComponent],
+  imports: [CommonModule, UpcomingEventRowComponent, MnBadge],
   templateUrl: './upcoming-events.component.html',
 })
 export class UpcomingEventsComponent implements OnInit, OnChanges, OnDestroy {

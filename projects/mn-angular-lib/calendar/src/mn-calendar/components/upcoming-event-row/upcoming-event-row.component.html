@@ -6,10 +6,10 @@
      tabindex="0">
   <div class="rounded-full" [style.background-color]="event.color.primaryColor"></div>
   <div class="min-w-0">
-    <div class="truncate text-[13px] font-semibold">{{ event.title }}</div>
+    <div class="line-clamp-2 break-words text-[13px] font-semibold">{{ event.title }}</div>
     <div class="text-xs tabular-nums opacity-60">{{ formattedDate }}</div>
     @if (event.description) {
-      <div class="truncate text-xs opacity-50">{{ event.description }}</div>
+      <div class="line-clamp-2 break-words text-xs opacity-50">{{ event.description }}</div>
     }
   </div>
 </div>

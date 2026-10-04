@@ -2,7 +2,7 @@
   <div class="mb-3 flex items-center gap-2">
     <h3 class="text-sm font-bold tracking-wide">{{ title }}</h3>
     @if (upcomingEvents.length) {
-      <span class="text-xs font-semibold tabular-nums opacity-45">{{ upcomingEvents.length }}</span>
+      <span mnBadge [data]="{ size: 'sm', color: 'accent', variant: 'fill' }" class="tabular-nums">{{ upcomingEvents.length }}</span>
     }
   </div>
   @for (event of upcomingEvents; track $index) {
