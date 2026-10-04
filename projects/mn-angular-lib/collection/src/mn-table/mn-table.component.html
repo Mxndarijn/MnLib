@@ -539,7 +539,10 @@
 <!-- Inline action buttons for an actions column, shared by the wide-table layout and
      (implicitly) mirrored by the ⋯ menu below 450px. -->
 <ng-template #actionButtons let-column="column" let-row="row">
-  @for (action of visibleRowActions(column, row); track $index) {
+  <!-- A placeholder (a hidden keepSlot action) is the same button, invisible and inert:
+       it holds the column so the actions after it line up with the rows above. -->
+  @for (slot of inlineRowActions(column, row); track $index) {
+    @let action = slot.action;
     <button
       mnButton
       type="button"
@@ -547,10 +550,13 @@
         size: 'sm',
         variant: 'text',
         color: rowActionColor(action, row),
-        disabled: isRowActionDisabled(action, row)
+        disabled: isRowActionDisabled(action, row) || slot.placeholder
       }"
       class="cursor-pointer"
-      (click)="$event.stopPropagation(); runRowAction(action, row)"
+      [class.invisible]="slot.placeholder"
+      [attr.inert]="slot.placeholder ? '' : null"
+      [attr.aria-hidden]="slot.placeholder ? 'true' : null"
+      (click)="$event.stopPropagation(); slot.placeholder || runRowAction(action, row)"
       [attr.aria-label]="rowActionLabel(action, row)"
       [attr.title]="showActionLabel(column, action, row) ? null : rowActionLabel(action, row)"
     >

@@ -695,6 +695,20 @@ export class MnTable<T = object>
     return (column.actions ?? []).filter(action => !(action.hidden?.(row) ?? false));
   }
 
+  /**
+   * The inline buttons for a row, in column order: every visible action, plus a placeholder
+   * where a hidden action has {@link MnTableRowAction.keepSlot} so the buttons after it keep
+   * their column. The ⋯ menu and the collapse rule still read {@link visibleRowActions}.
+   */
+  inlineRowActions(
+    column: ColumnDefinition<T>,
+    row: T,
+  ): { action: MnTableRowAction<T>; placeholder: boolean }[] {
+    return (column.actions ?? [])
+      .map(action => ({ action, placeholder: action.hidden?.(row) ?? false }))
+      .filter(slot => !slot.placeholder || !!slot.action.keepSlot);
+  }
+
   /** Whether a row has any visible actions at all; when false its cell is left empty. */
   hasRowActions(column: ColumnDefinition<T>, row: T): boolean {
     return this.visibleRowActions(column, row).length > 0;

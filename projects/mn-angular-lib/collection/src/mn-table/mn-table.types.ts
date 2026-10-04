@@ -132,6 +132,14 @@ export type MnTableRowAction<T> = {
    * actions, row 2 doesn't", or per-permission actions (e.g. only admins can delete).
    */
   hidden?: (row: T) => boolean;
+  /**
+   * When the action is {@link hidden} for a row, keep its place among the inline buttons as
+   * an invisible slot instead of dropping it, so the actions after it stay in the same column
+   * on every row (a delete never slides under another row's icon). It is still not shown,
+   * not focusable, not announced and not in the ⋯ menu. Leave it off for actions that stand
+   * in for each other (activate/deactivate), where a reserved slot would be a permanent gap.
+   */
+  keepSlot?: boolean;
   /** Predicate deciding whether the action is disabled (shown but non-interactive) for a row. */
   disabled?: (row: T) => boolean;
   /**

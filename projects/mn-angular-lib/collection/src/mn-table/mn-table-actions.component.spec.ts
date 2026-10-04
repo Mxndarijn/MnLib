@@ -93,6 +93,42 @@ describe('MnTable row actions', () => {
     expect(actionCells[1].textContent.trim()).toBe('');
   });
 
+  it('keeps an invisible, inert slot for a hidden keepSlot action so later actions line up', () => {
+    const actions: MnTableRowAction<Row>[] = [
+      { label: 'Share', run: () => undefined },
+      { label: 'People', hidden: (row) => !row.active, keepSlot: true, run: () => undefined },
+      { label: 'Delete', run: () => undefined },
+    ];
+    const buttons = renderActions(actions);
+
+    // Both rows render three buttons, so Delete is third on each.
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual([
+      'Share', 'People', 'Delete', 'Share', 'People', 'Delete',
+    ]);
+    const placeholder = buttons[4];
+    expect(placeholder.classList).toContain('invisible');
+    expect(placeholder.hasAttribute('inert')).toBeTrue();
+    expect(placeholder.getAttribute('aria-hidden')).toBe('true');
+    expect(buttons[1].classList).not.toContain('invisible');
+
+    // The ⋯ menu lists only what the row can actually do.
+    const menu = fixture.componentInstance.rowDropdownActions(
+      fixture.componentInstance.dataSource.columns[1],
+      DATA[1],
+    );
+    expect(menu.map((m) => m.label)).toEqual(['Share', 'Delete']);
+  });
+
+  it('never runs a placeholder', () => {
+    let ran = 0;
+    const buttons = renderActions([
+      { label: 'People', hidden: (row) => !row.active, keepSlot: true, run: () => ran++ },
+      { label: 'Delete', run: () => undefined },
+    ]);
+    buttons[2].click();
+    expect(ran).toBe(0);
+  });
+
   it('derives label and colour per row so one action can cover a flipped state', () => {
     const buttons = renderActions([
       {
