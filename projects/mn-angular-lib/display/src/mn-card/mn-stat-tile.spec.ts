@@ -11,7 +11,7 @@ import { MnStatTile } from './mn-stat-tile';
   imports: [MnStatTile],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <mn-stat-tile [label]="label" [value]="value" [data]="{ color: 'success' }">
+    <mn-stat-tile [label]="label" [value]="value" [loading]="loading" [data]="{ color: 'success' }">
       <i id="icon"></i>
       <b trailing id="trailing">+2</b>
     </mn-stat-tile>
@@ -20,6 +20,7 @@ import { MnStatTile } from './mn-stat-tile';
 class HostComponent {
   label = 'Present';
   value: string | number = 12;
+  loading = false;
 }
 
 describe('MnStatTile', () => {
@@ -69,5 +70,31 @@ describe('MnStatTile', () => {
     fixture.detectChanges();
 
     expect(number().textContent?.trim()).toBe('€ 25,50');
+  });
+
+  it('holds a skeleton in place of the number and the trailing content while loading', () => {
+    host.loading = true;
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(number()).toBeNull();
+    expect(el.querySelector('mn-skeleton')).not.toBeNull();
+    expect(el.querySelector('#trailing')).toBeNull();
+    expect(el.querySelector('[mnCard]')?.getAttribute('aria-busy')).toBe('true');
+    expect(el.textContent).toContain('Present');
+    expect(el.querySelector('#icon')).not.toBeNull();
+  });
+
+  it('swaps the skeleton for the number once loading ends', () => {
+    host.loading = true;
+    fixture.detectChanges();
+    host.loading = false;
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(number().textContent?.trim()).toBe('12');
+    expect(el.querySelector('mn-skeleton')).toBeNull();
+    expect(el.querySelector('#trailing')).not.toBeNull();
+    expect(el.querySelector('[mnCard]')?.hasAttribute('aria-busy')).toBe(false);
   });
 });
