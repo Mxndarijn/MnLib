@@ -55,12 +55,14 @@ describe('MnCard', () => {
     fixture.detectChanges();
   });
 
-  it('is a compact stacked surface with a soft hover by default, and no header', () => {
+  it('is a compact stacked surface that ignores the pointer by default, and has no header', () => {
     expect(classes()).toContain('p-4');
     expect(classes()).toContain('gap-3');
     expect(classes()).toContain('flex-col');
     expect(classes()).toContain('rounded-2xl');
-    expect(classes()).toContain('hover:shadow-md');
+    expect(classes()).not.toContain('hover:shadow-md');
+    expect(classes()).not.toContain('hover:-translate-y-1');
+    expect(classes()).not.toContain('cursor-pointer');
     expect(classes()).not.toContain('animate-rise');
     expect(classes()).not.toContain('transition-all');
     expect(header()).toBeNull();
@@ -146,5 +148,13 @@ describe('MnCard', () => {
     expect(link.classList).toContain('border-base-300');
     expect(link.classList).toContain('hover:-translate-y-1');
     expect(link.classList).not.toContain('hover:shadow-md');
+  });
+
+  it('gives a lifting card the focus ring that matches its hover', () => {
+    const link = fixture.nativeElement.querySelector('#link') as HTMLElement;
+    expect(link.classList).toContain('focus-visible:ring-2');
+    expect(link.classList).toContain('focus-visible:ring-primary');
+    expect(link.classList).toContain('cursor-pointer');
+    expect(link.classList).toContain('motion-reduce:hover:translate-y-0');
   });
 });

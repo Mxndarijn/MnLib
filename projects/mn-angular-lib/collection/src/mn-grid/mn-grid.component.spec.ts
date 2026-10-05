@@ -245,6 +245,12 @@ describe('MnGrid (keyboard activation)', () => {
     expect(space.defaultPrevented).toBeTrue();
   });
 
+  it('shows the primary focus ring on a clickable item, the same ring a lifting card shows', () => {
+    expect(items()[0].getAttribute('tabindex')).toBe('0');
+    expect(items()[0].classList).toContain('focus-visible:ring-2');
+    expect(items()[0].classList).toContain('focus-visible:ring-primary');
+  });
+
   it('leaves other keys and keys pressed inside the item alone', () => {
     press(items()[0], 'Tab');
     const inner = items()[0].querySelector('span') as HTMLElement;

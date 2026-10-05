@@ -20,6 +20,7 @@ export type SortState = {
 // ── Appearance ──
 export type TableAppearance = {
   striped?: boolean;
+  /** Hover wash on clickable rows (on by default); rows that do nothing on click never get one. */
   hover?: boolean;
   compact?: boolean;
   bordered?: boolean;

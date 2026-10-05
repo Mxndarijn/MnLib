@@ -127,14 +127,15 @@
       }
     }
 
-    <!-- Data items -->
+    <!-- Data items. The wash and the pointer promise that a click does something, so only a
+         clickable item gets them; a focusable one draws the primary ring inside its edges. -->
     @for (item of paginatedItems; track trackByID($index, item); let odd = $odd; let last = $last) {
       <div
-        class="flex items-center gap-2 bg-base-100 transition-colors duration-150"
+        class="flex items-center gap-2 bg-base-100 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
         [ngClass]="{'bg-primary/10': isSelected(item)}"
         [class.bg-base-200]="!isSelected(item) && odd && dataSource.appearance?.dividers !== false"
-        [class.hover:bg-base-200]="dataSource.appearance?.hover !== false"
-        [class.cursor-pointer]="!!dataSource.onItemClick"
+        [class.hover:bg-base-200]="itemsClickable && dataSource.appearance?.hover !== false"
+        [class.cursor-pointer]="itemsClickable"
         [class.px-4]="true"
         [class.py-3]="!dataSource.appearance?.compact"
         [class.py-2]="dataSource.appearance?.compact"

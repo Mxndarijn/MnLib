@@ -335,3 +335,53 @@ describe('MnList (keyboard activation)', () => {
     expect(fixture.nativeElement.querySelector('[aria-busy="true"]')).toBeNull();
   });
 });
+
+/**
+ * The hover wash and the pointer promise that clicking an item does something, so the list
+ * only gives them to items that do.
+ */
+describe('MnList item hover', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let host: HostComponent;
+
+  /**
+   * Renders the list over one row with the given data-source overrides.
+   * @param extra Fields to merge over the defaults.
+   */
+  function render(extra: Partial<ListDataSource<Row>> = {}): void {
+    host.dataSource = {
+      dataRows: new BehaviorSubject<Row[]>([{ id: '1', name: 'Alpha' }]),
+      itemTemplate: host.item,
+      getID: (row: Row) => row.id,
+      emptyMessage: '',
+      state: MnCollectionState.RETRIEVED,
+      canSearch: false,
+      ...extra,
+    } as ListDataSource<Row>;
+    fixture.detectChanges();
+  }
+
+  /** The rendered list item. */
+  const item = (): HTMLElement => fixture.nativeElement.querySelector('[role="listitem"]');
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(HostComponent);
+    host = fixture.componentInstance;
+  });
+
+  it('leaves an item that does nothing on click plain', () => {
+    render();
+
+    expect(item().classList).not.toContain('hover:bg-base-200');
+    expect(item().classList).not.toContain('cursor-pointer');
+  });
+
+  it('washes and points at an item that opens something', () => {
+    render({ onItemClick: () => undefined });
+
+    expect(item().classList).toContain('hover:bg-base-200');
+    expect(item().classList).toContain('cursor-pointer');
+    expect(item().classList).toContain('focus-visible:ring-primary');
+  });
+});

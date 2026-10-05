@@ -39,13 +39,20 @@ export const mnCardVariants = tv({
       row: { root: 'flex-row items-center' },
     },
     /**
-     * Hover response. `shadow` is a little depth for a card that only sits there;
-     * `lift` promises a destination and belongs on a card that is a link.
+     * Hover response. None by default: a hover promises that a click does something, and
+     * most cards are settings, forms or facts that do nothing when clicked. `lift` promises a
+     * destination and belongs on a card that is a link or a button; it brings the matching
+     * keyboard focus ring, so a card that answers the pointer also answers Tab. `shadow` is
+     * kept for a consumer that already asks for it.
      */
     hover: {
       none: {},
       shadow: { root: 'hover:shadow-md' },
-      lift: { root: 'hover:-translate-y-1 hover:shadow-lg' },
+      lift: {
+        root:
+          'cursor-pointer hover:-translate-y-1 hover:shadow-lg motion-reduce:hover:translate-y-0 ' +
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+      },
     },
     /**
      * Entrance. `rise` plays the consumer's `--animate-rise` keyframes when its theme
@@ -88,7 +95,7 @@ export const mnCardVariants = tv({
   defaultVariants: {
     padding: 'sm',
     layout: 'column',
-    hover: 'shadow',
+    hover: 'none',
     enter: 'none',
     borderRadius: 'two_xl',
     color: 'primary',

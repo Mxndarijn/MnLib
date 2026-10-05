@@ -117,13 +117,15 @@
     [attr.aria-label]="gridRegionLabel"
       role="list"
     >
+      <!-- A clickable item takes focus itself, not the card it holds, so the focus ring is drawn
+           here, in the radius of the default card, the same ring a lifting mnCard shows. -->
       @for (item of paginatedItems; track trackByID($index, item)) {
         <div
           (click)="onItemClick(item)"
           (keydown)="onItemKeydown($event, item)"
           [attr.tabindex]="dataSource.onItemClick ? 0 : null"
           [class.cursor-pointer]="!!dataSource.onItemClick"
-          class="transition-colors duration-150"
+          class="rounded-2xl transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           role="listitem"
         >
           <ng-container

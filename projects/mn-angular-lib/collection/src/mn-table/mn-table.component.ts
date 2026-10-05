@@ -315,6 +315,16 @@ export class MnTable<T = object>
     this.applyFilter(false);
   }
 
+  /**
+   * Whether clicking a row does anything: a data-source `onRowClick`, a bound `(rowClick)`,
+   * or row selection. Only then does a row get the hover wash and the pointer, so a plain
+   * list does not look like one that opens something. `appearance.hover: false` still turns
+   * the wash off on a clickable table.
+   */
+  get rowsClickable(): boolean {
+    return this.hasSelection || !!this.dataSource.onRowClick || this.rowClick.observed;
+  }
+
   onRowClick(row: T): void {
     if (this.hasSelection) {
       this.toggle(row);

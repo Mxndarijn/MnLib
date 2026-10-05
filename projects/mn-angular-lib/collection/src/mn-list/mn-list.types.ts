@@ -17,7 +17,7 @@ export type ListSkeleton =
 export type ListAppearance = {
   /** Show a divider between items. Defaults to true. */
   dividers?: boolean;
-  /** Highlight item on hover. Defaults to true. */
+  /** Highlight a clickable item on hover. Defaults to true; items that do nothing on click never get it. */
   hover?: boolean;
   /** Use compact (smaller) padding. */
   compact?: boolean;

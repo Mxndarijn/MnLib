@@ -47,6 +47,14 @@ export class MnList<T = unknown>
 
   // ── Item interaction ──
 
+  /**
+   * Whether clicking an item does anything: a data-source `onItemClick` or a bound
+   * `(itemClick)`. Only then does an item get the hover wash and the pointer.
+   */
+  get itemsClickable(): boolean {
+    return !!this.dataSource.onItemClick || this.itemClick.observed;
+  }
+
   onItemClick(item: T): void {
     this.dataSource.onItemClick?.(item);
     this.itemClick.emit(item);
