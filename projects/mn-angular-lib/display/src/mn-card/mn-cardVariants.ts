@@ -14,7 +14,10 @@ export const mnCardVariants = tv({
   slots: {
     root:
       'relative flex overflow-hidden border border-base-300 ' +
-      'bg-(--color-base-card,var(--color-base-100)) transition-all duration-200 motion-reduce:transition-none',
+      'bg-(--color-base-card,var(--color-base-100)) ' +
+      // Only what a hover changes. `transition-all` also animated padding, radius and border
+      // width from their initial values whenever a card mounted.
+      'transition-[translate,box-shadow,border-color] duration-200 motion-reduce:transition-none',
     accent: 'absolute inset-x-0 top-0 h-1',
     header: 'flex flex-wrap items-center gap-3',
     title: 'text-lg font-semibold text-base-content',
@@ -48,7 +51,8 @@ export const mnCardVariants = tv({
      * Entrance. `rise` plays the consumer's `--animate-rise` keyframes when its theme
      * defines them (a short rise-in, delayed per card through
      * {@link MnCard.enterDelayMs}) and is a no-op otherwise; reduced-motion users
-     * never see it.
+     * never see it. Off by default: a rise belongs to a card that is one of a list, so a
+     * page's static cards do not all move at once.
      */
     enter: {
       none: {},
@@ -85,7 +89,7 @@ export const mnCardVariants = tv({
     padding: 'sm',
     layout: 'column',
     hover: 'shadow',
-    enter: 'rise',
+    enter: 'none',
     borderRadius: 'two_xl',
     color: 'primary',
   },

@@ -61,7 +61,8 @@ describe('MnCard', () => {
     expect(classes()).toContain('flex-col');
     expect(classes()).toContain('rounded-2xl');
     expect(classes()).toContain('hover:shadow-md');
-    expect(classes()).toContain('animate-rise');
+    expect(classes()).not.toContain('animate-rise');
+    expect(classes()).not.toContain('transition-all');
     expect(header()).toBeNull();
     expect(card().querySelector('#body')).not.toBeNull();
   });
@@ -124,7 +125,16 @@ describe('MnCard', () => {
     expect(card().querySelector('#badge')).toBeNull();
   });
 
+  it('rises in only when asked to, as one card of a list', () => {
+    host.data = { enter: 'rise' };
+    fixture.detectChanges();
+
+    expect(classes()).toContain('animate-rise');
+    expect(classes()).toContain('motion-reduce:animate-none');
+  });
+
   it('staggers the entrance through the animation delay', () => {
+    host.data = { enter: 'rise' };
     host.delay = 120;
     fixture.detectChanges();
 
