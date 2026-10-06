@@ -1,5 +1,18 @@
 :host {
   display: block;
+  /*
+    Appear only when loading lasts: invisible for the delay (300 ms unless the caller sets
+    `appearDelay`), then a 150 ms fade in. A load that ends sooner shows no skeleton at all;
+    one that ends just after the delay only ever shows it faintly, so it cannot blink for a
+    single frame. The element keeps its size the whole time, so nothing below it moves.
+  */
+  animation: mn-skeleton-appear 150ms ease-out 300ms both;
+}
+
+@keyframes mn-skeleton-appear {
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes mn-skeleton-shimmer {

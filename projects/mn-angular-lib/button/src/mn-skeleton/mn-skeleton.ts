@@ -30,6 +30,12 @@ export class MnSkeleton {
     return this.data.height ?? null;
   }
 
+  /** The caller's {@link MnSkeletonProps.appearDelay}, overriding the stylesheet's 300 ms. */
+  @HostBinding('style.animation-delay')
+  get appearDelay(): string | null {
+    return this.data.appearDelay == null ? null : `${this.data.appearDelay}ms`;
+  }
+
   get isAnimated(): boolean {
     return this.data.animated !== false;
   }
