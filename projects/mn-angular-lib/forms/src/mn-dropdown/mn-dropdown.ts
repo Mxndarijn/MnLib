@@ -119,13 +119,20 @@ export class MnDropdown implements OnInit {
    */
   get panelClasses(): string {
     const base =
-      'fixed z-9999 min-w-48 max-w-[min(20rem,90vw)] bg-base-100 border border-base-300 rounded-md shadow-lg py-1 max-h-[60vh] -translate-x-full';
+      'fixed z-9999 min-w-48 max-w-[min(20rem,90vw)] bg-base-100 border border-base-300 rounded-md shadow-lg py-1 max-h-[60vh]' +
+      (this.alignStart ? '' : ' -translate-x-full');
     return this.isSearchable ? `${base} flex flex-col overflow-hidden` : `${base} overflow-auto`;
   }
 
   /** Tailwind's `sm` breakpoint — below this the menu renders as a bottom sheet.
    *  Kept in step with the same constant in mn-bottom-sheet / mn-multi-select. */
   private static readonly SHEET_MAX_WIDTH = 639.98;
+
+  /**
+   * Whether the popover opens rightwards from the trigger's left edge instead of leftwards from
+   * its right edge. Set by {@link fitIntoViewport} when there is no room on the left.
+   */
+  private alignStart = false;
 
   /** The anchored popover panel currently moved into `document.body`, if any. */
   private movedPanel: HTMLElement | null = null;
@@ -205,6 +212,7 @@ export class MnDropdown implements OnInit {
   set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
     const el = ref?.nativeElement ?? null;
     this.movedPanel = this.portal(el, this.movedPanel);
+    if (el) this.fitIntoViewport(el);
     if (el) this.focusPendingItem();
     if (el && this.isSearchable) {
       this.capturePanelFloor(el);
@@ -488,6 +496,7 @@ export class MnDropdown implements OnInit {
 
   private updateDropdownPosition(): void {
     if (!this.triggerRef) return;
+    this.alignStart = false;
     const rect = this.triggerRef.nativeElement.getBoundingClientRect();
     // The panel is right-aligned to the trigger via a `-translate-x-full` class, so
     // `left` is anchored to the trigger's right edge.
@@ -497,6 +506,32 @@ export class MnDropdown implements OnInit {
       ...anchoredPanelPlacement(rect, window.innerHeight, 4, window.innerHeight * 0.6),
       left: `${rect.right}px`,
     };
+  }
+
+  /**
+   * Keeps the opened popover inside the window. It normally hangs leftwards from the trigger's
+   * right edge; near the left edge of the window that pushed it off-screen, so it then opens
+   * rightwards from the trigger's left edge instead, and it never comes closer than 8 px to
+   * either edge. Applied to the element directly as well as to the bound state, in the same pass
+   * the panel appears, so no frame is drawn off-screen first.
+   * @param panel The popover panel, already in the document with its content.
+   */
+  private fitIntoViewport(panel: HTMLElement): void {
+    const trigger = this.triggerRef?.nativeElement;
+    if (!trigger || typeof window === 'undefined') return;
+    const margin = 8;
+    const rect = trigger.getBoundingClientRect();
+    const width = panel.offsetWidth;
+    // The usable width: innerWidth would count a page scrollbar as room.
+    const viewport = document.documentElement.clientWidth || window.innerWidth;
+    const alignStart = rect.right - width < margin;
+    const left = alignStart
+      ? Math.max(margin, Math.min(rect.left, viewport - width - margin))
+      : Math.min(rect.right, viewport - margin);
+    this.alignStart = alignStart;
+    this.dropdownStyle = { ...this.dropdownStyle, left: `${left}px` };
+    panel.style.left = `${left}px`;
+    panel.classList.toggle('-translate-x-full', !alignStart);
   }
 
   private startWatchingTrigger(): void {

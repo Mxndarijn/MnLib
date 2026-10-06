@@ -111,15 +111,13 @@ describe('MnDropdown (anchored popover)', () => {
     expect(el!.closest('.transformed-ancestor')).toBeNull();
   });
 
-  it('positions the popover from the trigger rect, right-aligned via a fixed layout', () => {
+  it('positions the popover from the trigger rect via a fixed layout', () => {
     component.toggle();
     fixture.detectChanges();
 
     const el = menu()!;
     expect(el.classList.contains('fixed')).toBeTrue();
-    // Right-aligned to the trigger: anchored at the trigger's right edge and pulled back
-    // by its own width with `-translate-x-full`.
-    expect(el.classList.contains('-translate-x-full')).toBeTrue();
+    // Which way it opens depends on the room beside the trigger; see "placement" below.
     // Anchored on whichever side of the trigger has room: `top` below it, `bottom` above it.
     // The test viewport is short, so either can win; exactly one of them is a pixel value.
     const anchoredBelow = /px$/.test(el.style.top);
@@ -959,5 +957,82 @@ describe('MnDropdown (active item)', () => {
 
     expect(run).toHaveBeenCalledTimes(1);
     expect(component.isOpen).toBeFalse();
+  });
+});
+
+describe('MnDropdown (placement)', () => {
+  /** Host that pins the dropdown against the left or the right edge of the window. */
+  @Component({
+    standalone: true,
+    imports: [MnDropdown],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
+      <div style="position: fixed; top: 80px" [style.left.px]="side === 'left' ? 4 : null" [style.right.px]="side === 'right' ? 24 : null">
+        <mn-lib-dropdown [datasource]="props"></mn-lib-dropdown>
+      </div>
+    `,
+  })
+  class EdgeHostComponent {
+    side: 'left' | 'right' = 'left';
+    props: MnDropdownProps = {
+      id: 'edge-dd',
+      mobileSheet: false,
+      actions: [{ label: 'A rather long command label', run: () => undefined }],
+    };
+  }
+
+  let fixture: ComponentFixture<EdgeHostComponent>;
+  /** A realistic menu width: the spec runner loads no Tailwind, so min-w/max-w do nothing. */
+  let widthStyle: HTMLStyleElement;
+
+  /**
+   * Opens the dropdown with its trigger against the given window edge.
+   * @returns The menu element and the trigger's rect. The spec runner loads no Tailwind, so the
+   *   `-translate-x-full` that pulls a leftward menu back by its width has no effect here: the
+   *   placement is asserted on the `left` and class the component sets, not on the menu's rect.
+   */
+  function openAt(side: 'left' | 'right'): { menu: HTMLElement; trigger: DOMRect } {
+    fixture.componentInstance.side = side;
+    fixture.detectChanges();
+    const component = fixture.debugElement.query(By.directive(MnDropdown)).componentInstance as MnDropdown;
+    component.toggle();
+    fixture.detectChanges();
+    const menu = document.getElementById('edge-dd-menu')!;
+    const trigger = fixture.nativeElement.querySelector('button[aria-haspopup]').getBoundingClientRect();
+    return { menu, trigger };
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [EdgeHostComponent],
+      providers: [
+        { provide: MnConfigService, useValue: configStub },
+        { provide: MnLanguageService, useValue: languageStub },
+      ],
+    }).compileComponents();
+    stubViewport(false);
+    widthStyle = document.createElement('style');
+    widthStyle.textContent = '#edge-dd-menu { width: 200px; }';
+    document.head.appendChild(widthStyle);
+    fixture = TestBed.createComponent(EdgeHostComponent);
+  });
+
+  afterEach(() => {
+    document.getElementById('edge-dd-menu')?.remove();
+    widthStyle.remove();
+  });
+
+  it('opens rightwards from a trigger near the left edge, at least 8 px from the edge', () => {
+    const { menu, trigger } = openAt('left');
+    // The trigger sits 4 px from the edge: the menu starts at its left edge, kept 8 px in.
+    expect(trigger.left).toBeLessThan(8);
+    expect(menu.style.left).toBe('8px');
+    expect(menu.classList.contains('-translate-x-full')).toBeFalse();
+  });
+
+  it('opens leftwards from the right edge of the trigger when there is room', () => {
+    const { menu, trigger } = openAt('right');
+    expect(menu.style.left).toBe(`${trigger.right}px`);
+    expect(menu.classList.contains('-translate-x-full')).toBeTrue();
   });
 });
