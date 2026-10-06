@@ -12,6 +12,7 @@
     [attr.aria-expanded]="isOpen"
     [attr.aria-controls]="isOpen ? resolvedId + '-menu' : null"
     (click)="toggle()"
+    (keydown)="onTriggerKeydown($event)"
   >
     @if (triggerLabelText) {
       <span class="truncate">{{ triggerLabelText }}</span>
@@ -43,7 +44,10 @@
         [maxHeightVh]="80"
         [minHeightPx]="sheetFloorPx"
       >
-        <div [id]="resolvedId + '-menu'" role="menu" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <!-- The keydown is delegated: focus sits on the menuitem buttons inside, never on the
+             menu itself, so the container needs no tabindex. -->
+        <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+        <div [id]="resolvedId + '-menu'" role="menu" class="flex flex-col flex-1 min-h-0 overflow-hidden" (keydown)="onMenuKeydown($event)">
           <!-- The sheet covers its own trigger, so it carries a header to name itself; the
                way out is the grabber (swipe-to-dismiss) and a backdrop tap. -->
           <div class="px-4 pt-1 pb-2 shrink-0">
@@ -56,10 +60,12 @@
         </div>
       </mn-bottom-sheet>
     } @else {
-      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <!-- Keydown delegated to the menuitem buttons inside, as in the sheet above. -->
+      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
       <div
         #dropdown
         (click)="$event.stopPropagation()"
+        (keydown)="onMenuKeydown($event)"
         [id]="resolvedId + '-menu'"
         [ngClass]="panelClasses"
         [style.left]="dropdownStyle.left"
@@ -96,6 +102,7 @@
         <button
           type="button"
           role="menuitem"
+          tabindex="-1"
           [disabled]="action.disabled"
           [attr.aria-current]="action.active ? 'true' : null"
           [class.opacity-50]="action.disabled"

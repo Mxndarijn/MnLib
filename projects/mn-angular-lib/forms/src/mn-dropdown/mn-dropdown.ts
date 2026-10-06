@@ -173,6 +173,13 @@ export class MnDropdown implements OnInit {
 
   isOpen = false;
 
+  /**
+   * The command that takes focus once the opened menu has rendered: the first or last one,
+   * or none when a desktop search box takes focus instead. Set by {@link open}, consumed by
+   * the panel and sheet queries the moment the menu appears.
+   */
+  private pendingFocus: 'first' | 'last' | null = null;
+
   /** Stable fallback id, used when {@link MnDropdownProps.id} is omitted. Generated once per
    *  instance so the a11y wiring (menu id, `aria-controls`, the search input) stays valid. */
   private readonly autoId = `mn-dropdown-${++nextDropdownId}`;
@@ -198,6 +205,7 @@ export class MnDropdown implements OnInit {
   set dropdownRef(ref: ElementRef<HTMLElement> | undefined) {
     const el = ref?.nativeElement ?? null;
     this.movedPanel = this.portal(el, this.movedPanel);
+    if (el) this.focusPendingItem();
     if (el && this.isSearchable) {
       this.capturePanelFloor(el);
     } else if (!el) {
@@ -214,6 +222,7 @@ export class MnDropdown implements OnInit {
   set sheetRef(ref: ElementRef<HTMLElement> | undefined) {
     const el = ref?.nativeElement ?? null;
     this.sheetHost = el;
+    if (el) this.focusPendingItem();
     if (el && this.isSearchable) {
       this.captureSheetFloor(el);
     } else if (!el) {
@@ -281,7 +290,20 @@ export class MnDropdown implements OnInit {
       this.close();
       return;
     }
+    this.open('first');
+  }
+
+  /**
+   * Opens the menu and moves focus into it, as the menu-button pattern expects: a keyboard
+   * user lands on a command (or in the search box) instead of staying on the trigger with
+   * the items out of reach at the end of the page.
+   * @param focus The command to focus once the menu has rendered.
+   */
+  private open(focus: 'first' | 'last'): void {
     if (this.datasource.actions.length === 0) return;
+    // A desktop search box autofocuses itself; the sheet's does not (it would pop the soft
+    // keyboard), so there the first command takes focus like in a plain menu.
+    this.pendingFocus = this.isSearchable && !this.isSheet ? null : focus;
     // `toggle()` and `close()` are public API: a consumer holding a @ViewChild can
     // open the panel without an event, and under OnPush nothing else marks this view.
     this.isOpen = true;
@@ -300,6 +322,7 @@ export class MnDropdown implements OnInit {
   close(): void {
     if (!this.isOpen) return;
     this.isOpen = false;
+    this.pendingFocus = null;
     this.cdr.markForCheck();
     this.searchTerm = '';
     this.panelFloorPx = null;
@@ -314,11 +337,103 @@ export class MnDropdown implements OnInit {
     return this.datasource.mobileSheet !== false && this.isNarrowViewport;
   }
 
-  /** Fires an action and closes. Ignores disabled items defensively. */
+  /**
+   * Fires an action and closes. Focus goes back to the trigger first, so a keyboard user is
+   * not left on a removed item and a modal the action opens restores focus there. Ignores
+   * disabled items defensively.
+   */
   select(action: MnDropdownAction): void {
     if (action.disabled) return;
     this.close();
+    this.triggerRef?.nativeElement.focus();
     action.run();
+  }
+
+  // ── Keyboard ──
+
+  /**
+   * Arrow keys on the trigger open the menu on its first (↓) or last (↑) command, or move
+   * there when it is already open. Enter and Space need no handler: they click the button.
+   * @param event The keydown on the trigger.
+   */
+  onTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    const which = event.key === 'ArrowDown' ? 'first' : 'last';
+    if (this.isOpen) {
+      this.focusItem(which);
+      return;
+    }
+    this.open(which);
+  }
+
+  /**
+   * Keyboard movement inside the open menu: the arrows step through the enabled commands
+   * (wrapping), Home and End jump to the ends, and Tab closes the menu with focus back on the
+   * trigger, so the browser's own Tab then moves on from there as if the menu was never
+   * open. Escape is handled document-wide by {@link onEscape}.
+   * @param event The keydown inside the menu.
+   */
+  onMenuKeydown(event: KeyboardEvent): void {
+    // Home and End belong to the caret while typing in the search box.
+    const inSearch = (event.target as HTMLElement | null)?.tagName === 'INPUT';
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.focusItem('next');
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.focusItem('previous');
+        break;
+      case 'Home':
+      case 'End':
+        if (inSearch) return;
+        event.preventDefault();
+        this.focusItem(event.key === 'Home' ? 'first' : 'last');
+        break;
+      case 'Tab':
+        this.close();
+        this.triggerRef?.nativeElement.focus();
+        break;
+    }
+  }
+
+  /** The enabled commands currently rendered in the menu, in order. */
+  private menuItems(): HTMLElement[] {
+    const menu = document.getElementById(`${this.resolvedId}-menu`);
+    if (!menu) return [];
+    return Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])'));
+  }
+
+  /**
+   * Focuses a command relative to the one that has focus now. From outside the list (the
+   * search box) "next" is the first command and "previous" the last.
+   * @param which The first, last, next or previous enabled command.
+   */
+  private focusItem(which: 'first' | 'last' | 'next' | 'previous'): void {
+    const items = this.menuItems();
+    if (items.length === 0) return;
+    const current = items.indexOf(document.activeElement as HTMLElement);
+    let index: number;
+    if (which === 'first') index = 0;
+    else if (which === 'last') index = items.length - 1;
+    else if (which === 'next') index = (current + 1) % items.length;
+    else index = current <= 0 ? items.length - 1 : current - 1;
+    items[index].focus();
+  }
+
+  /**
+   * Moves focus to the command {@link open} asked for, once. Called from the panel and sheet
+   * queries; deferred a microtask so the item list rendered in the same pass exists.
+   */
+  private focusPendingItem(): void {
+    const which = this.pendingFocus;
+    if (!which) return;
+    this.pendingFocus = null;
+    queueMicrotask(() => {
+      if (this.isOpen) this.focusItem(which);
+    });
   }
 
   // ── Search ──

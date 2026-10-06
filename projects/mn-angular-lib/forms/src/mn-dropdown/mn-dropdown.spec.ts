@@ -279,6 +279,86 @@ describe('MnDropdown (anchored popover)', () => {
     expect(component.isOpen).toBeFalse();
     expect(menu()).toBeNull();
   });
+
+  describe('keyboard', () => {
+    /** The ⋯ trigger button. */
+    function trigger(): HTMLButtonElement {
+      return fixture.nativeElement.querySelector('button[aria-haspopup]');
+    }
+
+    /** Sends a keydown to an element, renders, and lets the deferred focus move run. */
+    async function press(target: Element, key: string): Promise<KeyboardEvent> {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      target.dispatchEvent(event);
+      fixture.detectChanges();
+      await Promise.resolve();
+      return event;
+    }
+
+    /** Opens the menu the way a click or Enter does, and waits for the focus move. */
+    async function open(): Promise<void> {
+      component.toggle();
+      fixture.detectChanges();
+      await Promise.resolve();
+    }
+
+    it('takes the items out of the Tab order', async () => {
+      await open();
+      expect(items().every((item) => item.getAttribute('tabindex') === '-1')).toBeTrue();
+    });
+
+    it('focuses the first command when the menu opens', async () => {
+      await open();
+      expect(document.activeElement).toBe(items()[0]);
+    });
+
+    it('opens on the first command with ArrowDown on the trigger', async () => {
+      const event = await press(trigger(), 'ArrowDown');
+      expect(event.defaultPrevented).toBeTrue();
+      expect(component.isOpen).toBeTrue();
+      expect(document.activeElement).toBe(items()[0]);
+    });
+
+    it('opens on the last enabled command with ArrowUp on the trigger', async () => {
+      await press(trigger(), 'ArrowUp');
+      // The last item is disabled, so the last command that can take focus is Delete.
+      expect(document.activeElement).toBe(items()[1]);
+    });
+
+    it('steps with the arrows, wrapping and skipping disabled commands', async () => {
+      await open();
+      await press(items()[0], 'ArrowDown');
+      expect(document.activeElement).toBe(items()[1]);
+      await press(items()[1], 'ArrowDown');
+      expect(document.activeElement).withContext('wraps past the disabled item').toBe(items()[0]);
+      await press(items()[0], 'ArrowUp');
+      expect(document.activeElement).toBe(items()[1]);
+    });
+
+    it('jumps to the ends with Home and End', async () => {
+      await open();
+      await press(items()[0], 'End');
+      expect(document.activeElement).toBe(items()[1]);
+      await press(items()[1], 'Home');
+      expect(document.activeElement).toBe(items()[0]);
+    });
+
+    it('closes on Tab with focus on the trigger, leaving the Tab itself to the browser', async () => {
+      await open();
+      const event = await press(items()[0], 'Tab');
+      expect(event.defaultPrevented).withContext('the browser moves on from the trigger').toBeFalse();
+      expect(component.isOpen).toBeFalse();
+      expect(document.activeElement).toBe(trigger());
+    });
+
+    it('returns focus to the trigger after running a command', async () => {
+      await open();
+      items()[0].click();
+      fixture.detectChanges();
+      expect(host.edit).toHaveBeenCalledTimes(1);
+      expect(document.activeElement).toBe(trigger());
+    });
+  });
 });
 
 describe('MnDropdown (mobile sheet)', () => {
@@ -770,6 +850,26 @@ describe('MnDropdown (searchable)', () => {
 
     component.close();
     expect(component.searchTerm).toBe('');
+  });
+
+  it('leaves focus to the search box on open, and ArrowDown moves into the results', async () => {
+    await Promise.resolve();
+    expect(items().includes(document.activeElement as HTMLButtonElement))
+      .withContext('no command steals focus from the search box')
+      .toBeFalse();
+
+    searchInput()!.focus();
+    searchInput()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    // Copy is disabled, so the first command that can take focus is Copy link.
+    expect(document.activeElement).toBe(items()[1]);
+  });
+
+  it('keeps Home and End for the caret while typing in the search box', () => {
+    searchInput()!.focus();
+    const event = new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true });
+    searchInput()!.dispatchEvent(event);
+    expect(event.defaultPrevented).toBeFalse();
+    expect(document.activeElement).toBe(searchInput());
   });
 });
 
