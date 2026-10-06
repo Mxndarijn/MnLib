@@ -102,4 +102,15 @@ describe('MnButton', () => {
     expect(cls).toContain('bg-transparent');
     expect(cls).toContain('hover:bg-base-content/10');
   });
+
+  it('animates only its look, never the focus ring', () => {
+    // `transition-all` also animated outline colour, width and offset, so an app's keyboard
+    // focus ring slid in from the text colour over 300 ms instead of appearing at once.
+    // Class-level: the spec runner loads no Tailwind CSS, so computed styles would prove nothing.
+    const cls = button().className;
+    expect(cls).not.toContain('transition-all');
+    const transition = cls.split(' ').find((c) => c.startsWith('transition-['));
+    expect(transition).withContext('an explicit property list').toBeDefined();
+    expect(transition).not.toContain('outline');
+  });
 });

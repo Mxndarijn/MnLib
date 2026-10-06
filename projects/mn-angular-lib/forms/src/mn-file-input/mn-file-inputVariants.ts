@@ -10,7 +10,7 @@ import {tv, type VariantProps} from 'tailwind-variants';
  * "release to drop" state while files hover over that dropzone.
  */
 export const mnFileInputVariants = tv({
-  base: 'bg-base-100 border-1 border-base-300 text-base-content text-sm outline-none transition-all duration-300 ease-in-out',
+  base: 'bg-base-100 border-1 border-base-300 text-base-content text-sm outline-none transition-[color,background-color,border-color,box-shadow,scale,opacity] duration-300 ease-in-out',
   variants: {
     /** Inner padding scale of the clickable control. */
     size: {

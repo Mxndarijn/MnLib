@@ -22,7 +22,7 @@
         <div
           [style.left]="'calc(' + 100 / (2 * visibleSteps.length) + '%)'"
           [style.width]="'calc(' + (currentProgressIndex / (visibleSteps.length - 1)) * (100 - 100 / visibleSteps.length) + '%)'"
-          class="absolute top-3.75 h-1 bg-success z-1 transition-all duration-500"
+          class="absolute top-3.75 h-1 bg-success z-1 transition-[left,width] duration-500"
         ></div>
       }
 
@@ -40,7 +40,7 @@
               'bg-success text-success-content': visitedStepIds.includes(step.id) && step.id !== currentStepId,
               'bg-base-200 text-base-content/50': !visitedStepIds.includes(step.id) && step.id !== currentStepId
             }"
-            class="w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-all text-sm"
+            class="w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-colors text-sm"
           >{{ i + 1 }}
           </div>
           <div
