@@ -66,11 +66,10 @@
 
   <app-demo-example title="Table with Actions Column">
     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">The column's <code>actions</code> config renders inline
-      command buttons that automatically collapse into a ⋯ menu (<code>mn-dropdown</code>) once the table is narrower
-      than 450px — resize the window, or open it on a phone, to see the switch. Here <code>actionsInline: 'icon'</code>
-      keeps the wide layout icon-only (labels on hover), while the collapsed bottom-sheet shows full text. Actions are
-      also filtered per row via <code>hidden</code>: Viewers get no actions at all (empty cell, no ⋯) and only Admins
-      may delete.</p>
+      command buttons. Below 640px the table switches to composed rows and the actions move into the sheet a tap on the
+      row opens — resize the window, or open it on a phone, to see the switch. Here <code>actionsInline: 'icon'</code>
+      keeps the wide layout icon-only (labels on hover), while the sheet shows full text. Actions are also filtered per
+      row via <code>hidden</code>: Viewers get no actions at all and only Admins may delete.</p>
     <mn-table [dataSource]="actionsDataSource"></mn-table>
   </app-demo-example>
 
@@ -85,7 +84,7 @@
     <mn-table [dataSource]="dataIconActionsDataSource"></mn-table>
   </app-demo-example>
 
-  <app-demo-example title="Single action (still collapses to ⋯ when narrow)" hint="One inline button when wide; the same single action becomes the ⋯ menu below 450px. The second copy is boxed to 360px to force the collapse.">
+  <app-demo-example title="Single action (moves into the sheet when narrow)" hint="One inline button when wide; below 640px the row opens a sheet holding that action. The second copy is boxed to 360px to force the phone layout.">
     <mn-table [dataSource]="singleActionDataSource"></mn-table>
     <div style="max-width: 360px" class="mt-6">
       <mn-table [dataSource]="singleActionDataSource"></mn-table>

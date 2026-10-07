@@ -28,7 +28,7 @@ import { MnErrorMessage } from '../mn-error-message/mn-error-message';
 import { MnInputField } from '../mn-input-field';
 import { MnBottomSheet } from 'mn-angular-lib/bottom-sheet';
 import { MnConfigService } from 'mn-angular-lib/core';
-import { MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
+import { MN_IN_BOTTOM_SHEET, MN_IN_MODAL, MN_INSTANCE_ID, MN_SECTION_PATH } from 'mn-angular-lib/core';
 import { MnLanguageService } from 'mn-angular-lib/core';
 import { skip } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -134,18 +134,26 @@ export class MnSelect implements OnInit {
   @ViewChild('trigger', { static: false }) triggerRef!: ElementRef<HTMLElement>;
 
   /** Layout classes for the anchored popover panel. The mobile sheet is rendered by
-   *  mn-bottom-sheet instead, so it no longer needs a branch here. */
-  readonly panelClasses =
-    'fixed z-9999 w-max bg-base-100 border border-base-300 rounded-md shadow-lg max-h-60 overflow-auto';
+   *  mn-bottom-sheet instead, so it no longer needs a branch here. Inside a sheet the panel
+   *  shares the sheet's background, where a soft shadow does not show (least of all in dark
+   *  mode), so it gets a firmer edge and a deeper shadow there. */
+  get panelClasses(): string {
+    const edge = this.insideSheet ? 'z-[10001] border-base-content/30 shadow-2xl' : 'z-9999 border-base-300 shadow-lg';
+    return `fixed w-max bg-base-100 border ${edge} rounded-md max-h-60 overflow-auto`;
+  }
 
   /** The panel's own height cap in pixels: the `max-h-60` above, restated for the placement maths. */
   static readonly PANEL_MAX_HEIGHT_PX = 240;
   /** Space kept between a widened panel and the viewport's right edge. */
   static readonly PANEL_EDGE_GAP_PX = 8;
-  /** Layout classes for the invisible click shield rendered under the anchored panel.
+  /** Layout classes for the click shield rendered under the anchored panel.
    *  One step below the panel's z-index so the panel itself stays clickable, and above
-   *  any modal/drawer chrome (which tops out well under 9998). */
-  readonly shieldClasses = 'fixed inset-0 z-9998';
+   *  any modal/drawer chrome (which tops out well under 9998). Invisible, except inside a
+   *  sheet: there it dims the sheet a little, so the open list is the one thing in front. */
+  get shieldClasses(): string {
+    // Above the sheet (z-9999) inside one, or the dim would land behind it.
+    return this.insideSheet ? 'fixed inset-0 z-[10000] bg-black/30' : 'fixed inset-0 z-9998';
+  }
 
   /** Option count at which the search input auto-enables when `searchable` is unset. */
   private static readonly DEFAULT_SEARCH_THRESHOLD = 8;
@@ -362,9 +370,19 @@ export class MnSelect implements OnInit {
     });
   }
 
-  /** Whether the panel should currently render as a bottom sheet. */
+  /**
+   * Whether this select already sits in a sheet: an `mn-bottom-sheet`, or a modal (which is a
+   * sheet on a phone). Its own options sheet would then stack a second sheet on top.
+   */
+  private readonly insideSheet = inject(MN_IN_BOTTOM_SHEET) || inject(MN_IN_MODAL);
+
+  /**
+   * Whether the panel should currently render as a bottom sheet: on a narrow screen, unless the
+   * consumer turned it off or the select is already inside a sheet, where it opens as an
+   * anchored dropdown instead.
+   */
   get isSheet(): boolean {
-    return this.props.mobileSheet !== false && this.isNarrowViewport;
+    return this.props.mobileSheet !== false && this.isNarrowViewport && !this.insideSheet;
   }
 
   /**

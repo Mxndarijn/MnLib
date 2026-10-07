@@ -8,6 +8,7 @@ import {
   EventEmitter,
   HostListener,
   inject,
+  Injector,
   Output,
   TemplateRef,
   ViewChild,
@@ -28,6 +29,7 @@ import {
   TableDataSource,
 } from './mn-table.types';
 import {emptyFilterValue, isFilterValueActive, matchesColumnFilter} from './mn-table-filter.util';
+import {MnTableRowLayout, resolveRowLayout} from './mn-table-row-layout.util';
 import {MnSkeleton, MnSkeletonProps} from 'mn-angular-lib/button';
 import {MnSelect, MnSelectOption} from 'mn-angular-lib/forms';
 import {MnMultiSelect, MnMultiSelectOption} from 'mn-angular-lib/forms';
@@ -43,10 +45,23 @@ import {MnButton} from 'mn-angular-lib/button';
 import {MnBottomSheet} from 'mn-angular-lib/bottom-sheet';
 import { LucideDynamicIcon } from '@lucide/angular';
 import * as lucide from 'lucide';
-import { lucideIcons } from 'mn-angular-lib/core';
+import { lucideIcons, MN_IN_BOTTOM_SHEET, MN_IN_MODAL } from 'mn-angular-lib/core';
 
 /** Lucide icons this file renders. */
-const ICONS = lucideIcons({ Funnel: lucide.Funnel, X: lucide.X });
+const ICONS = lucideIcons({
+  ArrowDown: lucide.ArrowDown,
+  ArrowUp: lucide.ArrowUp,
+  ChevronRight: lucide.ChevronRight,
+  Ellipsis: lucide.Ellipsis,
+  Funnel: lucide.Funnel,
+  X: lucide.X,
+});
+
+/** What tapping a composed row does: select it, run the consumer's handler, open the sheet, or nothing. */
+export type MnTableRowTap = 'select' | 'click' | 'detail' | 'none';
+
+/** A cell value made only of figures, which needs its column name to mean anything on its own. */
+const BARE_FIGURE = /^[\d\s.,:%+\-−]+$/;
 
 @Component({
   selector: 'mn-table',
@@ -85,6 +100,302 @@ export class MnTable<T = object>
 
   /** Small-screen filter sheet, held so the close button can play its exit. */
   @ViewChild('filtersSheet') protected filtersSheet?: MnBottomSheet;
+
+  // ── Row mode (below 640px) ──
+
+  /**
+   * Whether this table renders inside an mn modal. There it never opens its own detail sheet:
+   * on a phone the modal already is a sheet, and a second one stacks two drawers on one screen.
+   * Actions stay reachable through a ⋯ menu on the row instead.
+   */
+  private readonly inModal = inject(MN_IN_MODAL);
+
+  /** For scheduling focus once the detail sheet has rendered. */
+  private readonly injector = inject(Injector);
+
+  /**
+   * The injector the filter sheet renders its fields with. The field template is declared
+   * outside the sheet, so on its own it injects from there and its selects would open a second
+   * sheet on top; this one says they are already in a sheet.
+   */
+  protected readonly inSheetInjector = Injector.create({
+    providers: [{provide: MN_IN_BOTTOM_SHEET, useValue: true}],
+    parent: this.injector,
+  });
+
+  /** The row whose detail sheet is open, or null when none is. */
+  protected detailRow: T | null = null;
+
+  /** The control that opened the detail sheet, which gets focus back when it closes. */
+  private detailTrigger: HTMLElement | null = null;
+
+  /** Detail sheet, held so an action can play its exit before running. */
+  @ViewChild('detailSheet') protected detailSheet?: MnBottomSheet;
+
+  /** The sheet's heading, focused on open so the sheet is announced and Escape reaches it. */
+  @ViewChild('detailHeading') protected detailHeading?: ElementRef<HTMLElement>;
+
+  /** The last derived row layout and the column config it was derived from. */
+  private layoutCache?: { columns: ColumnDefinition<T>[]; signature: string; layout: MnTableRowLayout<T> };
+
+  /** Counts tables on the page, so each sort radio group gets a name of its own. */
+  private static instanceCount = 0;
+
+  /** The `name` that ties this table's sort radios into one group. */
+  protected readonly sortGroupName = `mn-table-sort-${MnTable.instanceCount++}`;
+
+  /**
+   * Whether rows render as composed lines instead of a grid. The same 640px container width
+   * at which the filter row already collapses: below it neither the filter inputs nor the
+   * columns have room, so both give way at once.
+   */
+  get rowMode(): boolean {
+    return this.filtersCollapsed;
+  }
+
+  /**
+   * Which column goes where on a composed row, derived from the column config (see
+   * {@link resolveRowLayout}). Recomputed only when the columns, or a setting the rule reads,
+   * change — a consumer adding a permission-gated column later is picked up.
+   */
+  get rowLayout(): MnTableRowLayout<T> {
+    const columns = this.dataSource.columns;
+    const signature = columns
+      .map(c => [c.key, c.hiddenBelow, c.mobile, c.width, c.sortType, c.align, c.actions ? 'a' : ''].join('|'))
+      .join(';');
+    const cached = this.layoutCache;
+    if (cached && cached.signature === signature && cached.columns.length === columns.length
+      && columns.every((c, i) => c === cached.columns[i])) {
+      return cached.layout;
+    }
+    const layout = resolveRowLayout(columns);
+    this.layoutCache = {columns: [...columns], signature, layout};
+    return layout;
+  }
+
+  /**
+   * Every value column the detail sheet lists under its heading: all of them except the two
+   * the heading itself shows (title and trailing), so the sheet is the whole record.
+   */
+  get detailColumns(): ColumnDefinition<T>[] {
+    const {title, trailing} = this.rowLayout;
+    return this.dataSource.columns.filter(c => !c.actions && c !== title && c !== trailing && c.mobile !== 'hidden');
+  }
+
+  /** Whether any of the row's action columns has a visible action for it. */
+  rowHasAnyActions(row: T): boolean {
+    return this.rowLayout.actions.some(column => this.hasRowActions(column, row));
+  }
+
+  /**
+   * Whether a row has anything its composed line does not show: a column only the sheet
+   * lists, or an action. Never inside a modal, where the table opens no sheet.
+   */
+  rowHasDetail(row: T): boolean {
+    if (this.inModal) return false;
+    return this.rowLayout.sheet.length > 0 || this.rowHasAnyActions(row);
+  }
+
+  /**
+   * What a tap on a composed row does, in order of precedence: select it (a selection table),
+   * run the consumer's row handler as on a wide table, open the detail sheet, or nothing.
+   */
+  rowTap(row: T): MnTableRowTap {
+    if (this.hasSelection) return 'select';
+    if (this.dataSource.onRowClick || this.rowClick.observed) return 'click';
+    if (this.rowHasDetail(row)) return 'detail';
+    return 'none';
+  }
+
+  /** Whether a row needs its own ⋯ button for the sheet, because a tap already does something else. */
+  showsRowMore(row: T): boolean {
+    const tap = this.rowTap(row);
+    return (tap === 'select' || tap === 'click') && this.rowHasDetail(row);
+  }
+
+  /** Whether a row shows its actions as a ⋯ menu: inside a modal, where there is no sheet. */
+  showsRowMenu(row: T): boolean {
+    return this.inModal && this.rowHasAnyActions(row);
+  }
+
+  /** Handles a tap on a composed row's main area. */
+  onRowTap(row: T, event: Event): void {
+    if (this.rowTap(row) === 'detail') {
+      this.openDetail(row, event.currentTarget as HTMLElement | null);
+    } else {
+      this.onRowClick(row);
+    }
+  }
+
+  /**
+   * Opens the detail sheet for a row and moves focus to its heading.
+   * @param row The row.
+   * @param trigger The control that opened it, which gets focus back on close.
+   */
+  openDetail(row: T, trigger: HTMLElement | null = null): void {
+    this.detailRow = row;
+    this.detailTrigger = trigger;
+    this.cdr.markForCheck();
+    afterNextRender(() => this.detailHeading?.nativeElement.focus(), {injector: this.injector});
+  }
+
+  /** Plays the detail sheet's exit, then unmounts it. */
+  async closeDetail(): Promise<void> {
+    await this.detailSheet?.startClosing();
+    this.onDetailDismissed();
+  }
+
+  /** Clears the detail sheet once it is gone and returns focus to the control that opened it. */
+  onDetailDismissed(): void {
+    if (this.detailRow === null) return;
+    this.detailRow = null;
+    const trigger = this.detailTrigger;
+    this.detailTrigger = null;
+    this.cdr.markForCheck();
+    trigger?.focus();
+  }
+
+  /**
+   * Runs an action from the detail sheet. The sheet closes first, so an action that opens a
+   * modal or navigates does not do so underneath it.
+   */
+  async runDetailAction(action: MnTableRowAction<T>, row: T): Promise<void> {
+    if (this.isRowActionDisabled(action, row)) return;
+    await this.closeDetail();
+    action.run(row);
+  }
+
+  /**
+   * The text a composed row shows for a string column: its `cellSm` when it has one (the short
+   * form the app already wrote for narrow screens), else the cell itself.
+   */
+  rowCellText(column: ColumnDefinition<T>, row: T): string {
+    if (column.cellSm && typeof column.cellSm.cell === 'function') return column.cellSm.cell(row);
+    return this.getCellValue(column, row);
+  }
+
+  /** The template a composed row renders for a column, preferring `cellSm`; null for a string column. */
+  rowCellTemplate(column: ColumnDefinition<T>): TemplateRef<unknown> | null {
+    if (column.cellSm) return this.isTemplateRef(column.cellSm.cell) ? column.cellSm.cell : null;
+    return this.isTemplateRef(column.cell) ? column.cell : null;
+  }
+
+  /**
+   * A second-line value. A bare figure gets its column name in front ("Banen 3"): with no
+   * header above it, "3" alone says nothing.
+   */
+  rowMetaText(column: ColumnDefinition<T>, row: T): string {
+    const value = this.rowCellText(column, row);
+    if (!value.trim() || !BARE_FIGURE.test(value)) return value;
+    const header = this.headerText(column);
+    return header ? `${header} ${value}` : value;
+  }
+
+  /** A row's name as text, for accessible names: its title cell, else the selection label. */
+  rowLabel(row: T): string {
+    const title = this.rowLayout.title;
+    const text = title ? this.getCellValue(title, row) : '';
+    return text || this.defaultSelectionLabel(row) || '';
+  }
+
+  /** Accessible name of a row's ⋯ button. */
+  rowDetailsLabel(row: T): string {
+    return this.resolveLabel(undefined, 'mnCollection.rowDetails', 'Details for {{label}}')
+      .replace('{{label}}', this.rowLabel(row));
+  }
+
+  /** Columns a person can sort by, offered in the filter sheet once the header row is gone. */
+  get sortableColumns(): ColumnDefinition<T>[] {
+    return this.dataSource.columns.filter(c => this.isSortable(c));
+  }
+
+  /**
+   * Whether the toolbar shows the filter button: below 640px, when there is a filter to set or
+   * a sort to choose — the header row that held both is gone there.
+   */
+  get showsFilterButton(): boolean {
+    return this.filtersCollapsed && (this.hasColumnFilters || this.sortableColumns.length > 0);
+  }
+
+  /** How many column filters are set, shown as a count on the filter button. */
+  get activeFilterCount(): number {
+    return this.activeColumnFilters.length;
+  }
+
+  /**
+   * Title of the small-screen sheet and its button: "Filters" when there is something to filter,
+   * "Sort by" when the sheet only holds the sort choice — a funnel over a sheet with no filter in
+   * it promises something the sheet does not have.
+   */
+  get filterSheetLabel(): string {
+    return this.hasColumnFilters ? this.filtersButtonLabel : this.sortByLabel;
+  }
+
+  /** Accessible name of the icon-only filter button, with the active count when there is one. */
+  get filtersButtonAriaLabel(): string {
+    const count = this.activeFilterCount;
+    return count > 0 ? `${this.filterSheetLabel} (${count})` : this.filterSheetLabel;
+  }
+
+  /** Label of the sort select in the filter sheet. */
+  get sortByLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.sortBy', 'Sort by');
+  }
+
+  /** The sort select's "no sort" option. */
+  get sortDefaultLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.sortDefault', 'Default order');
+  }
+
+  /** The current sort direction in words, shown on the chosen column's direction button. */
+  get sortDirectionLabel(): string {
+    return this.currentSort?.direction === 'desc'
+      ? this.resolveLabel(undefined, 'mnCollection.sortDescending', 'Descending')
+      : this.resolveLabel(undefined, 'mnCollection.sortAscending', 'Ascending');
+  }
+
+  /** Accessible name of the direction button: what it shows and that a press flips it. */
+  get sortDirectionButtonLabel(): string {
+    return this.resolveLabel(undefined, 'mnCollection.sortDirection', '{{direction}}, tap to reverse')
+      .replace('{{direction}}', this.sortDirectionLabel);
+  }
+
+  /** Flips the current sort between ascending and descending. */
+  toggleSortDirection(): void {
+    if (!this.currentSort) return;
+    this.onSortDirection(this.currentSort.direction === 'desc' ? 'asc' : 'desc');
+  }
+
+  /**
+   * Sorts by a column chosen in the filter sheet, exactly as a header click would. A newly
+   * chosen column starts ascending; re-choosing the current one keeps its direction.
+   * @param columnKey The column, or empty for the default order.
+   */
+  onSortColumn(columnKey: string): void {
+    if (!columnKey) {
+      this.applySort(null);
+    } else {
+      const direction = this.currentSort?.columnKey === columnKey ? this.currentSort.direction : 'asc';
+      this.applySort({columnKey, direction});
+    }
+  }
+
+  /**
+   * Flips the direction of the current sort from the sheet's switch.
+   * @param direction The value the switch emitted.
+   */
+  onSortDirection(direction: string): void {
+    if (!this.currentSort) return;
+    this.applySort({columnKey: this.currentSort.columnKey, direction: direction === 'desc' ? 'desc' : 'asc'});
+  }
+
+  /** Sets the sort, tells the consumer and re-sorts, as a header click does. */
+  private applySort(sort: SortState | null): void {
+    this.currentSort = sort;
+    this.sortChange.emit(this.currentSort);
+    this.applyFilter(false);
+    this.cdr.markForCheck();
+  }
 
   protected override readonly componentName = 'MnTable';
 
@@ -296,7 +607,14 @@ export class MnTable<T = object>
     const collapsed = this.isFilterViewport();
     if (collapsed === this.filtersCollapsed) return;
     this.filtersCollapsed = collapsed;
-    if (!collapsed) this.filtersPanelOpen = false;
+    if (!collapsed) {
+      this.filtersPanelOpen = false;
+      // The wide table shows every column, so the detail sheet has nothing left to add.
+      this.detailRow = null;
+      this.detailTrigger = null;
+    }
+    // Composed rows and grid rows differ in height; the floor measured for one does not fit the other.
+    this.invalidatePageHeight();
     if (reflow) this.cdr.markForCheck();
   }
 
@@ -413,7 +731,7 @@ export class MnTable<T = object>
     // the guards below make it a no-op until real rows are on screen, and the
     // pinned widths then stop it from measuring again.
     afterEveryRender(() => {
-      if (this.layoutMode !== 'stable') return;
+      if (this.layoutMode !== 'stable' || this.rowMode) return;
       if (this.widthsPinned || this.isLoadingState) return;
       if (this.paginatedItems.length === 0) return;
       this.pinColumnWidths();
@@ -700,7 +1018,7 @@ export class MnTable<T = object>
 
   // ── Row actions ──
 
-  /** The actions visible for a given row — those whose `hidden(row)` is not true. */
+  /** The actions visible for a given row — those whose `hidden(row)` is not true. Shared by the wide table's buttons, the detail sheet and a modal's ⋯ menu. */
   visibleRowActions(column: ColumnDefinition<T>, row: T): MnTableRowAction<T>[] {
     return (column.actions ?? []).filter(action => !(action.hidden?.(row) ?? false));
   }
@@ -722,19 +1040,6 @@ export class MnTable<T = object>
   /** Whether a row has any visible actions at all; when false its cell is left empty. */
   hasRowActions(column: ColumnDefinition<T>, row: T): boolean {
     return this.visibleRowActions(column, row).length > 0;
-  }
-
-  /**
-   * Whether a row's actions fold into the ⋯ menu below 450px. They do unless the row has
-   * exactly one visible action that renders as a bare icon: that button is narrower than the
-   * ⋯ trigger it would hide behind, so collapsing it only puts a second tap in front of the
-   * one command the row has.
-   */
-  collapsesRowActions(column: ColumnDefinition<T>, row: T): boolean {
-    const visible = this.visibleRowActions(column, row);
-    if (visible.length !== 1) return true;
-    const [only] = visible;
-    return this.showActionLabel(column, only, row);
   }
 
   /**

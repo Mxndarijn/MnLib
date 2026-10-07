@@ -109,8 +109,8 @@ export type MnRowValue<T, V> = V | ((row: T) => V);
 /**
  * A per-row command rendered in an actions column (see {@link ColumnBase.actions}).
  * Unlike a cell it carries no display value — choosing it invokes {@link run} with the
- * row. The table renders actions inline as buttons and collapses them into a ⋯ menu
- * (mn-dropdown) once the table is narrower than 450px.
+ * row. The table renders actions inline as buttons; below 640px they move into the sheet a
+ * tap on the row opens (a ⋯ menu inside a modal).
  */
 export type MnTableRowAction<T> = {
   /** Visible label. Falls back to `labelKey`'s resolved text when omitted. */
@@ -155,6 +155,18 @@ export type MnTableRowAction<T> = {
 };
 
 // ── Column Definition ──
+/**
+ * Where a column goes once the table is narrower than 640px and renders each row as a
+ * composed line instead of a grid (see {@link ColumnBase.mobile}):
+ * - `'leading'` — a small block before the title (a rank, a thumbnail);
+ * - `'title'` — the row's name, up to two lines;
+ * - `'meta'` — the quiet second line under the title;
+ * - `'trailing'` — the value at the right edge, the one you compare down the list;
+ * - `'sheet'` — only in the bottom sheet a tap on the row opens;
+ * - `'hidden'` — nowhere on a phone.
+ */
+export type MnColumnMobileSlot = 'leading' | 'title' | 'meta' | 'trailing' | 'sheet' | 'hidden';
+
 /** Everything about a column that is independent of filtering. */
 export type ColumnBase<T> = {
   key: string;
@@ -168,9 +180,10 @@ export type ColumnBase<T> = {
    */
   cell?: ((row: T) => string) | TemplateRef<unknown>;
   /**
-   * Turns this column into an actions column: per-row command buttons rendered inline,
-   * automatically collapsing into a ⋯ menu (mn-dropdown) once the table is narrower than
-   * 450px. When set, {@link cell} is ignored.
+   * Turns this column into an actions column: per-row command buttons rendered inline.
+   * Below 640px, where rows are composed instead of gridded, the actions move into the
+   * bottom sheet a tap on the row opens (into a ⋯ menu inside a modal, where a second
+   * sheet would stack). When set, {@link cell} is ignored.
    */
   actions?: MnTableRowAction<T>[];
   /**
@@ -192,6 +205,13 @@ export type ColumnBase<T> = {
   width?: string;
   align?: 'left' | 'center' | 'right';
   hiddenBelow?: 'sm' | 'md' | 'lg';
+  /**
+   * Overrides the slot this column gets below 640px. Leave it unset: the table derives the
+   * slots from the config it already has (which columns a phone shows, {@link hiddenBelow},
+   * {@link width}, {@link sortType}, {@link align}). Set it only where that guess is wrong —
+   * a date that comes first but is not the row's name, an image that should not be text.
+   */
+  mobile?: MnColumnMobileSlot;
   /** Customizes the loading-skeleton placeholder shown in this column's cells while data loads. */
   skeleton?: ColumnSkeleton;
 }

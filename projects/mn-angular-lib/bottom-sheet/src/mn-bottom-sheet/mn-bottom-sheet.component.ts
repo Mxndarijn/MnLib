@@ -12,6 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { MN_IN_BOTTOM_SHEET } from 'mn-angular-lib/core';
 
 /**
  * A viewport-anchored bottom sheet — the mobile presentation shared by the modal
@@ -42,6 +43,9 @@ import { NgClass } from '@angular/common';
   imports: [NgClass],
   templateUrl: './mn-bottom-sheet.component.html',
   styleUrl: './mn-bottom-sheet.component.css',
+  // Tells the projected content it is already in a sheet, so a select inside opens a dropdown
+  // rather than a second sheet on top of this one.
+  providers: [{ provide: MN_IN_BOTTOM_SHEET, useValue: true }],
 })
 export class MnBottomSheet implements OnInit, OnDestroy {
   /** Tailwind's `sm` breakpoint — at or below this the swipe gesture is armed.

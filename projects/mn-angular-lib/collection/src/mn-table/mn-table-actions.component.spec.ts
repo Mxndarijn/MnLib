@@ -59,8 +59,8 @@ describe('MnTable row actions', () => {
   ): HTMLButtonElement[] {
     fixture.componentInstance.dataSource = makeDataSource(actions, overrides);
     fixture.detectChanges();
-    // Every action row also renders the collapsed ⋯ trigger (itself a button[mnButton]);
-    // exclude it so these assert on the inline action buttons.
+    // A dropdown's own trigger is also a button[mnButton]; exclude any so these assert on
+    // the inline action buttons only.
     return Array.from(
       fixture.nativeElement.querySelectorAll('tbody button[mnButton]:not(mn-lib-dropdown *)'),
     ) as HTMLButtonElement[];
@@ -191,17 +191,10 @@ describe('MnTable row actions', () => {
     expect(buttons[0].textContent?.trim()).toBe('Edit');
   });
 
-  it('keeps a lone icon-only action inline instead of folding it into the ⋯ menu', () => {
-    // One icon button is narrower than the ⋯ trigger; collapsing it would only add a tap.
-    renderActions([{ label: 'Edit', icon: LucidePencil.icon, run: () => undefined }], {
-      actionsInline: 'icon',
-    });
-
-    expect(fixture.nativeElement.querySelectorAll('tbody mn-lib-dropdown').length).toBe(0);
-  });
-
-  it('still offers the ⋯ menu when a row has more than one action', () => {
-    renderActions(
+  it('renders every action inline on the wide table, with no ⋯ menu', () => {
+    // The grid only renders at 640px and wider, where the buttons fit; below that the
+    // actions move into the row's detail sheet (covered by the row-mode spec).
+    const buttons = renderActions(
       [
         { label: 'Edit', icon: LucidePencil.icon, run: () => undefined },
         { label: 'Delete', icon: LucideTrash2.icon, run: () => undefined },
@@ -209,14 +202,8 @@ describe('MnTable row actions', () => {
       { actionsInline: 'icon' },
     );
 
-    expect(fixture.nativeElement.querySelectorAll('tbody mn-lib-dropdown').length).toBe(2);
-  });
-
-  it('still offers the ⋯ menu for a lone action that renders its text', () => {
-    // Text can be as wide as the row; only a bare icon is guaranteed to fit beside it.
-    renderActions([{ label: 'Deactivate', run: () => undefined }]);
-
-    expect(fixture.nativeElement.querySelectorAll('tbody mn-lib-dropdown').length).toBe(2);
+    expect(buttons.length).toBe(4);
+    expect(fixture.nativeElement.querySelectorAll('tbody mn-lib-dropdown').length).toBe(0);
   });
 
   it('invokes run with the row the action was chosen on', () => {

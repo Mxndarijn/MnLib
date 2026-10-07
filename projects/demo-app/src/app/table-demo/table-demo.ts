@@ -630,7 +630,7 @@ export class TableDemo implements OnInit {
       ],
     };
 
-    // A single action per row — still collapses into the ⋯ menu below 450px.
+    // A single action per row — inline when wide, in the row's sheet below 640px.
     this.singleActionDataSource = {
       dataRows: this.roleRows,
       getID: (row) => row.id,

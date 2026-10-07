@@ -39,7 +39,7 @@ import { MnButton } from 'mn-angular-lib/button';
 import { MnBottomSheet } from 'mn-angular-lib/bottom-sheet';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { MN_HAPTICS } from 'mn-angular-lib/modal-core';
-import { MnLanguageService } from 'mn-angular-lib/core';
+import { MN_IN_MODAL, MnLanguageService } from 'mn-angular-lib/core';
 import * as lucide from 'lucide';
 import { lucideIcons } from 'mn-angular-lib/core';
 
@@ -62,6 +62,9 @@ const ICONS = lucideIcons({ X: lucide.X });
   ],
   templateUrl: './mn-modal-shell.component.html',
   styleUrls: ['./mn-modal-shell.component.css'],
+  // Every body (form, wizard, custom component) renders in this view, so anything inside can
+  // tell it is in a modal — mn-table drops its own bottom sheet there.
+  providers: [{ provide: MN_IN_MODAL, useValue: true }],
 })
 export class MnModalShellComponent<TResult = unknown> implements OnInit, AfterViewInit, OnDestroy {
   /** Lucide icons the template renders. */

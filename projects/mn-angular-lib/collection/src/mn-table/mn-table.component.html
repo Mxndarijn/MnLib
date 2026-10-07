@@ -65,7 +65,7 @@
 
   <!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
        so an unsearchable table without toolbar templates emits no empty spacer. -->
-@if (isSearchable || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || (hasColumnFilters && filtersCollapsed)) {
+@if (isSearchable || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || showsFilterButton) {
   <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
     <!-- The left slot only when it has content: an empty one still took a flex gap, which
          pushed the search 8px in from the page edge. ml-auto keeps the search on the right. -->
@@ -78,45 +78,59 @@
     }
     <div
       class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[420px]:ml-auto @min-[560px]:flex-none @min-[560px]:w-auto">
-    @if (isSearchable) {
-      <!-- Enter must not submit a surrounding form: the search box belongs to the
-           table's chrome, not to whatever form the table happens to sit in. -->
-      <mn-lib-input-field
-        (keydown.enter)="$event.preventDefault()"
-        class="w-full @min-[420px]:flex-1 @min-[560px]:flex-none @min-[560px]:min-w-64"
-        [props]="{
-            id: 'mn-table-search',
-            type: 'search',
-            label: '',
-            ariaLabel: searchPlaceholderLabel,
-            placeholder: searchPlaceholderLabel,
-            size: 'sm',
-            borderRadius: 'md',
-            fullWidth: true
-          }"
-        [ngModel]="searchValue"
-        (ngModelChange)="onSearch($event)"
-      ></mn-lib-input-field>
+    <!-- Search and the filter button share one row: two full-width bars stacked above the
+         first row pushed the content a whole screen down on a phone. -->
+    @if (isSearchable || showsFilterButton) {
+      <div class="flex items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none">
+        @if (isSearchable) {
+          <!-- Enter must not submit a surrounding form: the search box belongs to the
+               table's chrome, not to whatever form the table happens to sit in. -->
+          <mn-lib-input-field
+            (keydown.enter)="$event.preventDefault()"
+            class="min-w-0 flex-1 @min-[560px]:flex-none @min-[560px]:min-w-64"
+            [props]="{
+                id: 'mn-table-search',
+                type: 'search',
+                label: '',
+                ariaLabel: searchPlaceholderLabel,
+                placeholder: searchPlaceholderLabel,
+                size: 'sm',
+                borderRadius: 'md',
+                fullWidth: true
+              }"
+            [ngModel]="searchValue"
+            (ngModelChange)="onSearch($event)"
+          ></mn-lib-input-field>
+        }
+        <!-- Below 640px the header row with its sort buttons and the inline filter row are
+             gone; this one button opens both, with a count while filters are set. -->
+        @if (showsFilterButton) {
+          <button
+            type="button"
+            mnButton
+            [data]="{ variant: 'outline', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
+            class="shrink-0 gap-1.5 px-2.5"
+            [class.ml-auto]="!isSearchable"
+            [attr.aria-label]="filtersButtonAriaLabel"
+            [attr.title]="filterSheetLabel"
+            [attr.aria-expanded]="filtersPanelOpen"
+            aria-controls="mn-table-filters-panel"
+            (click)="openFiltersPanel()"
+          >
+            <svg [lucideIcon]="icons.Funnel" [size]="17"></svg>
+            <!-- The count sits inside the button: a badge hanging off its corner reached past the
+                 table's right edge and gave a container that clips or scrolls a sideways scroll. -->
+            @if (activeFilterCount > 0) {
+              <span class="text-sm font-semibold leading-none tabular-nums" aria-hidden="true">{{ activeFilterCount }}</span>
+            }
+          </button>
+        }
+      </div>
     }
     @if (dataSource.toolbarRightTemplate) {
       <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
         <ng-container [ngTemplateOutlet]="dataSource.toolbarRightTemplate"></ng-container>
       </div>
-    }
-    <!-- Small-screen filter toggle: replaces the inline per-column filter row below 640px -->
-    @if (hasColumnFilters && filtersCollapsed) {
-      <button
-        type="button"
-        mnButton
-        [data]="{ variant: 'outline', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
-        class="w-full @min-[420px]:w-auto gap-1.5"
-        [attr.aria-expanded]="filtersPanelOpen"
-        aria-controls="mn-table-filters-panel"
-        (click)="openFiltersPanel()"
-      >
-        <svg [lucideIcon]="icons.Funnel" [size]="15"></svg>
-        <span>{{ filtersButtonLabel }}</span>
-      </button>
     }
   </div>
 </div>
@@ -124,16 +138,75 @@
 
 <!-- Small-screen filters: full-width fields decoupled from column widths, presented
      as a bottom sheet so they overlay rather than push the table down. -->
-@if (hasColumnFilters && filtersCollapsed && filtersPanelOpen) {
+@if (showsFilterButton && filtersPanelOpen) {
   <mn-bottom-sheet
     #filtersSheet
     (dismiss)="filtersPanelOpen = false"
-    [ariaLabel]="filtersButtonLabel"
+    [ariaLabel]="filterSheetLabel"
     [growWithKeyboard]="true"
     [maxHeightVh]="80"
   >
     <div id="mn-table-filters-panel" class="flex flex-col gap-3 px-4 pb-4">
-      <span class="text-base font-semibold text-base-content">{{ filtersButtonLabel }}</span>
+      <span class="text-base font-semibold text-base-content">{{ filterSheetLabel }}</span>
+      <!-- Sorting lives here below 640px: the header row whose buttons sorted is not rendered.
+           The choices are inline radios, not a select: a select opens its own bottom sheet on a
+           phone, which stacked a second sheet on this one and cut its list off. One row per
+           column, the direction as a separate switch once a column is picked. -->
+      @if (sortableColumns.length > 0) {
+        <fieldset class="m-0 flex flex-col gap-2 border-0 p-0">
+          <legend
+            class="mb-1 p-0 text-xs font-medium text-base-content/70"
+            [class.sr-only]="!hasColumnFilters"
+          >{{ sortByLabel }}</legend>
+          <div class="flex flex-col">
+            <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-base-content">
+              <input
+                type="radio"
+                class="size-[1.125rem] shrink-0 cursor-pointer appearance-none rounded-full border-2 border-base-content/40 bg-base-100 transition-[border] checked:border-[0.3125rem] checked:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                [name]="sortGroupName"
+                value=""
+                [checked]="!currentSort"
+                (change)="onSortColumn('')"
+              />
+              <span>{{ sortDefaultLabel }}</span>
+            </label>
+            @for (column of sortableColumns; track column.key) {
+              <!-- The chosen column carries its own direction button at the row's end: it sits
+                   inside a row that is already there, so picking a column never grows the sheet,
+                   and no greyed-out switch shows while the default order is chosen. -->
+              <div class="flex min-h-11 items-center gap-2">
+                <label class="flex min-w-0 flex-1 cursor-pointer items-center gap-3 self-stretch text-sm text-base-content">
+                  <input
+                    type="radio"
+                    class="size-[1.125rem] shrink-0 cursor-pointer appearance-none rounded-full border-2 border-base-content/40 bg-base-100 transition-[border] checked:border-[0.3125rem] checked:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    [name]="sortGroupName"
+                    [value]="column.key"
+                    [checked]="currentSort?.columnKey === column.key"
+                    (change)="onSortColumn(column.key)"
+                  />
+                  <span class="truncate">{{ headerText(column) || column.key }}</span>
+                </label>
+                @if (currentSort?.columnKey === column.key) {
+                  <button
+                    type="button"
+                    mnButton
+                    [data]="{ variant: 'outline', color: 'primary', size: 'sm', borderRadius: 'md', hover: true }"
+                    class="shrink-0 gap-1.5"
+                    [attr.aria-label]="sortDirectionButtonLabel"
+                    (click)="toggleSortDirection()"
+                  >
+                    <svg [lucideIcon]="currentSort?.direction === 'desc' ? icons.ArrowDown : icons.ArrowUp" [size]="15"></svg>
+                    <span>{{ sortDirectionLabel }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </fieldset>
+        @if (hasColumnFilters) {
+          <div class="border-t border-base-300" aria-hidden="true"></div>
+        }
+      }
       @for (column of dataSource.columns; track column.key) {
         @if (column.filterable) {
           <div class="flex flex-col gap-1">
@@ -147,8 +220,11 @@
                 {{ headerText(column) }}
               }
             </label>
+            <!-- The field template is declared outside the sheet, so it would inject from there;
+                 this injector tells its selects they are in a sheet (no second sheet on top). -->
             <ng-container
               [ngTemplateOutletContext]="{ $implicit: column, idScope: 'panel' }"
+              [ngTemplateOutletInjector]="inSheetInjector"
               [ngTemplateOutlet]="filterField"
             ></ng-container>
           </div>
@@ -181,6 +257,92 @@
   </mn-bottom-sheet>
 }
 
+<!-- Detail sheet (below 640px): the whole record of one row — title and right-side value as the
+     heading, every other column as a label/value list, then the actions. It is the only place a
+     column the composed row could not show, or an action, is reachable on a phone. -->
+@if (detailRow !== null) {
+  @let row = detailRow;
+  <mn-bottom-sheet
+    #detailSheet
+    (dismiss)="onDetailDismissed()"
+    [ariaLabel]="rowLabel(row)"
+    [maxHeightVh]="85"
+  >
+    <!-- Escape closes it: the sheet itself only handles the backdrop and the drag. Focus is
+         moved inside on open, so the key arrives here by bubbling. -->
+    <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+    <div class="flex flex-col gap-4 px-4 pb-4" (keydown.escape)="closeDetail()">
+      <div class="flex items-start gap-3">
+        <h2
+          #detailHeading
+          class="m-0 min-w-0 flex-1 text-lg font-semibold leading-snug text-base-content outline-none [overflow-wrap:anywhere]"
+          tabindex="-1"
+        >
+          @if (rowLayout.title; as title) {
+            <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: title, row: row }"></ng-container>
+          }
+        </h2>
+        @if (rowLayout.trailing; as trailing) {
+          <span class="shrink-0 text-lg font-semibold tabular-nums text-base-content">
+            <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: trailing, row: row }"></ng-container>
+          </span>
+        }
+      </div>
+      @if (detailColumns.length > 0) {
+        <dl class="m-0 grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] gap-x-3 gap-y-2.5 border-t border-base-300 pt-4 text-sm">
+          @for (column of detailColumns; track column.key) {
+            <dt class="text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
+              @if (isTemplateRef(column.header)) {
+                <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
+              } @else {
+                {{ headerText(column) }}
+              }
+            </dt>
+            <dd class="m-0 min-w-0 text-base-content [overflow-wrap:anywhere]">
+              <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: column, row: row }"></ng-container>
+            </dd>
+          }
+        </dl>
+      }
+      @if (rowHasAnyActions(row)) {
+        <div class="flex flex-col gap-2 border-t border-base-300 pt-4">
+          @for (column of rowLayout.actions; track column.key) {
+            @for (action of visibleRowActions(column, row); track $index) {
+              <button
+                mnButton
+                type="button"
+                [data]="{
+                  variant: 'outline',
+                  color: rowActionColor(action, row),
+                  size: 'md',
+                  borderRadius: 'md',
+                  hover: true,
+                  disabled: isRowActionDisabled(action, row)
+                }"
+                class="w-full gap-2"
+                [attr.aria-disabled]="isRowActionDisabled(action, row) || null"
+                (click)="runDetailAction(action, row)"
+              >
+                @let icon = rowActionIcon(action, row);
+                @if (icon) {
+                  <span class="inline-flex shrink-0 items-center">
+                    @if (isTemplateRef(icon)) {
+                      <ng-container [ngTemplateOutlet]="icon"></ng-container>
+                    } @else {
+                      <svg [lucideIcon]="$any(icon)" [size]="17"></svg>
+                    }
+                  </span>
+                }
+                <span>{{ rowActionLabel(action, row) }}</span>
+              </button>
+            }
+          }
+        </div>
+      }
+    </div>
+  </mn-bottom-sheet>
+}
+
 <!-- Announces loading. The skeletons are aria-hidden, so without this a screen reader hears
      nothing while rows load. The region stays in the DOM and only its text changes, which is
      what makes assistive tech read it; one inserted with its text already set is often missed. -->
@@ -190,6 +352,98 @@
   <div #collectionBody [attr.aria-busy]="isLoadingState || null" [attr.aria-label]="tableRegionLabel" [style.min-height.px]="bodyMinHeight"
      class="overflow-x-auto"
      role="region">
+  @if (rowMode) {
+  <!-- Below 640px every row is a composed line (see resolveRowLayout): the columns that
+       would not fit as cells become a title, a second line and a value on the right, and
+       the rest waits in the detail sheet a tap opens. A list, not a table: there are no
+       columns left for a screen reader to navigate. -->
+  <ul class="m-0 list-none p-0">
+    @if (isLoadingState) {
+      @for (_ of skeletonRows; track $index) {
+        <li aria-hidden="true" class="flex items-center gap-3 border-b border-base-300 bg-base-100 px-2 py-3">
+          <div class="flex flex-1 flex-col gap-2">
+            <mn-skeleton [data]="{ shape: 'text', width: '60%' }"></mn-skeleton>
+            <mn-skeleton [data]="{ shape: 'text', width: '40%', height: '0.75rem' }"></mn-skeleton>
+          </div>
+        </li>
+      }
+    } @else if (isErrorState) {
+      <li class="bg-base-100 py-8 text-center text-xs">
+        <ng-container [ngTemplateOutlet]="errorContent"></ng-container>
+      </li>
+    } @else {
+      @if (filteredItems.length === 0) {
+        <li class="bg-base-100 text-center text-xs">
+          <ng-container [ngTemplateOutlet]="emptyContent"></ng-container>
+        </li>
+      }
+      @for (row of paginatedItems; track trackByID($index, row)) {
+        @let tap = rowTap(row);
+        <li
+          class="flex items-stretch border-b border-base-300 bg-base-100"
+          [ngClass]="{ 'bg-primary/10': isSelected(row) }"
+        >
+          @if (hasSelection) {
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+            <div class="flex shrink-0 items-center pl-2" (click)="$event.stopPropagation()">
+              <mn-lib-checkbox
+                (checkedChange)="toggle(row)"
+                [checked]="isSelected(row)"
+                [props]="{ id: 'mn-table-row-' + $index, size: 'sm' }"
+              ></mn-lib-checkbox>
+            </div>
+          }
+          @if (tap === 'detail' || tap === 'click') {
+            <button
+              type="button"
+              class="flex min-w-0 flex-1 cursor-pointer items-start gap-3 px-2 py-3 text-left transition-colors duration-150 hover:bg-base-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+              [attr.aria-haspopup]="tap === 'detail' ? 'dialog' : null"
+              (click)="onRowTap(row, $event)"
+            >
+              <ng-container [ngTemplateOutlet]="rowBody" [ngTemplateOutletContext]="{ $implicit: row, chevron: true }"></ng-container>
+            </button>
+          } @else {
+            <!-- A selection row toggles on a click anywhere, as the wide table's row does; the
+                 checkbox is its keyboard control, so this area needs no focus of its own. -->
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+            <div
+              class="flex min-w-0 flex-1 items-start gap-3 px-2 py-3"
+              [class.cursor-pointer]="tap === 'select'"
+              (click)="tap === 'select' && onRowClick(row)"
+            >
+              <ng-container [ngTemplateOutlet]="rowBody" [ngTemplateOutletContext]="{ $implicit: row, chevron: false }"></ng-container>
+            </div>
+          }
+          @if (showsRowMore(row)) {
+            <button
+              type="button"
+              class="flex w-11 shrink-0 cursor-pointer items-center justify-center text-base-content/70 transition-colors hover:bg-base-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+              aria-haspopup="dialog"
+              [attr.aria-label]="rowDetailsLabel(row)"
+              (click)="openDetail(row, $any($event.currentTarget))"
+            >
+              <svg [lucideIcon]="icons.Ellipsis" [size]="18"></svg>
+            </button>
+          }
+          @if (showsRowMenu(row)) {
+            @for (column of rowLayout.actions; track column.key) {
+              @if (hasRowActions(column, row)) {
+                <div class="flex shrink-0 items-center pr-1">
+                  <mn-lib-dropdown [datasource]="{
+                    id: actionsDropdownId(column, row),
+                    actions: rowDropdownActions(column, row),
+                    menuLabel: headerText(column),
+                    size: 'sm'
+                  }"></mn-lib-dropdown>
+                </div>
+              }
+            }
+          }
+        </li>
+      }
+    }
+  </ul>
+  } @else {
   <table [class]="tableClasses">
     <thead>
       <tr class="bg-base-100">
@@ -312,13 +566,7 @@
           <!-- Error state -->
           <tr class="bg-base-100">
             <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
-              @if (dataSource.errorTemplate) {
-                <ng-container [ngTemplateOutlet]="dataSource.errorTemplate"></ng-container>
-              } @else {
-                <div class="flex flex-col items-center gap-2 text-error">
-                  <p class="text-sm">{{ dataSource.errorMessage }}</p>
-                </div>
-              }
+              <ng-container [ngTemplateOutlet]="errorContent"></ng-container>
             </td>
           </tr>
       } @else {
@@ -326,18 +574,7 @@
         @if (filteredItems.length === 0) {
           <tr class="bg-base-100">
             <td [attr.colspan]="totalColumnCount" class="text-center text-xs py-8">
-              @if (dataSource.emptyTemplate) {
-                <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
-              } @else {
-                <!-- The same look as a section's empty state, so a page with both reads as one:
-                     a faint icon over a medium line in the consumer's muted text colour. -->
-                <div class="flex flex-col items-center gap-3 py-16 text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
-                  @if (dataSource.emptyIcon !== null) {
-                    <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="26" class="opacity-30"></svg>
-                  }
-                  <p class="text-base font-medium">{{ dataSource.emptyMessage }}</p>
-                </div>
-              }
+              <ng-container [ngTemplateOutlet]="emptyContent"></ng-container>
             </td>
           </tr>
         }
@@ -377,35 +614,16 @@
                 class="text-xs px-2 py-1 @min-[640px]:px-4 @min-[640px]:py-2"
               >
                 @if (column.actions) {
-                  <!-- Actions column: inline command buttons that collapse into a ⋯ menu
-                       once the table is narrower than 450px (container query), for every
-                       row with actions. A row with no visible actions renders nothing.
-                       A row with a single icon-only action never collapses: one icon button
-                       is narrower than the ⋯ trigger it would hide behind, so folding it
-                       only costs a tap. -->
+                  <!-- Actions column: inline command buttons. The grid only renders at 640px
+                       and wider, where they fit; below that the actions move into the row's
+                       detail sheet. A row with no visible actions renders nothing. -->
                   @if (hasRowActions(column, row)) {
                   <div class="inline-flex items-center gap-1"
                        [class.justify-end]="(column.align ?? 'left') === 'right'">
-                    @if (collapsesRowActions(column, row)) {
-                      <span class="hidden items-center gap-1 @min-[450px]:inline-flex">
-                        <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
-                                      [ngTemplateOutlet]="actionButtons"></ng-container>
-                      </span>
-                      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
-                      <span class="@min-[450px]:hidden" (click)="$event.stopPropagation()">
-                        <mn-lib-dropdown [datasource]="{
-                          id: actionsDropdownId(column, row),
-                          actions: rowDropdownActions(column, row),
-                          menuLabel: headerText(column),
-                          size: 'sm'
-                        }"></mn-lib-dropdown>
-                      </span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1">
-                        <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
-                                      [ngTemplateOutlet]="actionButtons"></ng-container>
-                      </span>
-                    }
+                    <span class="inline-flex items-center gap-1">
+                      <ng-container [ngTemplateOutletContext]="{ column: column, row: row }"
+                                    [ngTemplateOutlet]="actionButtons"></ng-container>
+                    </span>
                   </div>
                   }
                 } @else if (column.cellSm) {
@@ -443,6 +661,7 @@
       }
     </tbody>
   </table>
+  }
 </div>
 
 <!-- Load more + pagination -->
@@ -539,8 +758,90 @@
   }
 </ng-template>
 
-<!-- Inline action buttons for an actions column, shared by the wide-table layout and
-     (implicitly) mirrored by the ⋯ menu below 450px. -->
+<!-- One composed row (below 640px): the leading block, the title (two lines at most) over the
+     second line, the right-side value, and a chevron when a tap opens something. The slots
+     come from rowLayout; a column renders its cellSm form here when it has one. -->
+<ng-template #rowBody let-row let-chevron="chevron">
+  @let layout = rowLayout;
+  @if (layout.leading; as leading) {
+    <span class="flex h-8 min-w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-sm font-semibold tabular-nums text-primary">
+      <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: leading, row: row }"></ng-container>
+    </span>
+  }
+  <span class="flex min-w-0 flex-1 flex-col gap-1">
+    @if (layout.title; as title) {
+      <span class="line-clamp-2 text-sm font-semibold leading-snug text-base-content [overflow-wrap:anywhere]">
+        <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: title, row: row }"></ng-container>
+      </span>
+    }
+    @if (layout.meta.length > 0) {
+      <span class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
+        @for (column of layout.meta; track column.key) {
+          <span class="min-w-0 max-w-full truncate">
+            <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: column, row: row, meta: true }"></ng-container>
+          </span>
+        }
+      </span>
+    }
+  </span>
+  @if (layout.trailing; as trailing) {
+    <span class="max-w-[40%] shrink-0 text-right text-sm font-semibold tabular-nums text-base-content">
+      <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: trailing, row: row }"></ng-container>
+    </span>
+  }
+  @if (chevron) {
+    <svg [lucideIcon]="icons.ChevronRight" [size]="16" aria-hidden="true" class="mt-0.5 shrink-0 opacity-50"></svg>
+  }
+</ng-template>
+
+<!-- A cell as a composed row shows it: cellSm first, a bare figure on the second line with its
+     column name in front. -->
+<ng-template #rowCell let-column let-row="row" let-meta="meta">
+  @let template = rowCellTemplate(column);
+  @if (template) {
+    <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }" [ngTemplateOutlet]="template"></ng-container>
+  } @else {
+    {{ meta ? rowMetaText(column, row) : rowCellText(column, row) }}
+  }
+</ng-template>
+
+<!-- A cell in full, as the wide table shows it: the detail sheet is where the long form belongs. -->
+<ng-template #fullCell let-column let-row="row">
+  @if (isTemplateRef(column.cell)) {
+    <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }" [ngTemplateOutlet]="$any(column.cell)"></ng-container>
+  } @else {
+    {{ getCellValue(column, row) }}
+  }
+</ng-template>
+
+<!-- Empty and error content, shared by the grid and the composed rows. -->
+<ng-template #emptyContent>
+  @if (dataSource.emptyTemplate) {
+    <ng-container [ngTemplateOutlet]="dataSource.emptyTemplate"></ng-container>
+  } @else {
+    <!-- The same look as a section's empty state, so a page with both reads as one:
+         a faint icon over a medium line in the consumer's muted text colour. -->
+    <div class="flex flex-col items-center gap-3 py-16 text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
+      @if (dataSource.emptyIcon !== null) {
+        <svg [lucideIcon]="dataSource.emptyIcon ?? defaultEmptyIcon" [size]="26" class="opacity-30"></svg>
+      }
+      <p class="text-base font-medium">{{ dataSource.emptyMessage }}</p>
+    </div>
+  }
+</ng-template>
+
+<ng-template #errorContent>
+  @if (dataSource.errorTemplate) {
+    <ng-container [ngTemplateOutlet]="dataSource.errorTemplate"></ng-container>
+  } @else {
+    <div class="flex flex-col items-center gap-2 text-error">
+      <p class="text-sm">{{ dataSource.errorMessage }}</p>
+    </div>
+  }
+</ng-template>
+
+<!-- Inline action buttons for an actions column on the wide table. Below 640px the same
+     actions render in the detail sheet (or a modal's ⋯ menu). -->
 <ng-template #actionButtons let-column="column" let-row="row">
   <!-- A placeholder (a hidden keepSlot action) is the same button, invisible and inert:
        it holds the column so the actions after it line up with the rows above. -->
