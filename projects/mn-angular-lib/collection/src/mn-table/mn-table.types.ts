@@ -212,6 +212,13 @@ export type ColumnBase<T> = {
    * a date that comes first but is not the row's name, an image that should not be text.
    */
   mobile?: MnColumnMobileSlot;
+  /**
+   * Whether this row has no value for the column. Below 640px an empty value is left off the
+   * composed row and the detail sheet, label included. A string cell needs nothing: a blank or
+   * lone-dash value is caught already. Set it on a template cell, whose markup the table cannot
+   * read, when that template draws a placeholder ("-") for "nothing".
+   */
+  isEmpty?: (row: T) => boolean;
   /** Customizes the loading-skeleton placeholder shown in this column's cells while data loads. */
   skeleton?: ColumnSkeleton;
 }

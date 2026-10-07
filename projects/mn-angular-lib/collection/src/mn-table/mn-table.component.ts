@@ -286,11 +286,13 @@ export class MnTable<T = object>
   }
 
   /**
-   * Whether a string cell is empty for this row: blank, or the lone dash an app writes for
-   * "nothing". Such a value is left off the composed row ("Beschrijving -" said nothing); the
-   * sheet still lists it. A template cell is never judged empty — its markup is the app's.
+   * Whether a cell is empty for this row: what the column's `isEmpty` says, else for a string
+   * cell blank or the lone dash an app writes for "nothing". Such a value is left off the
+   * composed row and the detail sheet ("Beschrijving: -" said nothing). A template cell without
+   * `isEmpty` is never judged empty — its markup is the app's.
    */
   rowValueEmpty(column: ColumnDefinition<T>, row: T): boolean {
+    if (column.isEmpty) return column.isEmpty(row);
     if (this.rowCellTemplate(column)) return false;
     return EMPTY_VALUE.test(this.rowCellText(column, row));
   }

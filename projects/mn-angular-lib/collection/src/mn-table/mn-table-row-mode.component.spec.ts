@@ -270,6 +270,21 @@ describe('MnTable row mode (below 640px)', () => {
       // Alan Turing has no notes: the Notes row is left out.
       expect(terms).not.toContain('Notes');
     });
+    it('leaves a value the column calls empty out of the sheet, label and all', () => {
+      // What a template column does: its markup draws a placeholder the table cannot read.
+      const source = dataSource();
+      source.columns = source.columns.map((c) => c.key === 'notes' ? { ...c, isEmpty: (m: Member) => m.id === '1' } : c);
+      render(source);
+      const termsFor = (index: number) => {
+        (rows()[index].querySelector('button[aria-haspopup="dialog"]') as HTMLButtonElement).click();
+        fixture.detectChanges();
+        return Array.from(sheet()!.querySelectorAll('dt')).map((dt) => dt.textContent?.trim());
+      };
+      // Ada's notes would read "Keyholder"; the column says there is nothing, so no Notes row.
+      const terms = termsFor(0);
+      expect(terms).not.toContain('Notes');
+      expect(terms).toContain('Lanes');
+    });
 
     it('offers sorting in the filter sheet, since the header row is gone', () => {
       render(dataSource());
