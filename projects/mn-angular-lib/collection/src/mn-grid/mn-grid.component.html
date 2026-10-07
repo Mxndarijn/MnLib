@@ -140,6 +140,8 @@
 </div>
 
 <!-- Load more + pagination -->
+<!-- No strip for a single page: "Page 1 of 1" under a short list is chrome with nothing to do. -->
+@if (totalPages > 1 || showLoadMore || isLoadingState) {
 <mn-collection-pagination
   (loadMore)="loadMoreRows()"
   (pageChange)="goToPage($event)"
@@ -157,3 +159,4 @@
   [visiblePages]="visiblePages"
   idPrefix="mn-grid"
 ></mn-collection-pagination>
+}

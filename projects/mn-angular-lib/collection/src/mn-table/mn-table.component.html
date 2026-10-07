@@ -65,7 +65,7 @@
 
   <!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
        so an unsearchable table without toolbar templates emits no empty spacer. -->
-@if (isSearchable || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || showsFilterButton) {
+@if (showsSearch || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || showsFilterButton) {
   <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
     <!-- The left slot only when it has content: an empty one still took a flex gap, which
          pushed the search 8px in from the page edge. ml-auto keeps the search on the right. -->
@@ -80,9 +80,9 @@
       class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[420px]:ml-auto @min-[560px]:flex-none @min-[560px]:w-auto">
     <!-- Search and the filter button share one row: two full-width bars stacked above the
          first row pushed the content a whole screen down on a phone. -->
-    @if (isSearchable || showsFilterButton) {
+    @if (showsSearch || showsFilterButton) {
       <div class="flex items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none">
-        @if (isSearchable) {
+        @if (showsSearch) {
           <!-- Enter must not submit a surrounding form: the search box belongs to the
                table's chrome, not to whatever form the table happens to sit in. -->
           <mn-lib-input-field
@@ -110,7 +110,7 @@
             mnButton
             [data]="{ variant: 'outline', color: 'primary', size: 'md', borderRadius: 'md', hover: true }"
             class="shrink-0 gap-1.5 px-2.5"
-            [class.ml-auto]="!isSearchable"
+            [class.ml-auto]="!showsSearch"
             [attr.aria-label]="filtersButtonAriaLabel"
             [attr.title]="filterSheetLabel"
             [attr.aria-expanded]="filtersPanelOpen"
@@ -282,25 +282,34 @@
             <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: title, row: row }"></ng-container>
           }
         </h2>
-        @if (rowLayout.trailing; as trailing) {
-          <span class="shrink-0 text-lg font-semibold tabular-nums text-base-content">
-            <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: trailing, row: row }"></ng-container>
+        @if (rowLayout.trailing && !rowValueEmpty(rowLayout.trailing, row)) {
+          @let trailing = rowLayout.trailing;
+          <span class="flex shrink-0 flex-col items-end gap-0.5 text-right">
+            @if (rowSlotLabel(trailing); as trailingLabel) {
+              <span class="text-xs text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">{{ trailingLabel }}</span>
+            }
+            <span class="text-lg font-semibold tabular-nums text-base-content">
+              <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: trailing, row: row }"></ng-container>
+            </span>
           </span>
         }
       </div>
       @if (detailColumns.length > 0) {
         <dl class="m-0 grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] gap-x-3 gap-y-2.5 border-t border-base-300 pt-4 text-sm">
           @for (column of detailColumns; track column.key) {
-            <dt class="text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
-              @if (isTemplateRef(column.header)) {
-                <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
-              } @else {
-                {{ headerText(column) }}
-              }
-            </dt>
-            <dd class="m-0 min-w-0 text-base-content [overflow-wrap:anywhere]">
-              <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: column, row: row }"></ng-container>
-            </dd>
+            <!-- An empty value or a lone dash says nothing here either ("Beschrijving: -"). -->
+            @if (!rowValueEmpty(column, row)) {
+              <dt class="text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
+                @if (isTemplateRef(column.header)) {
+                  <ng-container [ngTemplateOutlet]="$any(column.header)"></ng-container>
+                } @else {
+                  {{ headerText(column) }}
+                }
+              </dt>
+              <dd class="m-0 min-w-0 text-base-content [overflow-wrap:anywhere]">
+                <ng-container [ngTemplateOutlet]="fullCell" [ngTemplateOutletContext]="{ $implicit: column, row: row }"></ng-container>
+              </dd>
+            }
           }
         </dl>
       }
@@ -664,7 +673,8 @@
   }
 </div>
 
-<!-- Load more + pagination -->
+<!-- Load more + pagination (not for a single page below 640px, see showsPagination) -->
+@if (showsPagination) {
 <mn-collection-pagination
   (loadMore)="loadMoreRows()"
   (pageChange)="goToPage($event)"
@@ -682,6 +692,7 @@
   [visiblePages]="visiblePages"
   idPrefix="mn-table"
 ></mn-collection-pagination>
+}
 </div>
 
 <!-- Single source of truth for every filter control, reused by the inline header
@@ -774,34 +785,48 @@
         <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: title, row: row }"></ng-container>
       </span>
     }
-    @if (layout.meta.length > 0) {
+    @let meta = rowMeta(row);
+    @if (meta.length > 0) {
       <span class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">
-        @for (column of layout.meta; track column.key) {
+        @for (column of meta; track column.key) {
+          <!-- Bare values, no column names: on a 375px line a name like "Goedgekeurd door" took
+               half the room and cut off the value it described. Only the right side is labelled. -->
           <span class="min-w-0 max-w-full truncate">
-            <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: column, row: row, meta: true }"></ng-container>
+            <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: column, row: row }"></ng-container>
           </span>
         }
       </span>
     }
   </span>
   @if (layout.trailing; as trailing) {
-    <span class="max-w-[40%] shrink-0 text-right text-sm font-semibold tabular-nums text-base-content">
-      <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: trailing, row: row }"></ng-container>
-    </span>
+    @if (!rowValueEmpty(trailing, row)) {
+      <!-- The right-side value with its column name above it, small: "1-12-2023" or "535" alone
+           does not say whether it is a join date or a score. One line: a date that wrapped
+           ("7 oktober 2026 om / 21:00") doubled the row's height. Past 45% of the row the value
+           is cut short with an ellipsis rather than squeezing the title into two lines. -->
+      <span class="flex min-w-0 max-w-[45%] shrink-0 flex-col items-end gap-0.5 text-right">
+        @let trailingLabel = rowSlotLabel(trailing);
+        @if (trailingLabel) {
+          <span class="max-w-full truncate text-[0.6875rem] leading-tight text-(--color-base-content-muted,color-mix(in_oklab,var(--color-base-content)_65%,transparent))">{{ trailingLabel }}</span>
+        }
+        <span class="max-w-full truncate whitespace-nowrap text-sm font-semibold tabular-nums text-base-content">
+          <ng-container [ngTemplateOutlet]="rowCell" [ngTemplateOutletContext]="{ $implicit: trailing, row: row }"></ng-container>
+        </span>
+      </span>
+    }
   }
   @if (chevron) {
     <svg [lucideIcon]="icons.ChevronRight" [size]="16" aria-hidden="true" class="mt-0.5 shrink-0 opacity-50"></svg>
   }
 </ng-template>
 
-<!-- A cell as a composed row shows it: cellSm first, a bare figure on the second line with its
-     column name in front. -->
-<ng-template #rowCell let-column let-row="row" let-meta="meta">
+<!-- A cell as a composed row shows it: cellSm first. Its column name is the caller's (rowSlotLabel). -->
+<ng-template #rowCell let-column let-row="row">
   @let template = rowCellTemplate(column);
   @if (template) {
     <ng-container [ngTemplateOutletContext]="{ $implicit: row, data: row }" [ngTemplateOutlet]="template"></ng-container>
   } @else {
-    {{ meta ? rowMetaText(column, row) : rowCellText(column, row) }}
+    {{ rowCellText(column, row) }}
   }
 </ng-template>
 

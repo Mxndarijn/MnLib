@@ -86,6 +86,9 @@ describe('MnTable row mode (below 640px)', () => {
     fixture.componentInstance.dataSource = source;
     fixture.componentInstance.width = width;
     fixture.detectChanges();
+    // Re-measure once laid out, as a real resize would: the first measurement can run before
+    // the box has its final width.
+    window.dispatchEvent(new Event('resize'));
     fixture.detectChanges();
   }
 
@@ -143,11 +146,6 @@ describe('MnTable row mode (below 640px)', () => {
       expect(text).toContain('2019-03-03');
       // Hidden below lg: only in the sheet.
       expect(text).not.toContain('Keyholder');
-    });
-
-    it('puts the column name in front of a bare figure on the second line', () => {
-      render(dataSource({}, true));
-      expect(rows()[0].textContent).toContain('Lanes 3');
     });
 
     it('renders the grid again from 640px', () => {
@@ -219,6 +217,58 @@ describe('MnTable row mode (below 640px)', () => {
       source.columns = source.columns.filter((c) => c.key === 'name' || c.key === 'email');
       render(source);
       expect(rows()[0].querySelector('button')).toBeNull();
+    });
+
+    it('labels the right-side value with its column name', () => {
+      render(dataSource());
+      expect(rows()[0].textContent).toContain('Member since');
+    });
+
+    it('leaves an empty or dash value off the row', () => {
+      const source = dataSource({}, true);
+      source.dataRows = new BehaviorSubject<Member[]>([{ ...MEMBERS[0], lanes: '-' }, MEMBERS[1]]);
+      render(source);
+      expect(rows()[0].textContent).not.toContain('- ');
+      expect(rows()[0].querySelectorAll('.truncate').length).toBeLessThan(rows()[1].querySelectorAll('.truncate').length);
+    });
+
+    it('shows the full cell on a row, not the short cellSm form', () => {
+      const source = dataSource();
+      source.columns = source.columns.map((c) => c.key === 'name'
+        ? { ...c, cellSm: { below: 'sm' as const, cell: (m: Member) => m.name.slice(0, 3) } }
+        : c);
+      render(source);
+      expect(rows()[0].textContent).toContain('Ada Lovelace');
+    });
+
+    it('gives a row with its own click handler no ⋯ when it has no actions', () => {
+      const source = dataSource({ onRowClick: () => undefined });
+      source.columns = source.columns.filter((c) => !c.actions);
+      render(source);
+      expect(rows()[0].querySelector('button[aria-label^="Details for"]')).toBeNull();
+    });
+
+    it('hides search, the filter button and the pagination over a one-row list', () => {
+      const source = dataSource({ paginationMode: 'client-side-pagination', pageSize: 10, canSearch: true });
+      source.dataRows = new BehaviorSubject<Member[]>([MEMBERS[0]]);
+      render(source);
+      expect(fixture.nativeElement.querySelector('#mn-table-search')).toBeNull();
+      expect(fixture.nativeElement.querySelector('button[aria-controls="mn-table-filters-panel"]')).toBeNull();
+      expect(fixture.nativeElement.querySelector('mn-collection-pagination')).toBeNull();
+    });
+
+    it('keeps search over a longer list', () => {
+      render(dataSource({ canSearch: true }));
+      expect(fixture.nativeElement.querySelector('#mn-table-search')).not.toBeNull();
+    });
+
+    it('leaves an empty value out of the sheet', () => {
+      render(dataSource());
+      (rows()[1].querySelector('button[aria-haspopup="dialog"]') as HTMLButtonElement).click();
+      fixture.detectChanges();
+      const terms = Array.from(sheet()!.querySelectorAll('dt')).map((dt) => dt.textContent?.trim());
+      // Alan Turing has no notes: the Notes row is left out.
+      expect(terms).not.toContain('Notes');
     });
 
     it('offers sorting in the filter sheet, since the header row is gone', () => {

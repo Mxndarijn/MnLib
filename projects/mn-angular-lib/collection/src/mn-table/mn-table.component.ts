@@ -57,11 +57,12 @@ const ICONS = lucideIcons({
   X: lucide.X,
 });
 
+/** A string cell with nothing to say: blank, or a lone dash (hyphen, en or em dash). */
+const EMPTY_VALUE = /^\s*[-–—]?\s*$/;
+
 /** What tapping a composed row does: select it, run the consumer's handler, open the sheet, or nothing. */
 export type MnTableRowTap = 'select' | 'click' | 'detail' | 'none';
 
-/** A cell value made only of figures, which needs its column name to mean anything on its own. */
-const BARE_FIGURE = /^[\d\s.,:%+\-−]+$/;
 
 @Component({
   selector: 'mn-table',
@@ -207,10 +208,15 @@ export class MnTable<T = object>
     return 'none';
   }
 
-  /** Whether a row needs its own ⋯ button for the sheet, because a tap already does something else. */
+  /**
+   * Whether a row needs its own ⋯ button for the sheet, because a tap already does something
+   * else. A row that opens the consumer's own detail (`onRowClick`) gets one only for actions:
+   * a sheet with nothing but the same record next to that detail was two views of one row.
+   */
   showsRowMore(row: T): boolean {
     const tap = this.rowTap(row);
-    return (tap === 'select' || tap === 'click') && this.rowHasDetail(row);
+    if (tap === 'click') return !this.inModal && this.rowHasAnyActions(row);
+    return tap === 'select' && this.rowHasDetail(row);
   }
 
   /** Whether a row shows its actions as a ⋯ menu: inside a modal, where there is no sheet. */
@@ -266,29 +272,43 @@ export class MnTable<T = object>
   }
 
   /**
-   * The text a composed row shows for a string column: its `cellSm` when it has one (the short
-   * form the app already wrote for narrow screens), else the cell itself.
+   * The text a composed row shows for a string column: the full cell. Not `cellSm` — that is the
+   * short form an app wrote for a squeezed grid column (an e-mail cut to ten characters, a status
+   * reduced to an icon), and a composed row has the room the grid column lacked.
    */
   rowCellText(column: ColumnDefinition<T>, row: T): string {
-    if (column.cellSm && typeof column.cellSm.cell === 'function') return column.cellSm.cell(row);
     return this.getCellValue(column, row);
   }
 
-  /** The template a composed row renders for a column, preferring `cellSm`; null for a string column. */
+  /** The template a composed row renders for a column; null for a string column. */
   rowCellTemplate(column: ColumnDefinition<T>): TemplateRef<unknown> | null {
-    if (column.cellSm) return this.isTemplateRef(column.cellSm.cell) ? column.cellSm.cell : null;
     return this.isTemplateRef(column.cell) ? column.cell : null;
   }
 
   /**
-   * A second-line value. A bare figure gets its column name in front ("Banen 3"): with no
-   * header above it, "3" alone says nothing.
+   * Whether a string cell is empty for this row: blank, or the lone dash an app writes for
+   * "nothing". Such a value is left off the composed row ("Beschrijving -" said nothing); the
+   * sheet still lists it. A template cell is never judged empty — its markup is the app's.
    */
-  rowMetaText(column: ColumnDefinition<T>, row: T): string {
-    const value = this.rowCellText(column, row);
-    if (!value.trim() || !BARE_FIGURE.test(value)) return value;
-    const header = this.headerText(column);
-    return header ? `${header} ${value}` : value;
+  rowValueEmpty(column: ColumnDefinition<T>, row: T): boolean {
+    if (this.rowCellTemplate(column)) return false;
+    return EMPTY_VALUE.test(this.rowCellText(column, row));
+  }
+
+  /** The second-line columns that have something to show for this row. */
+  rowMeta(row: T): ColumnDefinition<T>[] {
+    return this.rowLayout.meta.filter(column => !this.rowValueEmpty(column, row));
+  }
+
+  /**
+   * The column name a composed row shows beside a second-line or right-side value: with no
+   * header row, "Lid", "1-12-2023" or "535" alone does not say what it is. Empty for a template
+   * cell — a badge or an icon carries its own meaning, and its markup is the app's.
+   */
+  rowSlotLabel(column: ColumnDefinition<T>): string {
+    // Templated values (an amount, a score) are labelled too: the label sits above them,
+    // clear of the app's markup.
+    return this.headerText(column);
   }
 
   /** A row's name as text, for accessible names: its title cell, else the selection label. */
@@ -311,10 +331,32 @@ export class MnTable<T = object>
 
   /**
    * Whether the toolbar shows the filter button: below 640px, when there is a filter to set or
-   * a sort to choose — the header row that held both is gone there.
+   * a sort to choose — the header row that held both is gone there. Not over an empty or
+   * one-row list, where there is nothing to narrow or order, unless a filter or sort is
+   * already set (then the button is how to undo it).
    */
   get showsFilterButton(): boolean {
-    return this.filtersCollapsed && (this.hasColumnFilters || this.sortableColumns.length > 0);
+    if (!this.filtersCollapsed || !(this.hasColumnFilters || this.sortableColumns.length > 0)) return false;
+    return this.totalItemCount > 1 || this.activeFilterCount > 0 || !!this.currentSort;
+  }
+
+  /**
+   * Whether the search field shows: as always on a wide table, but below 640px not over an empty
+   * or one-row list (there is nothing to find), unless a search is already typed or rows are
+   * still loading.
+   */
+  get showsSearch(): boolean {
+    if (!this.isSearchable) return false;
+    if (!this.rowMode) return true;
+    return this.isLoadingState || this.totalItemCount > 1 || !!this.searchValue;
+  }
+
+  /**
+   * Whether the pagination strip shows. Below 640px not for a single page: "Page 1 of 1" under
+   * an empty or short list is chrome with nothing to do. Above it the strip stays as it was.
+   */
+  get showsPagination(): boolean {
+    return !this.rowMode || this.totalPages > 1 || this.showLoadMore;
   }
 
   /** How many column filters are set, shown as a count on the filter button. */
