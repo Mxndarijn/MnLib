@@ -195,7 +195,7 @@
                     [attr.aria-label]="sortDirectionButtonLabel"
                     (click)="toggleSortDirection()"
                   >
-                    <svg [lucideIcon]="currentSort?.direction === 'desc' ? icons.ArrowDown : icons.ArrowUp" [size]="15"></svg>
+                    <svg [lucideIcon]="currentSort.direction === 'desc' ? icons.ArrowDown : icons.ArrowUp" [size]="15"></svg>
                     <span>{{ sortDirectionLabel }}</span>
                   </button>
                 }
