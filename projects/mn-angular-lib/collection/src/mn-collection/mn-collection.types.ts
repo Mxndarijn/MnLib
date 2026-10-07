@@ -147,6 +147,13 @@ export type MnCollectionDataSource<T> = {
   /** Options for the page-size selector dropdown. Defaults to [5, 10, 25, 50]. */
   pageSizeOptions?: number[];
 
+  /**
+   * The largest page mn-table's phone "Load more" may ask a `paginated` (server-side) consumer
+   * for. Each tap grows the page by the size it started at, up to this cap; past it the pager
+   * comes back. Defaults to 100, a common server limit. Client-side pagination has no cap.
+   */
+  maxPageSize?: number;
+
   /** Callback invoked when the user changes the page size via the dropdown. */
   onPageSizeChange?: (newSize: number) => void;
 

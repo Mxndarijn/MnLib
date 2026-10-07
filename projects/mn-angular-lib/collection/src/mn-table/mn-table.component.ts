@@ -358,7 +358,95 @@ export class MnTable<T = object>
    * an empty or short list is chrome with nothing to do. Above it the strip stays as it was.
    */
   get showsPagination(): boolean {
+    if (this.showsPhoneLoadMore) return false;
     return !this.rowMode || this.totalPages > 1 || this.showLoadMore;
+  }
+
+  /**
+   * Whether a paginated table offers "Load more" instead of the pager: below 640px, on the first
+   * page, while rows remain and the next size stays within {@link MnCollectionDataSource.maxPageSize}.
+   * A tap grows the page instead of appending the next one, so a consumer that reloads after an
+   * edit or a delete gets the whole visible list back rather than one page under stale rows.
+   */
+  get showsPhoneLoadMore(): boolean {
+    if (!this.rowMode || !this.isPaginated || this.currentPage !== 1) return false;
+    const clientSide = this.dataSource.paginationMode === 'client-side-pagination';
+    // A server-side consumer that cannot change its page size could never answer the tap.
+    if (!clientSide && !this.dataSource.onPageSizeChange) return false;
+    return this.phoneShownCount < this.totalItemCount && this.nextPhonePageSize() > this.phoneShownCount;
+  }
+
+  /**
+   * How many rows the phone list shows. A server-side consumer's rows, not the size asked for:
+   * a consumer that answers an older, bigger request last shows more than {@link pageSize}.
+   */
+  private get phoneShownCount(): number {
+    return this.dataSource.paginationMode === 'client-side-pagination'
+      ? Math.min(this.pageSize, this.totalItemCount)
+      : this.paginatedItems.length;
+  }
+
+  /** How far the phone list has grown, as "10 of 48". */
+  get phoneLoadedLabel(): string {
+    const shown = this.phoneShownCount;
+    const total = this.totalItemCount;
+    return this.lang.translateIfPresent('mnCollection.loadedCount', {shown, total}) ?? `${shown} of ${total}`;
+  }
+
+  /** The phone "Load more" button's label: the consumer's, the app's convention key, or English. */
+  get phoneLoadMoreLabel(): string {
+    return this.dataSource.labels?.loadMore ?? this.resolveLabel(undefined, 'mnCollection.loadMore', 'Load more');
+  }
+
+  /** A grown phone list has no pager to hold steady, so it keeps no full-page height floor. */
+  override get reservedPageHeight(): number {
+    return this.phoneLoadStep ? 0 : super.reservedPageHeight;
+  }
+
+  /**
+   * Grows the phone list by one step: a client-side table shows more of the rows it holds, a
+   * server-side one asks its consumer for a bigger first page. The rows on screen stay there
+   * while that loads ({@link phoneLoadingMore}); skeletons would throw the reader back to the top.
+   */
+  loadMorePhoneRows(): void {
+    if (!this.showsPhoneLoadMore || this.phoneLoadingMore) return;
+    if (!this.phoneLoadStep) this.phoneLoadStep = this.pageSize;
+    const size = this.nextPhonePageSize();
+    this.invalidatePageHeight();
+    this.pageSize = size;
+    if (this.dataSource.paginationMode === 'client-side-pagination') {
+      this.applyPagination();
+    } else {
+      this.phoneLoadingMore = true;
+      this.dataSource.onPageSizeChange?.(size);
+    }
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * The page size the next "Load more" asks for: one step more than the rows shown, capped for a
+   * server.
+   * @returns The next size; equal to the rows shown when the cap is reached.
+   */
+  private nextPhonePageSize(): number {
+    const step = this.phoneLoadStep || this.pageSize;
+    const shown = this.phoneShownCount;
+    const cap = this.dataSource.paginationMode === 'client-side-pagination'
+      ? Number.POSITIVE_INFINITY
+      : Math.max(this.dataSource.maxPageSize ?? MnTable.DEFAULT_MAX_PAGE_SIZE, shown);
+    return Math.min(shown + step, cap);
+  }
+
+  /** Fresh rows answer a "Load more": the button stops spinning. */
+  protected override onRowsChanged(): void {
+    super.onRowsChanged();
+    this.phoneLoadingMore = false;
+  }
+
+  /** A failed "Load more" shows the error, not a button that spins forever. */
+  override ngDoCheck(): void {
+    super.ngDoCheck();
+    if (this.phoneLoadingMore && this.isErrorState) this.phoneLoadingMore = false;
   }
 
   /** How many column filters are set, shown as a count on the filter button. */
@@ -460,6 +548,15 @@ export class MnTable<T = object>
    * and its footer is pinned over the bottom of the table.
    */
   private static readonly MOBILE_PAGE_SIZE = 10;
+
+  /** {@link MnCollectionDataSource.maxPageSize} when the consumer sets none. */
+  private static readonly DEFAULT_MAX_PAGE_SIZE = 100;
+
+  /** Rows one phone "Load more" tap adds: the page size before the first tap; 0 while not grown. */
+  private phoneLoadStep = 0;
+
+  /** Whether a phone "Load more" refetch is in flight: rows stay up and the button spins. */
+  protected phoneLoadingMore = false;
   /**
    * The component's own element, measured for every responsive decision. Typed via
    * the annotation, not `inject(ElementRef<HTMLElement>)` — that form is a generic
@@ -1208,6 +1305,12 @@ export class MnTable<T = object>
    * rendered rows update in every pagination mode (used at init and on window resize).
    */
   private applyResponsivePageSize(reflow: boolean): void {
+    // A phone list grown by "Load more" keeps its size while it stays a phone list: a phone fires
+    // resize whenever its address bar slides, and each one would throw the list back to 10 rows.
+    if (this.phoneLoadStep) {
+      if (this.isFilterViewport()) return;
+      this.phoneLoadStep = 0;
+    }
     const target = this.isMobileViewport()
       ? Math.min(this.desktopPageSize, MnTable.MOBILE_PAGE_SIZE)
       : this.desktopPageSize;
