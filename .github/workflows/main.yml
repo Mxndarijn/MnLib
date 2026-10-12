@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
@@ -55,6 +55,11 @@ jobs:
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
+      # Build ná de bump (versie zit in de dist), maar vóór commit/tag/push:
+      # een falende build maakt zo nooit een tag aan
+      - name: Build mn-angular-lib
+        run: npx ng build mn-angular-lib --configuration production
+
       # ---- Commit + tag aanmaken en pushen ----
       - name: Commit version bump and create tag
         run: |
@@ -64,13 +69,6 @@ jobs:
           git push origin HEAD:main
           git push origin --tags
 
-
-      # Build ná de bump
-      - name: Build mn-angular-lib
-        run: |
-          npx ng build mn-angular-lib --configuration production || \
-          npm run build --workspace=mn-angular-lib || \
-          npm run build:lib
       - name: Publish dist/mn-angular-lib to npm
         working-directory: dist/mn-angular-lib
         run: npm publish --access public
