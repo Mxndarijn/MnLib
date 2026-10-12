@@ -183,7 +183,8 @@ export class MnDropdown implements OnInit {
   /**
    * The command that takes focus once the opened menu has rendered: the first or last one,
    * or none when a desktop search box takes focus instead. Set by {@link open}, consumed by
-   * the panel and sheet queries the moment the menu appears.
+   * the panel and sheet queries the moment the menu appears, or by {@link open} itself when
+   * the panel is still mounted from a close that has not rendered yet.
    */
   private pendingFocus: 'first' | 'last' | null = null;
 
@@ -316,6 +317,9 @@ export class MnDropdown implements OnInit {
     // open the panel without an event, and under OnPush nothing else marks this view.
     this.isOpen = true;
     this.cdr.markForCheck();
+    // Reopened before the close rendered (Escape then Enter inside one frame): the panel never
+    // left, so no query setter fires to take the hand-off. Make it here instead.
+    if (this.movedPanel || this.sheetHost) this.focusPendingItem();
     if (this.isSheet) {
       // A sheet is anchored to the viewport, so it needs no trigger tracking — only a
       // scroll lock so the page behind it stays put.

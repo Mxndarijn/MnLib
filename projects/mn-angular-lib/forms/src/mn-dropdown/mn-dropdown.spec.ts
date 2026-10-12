@@ -349,6 +349,28 @@ describe('MnDropdown (anchored popover)', () => {
       expect(document.activeElement).toBe(trigger());
     });
 
+    /**
+     * Escape then Enter faster than a frame: the close never renders, so the panel stays mounted
+     * and no new one appears to take the focus hand-off. The reopen still has to land on a command.
+     */
+    it('focuses the first command when reopened before the close has rendered', async () => {
+      await open();
+      component.onEscape();
+      expect(document.activeElement).toBe(trigger());
+      component.toggle();
+      fixture.detectChanges();
+      await Promise.resolve();
+      expect(component.isOpen).toBeTrue();
+      expect(document.activeElement).toBe(items()[0]);
+    });
+
+    it('honours ArrowUp on a reopen before the close has rendered', async () => {
+      await open();
+      component.onEscape();
+      await press(trigger(), 'ArrowUp');
+      expect(document.activeElement).toBe(items()[1]);
+    });
+
     it('returns focus to the trigger after running a command', async () => {
       await open();
       items()[0].click();
