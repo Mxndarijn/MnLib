@@ -12,6 +12,8 @@ on:
       - '.github/pull_request_template.md'
       - '.github/CODEOWNERS'
       - '.github/dependabot.yml'
+      - '.github/workflows/codeql.yml'
+      - '.github/workflows/pr-checks.yml'
 
 permissions:
   id-token: write  # Required for OIDC
