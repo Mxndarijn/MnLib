@@ -1,0 +1,25 @@
+name: PR checks
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  pr-gate:
+    name: pr-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - run: npx ng test mn-angular-lib --watch=false --browsers=ChromeHeadless --progress=false
+        env: { CI: "true" }
+      - run: npx ng build mn-angular-lib --configuration production
+      - name: Pack dry-run (catches broken package exports)
+        working-directory: dist/mn-angular-lib
+        run: npm pack --dry-run

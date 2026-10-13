@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '24'  # npm 11 voor OIDC trusted publishing
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
@@ -55,6 +55,27 @@ jobs:
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
+      # Build ná de bump (versie zit in de dist), maar vóór commit/tag/push:
+      # een falende build maakt zo nooit een tag aan
+      - name: Build mn-angular-lib
+        run: npx ng build mn-angular-lib --configuration production
+
+      # OIDC trusted publishing vereist npm >= 11.5.1
+      - name: Ensure npm supports trusted publishing
+        run: |
+          NPM_VERSION=$(npm --version)
+          echo "npm $NPM_VERSION"
+          if [ "$(printf '%s\n' 11.5.1 "$NPM_VERSION" | sort -V | head -n1)" != "11.5.1" ]; then
+            echo "::error::npm $NPM_VERSION is too old for trusted publishing (need >= 11.5.1)"
+            exit 1
+          fi
+
+      # Pakketproblemen vóór de push vangen. De echte publish blijft ná de push:
+      # eerst publiceren kan een versie uitbrengen die nooit op main landt als de push faalt
+      - name: Publish dry-run
+        working-directory: dist/mn-angular-lib
+        run: npm publish --dry-run --access public
+
       # ---- Commit + tag aanmaken en pushen ----
       - name: Commit version bump and create tag
         run: |
@@ -64,13 +85,6 @@ jobs:
           git push origin HEAD:main
           git push origin --tags
 
-
-      # Build ná de bump
-      - name: Build mn-angular-lib
-        run: |
-          npx ng build mn-angular-lib --configuration production || \
-          npm run build --workspace=mn-angular-lib || \
-          npm run build:lib
       - name: Publish dist/mn-angular-lib to npm
         working-directory: dist/mn-angular-lib
         run: npm publish --access public
