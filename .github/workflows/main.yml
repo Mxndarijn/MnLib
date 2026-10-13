@@ -12,15 +12,26 @@ jobs:
   test-build-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      id-token: write
+      contents: read   # GITHUB_TOKEN pusht niet meer; dat doet de release-bot App
+      id-token: write  # npm OIDC trusted publishing
 
     steps:
+      # Token van GitHub App 'release-bot-mxndarijn' (bypass actor in de ruleset op main).
+      # Zonder owner/repositories geldt het token alleen voor deze repo.
+      - name: Mint release-bot token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
-          persist-credentials: true   # zorg dat GITHUB_TOKEN in git remote zit
+          persist-credentials: true   # zorg dat het App-token in git remote zit
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -42,8 +53,8 @@ jobs:
 
       - name: Configure git user
         run: |
-          git config user.name "ci-release-bot"
-          git config user.email "ci@example.com"
+          git config user.name "release-bot-mxndarijn[bot]"
+          git config user.email "${{ vars.RELEASE_BOT_USER_ID }}+release-bot-mxndarijn[bot]@users.noreply.github.com"
           # optioneel: voor monorepos/containers
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
@@ -80,6 +91,8 @@ jobs:
       - name: Commit version bump and create tag
         run: |
           git add projects/mn-angular-lib/package.json projects/mn-angular-lib/package-lock.json
+          # [skip ci] is verplicht: pushes met een App-token triggeren wél workflows
+          # (anders dan GITHUB_TOKEN), zonder dit volgt een eindeloze release-loop
           git commit -m "chore(release): v${NEW_VERSION} [skip ci]"
           git tag "v${NEW_VERSION}"
           git push origin HEAD:main
