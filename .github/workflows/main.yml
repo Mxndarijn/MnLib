@@ -3,14 +3,29 @@ name: Auto release mn-angular-lib on main
 on:
   push:
     branches: [ main ]
+    # projects/mn-angular-lib/README.md zit in het npm-pakket en wordt daarom bewust niet genegeerd
+    paths-ignore:
+      - 'README.md'
+      - 'CLAUDE.md'
+      - 'docs/**'
+      - '**/USAGE.md'
+      - '.github/pull_request_template.md'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
 
 permissions:
   id-token: write  # Required for OIDC
   contents: read
 
+# Nooit een lopende release afbreken
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   test-build-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
       id-token: write

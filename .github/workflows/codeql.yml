@@ -4,9 +4,13 @@ on:
   push: { branches: [main] }
   schedule: [{ cron: '23 4 * * 1' }]
 permissions: { contents: read, security-events: write, actions: read }
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy: { matrix: { language: [javascript-typescript, actions] } }
     steps:
       - uses: actions/checkout@v4
