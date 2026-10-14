@@ -3,12 +3,24 @@ name: Auto release mn-angular-lib on main
 on:
   push:
     branches: [ main ]
+    # projects/mn-angular-lib/README.md zit in het npm-pakket en wordt daarom bewust niet genegeerd
+    paths-ignore:
+      - 'README.md'
+      - 'CLAUDE.md'
+      - 'docs/**'
+      - '**/USAGE.md'
+      - '.github/pull_request_template.md'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/workflows/codeql.yml'
+      - '.github/workflows/pr-checks.yml'
 
 permissions:
   id-token: write  # Required for OIDC
   contents: read
 
-# Releases nooit parallel: twee runs zouden dezelfde patch-versie kunnen claimen
+# Releases nooit parallel (twee runs zouden dezelfde patch-versie kunnen claimen)
+# en nooit een lopende release afbreken
 concurrency:
   group: release
   cancel-in-progress: false
@@ -18,6 +30,7 @@ jobs:
     # Release-commits van de bot zelf nooit opnieuw releasen (naast [skip ci])
     if: github.actor != 'release-bot-mxndarijn[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # App-secrets staan in de 'release' environment, die alleen voor main geldt
     environment: release
     permissions:
