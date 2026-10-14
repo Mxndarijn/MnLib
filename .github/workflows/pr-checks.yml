@@ -4,12 +4,57 @@ on:
     branches: [main]
 permissions:
   contents: read
+  pull-requests: read
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  pr-gate:
-    name: pr-gate
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      lib: ${{ steps.f.outputs.lib }}
+    steps:
+      # No checkout: pull_request-only, so paths-filter lists changed files via the API
+      # (pull-requests: read). Restore actions/checkout if push/merge_group is ever added.
+      - id: f
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
+        with:
+          filters: |
+            lib: ['projects/**', 'tools/**', 'package*.json', 'angular.json', 'tsconfig*.json', 'eslint.config.js', '.github/**']
+
+  lint:
+    name: Lint (eslint + i18n)
+    needs: changes
+    if: needs.changes.outputs.lib == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: '24', cache: npm }
+      - run: npm ci
+      - run: npm run lint
+
+  type-check:
+    name: Type-check (lib + specs)
+    needs: changes
+    if: needs.changes.outputs.lib == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: '24', cache: npm }
+      - run: npm ci
+      # The spec tsconfig covers every entry's sources plus the specs; tsconfig.lib.json only
+      # works under ng-packagr (empty paths, inlineSources), which the build job checks.
+      - run: npx tsc --noEmit -p projects/mn-angular-lib/tsconfig.spec.json
+
+  test:
+    name: Tests (coverage gate)
+    needs: changes
+    if: needs.changes.outputs.lib == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -17,10 +62,34 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: '24', cache: npm }
       - run: npm ci
-      - run: npm run lint
-      - run: npx ng test mn-angular-lib --watch=false --browsers=ChromeHeadless --progress=false
+      # Thresholds live in karma.conf.js (coverageReporter.check).
+      - run: npx ng test mn-angular-lib --watch=false --browsers=ChromeHeadless --progress=false --code-coverage
         env: { CI: "true" }
+
+  build:
+    name: Build + pack dry-run
+    needs: changes
+    if: needs.changes.outputs.lib == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: '24', cache: npm }
+      - run: npm ci
       - run: npx ng build mn-angular-lib --configuration production
       - name: Pack dry-run (catches broken package exports)
         working-directory: dist/mn-angular-lib
         run: npm pack --dry-run
+
+  # Single stable required check; passes when the jobs were skipped because nothing relevant
+  # changed (docs-only PRs).
+  pr-gate:
+    name: pr-gate
+    if: always()
+    needs: [changes, lint, type-check, test, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: |
+          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then exit 1; fi

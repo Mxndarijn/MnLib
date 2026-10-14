@@ -40,6 +40,11 @@ module.exports = function (config) {
         { type: 'html' },
         { type: 'text-summary' },
       ],
+      // Only enforced with --code-coverage (as pr-checks.yml runs it). Set at the measured
+      // coverage rounded down; raise when coverage goes up, never lower to make a PR pass.
+      check: {
+        global: { statements: 76, branches: 65, functions: 77, lines: 78 },
+      },
       fixWebpackSourcePaths: true
     }
   });
