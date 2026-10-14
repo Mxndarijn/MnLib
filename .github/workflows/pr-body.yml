@@ -1,0 +1,23 @@
+name: PR body
+# Enforces RULES.md #12 for bot PRs: short, plain description; long proof goes in <details>.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, reopened, synchronize]
+permissions: {}
+jobs:
+  pr-body:
+    name: pr-body
+    if: endsWith(github.event.pull_request.user.login, '-bot-mxndarijn[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Drop <details> blocks and HTML comments, then count non-empty lines.
+          n=$(printf '%s\n' "$BODY" | tr -d '\r' \
+            | sed '/<details>/,/<\/details>/d; /<!--/,/-->/d' | grep -cv '^[[:space:]]*$' || true)
+          echo "PR body: $n lines outside <details> (max 10)"
+          if [ "$n" -eq 0 ]; then echo "::error::Empty PR description. RULES.md #12: What, Why, How tested, What Merijn must do."; exit 1; fi
+          if [ "$n" -gt 10 ]; then echo "::error::PR description has $n lines (max 10). RULES.md #12: move proof/file lists into a <details> block or a comment."; exit 1; fi
