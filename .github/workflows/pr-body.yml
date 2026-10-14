@@ -4,7 +4,11 @@ on:
   pull_request:
     branches: [main]
     types: [opened, edited, reopened, synchronize]
-permissions: {}
+permissions:
+  contents: read
+concurrency:
+  group: pr-body-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   pr-body:
     name: pr-body
@@ -12,12 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - run: bash .github/scripts/pr-body-lines.test.sh
       - env:
           BODY: ${{ github.event.pull_request.body }}
         run: |
-          # Drop <details> blocks and HTML comments, then count non-empty lines.
-          n=$(printf '%s\n' "$BODY" | tr -d '\r' \
-            | sed '/<details>/,/<\/details>/d; /<!--/,/-->/d' | grep -cv '^[[:space:]]*$' || true)
+          # Count non-blank lines outside HTML comments and <details> blocks (see the script).
+          n=$(printf '%s' "$BODY" | python3 .github/scripts/pr-body-lines.py)
           echo "PR body: $n lines outside <details> (max 10)"
           if [ "$n" -eq 0 ]; then echo "::error::Empty PR description. RULES.md #12: What, Why, How tested, What Merijn must do."; exit 1; fi
           if [ "$n" -gt 10 ]; then echo "::error::PR description has $n lines (max 10). RULES.md #12: move proof/file lists into a <details> block or a comment."; exit 1; fi
