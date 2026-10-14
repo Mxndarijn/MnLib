@@ -51,7 +51,7 @@
     "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/jasmine": "~5.1.0",
-    "angular-eslint": "22.5.0",
+    "angular-eslint": "22.6.0",
     "autoprefixer": "^10.4.23",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
@@ -63,13 +63,13 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "lucide": "^1.27.0",
-    "ng-packagr": "^22.1.1",
+    "ng-packagr": "^22.2.4",
     "postcss": "^8.5.3",
     "prettier": "^3.8.4",
     "quill": "^2.0.3",
     "tailwindcss": "^4.1.18",
-    "typescript": "~6.0.3",
-    "typescript-eslint": "8.59.2",
-    "zone.js": "^0.15.1"
+    "typescript": "~7.0.2",
+    "typescript-eslint": "8.71.1",
+    "zone.js": "^0.16.3"
   }
 }
