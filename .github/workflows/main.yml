@@ -19,28 +19,35 @@ permissions:
   id-token: write  # Required for OIDC
   contents: read
 
-# Nooit een lopende release afbreken
+# Releases nooit parallel (twee runs zouden dezelfde patch-versie kunnen claimen)
+# en nooit een lopende release afbreken
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
   test-build-release:
+    # Release-commits van de bot zelf nooit opnieuw releasen (naast [skip ci])
+    if: github.actor != 'release-bot-mxndarijn[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # App-secrets staan in de 'release' environment, die alleen voor main geldt
+    environment: release
     permissions:
-      contents: write
-      id-token: write
+      contents: read   # GITHUB_TOKEN pusht niet; dat doet de release-bot App
+      id-token: write  # npm OIDC trusted publishing
 
     steps:
+      # Checkout met de standaard GITHUB_TOKEN, zonder credentials in .git/config:
+      # het App-token komt pas vlak voor de push in beeld
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-          persist-credentials: true   # zorg dat GITHUB_TOKEN in git remote zit
+          persist-credentials: false
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'  # npm 11 voor OIDC trusted publishing
           registry-url: 'https://registry.npmjs.org'
@@ -57,14 +64,10 @@ jobs:
         env:
           CI: "true"
 
-      - name: Configure git user
-        run: |
-          git config user.name "ci-release-bot"
-          git config user.email "ci@example.com"
-          # optioneel: voor monorepos/containers
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Configure git safe.directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-            # ---- Versie bump (zonder auto-commit/tag) ----
+      # ---- Versie bump (zonder auto-commit/tag) ----
       - name: Bump version (patch) in projects/mn-angular-lib
         working-directory: projects/mn-angular-lib
         run: |
@@ -93,14 +96,36 @@ jobs:
         working-directory: dist/mn-angular-lib
         run: npm publish --dry-run --access public
 
+      # Token van GitHub App 'release-bot-mxndarijn' (bypass actor in de ruleset op main).
+      # Pas hier minten, ná alle stappen die third-party code draaien (npm ci, lint,
+      # tests, build), zodat die het token nooit kunnen zien.
+      # Zonder owner/repositories geldt het token alleen voor deze repo.
+      - name: Mint release-bot token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       # ---- Commit + tag aanmaken en pushen ----
       - name: Commit version bump and create tag
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT_ID: ${{ vars.RELEASE_BOT_USER_ID }}
         run: |
+          [ -n "$BOT_ID" ] || { echo '::error::RELEASE_BOT_USER_ID is not set'; exit 1; }
+          git config user.name "release-bot-mxndarijn[bot]"
+          git config user.email "${BOT_ID}+release-bot-mxndarijn[bot]@users.noreply.github.com"
           git add projects/mn-angular-lib/package.json projects/mn-angular-lib/package-lock.json
+          # [skip ci] is verplicht: pushes met een App-token triggeren wél workflows
+          # (anders dan GITHUB_TOKEN), zonder dit volgt een eindeloze release-loop
           git commit -m "chore(release): v${NEW_VERSION} [skip ci]"
           git tag "v${NEW_VERSION}"
-          git push origin HEAD:main
-          git push origin --tags
+          # Expliciete URL: het token komt niet in .git/config terecht.
+          # Atomic: branch en tag landen samen of geen van beide.
+          git push --atomic "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            HEAD:main "refs/tags/v${NEW_VERSION}"
 
       - name: Publish dist/mn-angular-lib to npm
         working-directory: dist/mn-angular-lib
