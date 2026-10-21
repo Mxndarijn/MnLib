@@ -8,6 +8,8 @@ updates:
     directory: /
     schedule: { interval: weekly }
     open-pull-requests-limit: 5
+    # Angular 22 needs TypeScript <6.1; remove once Angular supports TypeScript 7.
+    ignore: [{ dependency-name: typescript, versions: ['>=7'] }]
     groups:
       angular: { patterns: ['@angular/*', '@angular-devkit/*', '@angular-eslint/*', 'angular-eslint', 'ng-packagr', 'typescript', 'typescript-eslint', '@typescript-eslint/*', 'zone.js'] }
       minor-patch: { update-types: [minor, patch] }
