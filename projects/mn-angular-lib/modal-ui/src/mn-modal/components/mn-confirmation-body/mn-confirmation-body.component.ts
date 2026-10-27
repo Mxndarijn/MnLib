@@ -79,11 +79,21 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
 
     const result = (this.hasFormFields ? this.formBody?.form.value : true) as TResult;
 
-    if (this.config.confirm?.handler) {
-      await this.config.confirm.handler.handle(result);
-    }
+    try {
+      // `false` keeps the dialog open so a rejected confirm does not discard context.
+      // Throwing also keeps it open.
+      const keepOpen =
+        this.config.confirm?.handler != null &&
+        (await this.config.confirm.handler.handle(result)) === false;
 
-    this.modalRef.close(result);
+      if (keepOpen) {
+        return;
+      }
+
+      this.modalRef.close(result);
+    } catch (error) {
+      console.error('Confirmation handler error:', error);
+    }
   }
 
   cancel(): void {

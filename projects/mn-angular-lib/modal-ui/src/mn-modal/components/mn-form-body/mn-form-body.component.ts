@@ -914,9 +914,18 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel>
     const formValue = this.form.value as TResult;
 
     try {
-      if (this.config.onComplete) {
-        await this.config.onComplete.handle(formValue);
+      // `false` keeps the form open so a rejected submit does not wipe the fields.
+      // Throwing takes the catch path below and also keeps it open.
+      const keepOpen =
+        this.config.onComplete != null &&
+        (await this.config.onComplete.handle(formValue)) === false;
+
+      if (keepOpen) {
+        this.isSubmitting = false;
+        this.cdr.markForCheck();
+        return;
       }
+
       this.modalRef.close(formValue);
     } catch (error) {
       // Always allow retry on error, regardless of submit mode. This runs after an `await`,

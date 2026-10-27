@@ -508,8 +508,16 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
         payload: aggregatedData,
       };
 
-      if (this.config.onComplete) {
-        await this.config.onComplete.handle(result);
+      // `false` keeps the wizard open so a rejected submit does not wipe the form.
+      // Throwing takes the catch path below and also keeps it open.
+      const keepOpen =
+        this.config.onComplete != null &&
+        (await this.config.onComplete.handle(result)) === false;
+
+      if (keepOpen) {
+        this.isCompleting = false;
+        this.cdr.detectChanges();
+        return;
       }
 
       this.modalRef.close(result);
