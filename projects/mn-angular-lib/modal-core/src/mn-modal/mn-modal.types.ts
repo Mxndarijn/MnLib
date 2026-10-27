@@ -244,8 +244,16 @@ export type ModalRef<TResult = unknown> = {
 // Handlers
 // =========================
 
+/**
+ * Completes a form or wizard modal.
+ *
+ * Return `false` (sync or async) to keep the modal open after a rejected submit —
+ * for example when a server 400 was already toasted and the user's input must not
+ * be discarded. Throwing also keeps it open (existing behaviour). Any other return
+ * value, including `void` / `undefined` / `true`, closes the modal as before.
+ */
 export type ModalResultHandler<TResult = unknown> = {
-  handle(result: TResult): Promise<void> | void;
+  handle(result: TResult): Promise<boolean | void> | boolean | void;
 }
 
 export type WizardStepChangeEvent = {
