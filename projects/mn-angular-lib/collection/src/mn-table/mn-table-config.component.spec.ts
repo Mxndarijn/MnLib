@@ -313,6 +313,54 @@ describe('MnTable data source configuration', () => {
     expect(summaryText()).toContain('Alice');
   });
 
+  /**
+   * F160: chips / selectedIds survive a page change, but selectionChange used to
+   * re-resolve only against the current page's dataRows. Selecting on page 2 then
+   * silently dropped every page-1 pick for consumers (e.g. add-members footer).
+   */
+  it('emits previously selected rows that are no longer on the current page', async () => {
+    const pageRows = new BehaviorSubject<Row[]>([
+      { id: '1', name: 'Alice' },
+      { id: '2', name: 'Bob' },
+    ]);
+    const selectedRows = new BehaviorSubject<Row[]>([]);
+    const emitted: Row[][] = [];
+    fixture.componentInstance.dataSource = makeDataSource({
+      dataRows: pageRows,
+      selectionMode: 'multi',
+      selectionSummary: true,
+      selectedRows,
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
+    });
+    fixture.componentInstance.selectionChange.subscribe((rows: Row[]) => emitted.push(rows));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Select Alice on page 1.
+    fixture.componentInstance.toggle({ id: '1', name: 'Alice' });
+    fixture.detectChanges();
+    expect(emitted.at(-1)?.map((r) => r.id)).toEqual(['1']);
+    expect(selectedRows.value.map((r) => r.id)).toEqual(['1']);
+
+    // Page 2: Alice is gone from dataRows, but still selected.
+    pageRows.next([
+      { id: '3', name: 'Charlie' },
+      { id: '4', name: 'Dana' },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Select Charlie on page 2 — emit must keep Alice too.
+    fixture.componentInstance.toggle({ id: '3', name: 'Charlie' });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selectedIds.size).toBe(2);
+    expect(emitted.at(-1)?.map((r) => r.id).sort()).toEqual(['1', '3']);
+    expect(selectedRows.value.map((r) => r.id).sort()).toEqual(['1', '3']);
+  });
+
   it('hides the selection summary when nothing is selected', () => {
     fixture.componentInstance.dataSource = makeDataSource({
       selectionMode: 'multi',
