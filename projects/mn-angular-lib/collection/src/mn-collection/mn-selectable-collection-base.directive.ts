@@ -239,9 +239,14 @@ export abstract class MnSelectableCollectionBase<
     }
   }
 
-  /** The currently loaded rows whose id is selected. */
+  /**
+   * Every selected row that has been seen, including those no longer on the
+   * current page. Consumers of {@link selectionChange} and
+   * {@link MnSelectableCollectionDataSource.selectedRows} need the full
+   * selection; filtering only {@link MnSelectableCollectionDataSource.dataRows}
+   * silently drops off-page picks (F160).
+   */
   private resolveSelectedRows(): T[] {
-    return (this.dataSource.dataRows.value ?? [])
-      .filter(r => this.selectedIds.has(this.dataSource.getID(r)));
+    return this.selectedSummaryRows;
   }
 }
