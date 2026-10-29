@@ -191,4 +191,56 @@ describe('MnWizardBodyComponent', () => {
       expect(scroller.scrollTop).toBe(0);
     });
   });
+
+  describe('formValidators errors', () => {
+    function setupWithFormValidator(): void {
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [
+          {
+            id: 'one',
+            title: 'One',
+            fields: [{ kind: 'text', key: 'name', label: 'Name' } as never],
+            formValidators: [
+              (value: Record<string, unknown>) =>
+                value['name'] === 'bad' ? { name: 'Name is not allowed' } : null,
+            ],
+          },
+          { id: 'two', title: 'Two', body: 'Second step' },
+        ],
+      } as unknown as WizardModalConfig);
+    }
+
+    it('blocks next() and disables the step while formValidators report errors', async () => {
+      setupWithFormValidator();
+      const formBody = component.formBodies.first;
+      formBody.form.get('name')!.setValue('bad');
+      fixture.detectChanges();
+
+      expect(formBody.form.valid).withContext('controls stay valid').toBeTrue();
+      expect(formBody.hasFormErrors).toBeTrue();
+      expect(component.isCurrentStepValid).toBeFalse();
+
+      await component.next();
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('one');
+    });
+
+    it('advances once the formValidators error is cleared', async () => {
+      setupWithFormValidator();
+      const formBody = component.formBodies.first;
+      formBody.form.get('name')!.setValue('bad');
+      formBody.form.get('name')!.setValue('good');
+      fixture.detectChanges();
+
+      expect(formBody.hasFormErrors).toBeFalse();
+      expect(component.isCurrentStepValid).toBeTrue();
+
+      await component.next();
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('two');
+    });
+  });
 });
