@@ -16,7 +16,7 @@ class ProbeComponent {
 
 /** Probe used from an ng-template declared outside the modal shell. */
 @Component({
-  selector: 'app-probe',
+  selector: 'mn-lib-template-probe',
   standalone: true,
   template: '<p>probe</p>',
 })
@@ -34,7 +34,7 @@ class TemplateProbeComponent {
   imports: [TemplateProbeComponent],
   template: `
     <ng-template #body>
-      <app-probe />
+      <mn-lib-template-probe />
     </ng-template>
   `,
 })
