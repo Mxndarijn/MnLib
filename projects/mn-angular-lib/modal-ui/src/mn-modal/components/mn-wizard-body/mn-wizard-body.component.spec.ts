@@ -224,5 +224,16 @@ describe('MnWizardBodyComponent', () => {
 
       expect(component.modalRef.dismiss).toHaveBeenCalled();
     });
+
+    it('does not walk history on destroy when the top entry is not the wizard\'s', async () => {
+      setupTwoStep();
+      await component.next();
+      history.pushState({ host: 'elsewhere' }, '');
+      const go = spyOn(history, 'go');
+
+      fixture.destroy();
+
+      expect(go).not.toHaveBeenCalled();
+    });
   });
 });

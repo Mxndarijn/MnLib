@@ -201,6 +201,8 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:popstate')
   onBrowserBack(): void {
     if (this.ignorePopstate) {
+      // Consume the popstate our own history.back() caused; no timer to race.
+      this.ignorePopstate = false;
       return;
     }
     if (this.historyDepth <= 0) {
@@ -317,9 +319,13 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       this.historyDepth = 0;
       return;
     }
-    this.ignorePopstate = true;
     const depth = this.historyDepth;
     this.historyDepth = 0;
+    // Complete / the host may already have navigated away; only unwind while
+    // the top entry is still ours, or the walk would leave the new page.
+    if (!history.state?.[MnWizardBodyComponent.HISTORY_STATE_KEY]) {
+      return;
+    }
     history.go(-depth);
   }
 
@@ -541,10 +547,6 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ignorePopstate = true;
     this.historyDepth -= 1;
     history.back();
-    // Clear the flag after the popstate has had a chance to fire.
-    setTimeout(() => {
-      this.ignorePopstate = false;
-    }, 0);
   }
 
   /**
