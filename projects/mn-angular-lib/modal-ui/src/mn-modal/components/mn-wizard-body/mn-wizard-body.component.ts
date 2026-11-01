@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  HostListener,
   inject,
   Input,
   OnDestroy,
@@ -88,6 +89,14 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   wizardErrors: Record<string, string> = {};
 
   /**
+   * Browser-history entries this wizard pushed so Back steps the wizard instead
+   * of leaving the host page (em8TA5ZU). Cleaned up on destroy / dismiss.
+   */
+  private historyDepth = 0;
+  private ignorePopstate = false;
+  private static readonly HISTORY_STATE_KEY = 'mnWizard';
+
+  /**
    * Min-height (px) for the step container, sized to the tallest step so the
    * modal does not jump when navigating between steps. Monotonic — only grows.
    */
@@ -170,6 +179,61 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.currentStepId) {
       this.visitedStepIds.push(this.currentStepId);
     }
+    this.pushWizardHistory();
+  }
+
+  /** Push a history entry for the current step so browser Back stays inside the wizard. */
+  private pushWizardHistory(): void {
+    if (typeof history === 'undefined' || typeof history.pushState !== 'function') {
+      return;
+    }
+    history.pushState(
+      { [MnWizardBodyComponent.HISTORY_STATE_KEY]: this.currentStepId },
+      '',
+    );
+    this.historyDepth += 1;
+  }
+
+  /**
+   * Browser Back (em8TA5ZU): step the wizard back; on the first step dismiss the
+   * modal so the host page is not left mid-wizard.
+   */
+  @HostListener('window:popstate')
+  onBrowserBack(): void {
+    if (this.ignorePopstate) {
+      return;
+    }
+    if (this.historyDepth <= 0) {
+      return;
+    }
+    this.historyDepth -= 1;
+    if (this.currentVisibleIndex > 0) {
+      void this.applyHistoryBack();
+      return;
+    }
+    // First step — close the wizard; history already moved past our entry.
+    void this.dismissFromBrowserBack();
+  }
+
+  /** Apply a step-back without touching history (history already popped). */
+  private async applyHistoryBack(): Promise<void> {
+    const prevStep = this.visibleSteps[this.currentVisibleIndex - 1];
+    if (!prevStep) {
+      await this.dismissFromBrowserBack();
+      return;
+    }
+    const previousStepId = this.currentStepId;
+    this.visitedStepIds = this.visitedStepIds.filter((id) => id !== this.currentStepId);
+    this.setCurrentStep(prevStep.id);
+    await this.notifyStepChange(previousStepId, NavigationDirection.BACKWARD);
+    this.trackCurrentStepValidity();
+  }
+
+  private async dismissFromBrowserBack(): Promise<void> {
+    if (this.config.onCancel) {
+      await this.config.onCancel(ModalCloseReason.CANCELLED);
+    }
+    this.modalRef.dismiss(ModalCloseReason.CANCELLED);
   }
 
   ngAfterViewInit(): void {
@@ -241,6 +305,22 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.statusSubscription?.unsubscribe();
     this.formBodiesSubscription?.unsubscribe();
+    this.dropWizardHistory();
+  }
+
+  /** Remove history entries we pushed when the wizard closes via Complete / X / Cancel. */
+  private dropWizardHistory(): void {
+    if (this.historyDepth <= 0) {
+      return;
+    }
+    if (typeof history === 'undefined' || typeof history.go !== 'function') {
+      this.historyDepth = 0;
+      return;
+    }
+    this.ignorePopstate = true;
+    const depth = this.historyDepth;
+    this.historyDepth = 0;
+    history.go(-depth);
   }
 
   /**
@@ -388,6 +468,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       this.visitedStepIds.push(this.currentStepId);
     }
 
+    this.pushWizardHistory();
     await this.notifyStepChange(previousStepId, NavigationDirection.FORWARD);
     this.trackCurrentStepValidity();
   }
@@ -441,8 +522,29 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.setCurrentStep(prevStep.id);
 
+    // Drop the matching history entry without re-entering onBrowserBack (em8TA5ZU).
+    this.popWizardHistoryEntry();
+
     await this.notifyStepChange(previousStepId, NavigationDirection.BACKWARD);
     this.trackCurrentStepValidity();
+  }
+
+  /** history.back() one entry while ignoring the resulting popstate. */
+  private popWizardHistoryEntry(): void {
+    if (this.historyDepth <= 0) {
+      return;
+    }
+    if (typeof history === 'undefined' || typeof history.back !== 'function') {
+      this.historyDepth -= 1;
+      return;
+    }
+    this.ignorePopstate = true;
+    this.historyDepth -= 1;
+    history.back();
+    // Clear the flag after the popstate has had a chance to fire.
+    setTimeout(() => {
+      this.ignorePopstate = false;
+    }, 0);
   }
 
   /**

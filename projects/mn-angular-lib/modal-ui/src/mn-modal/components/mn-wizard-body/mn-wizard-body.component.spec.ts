@@ -191,4 +191,38 @@ describe('MnWizardBodyComponent', () => {
       expect(scroller.scrollTop).toBe(0);
     });
   });
+
+  describe('browser Back (em8TA5ZU)', () => {
+    function setupTwoStep(): void {
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [
+          { id: 'one', title: 'One', body: 'First' },
+          { id: 'two', title: 'Two', body: 'Second' },
+        ],
+      } as WizardModalConfig);
+    }
+
+    it('steps back on popstate instead of leaving the wizard on step 2', async () => {
+      setupTwoStep();
+      await component.next();
+      expect(component.currentStepId).toBe('two');
+
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('one');
+      expect(component.modalRef.dismiss).not.toHaveBeenCalled();
+    });
+
+    it('dismisses the wizard on popstate at the first step (host page stays)', () => {
+      setupTwoStep();
+      expect(component.currentStepId).toBe('one');
+
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+
+      expect(component.modalRef.dismiss).toHaveBeenCalled();
+    });
+  });
 });
