@@ -191,4 +191,73 @@ describe('MnWizardBodyComponent', () => {
       expect(scroller.scrollTop).toBe(0);
     });
   });
+
+  describe('browser Back (em8TA5ZU)', () => {
+    function setupTwoStep(): void {
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [
+          { id: 'one', title: 'One', body: 'First' },
+          { id: 'two', title: 'Two', body: 'Second' },
+        ],
+      } as WizardModalConfig);
+    }
+
+    it('steps back on popstate instead of leaving the wizard on step 2', async () => {
+      setupTwoStep();
+      await component.next();
+      expect(component.currentStepId).toBe('two');
+
+      // Real Back leaves history.state on the previous wizard entry before popstate.
+      history.replaceState({ mnWizard: 'one' }, '');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('one');
+      expect(component.modalRef.dismiss).not.toHaveBeenCalled();
+    });
+
+    it('steps forward on popstate when history.state points at a later wizard step', async () => {
+      setupTwoStep();
+      await component.next();
+      expect(component.currentStepId).toBe('two');
+
+      // Simulate browser Back (state is now the first-step entry).
+      history.replaceState({ mnWizard: 'one' }, '');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+      expect(component.currentStepId).toBe('one');
+
+      // Simulate browser Forward restoring the second-step entry.
+      history.replaceState({ mnWizard: 'two' }, '');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('two');
+      expect(component.modalRef.dismiss).not.toHaveBeenCalled();
+    });
+
+    it('dismisses the wizard on popstate at the first step (host page stays)', () => {
+      setupTwoStep();
+      expect(component.currentStepId).toBe('one');
+
+      // Leaving the first wizard entry drops mnWizard from history.state.
+      history.replaceState({ host: true }, '');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+
+      expect(component.modalRef.dismiss).toHaveBeenCalled();
+    });
+
+    it('does not walk history on destroy when the top entry is not the wizard\'s', async () => {
+      setupTwoStep();
+      await component.next();
+      history.pushState({ host: 'elsewhere' }, '');
+      const go = spyOn(history, 'go');
+
+      fixture.destroy();
+
+      expect(go).not.toHaveBeenCalled();
+    });
+  });
 });
