@@ -3,6 +3,20 @@
   <div [attr.aria-label]="labels.keyboard || null" class="mn-keyboard-keys flex flex-col gap-2 p-3" role="group">
     @for (row of rows; track $index) {
       <div class="flex justify-center gap-2">
+        @if ($last && textual) {
+          <button
+            (click)="toggleShift()"
+            [attr.aria-label]="labels.shift || '⇧'"
+            [attr.aria-pressed]="uppercase"
+            class="mn-keyboard-key mn-keyboard-key-shift flex-1 rounded-lg border border-base-300 bg-base-200 py-4 text-base font-medium text-base-content shadow-sm transition-colors hover:bg-base-300"
+            [class.bg-primary]="uppercase"
+            [class.text-primary-content]="uppercase"
+            style="flex-grow: 1.5"
+            type="button"
+          >
+            {{ labels.shift || '⇧' }}
+          </button>
+        }
         @for (key of row; track key) {
           <button
             (click)="press(key)"
@@ -15,7 +29,43 @@
       </div>
     }
 
+    @if (textual && accentsOpen) {
+      @for (row of accentRows; track $index) {
+        <div class="mn-keyboard-accents flex justify-center gap-2">
+          @for (key of row; track key) {
+            <button
+              (click)="press(key)"
+              class="mn-keyboard-key mn-keyboard-key-accent flex-1 rounded-lg border border-base-300 bg-base-100 py-3 text-xl font-semibold text-base-content shadow-sm transition-colors hover:bg-base-200 active:bg-base-300"
+              type="button"
+            >
+              {{ key }}
+            </button>
+          }
+        </div>
+      }
+    }
+
     <div class="flex justify-center gap-2">
+      @if (textual) {
+        <button
+          (click)="toggleAccents()"
+          [attr.aria-label]="labels.accents || 'é'"
+          [attr.aria-pressed]="accentsOpen"
+          class="mn-keyboard-key mn-keyboard-key-accents flex-1 rounded-lg border border-base-300 bg-base-200 py-4 text-base font-medium text-base-content shadow-sm transition-colors hover:bg-base-300"
+          type="button"
+        >
+          {{ labels.accents || 'é' }}
+        </button>
+        @for (key of symbolKeys; track key) {
+          <button
+            (click)="press(key)"
+            class="mn-keyboard-key mn-keyboard-key-symbol flex-1 rounded-lg border border-base-300 bg-base-100 py-4 text-xl font-semibold text-base-content shadow-sm transition-colors hover:bg-base-200 active:bg-base-300"
+            type="button"
+          >
+            {{ key }}
+          </button>
+        }
+      }
       <button
         (click)="backspace()"
         [attr.aria-label]="labels.backspace"
