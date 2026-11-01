@@ -195,8 +195,9 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Browser Back (em8TA5ZU): step the wizard back; on the first step dismiss the
-   * modal so the host page is not left mid-wizard.
+   * Browser Back / Forward (em8TA5ZU): step the wizard with history.
+   * Forward is distinguished from Back by comparing `history.state.mnWizard`
+   * to the current step index — popstate alone has no direction.
    */
   @HostListener('window:popstate')
   onBrowserBack(): void {
@@ -204,6 +205,19 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       // Consume the popstate our own history.back() caused; no timer to race.
       this.ignorePopstate = false;
       return;
+    }
+    const stateStep = history.state?.[MnWizardBodyComponent.HISTORY_STATE_KEY] as
+      | ModalStepId
+      | undefined;
+    if (stateStep != null) {
+      const targetIdx = this.visibleSteps.findIndex((s) => s.id === stateStep);
+      if (targetIdx > this.currentVisibleIndex) {
+        void this.applyHistoryForward(stateStep);
+        return;
+      }
+      if (targetIdx === this.currentVisibleIndex) {
+        return;
+      }
     }
     if (this.historyDepth <= 0) {
       return;
@@ -215,6 +229,21 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     // First step — close the wizard; history already moved past our entry.
     void this.dismissFromBrowserBack();
+  }
+
+  /** Apply a step-forward without touching history (history already advanced). */
+  private async applyHistoryForward(stepId: ModalStepId): Promise<void> {
+    this.historyDepth += 1;
+    const previousStepId = this.currentStepId;
+    if (!this.visitedStepIds.includes(previousStepId)) {
+      this.visitedStepIds.push(previousStepId);
+    }
+    this.setCurrentStep(stepId);
+    if (!this.visitedStepIds.includes(stepId)) {
+      this.visitedStepIds.push(stepId);
+    }
+    await this.notifyStepChange(previousStepId, NavigationDirection.FORWARD);
+    this.trackCurrentStepValidity();
   }
 
   /** Apply a step-back without touching history (history already popped). */

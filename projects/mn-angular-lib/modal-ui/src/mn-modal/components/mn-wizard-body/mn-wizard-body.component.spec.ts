@@ -208,6 +208,8 @@ describe('MnWizardBodyComponent', () => {
       await component.next();
       expect(component.currentStepId).toBe('two');
 
+      // Real Back leaves history.state on the previous wizard entry before popstate.
+      history.replaceState({ mnWizard: 'one' }, '');
       window.dispatchEvent(new PopStateEvent('popstate'));
       fixture.detectChanges();
 
@@ -215,10 +217,32 @@ describe('MnWizardBodyComponent', () => {
       expect(component.modalRef.dismiss).not.toHaveBeenCalled();
     });
 
+    it('steps forward on popstate when history.state points at a later wizard step', async () => {
+      setupTwoStep();
+      await component.next();
+      expect(component.currentStepId).toBe('two');
+
+      // Simulate browser Back (state is now the first-step entry).
+      history.replaceState({ mnWizard: 'one' }, '');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+      expect(component.currentStepId).toBe('one');
+
+      // Simulate browser Forward restoring the second-step entry.
+      history.replaceState({ mnWizard: 'two' }, '');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('two');
+      expect(component.modalRef.dismiss).not.toHaveBeenCalled();
+    });
+
     it('dismisses the wizard on popstate at the first step (host page stays)', () => {
       setupTwoStep();
       expect(component.currentStepId).toBe('one');
 
+      // Leaving the first wizard entry drops mnWizard from history.state.
+      history.replaceState({ host: true }, '');
       window.dispatchEvent(new PopStateEvent('popstate'));
       fixture.detectChanges();
 
