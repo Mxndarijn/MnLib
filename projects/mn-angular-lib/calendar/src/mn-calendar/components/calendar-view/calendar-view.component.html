@@ -71,6 +71,8 @@
               (click)="switchView(view.value)"
               [attr.aria-controls]="panelId"
               [attr.aria-selected]="currentView === view.value"
+              [class.text-base-content!]="currentView !== view.value"
+              [class.font-semibold]="currentView === view.value"
               [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
               mnButton
               role="tab"

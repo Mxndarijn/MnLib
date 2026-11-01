@@ -1,12 +1,12 @@
 <!-- The shared event chip: a colored spine and a tinted fill from the event's own
-     colours, so it reads the same in week, day and month. Text inherits the
-     event's primary colour, keeping it legible on either theme. The fill mixes that
+     colours, so it reads the same in week, day and month. Text mixes a little of
+     the event's primary colour into the theme's base-content, so it stays AA-legible on either theme. The fill mixes that
      colour into the page surface, so it darkens with a dark theme instead of staying
      a light pastel. -->
 <div class="h-full overflow-hidden cursor-pointer rounded-lg border-l-[3px] px-2 py-1 text-xs"
      [style.background-color]="'color-mix(in oklab, ' + event.color.primaryColor + ' 18%, var(--color-base-100, #fff))'"
      [style.border-left-color]="event.color.primaryColor"
-     [style.color]="event.color.primaryColor">
+     [style.color]="'color-mix(in oklab, ' + event.color.primaryColor + ' 30%, var(--color-base-content, #000))'">
   <div class="truncate font-semibold">{{ event.title }}</div>
   <div class="truncate text-[11px] opacity-85">{{ formattedTime }}</div>
   @if (event.description) {

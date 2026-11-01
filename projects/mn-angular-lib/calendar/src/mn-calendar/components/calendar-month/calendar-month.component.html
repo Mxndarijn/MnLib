@@ -27,7 +27,7 @@
               class="flex items-center overflow-hidden rounded-md border-l-[3px] px-1.5 py-0.5 text-[11px] leading-tight"
               [style.background-color]="'color-mix(in oklab, ' + event.color.primaryColor + ' 18%, var(--color-base-100, #fff))'"
               [style.border-left-color]="event.color.primaryColor"
-              [style.color]="event.color.primaryColor"
+              [style.color]="'color-mix(in oklab, ' + event.color.primaryColor + ' 30%, var(--color-base-content, #000))'"
               [title]="event.title">
               <span class="truncate font-semibold">{{ event.title }}</span>
             </div>
