@@ -166,6 +166,17 @@ describe('CalendarViewComponent', () => {
       expect(component.periodLabel).toBe('January 2025');
       expect(component.focusDay.getDate()).toBe(15);
     });
+
+    it('keeps the Month/Week/Day switcher visible on a narrow viewport (gM2XdeMo)', async () => {
+      await createCalendar(CalendarView.DAY);
+      component.isMobileView = true;
+      fixture.detectChanges();
+      const tabs = (fixture.nativeElement as HTMLElement).querySelectorAll('[role="tablist"] [role="tab"]');
+      expect(tabs.length).toBe(3);
+      component.switchView(CalendarView.WEEK);
+      fixture.detectChanges();
+      expect(component.currentView).toBe(CalendarView.WEEK);
+    });
   });
 
   describe('accessibility', () => {

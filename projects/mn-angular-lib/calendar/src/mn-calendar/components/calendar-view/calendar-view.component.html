@@ -7,7 +7,7 @@
        At `lg`, where the upcoming-events sidebar also appears, the nav folds up
        inline after Today and the whole toolbar becomes a single row. The one JS
        breakpoint (`mobileBreakpoint`) governs the phone controls — icon-only
-       picker, hidden view-switcher, forced day view — not the toolbar's shape. -->
+       picker, day default on first narrow enter — not the toolbar's shape. -->
   <div class="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
 
     <button (click)="goToToday()"
@@ -62,24 +62,23 @@
                        [props]="{ id: panelId + '-date', mode: 'date', placeholder: config.pickDateLabel, size: 'md', borderRadius: 'lg', hover: true, iconOnly: isMobileView }"
                        class="block"></mn-lib-datetime>
 
-      <!-- View switcher (month / week / day) — hidden on mobile, which is forced to day view. -->
-      @if (!isMobileView) {
-        <div [attr.aria-label]="calendarViewLabel" class="flex border border-base-300 rounded-md overflow-hidden"
-             role="tablist">
-          @for (view of viewOptions; track view.value) {
-            <button
-              (click)="switchView(view.value)"
-              [attr.aria-controls]="panelId"
-              [attr.aria-selected]="currentView === view.value"
-              [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
-              mnButton
-              role="tab"
-              type="button">
-              {{ view.label }}
-            </button>
-          }
-        </div>
-      }
+      <!-- View switcher (month / week / day). Always shown (gM2XdeMo) — mobile still
+           defaults to day on first narrow enter, but the user can switch views. -->
+      <div [attr.aria-label]="calendarViewLabel" class="flex border border-base-300 rounded-md overflow-hidden"
+           role="tablist">
+        @for (view of viewOptions; track view.value) {
+          <button
+            (click)="switchView(view.value)"
+            [attr.aria-controls]="panelId"
+            [attr.aria-selected]="currentView === view.value"
+            [data]="{ size: 'md', variant: currentView === view.value ? 'fill' : 'text', color: 'primary' }"
+            mnButton
+            role="tab"
+            type="button">
+            {{ view.label }}
+          </button>
+        }
+      </div>
 
       <!-- Action buttons (custom buttons + optional showButton CTA). -->
       @if (buttons.length || showButton) {
