@@ -22,6 +22,9 @@ export class FormModalBuilder<TModel = unknown, TResult = TModel> extends BaseMo
       kind: ModalKind.FORM,
       fields: [],
       rows: [],
+      // Default ONCE so double-click cannot fire two creates (oYcJjCHT). Callers that
+      // want a retryable submit opt in with `.submitMode(SubmitMode.RETRYABLE)`.
+      submitMode: SubmitMode.ONCE,
     });
   }
 
