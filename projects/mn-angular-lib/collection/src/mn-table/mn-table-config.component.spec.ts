@@ -323,6 +323,26 @@ describe('MnTable data source configuration', () => {
     expect(fixture.nativeElement.querySelector('ul')).toBeNull();
   });
 
+  it('names each row checkbox from selectionLabel (cVNWtAqj)', async () => {
+    // Payment-request MULTI_SELECT_TABLE was nameless: props were only `{id,size}`.
+    fixture.componentInstance.dataSource = makeDataSource({
+      selectionMode: 'multi',
+      selectionLabel: (row) => row.name,
+      columns: [{ key: 'name', header: 'Name', cell: (row) => row.name }],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const boxes: NodeListOf<HTMLInputElement> = fixture.nativeElement.querySelectorAll(
+      'tbody input[type="checkbox"]',
+    );
+    expect(boxes.length).toBeGreaterThan(0);
+    const labels = Array.from(boxes).map((box) => box.getAttribute('aria-label'));
+    expect(labels).toContain('Alice');
+    expect(labels).toContain('Bob');
+  });
+
   it('removes a single row from the selection via its tag', async () => {
     fixture.componentInstance.dataSource = makeDataSource({
       selectionMode: 'multi',

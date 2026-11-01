@@ -381,9 +381,9 @@ export class MnDropdown implements OnInit {
 
   /**
    * Keyboard movement inside the open menu: the arrows step through the enabled commands
-   * (wrapping), Home and End jump to the ends, and Tab closes the menu with focus back on the
-   * trigger, so the browser's own Tab then moves on from there as if the menu was never
-   * open. Escape is handled document-wide by {@link onEscape}.
+   * (wrapping), Home and End jump to the ends, and Tab / Shift+Tab move within the menu
+   * (wrapping) so focus does not escape until Escape or a command closes it (cVNWtAqj).
+   * Escape is handled document-wide by {@link onEscape}.
    * @param event The keydown inside the menu.
    */
   onMenuKeydown(event: KeyboardEvent): void {
@@ -405,8 +405,10 @@ export class MnDropdown implements OnInit {
         this.focusItem(event.key === 'Home' ? 'first' : 'last');
         break;
       case 'Tab':
-        this.close();
-        this.triggerRef?.nativeElement.focus();
+        // Keep focus inside the open menu (cVNWtAqj user-menu). Escape / activating a
+        // command still closes; Tab must not dump focus into the page behind.
+        event.preventDefault();
+        this.focusItem(event.shiftKey ? 'previous' : 'next');
         break;
     }
   }
