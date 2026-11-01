@@ -399,7 +399,7 @@
               <mn-lib-checkbox
                 (checkedChange)="toggle(row)"
                 [checked]="isSelected(row)"
-                [props]="{ id: 'mn-table-row-' + $index, size: 'sm' }"
+                [props]="{ id: 'mn-table-row-' + $index, size: 'sm', ariaLabel: selectionLabelFor(row) }"
               ></mn-lib-checkbox>
             </div>
           }
@@ -467,7 +467,7 @@
               <mn-lib-checkbox
                 (checkedChange)="toggleAll()"
                 [checked]="allSelected"
-                [props]="{ id: 'mn-table-select-all', size: 'sm' }"
+                [props]="{ id: 'mn-table-select-all', size: 'sm', ariaLabel: selectionColumnLabel }"
               ></mn-lib-checkbox>
             }
           </th>
@@ -606,7 +606,7 @@
                 <mn-lib-checkbox
                   (checkedChange)="toggle(row)"
                   [checked]="isSelected(row)"
-                  [props]="{ id: 'mn-table-row-' + $index, size: 'sm' }"
+                  [props]="{ id: 'mn-table-row-' + $index, size: 'sm', ariaLabel: selectionLabelFor(row) }"
                 ></mn-lib-checkbox>
               </td>
             }

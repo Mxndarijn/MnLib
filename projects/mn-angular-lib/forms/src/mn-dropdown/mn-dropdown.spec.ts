@@ -285,8 +285,17 @@ describe('MnDropdown (anchored popover)', () => {
     }
 
     /** Sends a keydown to an element, renders, and lets the deferred focus move run. */
-    async function press(target: Element, key: string): Promise<KeyboardEvent> {
-      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    async function press(
+      target: Element,
+      key: string,
+      opts: { shiftKey?: boolean } = {},
+    ): Promise<KeyboardEvent> {
+      const event = new KeyboardEvent('keydown', {
+        key,
+        bubbles: true,
+        cancelable: true,
+        shiftKey: opts.shiftKey === true,
+      });
       target.dispatchEvent(event);
       fixture.detectChanges();
       await Promise.resolve();
@@ -341,12 +350,23 @@ describe('MnDropdown (anchored popover)', () => {
       expect(document.activeElement).toBe(items()[0]);
     });
 
-    it('closes on Tab with focus on the trigger, leaving the Tab itself to the browser', async () => {
+    it('keeps the menu open and moves to the next command on Tab (cVNWtAqj)', async () => {
+      // User-menu a11y: Tab must not dump focus into the page behind the open menu.
       await open();
       const event = await press(items()[0], 'Tab');
-      expect(event.defaultPrevented).withContext('the browser moves on from the trigger').toBeFalse();
-      expect(component.isOpen).toBeFalse();
-      expect(document.activeElement).toBe(trigger());
+      expect(event.defaultPrevented).toBeTrue();
+      expect(component.isOpen).toBeTrue();
+      expect(document.activeElement).toBe(items()[1]);
+    });
+
+    it('moves to the previous command on Shift+Tab without closing', async () => {
+      await open();
+      await press(items()[0], 'ArrowDown');
+      expect(document.activeElement).toBe(items()[1]);
+      const event = await press(items()[1], 'Tab', { shiftKey: true });
+      expect(event.defaultPrevented).toBeTrue();
+      expect(component.isOpen).toBeTrue();
+      expect(document.activeElement).toBe(items()[0]);
     });
 
     /**

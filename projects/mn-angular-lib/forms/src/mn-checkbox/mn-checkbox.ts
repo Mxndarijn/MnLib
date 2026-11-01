@@ -101,6 +101,9 @@ export class MnCheckbox implements OnInit, OnChanges {
     if (this.props.label) {
       this.uiConfig = { ...this.uiConfig, label: this.props.label };
     }
+    if (this.props.ariaLabel) {
+      this.uiConfig = { ...this.uiConfig, ariaLabel: this.props.ariaLabel };
+    }
   }
 
   // ========== ControlValueAccessor Implementation ==========
@@ -117,6 +120,8 @@ export class MnCheckbox implements OnInit, OnChanges {
     if (this.checked !== undefined) {
       this.value = this.checked;
     }
+    // Row tables rebuild `[props]` per row; re-resolve so ariaLabel/label stick (cVNWtAqj).
+    this.resolveConfig();
   }
 
   registerOnChange(fn: (val: unknown) => void): void {
