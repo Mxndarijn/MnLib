@@ -41,7 +41,6 @@ import {
   SelectOption,
   SingleSelectTableFieldConfig,
   SliderFieldConfig,
-  SubmitMode,
 } from 'mn-angular-lib/modal-core';
 import { MnButton } from 'mn-angular-lib/button';
 import { MnInputField } from 'mn-angular-lib/forms';

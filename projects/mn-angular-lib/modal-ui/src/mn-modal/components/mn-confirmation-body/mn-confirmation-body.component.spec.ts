@@ -103,8 +103,6 @@ describe('MnConfirmationBodyComponent', () => {
 
     release();
     tick();
-    // Drain both promises
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     void first;
     void second;
     expect(mockModalRef.close).toHaveBeenCalledTimes(1);
