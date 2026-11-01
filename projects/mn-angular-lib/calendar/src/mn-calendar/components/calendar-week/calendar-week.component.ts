@@ -126,6 +126,7 @@ export class CalendarWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         this.buildColumns();
         this.refreshEvents();
         this.updateCurrentTime();
+        this.scrollToInitialRow();
         this.cdr.markForCheck();
       });
     }
@@ -279,7 +280,6 @@ export class CalendarWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.buildGridColumns();
     this.updateCurrentTime();
-    this.scrollToInitialRow();
   }
 
   /**

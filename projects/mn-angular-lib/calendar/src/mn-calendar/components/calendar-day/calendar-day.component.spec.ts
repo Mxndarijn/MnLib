@@ -107,4 +107,29 @@ describe('CalendarDayComponent vertical scroll (R7QVk8rz / G6pB4jWN)', () => {
     const el = scroller();
     expect(el.scrollTop).toBeGreaterThan(50);
   }));
+
+  it('does not snap back to the initial row when events are re-emitted after the user scrolled', fakeAsync(() => {
+    const ev = (id: string, h: number): CalendarEvent => ({
+      id,
+      title: id,
+      description: '',
+      startTime: new Date(2026, 10, 3, h, 0, 0),
+      endTime: new Date(2026, 10, 3, h + 1, 0, 0),
+      color: { id: 'blue', colorName: 'Blue', primaryColor: '#3366ff', secondaryColor: '#e8eeff' },
+    });
+    fixture.componentInstance.events$.next([ev('eve', 20)]);
+    fixture.detectChanges();
+    tick();
+    constrainDayHost();
+    fixture.detectChanges();
+    day().scrollToInitialRow();
+
+    const el = scroller();
+    el.scrollTop = 10; // user scrolled away from the initial position
+    fixture.componentInstance.events$.next([ev('eve', 20), ev('early', 8)]);
+    fixture.detectChanges();
+    tick();
+
+    expect(el.scrollTop).toBe(10);
+  }));
 });

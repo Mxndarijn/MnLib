@@ -124,6 +124,7 @@ export class CalendarDayComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateDayInfo();
         this.refreshEvents();
         this.updateCurrentTime();
+        this.scrollToInitialRow();
         this.cdr.markForCheck();
       });
     }
@@ -239,7 +240,6 @@ export class CalendarDayComponent implements OnInit, AfterViewInit, OnDestroy {
       (max, e) => Math.max(max, (e.column ?? 0) + (e.width ?? 1)),
       1,
     );
-    this.scrollToInitialRow();
   }
 
   /**
