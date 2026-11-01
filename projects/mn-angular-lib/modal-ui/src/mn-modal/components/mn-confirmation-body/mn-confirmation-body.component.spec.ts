@@ -84,6 +84,32 @@ describe('MnConfirmationBodyComponent', () => {
     expect(handler.handle).toHaveBeenCalledWith(true);
   });
 
+  it('ignores a second confirm while the handler is in flight (oYcJjCHT / lTsL0JFj)', fakeAsync(() => {
+    let release!: () => void;
+    const handler = {
+      handle: jasmine.createSpy('handle').and.returnValue(
+        new Promise<void>((resolve) => {
+          release = resolve;
+        }),
+      ),
+    };
+    setup({ confirm: { label: 'Remove', handler } });
+
+    const first = component.confirm();
+    const second = component.confirm();
+    tick();
+    expect(handler.handle).toHaveBeenCalledTimes(1);
+    expect(component.isConfirmDisabled).toBeTrue();
+
+    release();
+    tick();
+    // Drain both promises
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    void first;
+    void second;
+    expect(mockModalRef.close).toHaveBeenCalledTimes(1);
+  }));
+
   it('should return correct confirm label', () => {
     setup({ confirm: { label: 'Delete' } });
     expect(component.confirmLabel).toBe('Delete');

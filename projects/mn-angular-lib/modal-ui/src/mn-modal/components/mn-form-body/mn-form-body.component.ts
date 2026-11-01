@@ -907,9 +907,10 @@ export class MnFormBodyComponent<TModel = unknown, TResult = TModel>
       return;
     }
 
-    if (this.config.submitMode === SubmitMode.ONCE) {
-      this.isSubmitting = true;
-    }
+    // Always busy-lock for the in-flight request (oYcJjCHT). ONCE vs RETRYABLE only
+    // decides whether a failed submit can be tried again (catch clears the flag).
+    this.isSubmitting = true;
+    this.cdr.markForCheck();
 
     const formValue = this.form.value as TResult;
 

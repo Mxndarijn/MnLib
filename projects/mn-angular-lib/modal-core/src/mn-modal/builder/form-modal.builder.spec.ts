@@ -171,4 +171,10 @@ describe('FormModalBuilder', () => {
       .build();
     expect(config.body).toBe('Hello World');
   });
+
+  it('defaults submitMode to ONCE (oYcJjCHT)', () => {
+    const config = ModalBuilder.form().build();
+    expect(config.submitMode).toBe(SubmitMode.ONCE);
+  });
+
 });

@@ -71,7 +71,13 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
     this.cdr.detectChanges();
   }
 
+  /** True while the confirm handler is in flight — blocks double-click (oYcJjCHT / lTsL0JFj). */
+  isConfirming = false;
+
   async confirm(): Promise<void> {
+    if (this.isConfirming) {
+      return;
+    }
     if (this.hasFormFields && this.formBody?.form.invalid) {
       this.formBody.form.markAllAsTouched();
       return;
@@ -79,11 +85,18 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
 
     const result = (this.hasFormFields ? this.formBody?.form.value : true) as TResult;
 
-    if (this.config.confirm?.handler) {
-      await this.config.confirm.handler.handle(result);
+    this.isConfirming = true;
+    this.cdr.markForCheck();
+    try {
+      if (this.config.confirm?.handler) {
+        await this.config.confirm.handler.handle(result);
+      }
+      this.modalRef.close(result);
+    } catch (error) {
+      this.isConfirming = false;
+      this.cdr.markForCheck();
+      throw error;
     }
-
-    this.modalRef.close(result);
   }
 
   cancel(): void {
@@ -149,6 +162,9 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
     }
   }
   get isConfirmDisabled(): boolean {
+    if (this.isConfirming) {
+      return true;
+    }
     if (this.hasFormFields) {
       return this.confirmButtonStatus !== 'VALID';
     }
