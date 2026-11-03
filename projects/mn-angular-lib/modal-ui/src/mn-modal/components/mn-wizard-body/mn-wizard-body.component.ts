@@ -96,6 +96,10 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   private historyDepth = 0;
   /** Set while our own history.back() is in flight, so its popstate is consumed. */
   private ignorePopstate = false;
+  /** Settles a pending {@link unwindWizardHistory} once its popstate arrives. */
+  private resolveUnwind?: () => void;
+  /** How long Complete waits for the unwind's popstate before running anyway. */
+  private static readonly UNWIND_FALLBACK_MS = 300;
   /** history.state key holding the step id of a wizard entry. */
   private static readonly HISTORY_STATE_KEY = 'mnWizard';
   /**
@@ -258,6 +262,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       // Consume the popstate our own history.back() caused; no timer to race.
       this.ignorePopstate = false;
       this.syncWizardHistoryEntry();
+      this.resolveUnwind?.();
       return;
     }
     if (!this.isOwnHistoryEntry()) {
@@ -398,6 +403,52 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.statusSubscription?.unsubscribe();
     this.formBodiesSubscription?.unsubscribe();
     this.dropWizardHistory();
+  }
+
+  /**
+   * Removes every entry this wizard pushed and waits until the browser is back
+   * on the host entry. Complete runs it *before* the completion handler, so a
+   * handler that navigates pushes its page right after the host entry instead
+   * of on top of the wizard's entries, which would leave dead Back presses.
+   * Resolves on the resulting popstate, or after a short fallback when none
+   * arrives (no history API, or a test stub).
+   */
+  private async unwindWizardHistory(): Promise<void> {
+    if (this.historyDepth <= 0) {
+      return;
+    }
+    if (
+      typeof history === 'undefined' ||
+      typeof history.go !== 'function' ||
+      !this.isOwnHistoryEntry()
+    ) {
+      this.historyDepth = 0;
+      return;
+    }
+    const depth = this.historyDepth;
+    this.historyDepth = 0;
+    await new Promise<void>((resolve) => {
+      const done = (): void => {
+        clearTimeout(fallback);
+        this.resolveUnwind = undefined;
+        this.ignorePopstate = false;
+        resolve();
+      };
+      const fallback = setTimeout(done, MnWizardBodyComponent.UNWIND_FALLBACK_MS);
+      this.resolveUnwind = done;
+      this.ignorePopstate = true;
+      history.go(-depth);
+    });
+  }
+
+  /**
+   * Gives browser Back an entry to step on again after Complete unwound history
+   * but the wizard stays open (the handler returned `false` or threw).
+   */
+  private restoreWizardHistoryEntry(): void {
+    if (this.historyDepth === 0) {
+      this.pushWizardHistory();
+    }
   }
 
   /** Remove history entries we pushed when the wizard closes via Complete / X / Cancel. */
@@ -732,6 +783,10 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
         payload: aggregatedData,
       };
 
+      // Leave history as it was before the wizard opened, so a handler that
+      // navigates lands its page directly after the host page.
+      await this.unwindWizardHistory();
+
       // `false` keeps the wizard open so a rejected submit does not wipe the form.
       // Throwing takes the catch path below and also keeps it open.
       const keepOpen =
@@ -739,6 +794,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
         (await this.config.onComplete.handle(result)) === false;
 
       if (keepOpen) {
+        this.restoreWizardHistoryEntry();
         this.isCompleting = false;
         this.cdr.detectChanges();
         return;
@@ -746,6 +802,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.modalRef.close(result);
     } catch (error) {
+      this.restoreWizardHistoryEntry();
       this.isCompleting = false;
       this.cdr.detectChanges();
       console.error('Wizard completion error:', error);

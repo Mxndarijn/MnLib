@@ -199,6 +199,12 @@ describe('MnWizardBodyComponent', () => {
     /** Gates leaving the first step, to exercise a refused Forward. */
     let allowExit = true;
 
+    // Wizards in other spec files unwind with the real history.go; let their
+    // late popstates land before this block's wizard starts listening.
+    beforeEach(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
     /** The id the wizard under test tags its history entries with. */
     let ownId: unknown;
 
@@ -289,6 +295,54 @@ describe('MnWizardBodyComponent', () => {
       expect(component.currentStepId).toBe('two');
       expect(back).not.toHaveBeenCalled();
       expect(history.state).toEqual(entry('two', 0));
+    });
+
+    /** A one-step wizard whose completion handler is `handle`. */
+    function setupCompleting(handle: () => Promise<void | boolean>): void {
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [{ id: 'only', title: 'Only', body: 'Only' }],
+        onComplete: { handle },
+      } as WizardModalConfig);
+      ownId = history.state?.mnWizardId;
+    }
+
+    it('unwinds its history before the completion handler runs (no dead Back after a navigate)', async () => {
+      const go = history.go as jasmine.Spy;
+      let goCallsWhenHandled = -1;
+      setupCompleting(async () => {
+        goCallsWhenHandled = go.calls.count();
+      });
+
+      await component.complete();
+
+      expect(go).toHaveBeenCalledOnceWith(-1);
+      expect(goCallsWhenHandled).toBe(1);
+      expect(component.modalRef.close).toHaveBeenCalled();
+      // Already unwound: closing must not walk history a second time.
+      fixture.destroy();
+      expect(go).toHaveBeenCalledTimes(1);
+    });
+
+    it('pushes an entry again when the completion handler fails (wizard stays open)', async () => {
+      setupCompleting(async () => {
+        throw new Error('save failed');
+      });
+      spyOn(console, 'error');
+
+      await component.complete();
+
+      expect(component.modalRef.close).not.toHaveBeenCalled();
+      expect(history.state).toEqual(entry('only', 0));
+    });
+
+    it('pushes an entry again when onComplete returns false (wizard stays open)', async () => {
+      setupCompleting(async () => false);
+
+      await component.complete();
+
+      expect(component.modalRef.close).not.toHaveBeenCalled();
+      expect(history.state).toEqual(entry('only', 0));
     });
 
     it('dismisses the wizard on popstate at the first step (host page stays)', async () => {
