@@ -44,6 +44,9 @@ describe('MnWizardBodyComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MnWizardBodyComponent, HttpClientTestingModule],
     }).compileComponents();
+    // A destroyed wizard unwinds its entries with history.go; a real traversal
+    // would land its popstate on the next spec's wizard.
+    spyOn(history, 'go');
   });
 
   function setup(config: WizardModalConfig): void {
@@ -189,6 +192,178 @@ describe('MnWizardBodyComponent', () => {
 
       expect(component.currentStepId).toBe('three');
       expect(scroller.scrollTop).toBe(0);
+    });
+  });
+
+  describe('browser Back (em8TA5ZU)', () => {
+    /** Gates leaving the first step, to exercise a refused Forward. */
+    let allowExit = true;
+
+    // Wizards in other spec files unwind with the real history.go; let their
+    // late popstates land before this block's wizard starts listening.
+    beforeEach(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    /** The id the wizard under test tags its history entries with. */
+    let ownId: unknown;
+
+    /** A history entry of the wizard under test. */
+    function entry(step: string, pos: number): Record<string, unknown> {
+      return { mnWizard: step, mnWizardPos: pos, mnWizardId: ownId };
+    }
+
+    function setupSteps(flow: WizardFlowMode, ids: string[], startStepId?: string): void {
+      allowExit = true;
+      setup({
+        kind: ModalKind.WIZARD,
+        flow,
+        startStepId,
+        steps: ids.map((id, i) => ({
+          id,
+          title: id,
+          body: `Body ${id}`,
+          guard: i === 0 ? { canExit: () => allowExit } : undefined,
+        })),
+      } as WizardModalConfig);
+      ownId = history.state?.mnWizardId;
+    }
+
+    /** Lands the browser on `state` the way a real Back / Forward does, then settles. */
+    async function popTo(state: Record<string, unknown>): Promise<void> {
+      history.replaceState(state, '');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      await new Promise((resolve) => setTimeout(resolve));
+      fixture.detectChanges();
+    }
+
+    it('steps back on popstate instead of leaving the wizard on step 2', async () => {
+      setupSteps(WizardFlowMode.LINEAR, ['one', 'two']);
+      await component.next();
+      expect(component.currentStepId).toBe('two');
+
+      await popTo(entry('one', 0));
+
+      expect(component.currentStepId).toBe('one');
+      expect(component.modalRef.dismiss).not.toHaveBeenCalled();
+    });
+
+    it('steps forward on popstate when the entry is further along', async () => {
+      setupSteps(WizardFlowMode.LINEAR, ['one', 'two']);
+      await component.next();
+
+      await popTo(entry('one', 0));
+      expect(component.currentStepId).toBe('one');
+
+      await popTo(entry('two', 1));
+
+      expect(component.currentStepId).toBe('two');
+      expect(component.modalRef.dismiss).not.toHaveBeenCalled();
+    });
+
+    it('refuses Forward, sending the browser back, when the step may not be left', async () => {
+      setupSteps(WizardFlowMode.LINEAR, ['one', 'two']);
+      await component.next();
+      await popTo(entry('one', 0));
+      allowExit = false;
+      const back = spyOn(history, 'back');
+
+      await popTo(entry('two', 1));
+
+      expect(component.currentStepId).toBe('one');
+      expect(back).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns to the step jumped from, not the previous visible step (free flow)', async () => {
+      setupSteps(WizardFlowMode.FREE, ['one', 'two', 'three', 'four']);
+      await component.goToStep(component.visibleSteps[3]);
+      expect(component.currentStepId).toBe('four');
+      expect(history.state).toEqual(entry('four', 1));
+
+      await popTo(entry('one', 0));
+
+      expect(component.currentStepId).toBe('one');
+      expect(component.modalRef.dismiss).not.toHaveBeenCalled();
+    });
+
+    it('re-points its only entry, not pops it, on UI Back from a later start step', async () => {
+      setupSteps(WizardFlowMode.FREE, ['one', 'two', 'three'], 'three');
+      const back = spyOn(history, 'back');
+
+      await component.back();
+
+      expect(component.currentStepId).toBe('two');
+      expect(back).not.toHaveBeenCalled();
+      expect(history.state).toEqual(entry('two', 0));
+    });
+
+    /** A one-step wizard whose completion handler is `handle`. */
+    function setupCompleting(handle: () => Promise<void | boolean>): void {
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [{ id: 'only', title: 'Only', body: 'Only' }],
+        onComplete: { handle },
+      } as WizardModalConfig);
+      ownId = history.state?.mnWizardId;
+    }
+
+    it('unwinds its history before the completion handler runs (no dead Back after a navigate)', async () => {
+      const go = history.go as jasmine.Spy;
+      let goCallsWhenHandled = -1;
+      setupCompleting(async () => {
+        goCallsWhenHandled = go.calls.count();
+      });
+
+      await component.complete();
+
+      expect(go).toHaveBeenCalledOnceWith(-1);
+      expect(goCallsWhenHandled).toBe(1);
+      expect(component.modalRef.close).toHaveBeenCalled();
+      // Already unwound: closing must not walk history a second time.
+      fixture.destroy();
+      expect(go).toHaveBeenCalledTimes(1);
+    });
+
+    it('pushes an entry again when the completion handler fails (wizard stays open)', async () => {
+      setupCompleting(async () => {
+        throw new Error('save failed');
+      });
+      spyOn(console, 'error');
+
+      await component.complete();
+
+      expect(component.modalRef.close).not.toHaveBeenCalled();
+      expect(history.state).toEqual(entry('only', 0));
+    });
+
+    it('pushes an entry again when onComplete returns false (wizard stays open)', async () => {
+      setupCompleting(async () => false);
+
+      await component.complete();
+
+      expect(component.modalRef.close).not.toHaveBeenCalled();
+      expect(history.state).toEqual(entry('only', 0));
+    });
+
+    it('dismisses the wizard on popstate at the first step (host page stays)', async () => {
+      setupSteps(WizardFlowMode.LINEAR, ['one', 'two']);
+      expect(component.currentStepId).toBe('one');
+
+      // Leaving the first wizard entry drops mnWizard from history.state.
+      await popTo({ host: true });
+
+      expect(component.modalRef.dismiss).toHaveBeenCalled();
+    });
+
+    it('does not walk history on destroy when the top entry is not the wizard\'s', async () => {
+      setupSteps(WizardFlowMode.LINEAR, ['one', 'two']);
+      await component.next();
+      history.pushState({ host: 'elsewhere' }, '');
+      const go = history.go as jasmine.Spy;
+
+      fixture.destroy();
+
+      expect(go).not.toHaveBeenCalled();
     });
   });
 
