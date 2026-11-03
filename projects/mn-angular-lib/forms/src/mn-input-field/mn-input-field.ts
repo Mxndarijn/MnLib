@@ -6,7 +6,9 @@ import {
   inject,
   InjectionToken,
   Input,
+  OnChanges,
   OnInit,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { MnErrorMessageData, MnInputFieldUIConfig, MnInputProps } from './mn-input-fieldTypes';
@@ -86,7 +88,7 @@ export const MN_INPUT_FIELD_CONFIG = new InjectionToken<MnInputFieldUIConfig>(
     '[style.width]': "props?.fullWidth ? '100%' : null",
   },
 })
-export class MnInputField implements OnInit {
+export class MnInputField implements OnInit, OnChanges {
   ngControl = inject(NgControl, { optional: true, self: true });
 
   /** Resolved UI configuration for the input field */
@@ -163,6 +165,18 @@ export class MnInputField implements OnInit {
 
     if (this.props.autoFocus) {
       setTimeout(() => this.focus(), 0);
+    }
+  }
+
+  /**
+   * Re-applies label/placeholder/aria from `props` when the parent replaces the
+   * input object (language switch, kiosk search label, etc.). Without this the
+   * field keeps the values copied into `uiConfig` at init.
+   */
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['props'] && !changes['props'].firstChange && this.props) {
+      this.resolveConfig();
+      this.cdr.markForCheck();
     }
   }
 
