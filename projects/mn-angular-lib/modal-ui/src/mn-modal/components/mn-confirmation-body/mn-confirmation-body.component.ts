@@ -88,9 +88,19 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
     this.isConfirming = true;
     this.cdr.markForCheck();
     try {
-      if (this.config.confirm?.handler) {
-        await this.config.confirm.handler.handle(result);
+      // `false` keeps the dialog open so a rejected confirm does not discard context.
+      // Throwing also keeps it open (rethrown below so the caller sees the failure).
+      const keepOpen =
+        this.config.confirm?.handler != null &&
+        (await this.config.confirm.handler.handle(result)) === false;
+
+      if (keepOpen) {
+        // Runs after an `await`: unlock and announce, or the button stays disabled.
+        this.isConfirming = false;
+        this.cdr.markForCheck();
+        return;
       }
+
       this.modalRef.close(result);
     } catch (error) {
       this.isConfirming = false;

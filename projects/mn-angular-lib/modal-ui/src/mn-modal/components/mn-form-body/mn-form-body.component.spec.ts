@@ -133,6 +133,40 @@ describe('MnFormBodyComponent', () => {
     expect(mockModalRef.close).toHaveBeenCalled();
   });
 
+  it('submit() should keep the form open when onComplete returns false', async () => {
+    const handler = { handle: jasmine.createSpy('handle').and.returnValue(Promise.resolve(false)) };
+    const config = createFormConfig([
+      { kind: FieldKind.TEXT, key: 'name', label: 'Name', validators: [Validators.required] },
+    ]);
+    config.onComplete = handler;
+    setup(config);
+
+    component.form.get('name')!.setValue('John');
+    await component.submit();
+
+    expect(handler.handle).toHaveBeenCalled();
+    expect(mockModalRef.close).not.toHaveBeenCalled();
+    expect(component.isSubmitting).toBeFalse();
+  });
+
+  it('submit() should keep the form open when onComplete throws', async () => {
+    const handler = {
+      handle: jasmine.createSpy('handle').and.returnValue(Promise.reject(new Error('rejected'))),
+    };
+    const config = createFormConfig([
+      { kind: FieldKind.TEXT, key: 'name', label: 'Name', validators: [Validators.required] },
+    ]);
+    config.onComplete = handler;
+    setup(config);
+
+    component.form.get('name')!.setValue('John');
+    await component.submit();
+
+    expect(handler.handle).toHaveBeenCalled();
+    expect(mockModalRef.close).not.toHaveBeenCalled();
+    expect(component.isSubmitting).toBeFalse();
+  });
+
   it('should build rows from config.rows when provided', () => {
     const config: FormModalConfig<Record<string, unknown>, Record<string, unknown>> = {
       kind: ModalKind.FORM,
