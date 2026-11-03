@@ -70,6 +70,19 @@ export class CalendarWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Scrollable week body — vertical scroll for the full hour range (R7QVk8rz). */
   @ViewChild('bodyScroller') bodyScroller?: ElementRef<HTMLElement>;
 
+  /**
+   * True from open / a date change until that week's first events batch lands,
+   * which then decides the initial scroll; later batches leave the user's scroll alone.
+   * An empty batch does not count: the host replays its last (often still empty) list on
+   * subscribe, before the real load lands.
+   */
+  private pendingInitialScroll = true;
+
+  /** The user scrolled (wheel, touch, scrollbar) before events landed: keep their position. */
+  onUserScrollIntent(): void {
+    this.pendingInitialScroll = false;
+  }
+
   /** The date around which the week is centred. */
   @Input() focusDay!: Date;
   /** Observable that emits the full event list whenever it changes. */
@@ -116,17 +129,28 @@ export class CalendarWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe((events) => {
         this.events = events;
         this.refreshEvents();
+        // The host loads a week's events after the date change; the first batch
+        // after open / date change is the one the initial scroll should see.
+        if (this.pendingInitialScroll && events.length > 0) {
+          this.pendingInitialScroll = false;
+          this.scrollToInitialRow();
+        }
         this.cdr.markForCheck();
       });
     }
 
     if (this.focusDayChanged) {
       this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe((date) => {
+        // A replay of the date already shown is not a date change: keep the scroll.
+        const dateChanged = date.toDateString() !== this.focusDay?.toDateString();
         this.focusDay = date;
         this.buildColumns();
         this.refreshEvents();
         this.updateCurrentTime();
-        this.scrollToInitialRow();
+        if (dateChanged) {
+          this.pendingInitialScroll = true;
+          this.scrollToInitialRow();
+        }
         this.cdr.markForCheck();
       });
     }

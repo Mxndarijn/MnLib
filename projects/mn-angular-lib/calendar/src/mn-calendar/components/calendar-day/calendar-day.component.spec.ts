@@ -83,29 +83,54 @@ describe('CalendarDayComponent vertical scroll (R7QVk8rz / G6pB4jWN)', () => {
     expect(el.scrollTop).toBeGreaterThan(0);
   }));
 
-  it('scrolls toward the first event on open when not today', fakeAsync(() => {
-    const focus = new Date(2026, 10, 3, 12, 0, 0);
-    fixture.componentInstance.focusDay = focus;
-    fixture.componentInstance.focus$.next(focus);
-    fixture.componentInstance.events$.next([
-      {
-        id: 'eve',
-        title: 'Evening training',
-        description: '',
-        startTime: new Date(2026, 10, 3, 20, 0, 0),
-        endTime: new Date(2026, 10, 3, 21, 0, 0),
-        color: { id: 'blue', colorName: 'Blue', primaryColor: '#3366ff', secondaryColor: '#e8eeff' },
-      },
-    ]);
+  /** A day that is never "today", so the now-line cannot decide the scroll. */
+  const notToday = new Date(2031, 2, 4, 12, 0, 0);
+
+  /** An evening event on {@link notToday}. */
+  const eveningEvent = (): CalendarEvent => ({
+    id: 'eve',
+    title: 'Evening training',
+    description: '',
+    startTime: new Date(2031, 2, 4, 20, 0, 0),
+    endTime: new Date(2031, 2, 4, 21, 0, 0),
+    color: { id: 'blue', colorName: 'Blue', primaryColor: '#3366ff', secondaryColor: '#e8eeff' },
+  });
+
+  /** Renders, constrains the host, then changes the date the way calendar-view does. */
+  function openThenChangeDate(): void {
     fixture.detectChanges();
     tick();
     constrainDayHost();
     fixture.detectChanges();
-    day().scrollToInitialRow();
+    // calendar-view emits the new date first and only then requests its events.
+    fixture.componentInstance.focus$.next(notToday);
     fixture.detectChanges();
+    tick();
+  }
 
+  it('scrolls to the first event once that date\'s events arrive after the date change', fakeAsync(() => {
+    openThenChangeDate();
     const el = scroller();
+    expect(el.scrollTop).withContext('no events yet: start at the top').toBe(0);
+
+    fixture.componentInstance.events$.next([eveningEvent()]);
+    fixture.detectChanges();
+    tick();
+
     expect(el.scrollTop).toBeGreaterThan(50);
+  }));
+
+  it('keeps the user\'s position when they scroll before the events arrive', fakeAsync(() => {
+    openThenChangeDate();
+    const el = scroller();
+    el.dispatchEvent(new WheelEvent('wheel'));
+    el.scrollTop = 10;
+
+    fixture.componentInstance.events$.next([eveningEvent()]);
+    fixture.detectChanges();
+    tick();
+
+    expect(el.scrollTop).toBe(10);
   }));
 
   it('does not snap back to the initial row when events are re-emitted after the user scrolled', fakeAsync(() => {

@@ -14,6 +14,7 @@
     </div>
   </div>
   <div #bodyScroller
+       (wheel)="onUserScrollIntent()" (touchstart)="onUserScrollIntent()" (pointerdown)="onUserScrollIntent()"
        style="display: grid; grid-template-columns: 60px 1fr; align-items: start; flex: 1 1 0; min-height: 0; overflow-x: hidden; overflow-y: auto">
     <div class="grid"
       [style.grid-template-rows]="'repeat(' + totalRows + ', 1.5rem)'"
