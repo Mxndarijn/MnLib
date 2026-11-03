@@ -1,6 +1,8 @@
 ﻿import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   inject,
   Input,
@@ -8,6 +10,7 @@
   OnInit,
   Output,
   Type,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, takeUntil } from 'rxjs';
@@ -44,8 +47,12 @@ type DisplayHourRow = {
   imports: [CommonModule, CalendarEventComponent],
   templateUrl: './calendar-week.component.html',
   providers: [CalendarEventLayoutService],
+  host: { class: 'flex h-full min-h-0 flex-col overflow-hidden' },
 })
-export class CalendarWeekComponent implements OnInit, OnDestroy {
+export class CalendarWeekComponent implements OnInit, AfterViewInit, OnDestroy {
+  /** Fixed half-hour row height (px) matching the template `1.5rem` rows. */
+  static readonly ROW_HEIGHT_PX = 24;
+
   private readonly lang = inject(MnLanguageService);
 
   /**
@@ -59,6 +66,22 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
 
   private layoutService = inject(CalendarEventLayoutService);
   private cdr = inject(ChangeDetectorRef);
+
+  /** Scrollable week body — vertical scroll for the full hour range (R7QVk8rz). */
+  @ViewChild('bodyScroller') bodyScroller?: ElementRef<HTMLElement>;
+
+  /**
+   * True from open / a date change until that week's first events batch lands,
+   * which then decides the initial scroll; later batches leave the user's scroll alone.
+   * An empty batch does not count: the host replays its last (often still empty) list on
+   * subscribe, before the real load lands.
+   */
+  private pendingInitialScroll = true;
+
+  /** The user scrolled (wheel, touch, scrollbar) before events landed: keep their position. */
+  onUserScrollIntent(): void {
+    this.pendingInitialScroll = false;
+  }
 
   /** The date around which the week is centred. */
   @Input() focusDay!: Date;
@@ -106,22 +129,41 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
       this.eventsChanged.pipe(takeUntil(this.destroy$)).subscribe((events) => {
         this.events = events;
         this.refreshEvents();
+        // The host loads a week's events after the date change; the first batch
+        // after open / date change is the one the initial scroll should see.
+        if (this.pendingInitialScroll && events.length > 0) {
+          this.pendingInitialScroll = false;
+          this.scrollToInitialRow();
+        }
         this.cdr.markForCheck();
       });
     }
 
     if (this.focusDayChanged) {
       this.focusDayChanged.pipe(takeUntil(this.destroy$)).subscribe((date) => {
+        // A replay of the date already shown is not a date change: keep the scroll.
+        const dateChanged = date.toDateString() !== this.focusDay?.toDateString();
         this.focusDay = date;
         this.buildColumns();
         this.refreshEvents();
         this.updateCurrentTime();
+        if (dateChanged) {
+          this.pendingInitialScroll = true;
+          this.scrollToInitialRow();
+        }
         this.cdr.markForCheck();
       });
     }
 
     // Build hour rows asynchronously (formatTimeI returns a Promise).
-    this.buildHourRows().then(() => this.cdr.markForCheck());
+    this.buildHourRows().then(() => {
+      this.cdr.markForCheck();
+      this.scrollToInitialRow();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToInitialRow();
   }
 
   ngOnDestroy() {
@@ -262,6 +304,44 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
 
     this.buildGridColumns();
     this.updateCurrentTime();
+  }
+
+  /**
+   * Scrolls the body to the current hour (when today is in the week) or the first
+   * event (SuperBottie option 1 / R7QVk8rz).
+   */
+  scrollToInitialRow(): void {
+    const el = this.bodyScroller?.nativeElement;
+    if (!el || this.totalRows <= 0) {
+      return;
+    }
+    const targetRow = this.resolveInitialScrollRow();
+    if (targetRow <= 1) {
+      el.scrollTop = 0;
+      return;
+    }
+    const rowPx = CalendarWeekComponent.ROW_HEIGHT_PX;
+    const offset = (targetRow - 1) * rowPx - el.clientHeight / 3;
+    el.scrollTop = Math.max(0, offset);
+  }
+
+  /** 1-based grid row to land on: now-line, else earliest event, else top. */
+  private resolveInitialScrollRow(): number {
+    if (this.currentTimeRow > 0) {
+      return this.currentTimeRow;
+    }
+    let earliest = Number.POSITIVE_INFINITY;
+    for (const event of this.displayEvents) {
+      const row = CalendarUtility.getCorrectRow(
+        event.startTime.getHours(),
+        event.startTime.getMinutes(),
+        this.resolvedConfig.startHour,
+      );
+      if (row > 0 && row < earliest) {
+        earliest = row;
+      }
+    }
+    return Number.isFinite(earliest) ? earliest : 1;
   }
 
   /** Computes the CSS grid-template-columns string based on per-day sub-column counts. */
