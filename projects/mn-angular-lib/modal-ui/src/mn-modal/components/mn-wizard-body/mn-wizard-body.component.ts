@@ -89,12 +89,31 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
   wizardErrors: Record<string, string> = {};
 
   /**
-   * Browser-history entries this wizard pushed so Back steps the wizard instead
-   * of leaving the host page (em8TA5ZU). Cleaned up on destroy / dismiss.
+   * Browser-history entries this wizard has below and including the current one,
+   * so Back steps the wizard instead of leaving the host page (em8TA5ZU).
+   * Always the current entry's position + 1; cleaned up on destroy / dismiss.
    */
   private historyDepth = 0;
+  /** Set while our own history.back() is in flight, so its popstate is consumed. */
   private ignorePopstate = false;
+  /** history.state key holding the step id of a wizard entry. */
   private static readonly HISTORY_STATE_KEY = 'mnWizard';
+  /**
+   * history.state key holding a wizard entry's position (0 = first). It tells
+   * Back from Forward: popstate has no direction, and in a free-flow wizard the
+   * trail of visited steps is not the visible step order.
+   */
+  private static readonly HISTORY_POS_KEY = 'mnWizardPos';
+  /**
+   * history.state key holding the id of the wizard that pushed the entry. An
+   * entry another wizard left behind (one that closed without unwinding) is
+   * then never mistaken for one of ours.
+   */
+  private static readonly HISTORY_ID_KEY = 'mnWizardId';
+  /** Source of {@link historyId}; one per wizard opened in this page. */
+  private static nextHistoryId = 1;
+  /** This wizard's id in its history entries. */
+  private readonly historyId = MnWizardBodyComponent.nextHistoryId++;
 
   /**
    * Min-height (px) for the step container, sized to the tallest step so the
@@ -182,62 +201,103 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pushWizardHistory();
   }
 
+  /** Builds the history.state for a wizard entry at `pos` showing the current step. */
+  private wizardHistoryState(pos: number): Record<string, unknown> {
+    return {
+      [MnWizardBodyComponent.HISTORY_STATE_KEY]: this.currentStepId,
+      [MnWizardBodyComponent.HISTORY_POS_KEY]: pos,
+      [MnWizardBodyComponent.HISTORY_ID_KEY]: this.historyId,
+    };
+  }
+
+  /** Whether the current history entry is one this wizard pushed. */
+  private isOwnHistoryEntry(): boolean {
+    return (
+      typeof history !== 'undefined' &&
+      history.state?.[MnWizardBodyComponent.HISTORY_ID_KEY] === this.historyId &&
+      history.state?.[MnWizardBodyComponent.HISTORY_STATE_KEY] != null &&
+      typeof history.state?.[MnWizardBodyComponent.HISTORY_POS_KEY] === 'number'
+    );
+  }
+
   /** Push a history entry for the current step so browser Back stays inside the wizard. */
   private pushWizardHistory(): void {
     if (typeof history === 'undefined' || typeof history.pushState !== 'function') {
       return;
     }
-    history.pushState(
-      { [MnWizardBodyComponent.HISTORY_STATE_KEY]: this.currentStepId },
-      '',
-    );
+    history.pushState(this.wizardHistoryState(this.historyDepth), '');
     this.historyDepth += 1;
   }
 
   /**
-   * Browser Back / Forward (em8TA5ZU): step the wizard with history.
-   * Forward is distinguished from Back by comparing `history.state.mnWizard`
-   * to the current step index — popstate alone has no direction.
+   * Re-points the current wizard entry at the step on screen. The UI Back button
+   * goes to the previous *visible* step, which after a free-flow jump is not the
+   * step the entry underneath was pushed for.
+   */
+  private syncWizardHistoryEntry(): void {
+    if (typeof history === 'undefined' || typeof history.replaceState !== 'function') {
+      return;
+    }
+    if (!this.isOwnHistoryEntry()) {
+      return;
+    }
+    if (history.state[MnWizardBodyComponent.HISTORY_STATE_KEY] === this.currentStepId) {
+      return;
+    }
+    history.replaceState(this.wizardHistoryState(this.historyDepth - 1), '');
+  }
+
+  /**
+   * Browser Back / Forward (em8TA5ZU): show the step the entry was pushed for.
+   * The entry's position, compared to {@link historyDepth}, says which way the
+   * browser moved; leaving the first entry closes the wizard.
    */
   @HostListener('window:popstate')
   onBrowserBack(): void {
     if (this.ignorePopstate) {
       // Consume the popstate our own history.back() caused; no timer to race.
       this.ignorePopstate = false;
+      this.syncWizardHistoryEntry();
       return;
     }
-    const stateStep = history.state?.[MnWizardBodyComponent.HISTORY_STATE_KEY] as
-      | ModalStepId
-      | undefined;
-    if (stateStep != null) {
-      const targetIdx = this.visibleSteps.findIndex((s) => s.id === stateStep);
-      if (targetIdx > this.currentVisibleIndex) {
-        void this.applyHistoryForward(stateStep);
+    if (!this.isOwnHistoryEntry()) {
+      if (this.historyDepth <= 0) {
         return;
       }
-      if (targetIdx === this.currentVisibleIndex) {
-        return;
-      }
-    }
-    if (this.historyDepth <= 0) {
+      // Back past our first entry — close the wizard; the host page stays.
+      this.historyDepth = 0;
+      void this.dismissFromBrowserBack();
       return;
     }
-    this.historyDepth -= 1;
-    if (this.currentVisibleIndex > 0) {
-      void this.applyHistoryBack();
+    const stateStep = history.state[MnWizardBodyComponent.HISTORY_STATE_KEY] as ModalStepId;
+    const statePos = history.state[MnWizardBodyComponent.HISTORY_POS_KEY] as number;
+    const fromDepth = this.historyDepth;
+    this.historyDepth = statePos + 1;
+    if (stateStep === this.currentStepId) {
       return;
     }
-    // First step — close the wizard; history already moved past our entry.
-    void this.dismissFromBrowserBack();
+    if (this.historyDepth > fromDepth) {
+      void this.applyHistoryForward(stateStep, fromDepth);
+      return;
+    }
+    void this.applyHistoryBack(stateStep);
   }
 
-  /** Apply a step-forward without touching history (history already advanced). */
-  private async applyHistoryForward(stepId: ModalStepId): Promise<void> {
-    this.historyDepth += 1;
-    const previousStepId = this.currentStepId;
-    if (!this.visitedStepIds.includes(previousStepId)) {
-      this.visitedStepIds.push(previousStepId);
+  /**
+   * Apply a browser Forward. History has already advanced, so a step that may
+   * not be left (invalid form, guard, validator) sends the browser back again.
+   * @param stepId The step the restored entry was pushed for.
+   * @param fromDepth {@link historyDepth} before the Forward, restored on refusal.
+   */
+  private async applyHistoryForward(stepId: ModalStepId, fromDepth: number): Promise<void> {
+    const target = this.visibleSteps.find((s) => s.id === stepId);
+    if (!target || !(await this.canLeaveCurrentStep()) || !(await this.canEnterStep(target))) {
+      this.historyDepth = fromDepth;
+      this.ignorePopstate = true;
+      history.back();
+      return;
     }
+    const previousStepId = this.currentStepId;
     this.setCurrentStep(stepId);
     if (!this.visitedStepIds.includes(stepId)) {
       this.visitedStepIds.push(stepId);
@@ -246,16 +306,14 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.trackCurrentStepValidity();
   }
 
-  /** Apply a step-back without touching history (history already popped). */
-  private async applyHistoryBack(): Promise<void> {
-    const prevStep = this.visibleSteps[this.currentVisibleIndex - 1];
-    if (!prevStep) {
-      await this.dismissFromBrowserBack();
-      return;
-    }
+  /**
+   * Apply a browser Back without touching history (history already moved).
+   * @param stepId The step the restored entry was pushed for.
+   */
+  private async applyHistoryBack(stepId: ModalStepId): Promise<void> {
     const previousStepId = this.currentStepId;
     this.visitedStepIds = this.visitedStepIds.filter((id) => id !== this.currentStepId);
-    this.setCurrentStep(prevStep.id);
+    this.setCurrentStep(stepId);
     await this.notifyStepChange(previousStepId, NavigationDirection.BACKWARD);
     this.trackCurrentStepValidity();
   }
@@ -329,6 +387,9 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
       this.visitedStepIds.push(this.currentStepId);
     }
 
+    // A jump is a step of its own in history, so browser Back returns to where
+    // the user jumped from rather than to the previous visible step.
+    this.pushWizardHistory();
     await this.notifyStepChange(previousStepId, NavigationDirection.DIRECT);
     this.trackCurrentStepValidity();
   }
@@ -352,7 +413,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.historyDepth = 0;
     // Complete / the host may already have navigated away; only unwind while
     // the top entry is still ours, or the walk would leave the new page.
-    if (!history.state?.[MnWizardBodyComponent.HISTORY_STATE_KEY]) {
+    if (!this.isOwnHistoryEntry()) {
       return;
     }
     history.go(-depth);
@@ -463,38 +524,54 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.isStepVisible(step);
   }
 
-  async next(): Promise<void> {
-    if (!this.canGoNext) return;
-
+  /**
+   * Whether the current step may be left going forward: its form is valid
+   * (touching every field when not), its exit guard allows it and its
+   * validators pass. Shared by Next and browser Forward.
+   */
+  private async canLeaveCurrentStep(): Promise<boolean> {
     const currentStep = this.currentStep;
 
     // Validate embedded form if present
     const formBody = this.getCurrentFormBody();
     if (formBody && formBody.form.invalid) {
       formBody.form.markAllAsTouched();
-      return;
+      return false;
     }
 
     if (currentStep?.guard?.canExit) {
       const canExit = await currentStep.guard.canExit();
-      if (!canExit) return;
+      if (!canExit) return false;
     }
 
     if (currentStep?.validators) {
       for (const validator of currentStep.validators) {
         const result = await validator.validate();
-        if (result.status === 'invalid') return;
+        if (result.status === 'invalid') return false;
       }
     }
+    return true;
+  }
+
+  /**
+   * Whether `step`'s enter guard lets the user in.
+   * @param step The step about to become current.
+   */
+  private async canEnterStep(step: WizardStepConfig): Promise<boolean> {
+    if (!step.guard?.canEnter) return true;
+    return step.guard.canEnter();
+  }
+
+  async next(): Promise<void> {
+    if (!this.canGoNext) return;
+
+    if (!(await this.canLeaveCurrentStep())) return;
 
     // Find next visible step
     const nextStep = this.visibleSteps[this.currentVisibleIndex + 1];
     if (!nextStep) return;
 
-    if (nextStep.guard?.canEnter) {
-      const canEnter = await nextStep.guard.canEnter();
-      if (!canEnter) return;
-    }
+    if (!(await this.canEnterStep(nextStep))) return;
 
     const previousStepId = this.currentStepId;
     this.setCurrentStep(nextStep.id);
@@ -564,9 +641,18 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.trackCurrentStepValidity();
   }
 
-  /** history.back() one entry while ignoring the resulting popstate. */
+  /**
+   * Keeps history in step with the UI Back button. Pops one entry (ignoring the
+   * resulting popstate, which then re-points the exposed entry at this step),
+   * but never the first one: after a free-flow jump the wizard can still go back
+   * while only one entry is ours, so that entry is re-pointed instead.
+   */
   private popWizardHistoryEntry(): void {
     if (this.historyDepth <= 0) {
+      return;
+    }
+    if (this.historyDepth === 1) {
+      this.syncWizardHistoryEntry();
       return;
     }
     if (typeof history === 'undefined' || typeof history.back !== 'function') {
