@@ -15,6 +15,12 @@ export type MnCheckboxProps = {
   /** Label text displayed next to the checkbox */
   label?: string;
 
+  /**
+   * Accessible name when there is no visible label (e.g. a table selection cell).
+   * Prefer this over a visible `label` when the control must stay compact (cVNWtAqj).
+   */
+  ariaLabel?: string;
+
   // ========== Styling/Variants ==========
 
   /** Size variant of the checkbox (default: 'md') */
