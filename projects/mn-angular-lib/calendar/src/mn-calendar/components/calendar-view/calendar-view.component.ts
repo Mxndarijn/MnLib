@@ -188,12 +188,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /** Switches the active view. On mobile, forces day view. */
+  /** Switches the active view (gM2XdeMo: allowed on mobile too). */
   switchView(view: CalendarView) {
-    if (this.isMobileView) {
-      this.currentView = CalendarView.DAY;
-      return;
-    }
     this.currentView = view;
   }
 

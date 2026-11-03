@@ -228,10 +228,12 @@ export class CalendarDayComponent implements OnInit, OnDestroy {
   private updateCurrentTime() {
     const now = new Date();
     if (this.focusDay && this.formatter.isSameDay(this.focusDay, now)) {
-      this.currentTimeRow = CalendarUtility.getCorrectRow(
+      // Hide when outside the visible hours — getCorrectRow would clamp onto row 1 (l2tTCjLe).
+      this.currentTimeRow = CalendarUtility.getCurrentTimeRow(
         now.getHours(),
         now.getMinutes(),
         this.resolvedConfig.startHour,
+        this.resolvedConfig.endHour,
       );
       this.isToday = true;
       // formatTime is async; refresh the label and re-render when it resolves.

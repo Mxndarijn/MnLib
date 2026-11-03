@@ -312,4 +312,104 @@ describe('MnWizardBodyComponent', () => {
       expect(go).not.toHaveBeenCalled();
     });
   });
+
+  describe('complete keep-open', () => {
+    it('closes when onComplete returns void', async () => {
+      const handler = { handle: jasmine.createSpy('handle').and.returnValue(Promise.resolve()) };
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [{ id: 'one', title: 'One', body: 'First step' }],
+        onComplete: handler,
+      } as WizardModalConfig);
+
+      await component.complete();
+
+      expect(handler.handle).toHaveBeenCalled();
+      expect(component.modalRef.close).toHaveBeenCalled();
+    });
+
+    it('keeps the wizard open when onComplete returns false', async () => {
+      const handler = { handle: jasmine.createSpy('handle').and.returnValue(Promise.resolve(false)) };
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [{ id: 'one', title: 'One', body: 'First step' }],
+        onComplete: handler,
+      } as WizardModalConfig);
+
+      await component.complete();
+
+      expect(handler.handle).toHaveBeenCalled();
+      expect(component.modalRef.close).not.toHaveBeenCalled();
+      expect(component.isCompleting).toBeFalse();
+    });
+
+    it('keeps the wizard open when onComplete throws', async () => {
+      const handler = {
+        handle: jasmine.createSpy('handle').and.returnValue(Promise.reject(new Error('rejected'))),
+      };
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [{ id: 'one', title: 'One', body: 'First step' }],
+        onComplete: handler,
+      } as WizardModalConfig);
+
+      await component.complete();
+
+      expect(handler.handle).toHaveBeenCalled();
+      expect(component.modalRef.close).not.toHaveBeenCalled();
+      expect(component.isCompleting).toBeFalse();
+    });
+  });
+
+  describe('formValidators errors', () => {
+    function setupWithFormValidator(): void {
+      setup({
+        kind: ModalKind.WIZARD,
+        steps: [
+          {
+            id: 'one',
+            title: 'One',
+            fields: [{ kind: 'text', key: 'name', label: 'Name' } as never],
+            formValidators: [
+              (value: Record<string, unknown>) =>
+                value['name'] === 'bad' ? { name: 'Name is not allowed' } : null,
+            ],
+          },
+          { id: 'two', title: 'Two', body: 'Second step' },
+        ],
+      } as unknown as WizardModalConfig);
+    }
+
+    it('blocks next() and disables the step while formValidators report errors', async () => {
+      setupWithFormValidator();
+      const formBody = component.formBodies.first;
+      formBody.form.get('name')!.setValue('bad');
+      fixture.detectChanges();
+
+      expect(formBody.form.valid).withContext('controls stay valid').toBeTrue();
+      expect(formBody.hasFormErrors).toBeTrue();
+      expect(component.isCurrentStepValid).toBeFalse();
+
+      await component.next();
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('one');
+    });
+
+    it('advances once the formValidators error is cleared', async () => {
+      setupWithFormValidator();
+      const formBody = component.formBodies.first;
+      formBody.form.get('name')!.setValue('bad');
+      formBody.form.get('name')!.setValue('good');
+      fixture.detectChanges();
+
+      expect(formBody.hasFormErrors).toBeFalse();
+      expect(component.isCurrentStepValid).toBeTrue();
+
+      await component.next();
+      fixture.detectChanges();
+
+      expect(component.currentStepId).toBe('two');
+    });
+  });
 });

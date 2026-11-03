@@ -60,9 +60,18 @@ export class MnCustomBodyHostComponent implements OnInit {
   }
 
   attachTemplate(template: TemplateRef<unknown>): void {
-    this.container.createEmbeddedView(template, {
-      $implicit: this.modalRef,
-      modalRef: this.modalRef,
-    });
+    // Embedded views inherit the TemplateRef's declaration injector by default —
+    // the page that declared the ng-template, not this host. That left MN_IN_MODAL
+    // false inside template modal bodies, so mn-table opened a second bottom sheet
+    // over the modal (F157). Pass this container's injector so the shell's
+    // MN_IN_MODAL=true reaches every directive in the template.
+    this.container.createEmbeddedView(
+      template,
+      {
+        $implicit: this.modalRef,
+        modalRef: this.modalRef,
+      },
+      { injector: this.container.injector },
+    );
   }
 }

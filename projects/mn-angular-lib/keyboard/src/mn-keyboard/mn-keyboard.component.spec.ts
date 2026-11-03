@@ -149,4 +149,61 @@ describe('MnKeyboard', () => {
 
     expect(dismissed).toBe(1);
   });
+
+  it('flips uppercase from the shift key and reports it', () => {
+    const seen: boolean[] = [];
+    component.uppercaseChange.subscribe((value) => seen.push(value));
+
+    component.toggleShift();
+    component.toggleShift();
+
+    expect(seen).toEqual([true, false]);
+    expect(component.uppercase).toBeFalse();
+  });
+
+  it('renders a shift key that upper-cases the letters when clicked', () => {
+    const shift: HTMLButtonElement = fixture.nativeElement.querySelector('.mn-keyboard-key-shift');
+
+    shift.click();
+    fixture.detectChanges();
+
+    expect(component.uppercase).toBeTrue();
+    expect(fixture.nativeElement.textContent).toContain('Q');
+  });
+
+  it('types an apostrophe and a hyphen', () => {
+    const seen = emissions();
+    expect(component.symbolKeys).toEqual(["'", '-']);
+    component.value = 'O';
+
+    component.press("'");
+
+    expect(seen).toEqual(["O'"]);
+  });
+
+  it('keeps the accent page closed until asked, then offers all 21 accents', () => {
+    const q = (): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('.mn-keyboard-key-accent'));
+    expect(q().length).toBe(0);
+
+    (fixture.nativeElement.querySelector('.mn-keyboard-key-accents') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(q().map((b) => b.textContent!.trim()).join('')).toBe('éèëêáàäâóòöôúùüûíìïîç');
+  });
+
+  it('upper-cases the accents with shift', () => {
+    component.uppercase = true;
+
+    expect(component.accentRows[0][0]).toBe('É');
+    expect(component.accentRows[2][6]).toBe('Ç');
+  });
+
+  it('offers no text-only keys on the numeric pad', () => {
+    fixture.componentRef.setInput('layout', 'numeric');
+    fixture.detectChanges();
+
+    expect(component.textual).toBeFalse();
+    expect(fixture.nativeElement.querySelector('.mn-keyboard-key-shift')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.mn-keyboard-key-symbol')).toBeNull();
+  });
 });

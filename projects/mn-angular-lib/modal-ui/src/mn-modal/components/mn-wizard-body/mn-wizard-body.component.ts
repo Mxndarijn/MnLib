@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { MnModalRef } from 'mn-angular-lib/modal-core';
 import {
   ActionStyle,
@@ -375,7 +375,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Validate current step's form before allowing direct step navigation
     const formBody = this.getCurrentFormBody();
-    if (formBody && formBody.form.invalid) {
+    if (formBody && (formBody.form.invalid || formBody.hasFormErrors)) {
       formBody.form.markAllAsTouched();
       return;
     }
@@ -534,7 +534,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Validate embedded form if present
     const formBody = this.getCurrentFormBody();
-    if (formBody && formBody.form.invalid) {
+    if (formBody && (formBody.form.invalid || formBody.hasFormErrors)) {
       formBody.form.markAllAsTouched();
       return false;
     }
@@ -605,9 +605,14 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const formBody = this.getCurrentFormBody();
     if (formBody && formBody.form) {
-      this.isCurrentStepValid = formBody.form.valid;
-      this.statusSubscription = formBody.form.statusChanges.subscribe(() => {
-        this.isCurrentStepValid = formBody.form.valid;
+      const isValid = () => formBody.form.valid && !formBody.hasFormErrors;
+      this.isCurrentStepValid = isValid();
+      // formValidators errors refresh on valueChanges, not statusChanges
+      this.statusSubscription = merge(
+        formBody.form.statusChanges,
+        formBody.form.valueChanges,
+      ).subscribe(() => {
+        this.isCurrentStepValid = isValid();
         this.cdr.detectChanges();
       });
     } else {
@@ -687,7 +692,7 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Validate embedded form if present
     const formBody = this.getCurrentFormBody();
-    if (formBody && formBody.form.invalid) {
+    if (formBody && (formBody.form.invalid || formBody.hasFormErrors)) {
       formBody.form.markAllAsTouched();
       return;
     }
@@ -727,8 +732,16 @@ export class MnWizardBodyComponent implements OnInit, AfterViewInit, OnDestroy {
         payload: aggregatedData,
       };
 
-      if (this.config.onComplete) {
-        await this.config.onComplete.handle(result);
+      // `false` keeps the wizard open so a rejected submit does not wipe the form.
+      // Throwing takes the catch path below and also keeps it open.
+      const keepOpen =
+        this.config.onComplete != null &&
+        (await this.config.onComplete.handle(result)) === false;
+
+      if (keepOpen) {
+        this.isCompleting = false;
+        this.cdr.detectChanges();
+        return;
       }
 
       this.modalRef.close(result);

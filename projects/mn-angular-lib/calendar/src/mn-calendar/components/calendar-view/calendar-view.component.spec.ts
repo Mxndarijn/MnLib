@@ -52,6 +52,20 @@ describe('CalendarViewComponent', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
+  describe('view switcher contrast', () => {
+    it('keeps inactive tabs on base-content and marks the active tab bold', async () => {
+      await createCalendar(CalendarView.WEEK);
+
+      const tabs: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('[role="tab"]'));
+      const active = tabs.find(t => t.getAttribute('aria-selected') === 'true')!;
+      const inactive = tabs.filter(t => t !== active);
+
+      expect(active.classList).toContain('font-semibold');
+      expect(inactive.length).toBeGreaterThan(0);
+      inactive.forEach(t => expect(t.classList).toContain('text-base-content!'));
+    });
+  });
+
   describe('navigating', () => {
     it('steps a day at a time in day view', async () => {
       await createCalendar(CalendarView.DAY);
@@ -165,6 +179,17 @@ describe('CalendarViewComponent', () => {
       component.switchView(CalendarView.MONTH);
       expect(component.periodLabel).toBe('January 2025');
       expect(component.focusDay.getDate()).toBe(15);
+    });
+
+    it('keeps the Month/Week/Day switcher visible on a narrow viewport (gM2XdeMo)', async () => {
+      await createCalendar(CalendarView.DAY);
+      component.isMobileView = true;
+      fixture.detectChanges();
+      const tabs = (fixture.nativeElement as HTMLElement).querySelectorAll('[role="tablist"] [role="tab"]');
+      expect(tabs.length).toBe(3);
+      component.switchView(CalendarView.WEEK);
+      fixture.detectChanges();
+      expect(component.currentView).toBe(CalendarView.WEEK);
     });
   });
 
