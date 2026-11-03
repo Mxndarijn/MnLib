@@ -35,4 +35,8 @@ export type MnKeyboardLabels = {
   submit: string;
   /** Accessible name for the keyboard as a whole. */
   keyboard: string;
+  /** The shift (upper/lower case) key. Defaults to a glyph. */
+  shift?: string;
+  /** The key that opens the accented-letter page. Defaults to a glyph. */
+  accents?: string;
 };
