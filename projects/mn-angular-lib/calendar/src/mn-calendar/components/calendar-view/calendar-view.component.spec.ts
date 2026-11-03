@@ -52,6 +52,20 @@ describe('CalendarViewComponent', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
+  describe('view switcher contrast', () => {
+    it('keeps inactive tabs on base-content and marks the active tab bold', async () => {
+      await createCalendar(CalendarView.WEEK);
+
+      const tabs: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('[role="tab"]'));
+      const active = tabs.find(t => t.getAttribute('aria-selected') === 'true')!;
+      const inactive = tabs.filter(t => t !== active);
+
+      expect(active.classList).toContain('font-semibold');
+      expect(inactive.length).toBeGreaterThan(0);
+      inactive.forEach(t => expect(t.classList).toContain('text-base-content!'));
+    });
+  });
+
   describe('navigating', () => {
     it('steps a day at a time in day view', async () => {
       await createCalendar(CalendarView.DAY);
