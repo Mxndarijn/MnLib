@@ -302,10 +302,12 @@ export class CalendarWeekComponent implements OnInit, OnDestroy {
     if (dayIdx >= 0 && this.dayColumnMap.length > 0) {
       const dayInfo = this.dayColumnMap[dayIdx];
       this.currentTimeCol = `${dayInfo.startCol} / span ${dayInfo.subColumns}`;
-      this.currentTimeRow = CalendarUtility.getCorrectRow(
+      // Hide when outside the visible hours — getCorrectRow would clamp onto row 1 (l2tTCjLe).
+      this.currentTimeRow = CalendarUtility.getCurrentTimeRow(
         now.getHours(),
         now.getMinutes(),
         this.resolvedConfig.startHour,
+        this.resolvedConfig.endHour,
       );
       // formatTime is async; refresh the label and re-render when it resolves.
       this.formatter.formatTime(now).then((label) => {
