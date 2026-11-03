@@ -66,28 +66,30 @@
   <!-- Toolbar: custom toolbar template + search. Only rendered when it has content,
        so an unsearchable table without toolbar templates emits no empty spacer. -->
 @if (showsSearch || dataSource.toolbarLeftTemplate || dataSource.toolbarRightTemplate || showsFilterButton) {
-  <div class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center justify-between gap-2 mb-3">
+  <!-- spYV0YV5 / GRRU8s1V / D2NV3xS9: wrap at ~600px so search + Filters never force
+       page-level horizontal scroll. min-w-0 lets flex children shrink inside the page. -->
+  <div class="mb-3 flex min-w-0 flex-col flex-wrap justify-between gap-2 @min-[420px]:flex-row @min-[420px]:items-center">
     <!-- The left slot only when it has content: an empty one still took a flex gap, which
          pushed the search 8px in from the page edge. ml-auto keeps the search on the right. -->
     @if (dataSource.toolbarLeftTemplate) {
-    <div class="flex items-center gap-2 w-full @min-[420px]:w-auto">
-      <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
+    <div class="flex min-w-0 w-full items-center gap-2 @min-[420px]:w-auto">
+      <div class="flex min-w-0 w-full flex-col @min-[420px]:w-auto @min-[420px]:flex-row">
         <ng-container [ngTemplateOutlet]="dataSource.toolbarLeftTemplate"></ng-container>
       </div>
     </div>
     }
     <div
-      class="flex flex-col @min-[420px]:flex-row @min-[420px]:items-center gap-2 w-full @min-[420px]:flex-1 @min-[420px]:ml-auto @min-[560px]:flex-none @min-[560px]:w-auto">
+      class="flex min-w-0 w-full flex-col flex-wrap gap-2 @min-[420px]:ml-auto @min-[420px]:flex-1 @min-[420px]:flex-row @min-[420px]:items-center @min-[720px]:w-auto @min-[720px]:flex-none">
     <!-- Search and the filter button share one row: two full-width bars stacked above the
          first row pushed the content a whole screen down on a phone. -->
     @if (showsSearch || showsFilterButton) {
-      <div class="flex items-center gap-2 w-full @min-[420px]:flex-1 @min-[560px]:flex-none">
+      <div class="flex min-w-0 w-full items-center gap-2 @min-[420px]:flex-1 @min-[720px]:flex-none">
         @if (showsSearch) {
           <!-- Enter must not submit a surrounding form: the search box belongs to the
                table's chrome, not to whatever form the table happens to sit in. -->
           <mn-lib-input-field
             (keydown.enter)="$event.preventDefault()"
-            class="min-w-0 flex-1 @min-[560px]:flex-none @min-[560px]:min-w-64"
+            class="min-w-0 flex-1 @min-[720px]:flex-none @min-[720px]:min-w-64"
             [props]="{
                 id: 'mn-table-search',
                 type: 'search',
@@ -128,7 +130,7 @@
       </div>
     }
     @if (dataSource.toolbarRightTemplate) {
-      <div class="flex flex-col w-full @min-[420px]:w-auto @min-[420px]:flex-row">
+      <div class="flex min-w-0 w-full flex-col @min-[420px]:w-auto @min-[420px]:flex-row">
         <ng-container [ngTemplateOutlet]="dataSource.toolbarRightTemplate"></ng-container>
       </div>
     }

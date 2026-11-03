@@ -84,6 +84,58 @@ describe('MnConfirmationBodyComponent', () => {
     expect(handler.handle).toHaveBeenCalledWith(true);
   });
 
+  it('keeps the dialog open and re-enables confirm when the handler returns false', async () => {
+    const handler = { handle: jasmine.createSpy('handle').and.returnValue(Promise.resolve(false)) };
+    setup({ confirm: { label: 'Yes', handler } });
+
+    await component.confirm();
+
+    expect(handler.handle).toHaveBeenCalledWith(true);
+    expect(mockModalRef.close).not.toHaveBeenCalled();
+    expect(component.isConfirming).toBeFalse();
+    expect(component.isConfirmDisabled).toBeFalse();
+
+    handler.handle.and.returnValue(Promise.resolve());
+    await component.confirm();
+    expect(handler.handle).toHaveBeenCalledTimes(2);
+    expect(mockModalRef.close).toHaveBeenCalledWith(true);
+  });
+
+  it('unlocks and rethrows when the handler throws', async () => {
+    const handler = {
+      handle: jasmine.createSpy('handle').and.returnValue(Promise.reject(new Error('rejected'))),
+    };
+    setup({ confirm: { label: 'Yes', handler } });
+
+    await expectAsync(component.confirm()).toBeRejectedWithError('rejected');
+    expect(mockModalRef.close).not.toHaveBeenCalled();
+    expect(component.isConfirming).toBeFalse();
+  });
+
+  it('ignores a second confirm while the handler is in flight (oYcJjCHT / lTsL0JFj)', fakeAsync(() => {
+    let release!: () => void;
+    const handler = {
+      handle: jasmine.createSpy('handle').and.returnValue(
+        new Promise<void>((resolve) => {
+          release = resolve;
+        }),
+      ),
+    };
+    setup({ confirm: { label: 'Remove', handler } });
+
+    const first = component.confirm();
+    const second = component.confirm();
+    tick();
+    expect(handler.handle).toHaveBeenCalledTimes(1);
+    expect(component.isConfirmDisabled).toBeTrue();
+
+    release();
+    tick();
+    void first;
+    void second;
+    expect(mockModalRef.close).toHaveBeenCalledTimes(1);
+  }));
+
   it('should return correct confirm label', () => {
     setup({ confirm: { label: 'Delete' } });
     expect(component.confirmLabel).toBe('Delete');

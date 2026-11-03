@@ -71,7 +71,13 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
     this.cdr.detectChanges();
   }
 
+  /** True while the confirm handler is in flight — blocks double-click (oYcJjCHT / lTsL0JFj). */
+  isConfirming = false;
+
   async confirm(): Promise<void> {
+    if (this.isConfirming) {
+      return;
+    }
     if (this.hasFormFields && this.formBody?.form.invalid) {
       this.formBody.form.markAllAsTouched();
       return;
@@ -79,20 +85,27 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
 
     const result = (this.hasFormFields ? this.formBody?.form.value : true) as TResult;
 
+    this.isConfirming = true;
+    this.cdr.markForCheck();
     try {
       // `false` keeps the dialog open so a rejected confirm does not discard context.
-      // Throwing also keeps it open.
+      // Throwing also keeps it open (rethrown below so the caller sees the failure).
       const keepOpen =
         this.config.confirm?.handler != null &&
         (await this.config.confirm.handler.handle(result)) === false;
 
       if (keepOpen) {
+        // Runs after an `await`: unlock and announce, or the button stays disabled.
+        this.isConfirming = false;
+        this.cdr.markForCheck();
         return;
       }
 
       this.modalRef.close(result);
     } catch (error) {
-      console.error('Confirmation handler error:', error);
+      this.isConfirming = false;
+      this.cdr.markForCheck();
+      throw error;
     }
   }
 
@@ -159,6 +172,9 @@ export class MnConfirmationBodyComponent<TResult = boolean> implements OnInit {
     }
   }
   get isConfirmDisabled(): boolean {
+    if (this.isConfirming) {
+      return true;
+    }
     if (this.hasFormFields) {
       return this.confirmButtonStatus !== 'VALID';
     }

@@ -19,6 +19,16 @@ const ALPHA_ROWS: readonly string[][] = [
 /** The digit row that sits above the letters on an alphanumeric keyboard. */
 const DIGIT_ROW: readonly string[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
+/** Accented letters for Dutch names, lower-case, in three rows of seven. */
+const ACCENT_ROWS: readonly string[][] = [
+  ['é', 'è', 'ë', 'ê', 'á', 'à', 'ä'],
+  ['â', 'ó', 'ò', 'ö', 'ô', 'ú', 'ù'],
+  ['ü', 'û', 'í', 'ì', 'ï', 'î', 'ç'],
+];
+
+/** Punctuation allowed in names: apostrophe and hyphen. */
+const SYMBOL_KEYS: readonly string[] = ["'", '-'];
+
 /** Phone-style pad rows for the numeric layout. */
 const NUMERIC_ROWS: readonly string[][] = [
   ['1', '2', '3'],
@@ -75,9 +85,13 @@ export class MnKeyboard {
     space: '␣',
     submit: '⏎',
     keyboard: '',
+    shift: '⇧',
+    accents: 'é',
   };
   /** Whether letters are rendered (and typed) upper-case. */
   @Input() uppercase = false;
+  /** Emits the new case when the shift key flips {@link uppercase}. */
+  @Output() uppercaseChange = new EventEmitter<boolean>();
   /** Whether to offer a space key. Off for a field that can never contain one. */
   @Input() allowSpace = true;
   /** Whether to offer a submit key. */
@@ -111,6 +125,26 @@ export class MnKeyboard {
     return this.layout === 'alpha' ? letters : [[...DIGIT_ROW], ...letters];
   }
 
+  /** Whether the accent page is open. */
+  accentsOpen = false;
+
+  /** Whether the layout takes text (letters, accents, apostrophe, hyphen). */
+  get textual(): boolean {
+    return this.layout !== 'numeric';
+  }
+
+  /** The accent rows, cased like the letters. */
+  get accentRows(): readonly string[][] {
+    return this.uppercase
+      ? ACCENT_ROWS.map((row) => row.map((key) => key.toUpperCase()))
+      : ACCENT_ROWS;
+  }
+
+  /** The apostrophe and hyphen keys. */
+  get symbolKeys(): readonly string[] {
+    return SYMBOL_KEYS;
+  }
+
   /** Whether the space key should be offered (never on a digits-only pad). */
   get spaceVisible(): boolean {
     return this.allowSpace && this.layout !== 'numeric';
@@ -122,6 +156,17 @@ export class MnKeyboard {
    */
   press(key: string): void {
     this.emit(this.value + key);
+  }
+
+  /** Flips between lower and upper case, as the shift key does. */
+  toggleShift(): void {
+    this.uppercase = !this.uppercase;
+    this.uppercaseChange.emit(this.uppercase);
+  }
+
+  /** Opens or closes the accent page. */
+  toggleAccents(): void {
+    this.accentsOpen = !this.accentsOpen;
   }
 
   /** Appends a space. */
