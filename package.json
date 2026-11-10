@@ -63,7 +63,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.3.0",
     "lucide": "^1.66.0",
-    "ng-packagr": "^22.2.5",
+    "ng-packagr": "^22.2.6",
     "postcss": "^8.5.32",
     "prettier": "^3.9.10",
     "quill": "^2.0.3",
