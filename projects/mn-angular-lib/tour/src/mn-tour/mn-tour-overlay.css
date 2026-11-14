@@ -1,0 +1,198 @@
+:host {
+  /* D10 timings. Kept in step with MN_TOUR_MOTION in mn-tour.types.ts, which the service waits on. */
+  --mn-tour-glide: 450ms;
+  --mn-tour-fade-in: 450ms;
+  --mn-tour-fade-out: 200ms;
+  --mn-tour-content-fade: 120ms;
+  /* The recorded prototype's curves and colours (D10), so the app matches what was approved. */
+  --mn-tour-glide-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* The bottom sheet's curve, so the phone card rises like mn-bottom-sheet does. */
+  --mn-tour-sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --mn-tour-dim-color: rgb(15 23 42 / 0.55);
+
+  display: contents;
+}
+
+.mn-tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+}
+
+/* The corner offer leaves the page usable: only the card itself takes pointer input. */
+.mn-tour-root.mn-tour-passive {
+  pointer-events: none;
+}
+
+.mn-tour-passive .mn-tour-card {
+  pointer-events: auto;
+}
+
+.mn-tour-blocker {
+  position: fixed;
+  inset: 0;
+}
+
+/* Full-page dim behind a centred card. Fades out fast, in slowly with ease-out. */
+.mn-tour-dim {
+  position: fixed;
+  inset: 0;
+  background: var(--mn-tour-dim-color);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--mn-tour-fade-out) ease;
+}
+
+.mn-tour-dim.is-visible {
+  opacity: 1;
+  transition: opacity var(--mn-tour-fade-in) ease-out;
+}
+
+/* The highlight: a rounded cut-out whose huge outer shadow is the dim around it, with a
+   primary ring on top. Position changes are instant unless .is-gliding is set. */
+.mn-tour-hole {
+  position: fixed;
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 3px var(--color-primary),
+    0 0 0 200vmax var(--mn-tour-dim-color);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--mn-tour-fade-out) ease;
+}
+
+.mn-tour-hole.is-visible {
+  opacity: 1;
+  transition: opacity var(--mn-tour-fade-in) ease-out;
+}
+
+.mn-tour-hole.is-gliding {
+  transition:
+    opacity var(--mn-tour-fade-in) ease-out,
+    top var(--mn-tour-glide) var(--mn-tour-glide-ease),
+    left var(--mn-tour-glide) var(--mn-tour-glide-ease),
+    width var(--mn-tour-glide) var(--mn-tour-glide-ease),
+    height var(--mn-tour-glide) var(--mn-tour-glide-ease);
+}
+
+/* The card. border-box, so the width it is given includes its padding and a label can never
+   be pushed past its edge. */
+.mn-tour-card {
+  position: fixed;
+  box-sizing: border-box;
+  padding: 1.25rem;
+  border: 1px solid var(--color-base-300);
+  border-radius: 1rem;
+  background: var(--color-base-100);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.28);
+  outline: none;
+  opacity: 0;
+  transition: opacity var(--mn-tour-fade-out) ease;
+}
+
+.mn-tour-card.is-shown {
+  opacity: 1;
+  transition: opacity var(--mn-tour-fade-in) ease-out;
+}
+
+.mn-tour-card.is-shown.is-gliding {
+  transition:
+    opacity var(--mn-tour-fade-in) ease-out,
+    transform var(--mn-tour-glide) var(--mn-tour-glide-ease);
+}
+
+.mn-tour-card--beside {
+  top: 0;
+  left: 0;
+  width: max-content;
+  min-width: min(18rem, calc(100vw - 2rem));
+  max-width: min(23rem, calc(100vw - 2rem));
+}
+
+.mn-tour-card--centred {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(26rem, calc(100vw - 2rem));
+}
+
+.mn-tour-card--corner {
+  right: 1rem;
+  bottom: 1rem;
+  width: min(23rem, calc(100vw - 2rem));
+}
+
+/* Below lg: the mn-bottom-sheet surface. It rises once when it first appears and then stays
+   put; between steps only its content changes. */
+.mn-tour-card--sheet {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  border-width: 1px 0 0;
+  border-radius: 1rem 1rem 0 0;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  animation: mn-tour-sheet-in 0.35s var(--mn-tour-sheet-ease);
+}
+
+/* On the sheet the primary button takes the space the dots leave. */
+.mn-tour-card--sheet .mn-tour-actions {
+  flex: 1 1 auto;
+}
+
+.mn-tour-card--sheet .mn-tour-primary {
+  flex: 1 1 auto;
+}
+
+.mn-tour-content {
+  opacity: 0;
+  transition: opacity var(--mn-tour-content-fade) ease;
+}
+
+.mn-tour-content.is-visible {
+  opacity: 1;
+}
+
+.mn-tour-dot {
+  display: block;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: var(--color-base-300);
+  transition: width var(--mn-tour-glide) var(--mn-tour-glide-ease), background-color var(--mn-tour-glide) ease;
+}
+
+.mn-tour-dot.is-active {
+  width: 1rem;
+  background: var(--color-primary);
+}
+
+.mn-tour-skip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@keyframes mn-tour-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* No glide and no fade under reduced motion, whether the OS asks for it or the service set
+   the class (which is how the service's own waits and the styles stay in step). */
+.mn-tour-reduced *,
+.mn-tour-reduced {
+  transition: none !important;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-tour-root *,
+  .mn-tour-root {
+    transition: none !important;
+    animation: none !important;
+  }
+}

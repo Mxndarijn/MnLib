@@ -1,0 +1,101 @@
+<div
+  [class.mn-tour-passive]="dim() === 'none'"
+  [class.mn-tour-reduced]="reducedMotion()"
+  class="mn-tour-root"
+>
+  @if (dim() !== 'none') {
+    <!-- Catches clicks on the page while the tour runs; the dim itself is purely visual. -->
+    <div aria-hidden="true" class="mn-tour-blocker"></div>
+  }
+  <div [class.is-visible]="dim() === 'full'" aria-hidden="true" class="mn-tour-dim"></div>
+  <div
+    [class.is-gliding]="gliding()"
+    [class.is-visible]="dim() === 'hole' && holeVisible()"
+    [style.height.px]="hole()?.height ?? 0"
+    [style.left.px]="hole()?.left ?? 0"
+    [style.top.px]="hole()?.top ?? 0"
+    [style.width.px]="hole()?.width ?? 0"
+    aria-hidden="true"
+    class="mn-tour-hole"
+  ></div>
+
+  @if (view(); as v) {
+    <div
+      #card
+      [attr.aria-describedby]="bodyId"
+      [attr.aria-labelledby]="titleId"
+      [attr.aria-modal]="dim() === 'none' ? null : 'true'"
+      [class.is-gliding]="gliding()"
+      [class.is-shown]="cardVisible()"
+      [class.mn-tour-card--beside]="variant() === 'beside'"
+      [class.mn-tour-card--centred]="variant() === 'centred'"
+      [class.mn-tour-card--corner]="variant() === 'corner'"
+      [class.mn-tour-card--sheet]="variant() === 'sheet'"
+      [style.transform]="cardTransform()"
+      class="mn-tour-card text-base-content"
+      role="dialog"
+      tabindex="-1"
+    >
+      <div [class.is-visible]="contentVisible()" aria-live="polite" class="mn-tour-content">
+        <div class="flex items-start gap-4">
+          <div class="min-w-0 flex-1 text-left">
+            @if (v.kicker) {
+              <p class="text-xs font-medium text-base-content/60">{{ v.kicker }}</p>
+            }
+            <h2 [id]="titleId" class="mt-0.5 text-base font-semibold leading-snug">{{ v.title }}</h2>
+          </div>
+          @if (v.skip) {
+            <button
+              (click)="action.emit('skip')"
+              class="mn-tour-skip shrink-0 whitespace-nowrap rounded text-sm text-base-content/60 hover:text-base-content hover:underline underline-offset-2 cursor-pointer"
+              type="button"
+            >{{ v.skip }}</button>
+          }
+        </div>
+
+        <p [id]="bodyId" class="mt-1.5 text-left text-sm leading-relaxed text-base-content/80">{{ v.body }}</p>
+
+        @if (v.nextTour; as next) {
+          <div class="mn-tour-next mt-4 rounded-xl bg-primary/10 px-3.5 py-3 text-left">
+            @if (next.kicker) {
+              <p class="text-xs font-medium text-primary">{{ next.kicker }}</p>
+            }
+            <p class="text-sm font-semibold">{{ next.title }}</p>
+            @if (next.meta) {
+              <p class="text-xs text-base-content/60">{{ next.meta }}</p>
+            }
+          </div>
+        }
+
+        <div class="mn-tour-footer mt-5 flex items-center gap-3">
+          @if (v.progress; as p) {
+            <div aria-hidden="true" class="mn-tour-dots flex shrink-0 items-center gap-1.5">
+              @for (active of dots(p.total, p.active); track $index) {
+                <span [class.is-active]="active" class="mn-tour-dot"></span>
+              }
+            </div>
+            <span class="sr-only">{{ p.label }}</span>
+          }
+          <div class="mn-tour-actions ml-auto flex items-center gap-2">
+            @if (v.secondary) {
+              <button
+                (click)="action.emit('secondary')"
+                [data]="secondaryButton"
+                class="mn-tour-secondary"
+                mnButton
+                type="button"
+              >{{ v.secondary }}</button>
+            }
+            <button
+              (click)="action.emit('primary')"
+              [data]="primaryButton"
+              class="mn-tour-primary"
+              mnButton
+              type="button"
+            >{{ v.primary }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

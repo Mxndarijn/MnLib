@@ -43,6 +43,7 @@ The library is **not** one module. Each folder under `projects/mn-angular-lib/` 
 | `alert`, `bottom-sheet`, `keyboard`, `tab`, `segmented`, `rich-text-editor` | the component of that name |
 | `forms` | input, checkbox, textarea, datetime, file input, select, multi-select, dropdown; also the internal `mn-error-message` and panel/listbox helpers (not exported) |
 | `collection` | collection base, table, list, grid |
+| `tour` | `MnTourService`: guided tours over `[data-tour]` markers and their offer cards (the overlay component is internal) |
 | `display` | card, breadcrumbs, icon, information card, dual image |
 | `calendar-core` / `calendar` | calendar models, tokens and formatter / calendar views and the date selector bar |
 | `modal-core` / `modal-ui` / `modal` | types, builders, `MnModalRef`, action icons / shell and body components / `MnModalService` |

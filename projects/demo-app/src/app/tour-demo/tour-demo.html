@@ -1,0 +1,44 @@
+<app-demo-page
+  title="Tour"
+  tag="MnTourService"
+  lead="A guided tour: a highlight around [data-tour] markers and a card that walks through them. The app passes translated texts and moves between pages in each step's before(); the service reports how the tour ended."
+>
+  <app-demo-example title="Run it" hint="Same-page stops glide; the Planning stop switches the tab first, so it jumps and fades in.">
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-wrap gap-2">
+        <button (click)="start()" [data]="{ variant: 'fill', color: 'primary' }" mnButton type="button">Start tour</button>
+        <button (click)="offerCentred()" [data]="{ variant: 'outline', color: 'gray' }" mnButton type="button">Welcome offer</button>
+        <button (click)="offerCorner()" [data]="{ variant: 'outline', color: 'gray' }" mnButton type="button">Corner offer</button>
+      </div>
+      <p class="text-sm opacity-70">Last outcome: {{ lastOutcome() }}</p>
+    </div>
+  </app-demo-example>
+
+  <app-demo-example title="Mock page" hint="The markers the tour points at.">
+    <div class="flex gap-4 rounded-xl border border-base-300 p-4">
+      <nav class="flex w-40 shrink-0 flex-col gap-2 rounded-lg bg-base-200 p-3 text-sm" data-tour="demo-nav">
+        <span>Home</span><span>Reserveren</span><span>Wedstrijden</span><span>Beheer</span>
+      </nav>
+      <div class="flex min-w-0 flex-1 flex-col gap-4">
+        <div class="flex justify-end">
+          <span class="rounded-full bg-base-200 px-3 py-1 text-sm" data-tour="demo-account">Account</span>
+        </div>
+        @if (tab() === 'overview') {
+          <section class="rounded-lg border border-base-300 p-3" data-tour="demo-attention">
+            <h3 class="font-semibold">Vraagt om aandacht</h3>
+            <p class="text-sm opacity-70">2 openstaande betalingen</p>
+          </section>
+          <section class="rounded-lg border border-base-300 p-3" data-tour="demo-soon">
+            <h3 class="font-semibold">Binnenkort</h3>
+            <p class="text-sm opacity-70">Clubkampioenschap, za 22 nov</p>
+          </section>
+        } @else {
+          <section class="rounded-lg border border-base-300 p-6" data-tour="demo-planning">
+            <h3 class="font-semibold">Planning</h3>
+            <p class="text-sm opacity-70">Baan 1–6, zaterdag</p>
+          </section>
+        }
+      </div>
+    </div>
+  </app-demo-example>
+</app-demo-page>

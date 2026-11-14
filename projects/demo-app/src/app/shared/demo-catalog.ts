@@ -193,6 +193,14 @@ export const DEMOS: DemoEntry[] = [
     description: 'Single-choice switch for how one pane is rendered.',
   },
   {
+    title: 'Tour',
+    path: '/demos/tour-demo',
+    category: 'Navigation',
+    color: '#0891b2',
+    abbr: 'TR',
+    description: 'Guided tour: highlight, step card, offer cards.',
+  },
+  {
     title: 'Date Selector Bar',
     path: '/demos/date-selector-bar-demo',
     category: 'Navigation',

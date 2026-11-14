@@ -27,6 +27,7 @@ import {BottomSheetDemo} from './bottom-sheet-demo/bottom-sheet-demo';
 import {DropdownDemo} from './dropdown-demo/dropdown-demo';
 import {KeyboardDemo} from './keyboard-demo/keyboard-demo';
 import {SegmentedDemo} from './segmented-demo/segmented-demo';
+import {TourDemo} from './tour-demo/tour-demo';
 import {CardDemo} from './card-demo/card-demo';
 
 export const routes: Routes = [
@@ -67,5 +68,6 @@ export const routes: Routes = [
   {path: 'demos/bottom-sheet-demo', component: BottomSheetDemo, title: 'Bottom Sheet Demo'},
   {path: 'demos/keyboard-demo', component: KeyboardDemo, title: 'Keyboard Demo'},
   {path: 'demos/segmented-demo', component: SegmentedDemo, title: 'Segmented Demo'},
+  {path: 'demos/tour-demo', component: TourDemo, title: 'Tour Demo'},
   {path: 'demos/card-demo', component: CardDemo, title: 'Card Demo'},
 ];

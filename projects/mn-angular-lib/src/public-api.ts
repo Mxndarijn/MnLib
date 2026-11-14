@@ -14,6 +14,7 @@ export * from 'mn-angular-lib/forms';
 export * from 'mn-angular-lib/collection';
 export * from 'mn-angular-lib/tab';
 export * from 'mn-angular-lib/segmented';
+export * from 'mn-angular-lib/tour';
 export * from 'mn-angular-lib/rich-text-editor';
 export * from 'mn-angular-lib/display';
 export * from 'mn-angular-lib/calendar-core';
