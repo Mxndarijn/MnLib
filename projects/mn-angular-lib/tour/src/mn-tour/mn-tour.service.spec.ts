@@ -181,6 +181,71 @@ describe('MnTourService', () => {
       expect(await ref.result).toEqual({ status: 'completed', step: 2, startNext: false });
     });
 
+    describe('final link', () => {
+      const link = (): HTMLButtonElement | null => card()?.querySelector('.mn-tour-link') ?? null;
+
+      it('is rendered only on the last step', async () => {
+        service.start(opts({ finalLink: { label: 'Meer in de help', run: () => undefined } }));
+        await until(() => title() === 'Stap A');
+        expect(link()).toBeNull();
+        button('Volgende')!.click();
+        await until(() => title() === 'Stap B');
+        expect(link()).toBeNull();
+        button('Volgende')!.click();
+        await until(() => title() === 'Stap C');
+        expect(link()?.textContent).toContain('Meer in de help');
+        // The footer keeps its own controls.
+        expect(button('Vorige')).not.toBeNull();
+        expect(button('Klaar')).not.toBeNull();
+      });
+
+      it('is absent when finalLink is omitted', async () => {
+        service.start(opts({ startAt: 2 }));
+        await until(() => title() === 'Stap C');
+        expect(link()).toBeNull();
+      });
+
+      it('completes the tour without the next tour, then calls run once', async () => {
+        const order: string[] = [];
+        const run = jasmine.createSpy('run').and.callFake(() => void order.push('run'));
+        const ref = service.start(opts({ startAt: 2, finalLink: { label: 'Help', run } }));
+        void ref.result.then(() => order.push('result'));
+        await until(() => title() === 'Stap C');
+        link()!.click();
+        expect(await ref.result).toEqual({ status: 'completed', step: 2, startNext: false });
+        await until(() => run.calls.count() === 1);
+        await flush(50);
+        expect(run).toHaveBeenCalledTimes(1);
+        expect(order).toEqual(['result', 'run']);
+      });
+
+      it('sits between the body and the next-tour block, which still works', async () => {
+        const ref = service.start(
+          opts({ startAt: 2, nextTour: { title: 'Baan reserveren' }, finalLink: { label: 'Help', run: () => undefined } }),
+        );
+        await until(() => title() === 'Stap C');
+        const body = document.getElementById(card()!.getAttribute('aria-describedby')!)!;
+        const next = card()!.querySelector('.mn-tour-next')!;
+        expect(body.compareDocumentPosition(link()!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(link()!.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        button('Start volgende')!.click();
+        expect(await ref.result).toEqual({ status: 'completed', step: 2, startNext: true });
+      });
+
+      it('is a normal button in the tab order, so Enter on it is its own click', async () => {
+        const run = jasmine.createSpy('run');
+        const ref = service.start(opts({ startAt: 2, finalLink: { label: 'Help', run } }));
+        await until(() => title() === 'Stap C');
+        expect(link()!.tagName).toBe('BUTTON');
+        expect(link()!.tabIndex).toBe(0);
+        // The service must not turn Enter on the link into "Klaar" as well.
+        press('Enter', link()!);
+        await flush(50);
+        expect(ref.step()).toBe(2);
+        expect(run).not.toHaveBeenCalled();
+      });
+    });
+
     it('reports a skip from the link with the step it happened on', async () => {
       const ref = service.start(opts({ startAt: 1 }));
       await until(() => title() === 'Stap B');

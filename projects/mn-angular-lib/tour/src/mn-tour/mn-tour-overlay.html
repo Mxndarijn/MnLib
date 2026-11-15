@@ -55,6 +55,14 @@
 
         <p [id]="bodyId" class="mt-1.5 text-left text-sm leading-relaxed text-base-content/80">{{ v.body }}</p>
 
+        @if (v.link) {
+          <button
+            (click)="action.emit('link')"
+            class="mn-tour-link mt-2 inline-flex items-center gap-1 rounded text-left text-sm font-medium text-primary hover:underline underline-offset-2 cursor-pointer"
+            type="button"
+          >{{ v.link }}<span aria-hidden="true">&rarr;</span></button>
+        }
+
         @if (v.nextTour; as next) {
           <div class="mn-tour-next mt-4 rounded-xl bg-primary/10 px-3.5 py-3 text-left">
             @if (next.kicker) {

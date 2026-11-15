@@ -43,6 +43,17 @@ export type MnTourNextTour = {
 };
 
 /**
+ * A small text link on a tour's final card, e.g. to the module's help topic. Pressing it ends
+ * the tour as `completed` (with `startNext: false`) and then calls {@link run}.
+ */
+export type MnTourFinalLink = {
+  /** The link's text (e.g. "Meer over wedstrijden in de help"). */
+  label: string;
+  /** Called once the tour has ended, e.g. to navigate to the help topic. */
+  run: () => void | Promise<void>;
+};
+
+/**
  * Every label the tour card renders. The library ships no strings of its own, so all of them
  * come from the caller, already translated.
  */
@@ -74,6 +85,8 @@ export type MnTourOptions = {
   labels: MnTourLabels;
   /** Optional block on the final card that offers the next tour. */
   nextTour?: MnTourNextTour;
+  /** Optional text link on the final card, shown under the body (above a next-tour block). */
+  finalLink?: MnTourFinalLink;
   /** Index of the first step to show (default 0), e.g. to resume a tour. */
   startAt?: number;
   /** How long a step waits for its target to appear before it is skipped (default 4000 ms). */

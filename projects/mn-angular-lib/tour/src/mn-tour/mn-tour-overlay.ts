@@ -16,7 +16,7 @@ export type MnTourCardVariant = 'beside' | 'centred' | 'corner' | 'sheet';
 export type MnTourDim = 'none' | 'full' | 'hole';
 
 /** A button or link on the card the user pressed. The service decides what it means. */
-export type MnTourCardAction = 'skip' | 'secondary' | 'primary';
+export type MnTourCardAction = 'skip' | 'secondary' | 'primary' | 'link';
 
 /** What the card shows. Every string is the caller's, already translated. */
 export type MnTourCardView = {
@@ -28,6 +28,8 @@ export type MnTourCardView = {
   body: string;
   /** Optional "next tour" block above the footer. */
   nextTour?: MnTourNextTour;
+  /** Label of the text link under the body (final card only); no link when absent. */
+  link?: string;
   /** Label of the small skip link top right; no link when absent. */
   skip?: string;
   /** Label of the secondary (outline) button; no button when absent. */

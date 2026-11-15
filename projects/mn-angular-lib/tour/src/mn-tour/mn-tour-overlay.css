@@ -167,7 +167,8 @@
   background: var(--color-primary);
 }
 
-.mn-tour-skip:focus-visible {
+.mn-tour-skip:focus-visible,
+.mn-tour-link:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

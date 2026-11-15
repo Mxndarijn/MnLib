@@ -453,6 +453,14 @@ export class MnTourService implements OnDestroy {
     }
     if (s.busy) return;
     const last = this.isLastStep(s, i);
+    if (action === 'link') {
+      // End first (the outcome settles, the overlay starts to go), then hand over to the app.
+      const link = s.options.finalLink;
+      if (last && link) {
+        void this.endTour(s, { status: 'completed', step: i, startNext: false }).then(() => link.run());
+      }
+      return;
+    }
     if (action === 'primary') {
       if (last) void this.endTour(s, { status: 'completed', step: i, startNext: !!s.options.nextTour });
       else void this.go(s, i + 1, 1);
@@ -531,6 +539,7 @@ export class MnTourService implements OnDestroy {
       title: step.title,
       body: step.body,
       nextTour: withNext ? nextTour : undefined,
+      link: last ? s.options.finalLink?.label : undefined,
       skip: last ? undefined : labels.skip,
       secondary: withNext ? labels.close : this.hasPrevious(s, i) ? labels.previous : undefined,
       primary: withNext ? labels.startNext : last ? labels.done : labels.next,
