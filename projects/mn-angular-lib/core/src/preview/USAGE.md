@@ -84,7 +84,38 @@ window.postMessage({
 });
 ```
 
-This calls `MnLanguageService.registerTranslations()` for each locale and then re-sets the current locale to trigger re-rendering.
+This calls `MnLanguageService.registerTranslations()` for each locale. Registering bumps a revision
+that every `translate()` reads, so each view that shows a translated text renders again, also for
+the locale that was already active.
+
+### Ready (site → editor)
+
+```typescript
+{ type: 'mn-preview-ready', locale: 'nl', path: '/diensten' }
+```
+
+Posted to the parent once the listener is registered, and again after every page change in the
+app. Anything the editor posted before it was lost, so the editor sends its content on this message
+rather than on a timer.
+
+### Click to edit
+
+The editor switches it on or off:
+
+```typescript
+frame.contentWindow.postMessage({ type: 'mn-preview-edit-mode', enabled: true }, siteOrigin);
+```
+
+While it is on, the text or image under the pointer gets a dashed outline, and a click reports it
+instead of following a link:
+
+```typescript
+{ type: 'mn-preview-select', kind: 'text', text: 'Vraag een offerte aan', context: '…', locale: 'nl', path: '/' }
+{ type: 'mn-preview-select', kind: 'image', src: '/logo.webp', alt: 'Logo', locale: 'nl', path: '/' }
+```
+
+The site only knows what it rendered, so the editor works out which translation key or config value
+that was (matching the text, `{{placeholders}}` included, or the image URL).
 
 ---
 

@@ -36,6 +36,13 @@ export class MnLanguageService {
    * the views that translated something, and a `computed` built on `translate` recomputes.
    */
   private readonly _locale = signal('en');
+
+  /**
+   * Bumped whenever translations are registered at runtime, and read by every lookup, for the same
+   * reason as {@link _locale}: live preview registers new texts for the locale already active, so
+   * without this no view that translated something would know to render again.
+   */
+  private readonly _revision = signal(0);
   private _urlPattern: string | null = null;
   private _debug = false;
 
@@ -126,6 +133,7 @@ export class MnLanguageService {
       ...(this._translations[locale] ?? {}),
       ...translations,
     };
+    this._revision.update(v => v + 1);
   }
 
   /**
@@ -147,6 +155,7 @@ export class MnLanguageService {
    * ```
    */
   translate(key: string, params?: Record<string, string | number>): string {
+    this._revision();
     const map = this._translations[this.locale] ?? {};
     let value = this.getValueFromMap(map, this.resolvePluralKey(map, key, params));
 
@@ -254,6 +263,8 @@ export class MnLanguageService {
    * @returns The translation, or `undefined` when the key is not defined.
    */
   translateIfPresent(key: string, params?: Record<string, string | number>): string | undefined {
+    // Read here too: a key that is missing now may arrive with the next registerTranslations.
+    this._revision();
     const map = this._translations[this.locale] ?? {};
     if (this.getValueFromMap(map, key) === undefined) return undefined;
     return this.translate(key, params);
