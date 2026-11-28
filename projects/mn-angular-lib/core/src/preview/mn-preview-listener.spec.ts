@@ -90,6 +90,24 @@ describe('enableMnPreviewMode', () => {
     }));
   });
 
+  it('keeps the page where it was when the site redraws after an update', async () => {
+    enableMnPreviewMode(config, lang, [EDITOR]);
+    host.style.height = '5000px';
+    window.scrollTo(0, 1200);
+    const at = window.scrollY;
+    expect(at).toBeGreaterThan(0);
+    // A site that rebuilds its page a moment after new content arrives, as PBB does.
+    const redraw = (e: MessageEvent) => {
+      if ((e.data as { type?: string })?.type === 'mn-config-update') setTimeout(() => window.scrollTo(0, 0), 50);
+    };
+    window.addEventListener('message', redraw);
+    send({ type: 'mn-config-update', config: { defaults: {} } });
+    await new Promise(resolve => setTimeout(resolve, 300));
+    window.removeEventListener('message', redraw);
+    expect(window.scrollY).toBe(at);
+    window.scrollTo(0, 0);
+  });
+
   it('leaves clicks alone once edit mode is off', async () => {
     enableMnPreviewMode(config, lang, [EDITOR]);
     host.innerHTML = '<span>Text</span>';

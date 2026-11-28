@@ -38,7 +38,8 @@ const MAX_TEXT_DEPTH = 4;
  * Call this once in your app's bootstrap (e.g., APP_INITIALIZER or root component), in the
  * browser only and only inside a frame.
  *
- * Besides swapping content it tells the editor when it is ready (`mn-preview-ready`), and in edit
+ * Besides swapping content it keeps the page scrolled where it was through each update, tells the
+ * editor when it is ready (`mn-preview-ready`), and in edit
  * mode (`mn-preview-edit-mode`) it outlines the text or image under the pointer and reports a
  * click on it (`mn-preview-select`) instead of following it, so the owner can click what they want
  * to change.
@@ -78,16 +79,20 @@ export function enableMnPreviewMode(
     switch (data.type) {
       case 'mn-config-update':
         if (data.config) {
+          const restore = keepScrollPosition();
           await configService.loadFromObject(data.config);
+          restore();
         }
         break;
 
       case 'mn-translations-update':
         if (data.translations) {
+          const restore = keepScrollPosition();
           for (const [locale, translations] of Object.entries(data.translations)) {
             langService.registerTranslations(locale, translations);
           }
           await langService.setLocale(langService.locale);
+          restore();
         }
         break;
 
@@ -115,6 +120,37 @@ export function enableMnPreviewMode(
       onNavigate();
     };
   }
+}
+
+/** How long after an update the page is held where it was: a site may redraw a little later. */
+const KEEP_SCROLL_MS = 600;
+
+/**
+ * Remembers where the page is scrolled to, and returns a function that holds it there for a moment.
+ *
+ * A site may redraw much of its page when new content arrives (PBB rebuilds its whole view for a
+ * new config), which drops the reader back to the top while they type in the editor. The hold ends
+ * early when the visitor scrolls, so it never fights them.
+ */
+function keepScrollPosition(): () => void {
+  const x = window.scrollX;
+  const y = window.scrollY;
+  return () => {
+    const until = performance.now() + KEEP_SCROLL_MS;
+    let stopped = false;
+    const stop = () => (stopped = true);
+    const events = ['wheel', 'touchstart', 'keydown', 'mousedown'] as const;
+    events.forEach(type => window.addEventListener(type, stop, { once: true, passive: true }));
+    const hold = () => {
+      if (stopped || performance.now() > until) {
+        events.forEach(type => window.removeEventListener(type, stop));
+        return;
+      }
+      if (Math.abs(window.scrollY - y) > 1 || Math.abs(window.scrollX - x) > 1) window.scrollTo(x, y);
+      requestAnimationFrame(hold);
+    };
+    hold();
+  };
 }
 
 type Selection =
